@@ -30,5 +30,10 @@
       chmod -R g+w /etc/nixos
     fi
   '';
+
+  # Add alias for nixos-rebuild switch 
+  environment.shellAliases = {
+    update = "sudo nixos-rebuild switch --flake /etc/nixos#$(hostname)";
+  };
 }
 
