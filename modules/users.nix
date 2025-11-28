@@ -18,9 +18,11 @@ in
     home.stateVersion = "25.05";
     programs.git = {
       enable = true;
-      userName = userData.name;
-      userEmail = userData.email;
-      extraConfig = {
+      settings = {
+        user = {
+          name = userData.name;
+          email = userData.email;
+        };
         safe.directory = "/etc/nixos"; # trust this directory for operations
       };
     };
