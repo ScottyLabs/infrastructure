@@ -8,6 +8,7 @@
 
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = true;
+  home-manager.backupFileExtension = "backup";
 
   home-manager.users = builtins.mapAttrs (andrewId: userData: {
     home.stateVersion = "25.11";
