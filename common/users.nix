@@ -11,6 +11,27 @@
 
   home-manager.users = builtins.mapAttrs (andrewId: userData: {
     home.stateVersion = "25.11";
+    home.packages = with pkgs; [
+      eza
+      bat
+    ];
+
+    # zsh enabled on the system level
+    programs.zsh = {
+      shellAliases = {
+        ls = "eza";
+        cat = "bat --style=plain --paging=never";
+      };
+
+      oh-my-zsh = {
+        enable = true;
+      };
+    };
+
+    programs.starship = {
+      enable = true;
+      enableZshIntegration = true;
+    };
 
     programs.git = {
       enable = true;

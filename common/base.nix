@@ -5,8 +5,6 @@
     git
     curl
     ghostty.terminfo
-    eza
-    bat
     pfetch
   ];
 
@@ -14,31 +12,12 @@
   programs.zsh = {
     enable = true;
     enableCompletion = true;
-
-    shellAliases = {
-      update = "sudo btrbk run && sudo nixos-rebuild switch --flake /etc/nixos#$(hostname)";
-      rollback = "sudo nixos-rebuild switch --rollback";
-
-      ls = "eza";
-      cat = "bat --style=plain --paging=never";
-    };
-
-    oh-my-zsh = {
-      enable = true;
-    };
+    initExtra = ''
+      pfetch
+    '';
   };
 
   users.defaultUserShell = pkgs.zsh;
-
-  # Shell prompt
-  programs.starship = {
-    enable = true;
-    enableZshIntegration = true;
-  };
-
-  programs.zsh.initExtra = ''
-    pfetch
-  '';
 
   # Neovim
   programs.neovim = {
@@ -98,6 +77,12 @@
       chmod -R g+w /etc/nixos
     fi
   '';
+
+  # Add alias for nixos-rebuild switch
+  environment.shellAliases = {
+    update = "sudo btrbk run && sudo nixos-rebuild switch --flake /etc/nixos#$(hostname)";
+    rollback = "sudo nixos-rebuild switch --rollback";
+  };
 
   # Garbage collection
   nix.gc = {
