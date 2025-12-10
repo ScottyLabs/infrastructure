@@ -1,4 +1,4 @@
-{ config, pkgs, hostname, userWhitelist ... }:
+{ config, pkgs, hostname, userWhitelist, ... }:
 
 {
   environment.systemPackages = with pkgs; [
