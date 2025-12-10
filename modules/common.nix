@@ -1,12 +1,34 @@
-{ config, pkgs, ... }:
+{ config, pkgs, hostname, userWhitelist, ... }:
 
 {
   environment.systemPackages = with pkgs; [
     vim
     git
+    curl
   ];
 
-  services.openssh.enable = true;
+  # SSH
+  services.openssh = {
+    enable = true;
+    settings = {
+      PasswordAuthentication = false; # KbdInteractiveAuthentication used instead
+      PermitRootLogin = "no"; # shouldn't SSH directly as root
+      AllowUsers = builtins.attrNames userWhitelist;
+    };
+  };
+
+  # Boot
+  boot.loader.systemd-boot.enable = true;
+  boot.loader.efi.canTouchEfiVariables = true;
+
+  # Networking
+  networking.hostName = hostname;
+  networking.networkmanager.enable = true;
+
+  # Regional
+  time.timeZone = "America/New_York";
+  i18n.defaultLocale = "en_US.UTF-8";
+  console.keyMap = "us";
 
   # Kerberos client for CMU
   security.krb5 = {
@@ -21,7 +43,10 @@
   };
 
   # PAM Kerberos integration
-  security.pam.services.sshd.makeHomeDir = true;
+  security.pam = {
+    krb5.enable = true;
+    services.sshd.makeHomeDir = true;
+  }
 
   # Maintain /etc/nixos permissions for shared access
   system.activationScripts.etcNixosPermissions = ''
@@ -31,9 +56,28 @@
     fi
   '';
 
-  # Add alias for nixos-rebuild switch 
+  # Add alias for nixos-rebuild switch
   environment.shellAliases = {
     update = "sudo nixos-rebuild switch --flake /etc/nixos#$(hostname)";
   };
-}
 
+  # Btrfs auto-scrubbing
+  services.btrfs.autoScrub = {
+    enable = true;
+    interval = "monthly";
+    fileSystems = [ "/" ];
+  };
+
+  # Garbage collection
+  nix.gc = {
+    automatic = true;
+    dates = "weekly";
+    options = "--delete-older-than 7d";
+  };
+
+  # Nix
+  nix.settings = {
+    auto-optimise-store = true;
+    experimental-features = [ "nix-command" "flakes" ];
+  };
+}
