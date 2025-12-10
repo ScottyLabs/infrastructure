@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-# Ask for the nixos configuration name
-read -p "Enter the name of the NixOS configuration to deploy: " NAME
+NAME=${NAME:-}
 if [ -z "$NAME" ]; then
   echo "NixOS configuration name cannot be empty."
   exit 1
