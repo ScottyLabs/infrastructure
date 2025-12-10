@@ -7,7 +7,11 @@
     curl
   ];
 
-  programs.vim.defaultEditor = true;
+  # Vim
+  programs.vim = {
+    enable = true;
+    defaultEditor = true;
+  };
 
   # SSH
   services.openssh = {
