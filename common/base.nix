@@ -5,16 +5,12 @@
     git
     curl
     ghostty.terminfo
-    pfetch
   ];
 
   # Shell
   programs.zsh = {
     enable = true;
     enableCompletion = true;
-    initExtra = ''
-      pfetch
-    '';
   };
 
   users.defaultUserShell = pkgs.zsh;

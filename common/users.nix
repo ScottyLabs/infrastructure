@@ -14,6 +14,7 @@
     home.packages = with pkgs; [
       eza
       bat
+      pfetch
     ];
 
     # zsh enabled on the system level
@@ -22,7 +23,9 @@
         ls = "eza";
         cat = "bat --style=plain --paging=never";
       };
-
+      initExtra = ''
+        pfetch
+      '';
       oh-my-zsh = {
         enable = true;
       };
