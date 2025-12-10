@@ -5,6 +5,7 @@
     vim
     git
     curl
+    ghostty.terminfo
   ];
 
   # Vim
