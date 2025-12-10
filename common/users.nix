@@ -18,8 +18,10 @@
       pfetch
     ];
 
-    # zsh enabled on the system level
     programs.zsh = {
+      enable = true;
+      enableCompletion = true;
+
       shellAliases = {
         ls = "eza";
         cat = "bat --style=plain --paging=never";
