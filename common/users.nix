@@ -26,12 +26,9 @@
         ls = "eza";
         cat = "bat --style=plain --paging=never";
       };
-      initExtra = ''
+      initContent = ''
         pfetch
       '';
-      oh-my-zsh = {
-        enable = true;
-      };
     };
 
     programs.starship = {
