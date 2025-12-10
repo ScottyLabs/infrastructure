@@ -1,4 +1,4 @@
-{ config, pkgs, hostname, userWhitelist, ... }:
+{ config, pkgs, hostname, userWhitelist, neovim-nightly-overlay, ... }:
 
 {
   environment.systemPackages = with pkgs; [
@@ -18,6 +18,8 @@
   # Neovim
   programs.neovim = {
     enable = true;
+    package = neovim-nightly-overlay.packages.${pkgs.stdenv.hostPlatform.system}.default;
+
     defaultEditor = true;
     viAlias = true;
     vimAlias = true;

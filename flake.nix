@@ -25,8 +25,7 @@
   let
     mkSystem = hostname: nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
-      specialArgs = { inherit hostname userWhitelist; };
-      nixpkgs.overlays = [ neovim-nightly-overlay.overlay ];
+      specialArgs = { inherit hostname userWhitelist neovim-nightly-overlay; };
       modules = [
         ./hosts/${hostname}/configuration.nix
         ./common
