@@ -21,7 +21,7 @@
     };
   };
 
-  outputs = { self, nixpkgs, home-manager, agenix, disko, ... }:
+  outputs = { self, nixpkgs, home-manager, agenix, disko, neovim-nightly-overlay, ... }:
   let
     mkSystem = hostname: nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
