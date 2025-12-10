@@ -3,6 +3,12 @@
 {
   environment.systemPackages = [ pkgs.btrbk ];
 
+  services.btrfs.autoScrub = {
+    enable = true;
+    interval = "monthly";
+    fileSystems = [ "/" ];
+  };
+
   # Mount top-level btrfs for btrbk to access subvolumes
   fileSystems."/mnt/btrfs-root" = {
     device = "/dev/disk/by-partlabel/disk-main-root";
@@ -10,11 +16,10 @@
     options = [ "subvolid=5" "noatime" ];
   };
 
-  services.btrfs.autoScrub = {
-    enable = true;
-    interval = "monthly";
-    fileSystems = [ "/" ];
-  };
+  # Btrbk does not create snapshot directories automatically
+  systemd.tmpfiles.rules = [
+    "d /mnt/btrfs-root/.snapshots 0755 root root"
+  ];
 
   services.btrbk.instances."btrbk" = {
     onCalendar = "daily";                    # Run once per day
