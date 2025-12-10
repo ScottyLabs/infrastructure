@@ -1,17 +1,53 @@
-{ config, pkgs, hostname, userWhitelist, ... }:
+{ config, pkgs, hostname, userWhitelist, neovim-nightly-overlay, ... }:
 
 {
   environment.systemPackages = with pkgs; [
-    vim
     git
     curl
     ghostty.terminfo
+    eza
+    bat
+    pfetch
   ];
 
-  # Vim
-  programs.vim = {
+  # Shell
+  programs.zsh = {
     enable = true;
+    enableCompletion = true;
+
+    shellAliases = {
+      update = "sudo btrbk run && sudo nixos-rebuild switch --flake /etc/nixos#$(hostname)";
+      rollback = "sudo nixos-rebuild switch --rollback";
+
+      ls = "eza";
+      cat = "bat --style=plain --paging=never";
+    };
+
+    oh-my-zsh = {
+      enable = true;
+    };
+  };
+
+  users.defaultUserShell = pkgs.zsh;
+
+  # Shell prompt
+  programs.starship = {
+    enable = true;
+    enableZshIntegration = true;
+  };
+
+  programs.zsh.initExtra = ''
+    pfetch
+  '';
+
+  # Neovim
+  programs.neovim = {
+    enable = true;
+    package = neovim-nightly-overlay.packages.${pkgs.stdenv.hostPlatform.system}.default;
+    
     defaultEditor = true;
+    viAlias = true;
+    vimAlias = true;
   };
 
   # SSH
@@ -62,12 +98,6 @@
       chmod -R g+w /etc/nixos
     fi
   '';
-
-  # Add alias for nixos-rebuild switch
-  environment.shellAliases = {
-    update = "sudo btrbk run && sudo nixos-rebuild switch --flake /etc/nixos#$(hostname)";
-    rollback = "sudo nixos-rebuild switch --rollback";
-  };
 
   # Garbage collection
   nix.gc = {

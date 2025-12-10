@@ -7,6 +7,10 @@
       url = "github:nix-community/home-manager/release-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    neovim-nightly-overlay = {
+      url = "github:neovim/neovim-nightly-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     agenix = {
       url = "github:ryantm/agenix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -17,7 +21,7 @@
     };
   };
 
-  outputs = { self, nixpkgs, home-manager, agenix, disko, ... }:
+  outputs = { self, nixpkgs, home-manager, agenix, disko, neovim-nightly-overlay, ... }:
   let
     mkSystem = hostname: nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
