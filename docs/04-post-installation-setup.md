@@ -12,7 +12,7 @@ The `-A` flag is necessary for forwarding your local SSH keys to the remote serv
 scp ~/.ssh/id_ed25519 andrewid@hostname:~/.ssh/
 ```
 
-Once you're in, run `update` once, and then the initial setup script:
+Once you're in, run `update` once (do not forget this), and then the initial setup script:
 
 ```bash
 curl -sSL https://raw.githubusercontent.com/ScottyLabs/infrastructure/main/scripts/initial-setup.sh | bash
