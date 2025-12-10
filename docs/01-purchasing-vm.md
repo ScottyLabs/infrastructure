@@ -19,9 +19,9 @@ They will provide a MAC address for the VM, which you can enter on [NetReg](http
 
 Before continuing, you must have permissions on NetReg. If you do not have permission, ask the current Head of Developer Operations. This link should have the subnet pre-selected for CampusCloud VMs, but if it is not, go to `Register a New Machine` and select the subnet `A100 Datacenter - Colocation Public`. Fill out the form with the following details:
 
-    * Hostname: `hostname` (select `scottylabs.org` in the dropdown)
-    * Hardware Address: The MAC address provided by Computing Services
-    * Affiliation: `ScottyLabs`
+* Hostname: `hostname` (select `scottylabs.org` in the dropdown)
+* Hardware Address: The MAC address provided by Computing Services
+* Affiliation: `ScottyLabs`
 
 You must then wait for the public IP to be assigned to the VM, which can take up to 30 minutes. Once you have the IP, create an `A` record on `hostname.scottylabs.org` pointing to this IP.
 
