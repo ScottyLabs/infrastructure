@@ -48,7 +48,7 @@
   security.pam = {
     krb5.enable = true;
     services.sshd.makeHomeDir = true;
-  }
+  };
 
   # Maintain /etc/nixos permissions for shared access
   system.activationScripts.etcNixosPermissions = ''
