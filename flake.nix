@@ -21,11 +21,12 @@
     };
   };
 
-  outputs = { self, nixpkgs, home-manager, agenix, disko, neovim-nightly-overlay, ... }:
+  outputs = { self, nixpkgs, home-manager, agenix, disko ... }:
   let
     mkSystem = hostname: nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       specialArgs = { inherit hostname userWhitelist; };
+      nixpkgs.overlays = [ inputs.neovim-nightly-overlay.overlay ];
       modules = [
         ./hosts/${hostname}/configuration.nix
         ./common
