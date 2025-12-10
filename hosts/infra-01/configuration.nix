@@ -1,7 +1,9 @@
 { config, lib, pkgs, ... }:
 
 {
-  system.stateVersion = "25.11";
+  imports = [
+    ../../platforms/campus-cloud
+  ];
 
-  virtualisation.vmware.guest.enable = true;
+  system.stateVersion = "25.11";
 }
