@@ -24,9 +24,8 @@
       specialArgs = { inherit hostname userWhitelist; };
       modules = [
         ./hosts/${hostname}/configuration.nix
-        ./modules/common.nix
-        ./modules/users.nix
-        ./modules/disk-config.nix
+        ./common
+
         home-manager.nixosModules.home-manager
         agenix.nixosModules.default
         disko.nixosModules.disko

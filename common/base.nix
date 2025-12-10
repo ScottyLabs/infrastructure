@@ -7,6 +7,8 @@
     curl
   ];
 
+  programs.vim.defaultEditor = true;
+
   # SSH
   services.openssh = {
     enable = true;
@@ -58,14 +60,8 @@
 
   # Add alias for nixos-rebuild switch
   environment.shellAliases = {
-    update = "sudo nixos-rebuild switch --flake /etc/nixos#$(hostname)";
-  };
-
-  # Btrfs auto-scrubbing
-  services.btrfs.autoScrub = {
-    enable = true;
-    interval = "monthly";
-    fileSystems = [ "/" ];
+    update = "sudo btrbk run && sudo nixos-rebuild switch --flake /etc/nixos#$(hostname)";
+    rollback = "sudo nixos-rebuild switch --rollback";
   };
 
   # Garbage collection
