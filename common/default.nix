@@ -6,6 +6,7 @@
     ./users.nix
     ./btrfs.nix
     ./acme.nix
+    ./postgresql.nix
   ];
 
   # Enforce that each host must have a disk configuration defined

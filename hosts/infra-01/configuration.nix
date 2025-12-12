@@ -7,5 +7,9 @@
     ./keycloak.nix
   ];
 
+  scottylabs.postgresql.databases = [
+    "keycloak"
+  ];
+
   system.stateVersion = "25.11";
 }

@@ -18,28 +18,18 @@ let
   };
 in
 {
-  age.secrets.keycloak = {
-    file = ../../secrets/infra-01/keycloak.age;
-    mode = "0400";
-  };
-
-  services.postgresql = {
-    enable = true;
-    ensureDatabases = [ "keycloak" ];
-    ensureUsers = [{
-      name = "keycloak";
-      ensureDBOwnership = true;
-    }];
-  };
+  # Load admin password from agenix secret
+  systemd.services.keycloak.serviceConfig.EnvironmentFile = config.age.secrets.keycloak.path;
 
   services.keycloak = {
     enable = true;
     database = {
       type = "postgresql";
-      host = "localhost";
+      createLocally = false;
+      host = "/run/postgresql"; # Unix socket path for peer auth
       name = "keycloak";
       username = "keycloak";
-      passwordFile = config.age.secrets.keycloak.path;
+      useSSL = false;
     };
     settings = {
       hostname = "idp.scottylabs.org";
