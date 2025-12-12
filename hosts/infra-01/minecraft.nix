@@ -28,11 +28,11 @@
         CF_SLUG = "society-sunlit-valley";
         MEMORY = "8G";
         TZ = "America/New_York";
-	ALLOW_FLIGHT = "true";
+        ALLOW_FLIGHT = "true";
         OPS = "cerulean3910";
         MOTD = "Society: Sunlit Valley";
-	ENABLE_RCON = "true";
-	# RCON_PASSWORD comes from environmentFiles
+        ENABLE_RCON = "true";
+        # RCON_PASSWORD comes from environmentFiles
       };
 
       volumes = [
