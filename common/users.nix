@@ -15,6 +15,7 @@
     home.packages = with pkgs; [
       eza
       bat
+      zoxide
       pfetch
     ];
 
@@ -23,17 +24,32 @@
       enableCompletion = true;
 
       shellAliases = {
-        ls = "eza";
         cat = "bat --style=plain --paging=never";
       };
+
+      initExtraFirst = ''
+        zstyle ':omz:plugins:eza' 'git-status' yes
+        zstyle ':omz:plugins:eza' 'icons' yes
+      '';  
       initContent = ''
         pfetch
       '';
+
+      oh-my-zsh = {
+        enable = true;
+        plugins = [ "eza" ];
+      };
     };
 
     programs.starship = {
       enable = true;
       enableZshIntegration = true;
+    };
+
+    programs.zoxide = {
+      enable = true;
+      enableZshIntegration = true;
+      options = [ "--cmd cd" ];
     };
 
     programs.git = {
