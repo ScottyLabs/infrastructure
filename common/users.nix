@@ -15,7 +15,6 @@
     home.packages = with pkgs; [
       eza
       bat
-      zoxide
       pfetch
     ];
 
