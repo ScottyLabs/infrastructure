@@ -19,3 +19,23 @@ curl -sSL https://raw.githubusercontent.com/ScottyLabs/infrastructure/main/scrip
 ```
 
 When making configuration changes, always make sure to use the `update` alias for  `sudo nixos rebuild-switch`. It creates a btrfs backup first, which you can use to roll back if something goes wrong.
+
+Finally, add the VM's SSH host key to `secrets.nix` so that agenix can encrypt secrets for this host:
+
+```bash
+cat /etc/ssh/ssh_host_ed25519_key.pub
+```
+
+Copy the output and add it to `secrets.nix` at the repo root:
+
+```nix
+let
+  # ...
+  hostname = "ssh-ed25519 AAAAC3...";  # paste here
+in
+{
+  # ...
+}
+```
+
+Commit this change to the repository.

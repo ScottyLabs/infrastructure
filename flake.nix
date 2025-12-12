@@ -23,9 +23,11 @@
 
   outputs = { self, nixpkgs, home-manager, agenix, disko, neovim-nightly-overlay, ... }:
   let
+    users = import ./users.nix;
+
     mkSystem = hostname: nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
-      specialArgs = { inherit hostname userWhitelist neovim-nightly-overlay; };
+      specialArgs = { inherit hostname users neovim-nightly-overlay; };
       modules = [
         ./hosts/${hostname}/configuration.nix
         ./common
@@ -34,11 +36,6 @@
         agenix.nixosModules.default
         disko.nixosModules.disko
       ];
-    };
-
-    userWhitelist = {
-      apallati = { gitName = "Anish Pallati"; gitEmail = "i@anish.land"; };
-      jefferyo = { gitName = "Jeffery Oo";    gitEmail = "jefferyo@andrew.cmu.edu"; };
     };
 
     hosts = [ "infra-01" "prod-01" "prod-02" ];

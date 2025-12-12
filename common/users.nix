@@ -1,10 +1,10 @@
-{ config, pkgs, userWhitelist, ... }:
+{ config, pkgs, users, ... }:
 
 {
   users.users = builtins.mapAttrs (andrewId: userData: {
     isNormalUser = true;
     extraGroups = [ "wheel" ];
-  }) userWhitelist;
+  }) users;
 
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = true;
@@ -38,16 +38,18 @@
 
     programs.git = {
       enable = true;
+      signing = {
+        key = "key::${userData.sshPublicKey}";
+        format = "ssh";
+        signByDefault = true;
+      };
       settings = {
-        user = {
-          name = userData.gitName;
-          email = userData.gitEmail;
-        };
+        user = userData.git;
         init = {
           defaultBranch = "main";
         };
         safe.directory = "/etc/nixos"; # trust this directory for operations
       };
     };
-  }) userWhitelist;
+  }) users;
 }

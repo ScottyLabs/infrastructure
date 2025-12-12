@@ -1,4 +1,4 @@
-{ config, pkgs, hostname, userWhitelist, neovim-nightly-overlay, ... }:
+{ config, pkgs, hostname, users, neovim-nightly-overlay, ... }:
 
 {
   environment.systemPackages = with pkgs; [
@@ -31,7 +31,7 @@
     settings = {
       PasswordAuthentication = false; # KbdInteractiveAuthentication used instead
       PermitRootLogin = "no"; # shouldn't SSH directly as root
-      AllowUsers = builtins.attrNames userWhitelist;
+      AllowUsers = builtins.attrNames users;
     };
   };
 
