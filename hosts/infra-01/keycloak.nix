@@ -14,7 +14,7 @@ let
     owner = "ScottyLabs";
     repo = "keycloak";
     rev = "a961ae70f06b11d94b56f4a7d43c4d1bbd10c6b9";
-    sha256 = "";
+    sha256 = "sha256-Z0gJGvAflUTi7g1bSzapWO9osBDHKzyyZ656+MJgbb8=";
   };
 in
 {
