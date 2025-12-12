@@ -5,6 +5,7 @@
     ./base.nix
     ./users.nix
     ./btrfs.nix
+    ./acme.nix
   ];
 
   # Enforce that each host must have a disk configuration defined
