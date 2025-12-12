@@ -5,6 +5,7 @@
     git
     curl
     ghostty.terminfo
+    ragenix
   ];
 
   # Shell

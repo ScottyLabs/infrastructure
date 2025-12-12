@@ -10,5 +10,5 @@ let
   prod-02 = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEYYPbjYn0jjTb50znqzhPc0Dl8EdImBzy97Mm+vOlz0 root@prod-02";
 in
 {
-  "infra-01/curseforge-api-key.age".publicKeys = admins ++ [ infra-01 ];
+  "infra-01/minecraft.age".publicKeys = admins ++ [ infra-01 ];
 }

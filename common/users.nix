@@ -3,7 +3,7 @@
 {
   users.users = builtins.mapAttrs (andrewId: userData: {
     isNormalUser = true;
-    extraGroups = [ "wheel" ];
+    extraGroups = [ "wheel" "docker" ];
   }) users;
 
   home-manager.useGlobalPkgs = true;
