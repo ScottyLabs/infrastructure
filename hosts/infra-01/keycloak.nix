@@ -18,6 +18,11 @@ let
   };
 in
 {
+  age.secrets.keycloak = {
+    file = ../../secrets/infra-01/keycloak.age;
+    mode = "0400";
+  };
+
   # Load admin password from agenix secret
   systemd.services.keycloak.serviceConfig.EnvironmentFile = config.age.secrets.keycloak.path;
 
