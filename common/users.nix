@@ -27,12 +27,15 @@
         cat = "bat --style=plain --paging=never";
       };
 
-      initContent = lib.mkBefore ''
-        zstyle ':omz:plugins:eza' 'git-status' yes
-        zstyle ':omz:plugins:eza' 'icons' yes
-      '' + ''
-        pfetch
-      '';
+      initContent = lib.mkMerge [
+        (lib.mkBefore ''
+          zstyle ':omz:plugins:eza' 'git-status' yes
+          zstyle ':omz:plugins:eza' 'icons' yes
+        '')
+        ''
+          pfetch
+        ''
+      ];
 
       oh-my-zsh = {
         enable = true;
