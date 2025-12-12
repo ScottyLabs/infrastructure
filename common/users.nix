@@ -27,11 +27,10 @@
         cat = "bat --style=plain --paging=never";
       };
 
-      initExtraFirst = ''
+      initContent = lib.mkBefore ''
         zstyle ':omz:plugins:eza' 'git-status' yes
         zstyle ':omz:plugins:eza' 'icons' yes
-      '';  
-      initContent = ''
+      '' + ''
         pfetch
       '';
 
