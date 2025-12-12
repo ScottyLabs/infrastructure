@@ -30,6 +30,7 @@ in
       name = "keycloak";
       username = "keycloak";
       useSSL = false;
+      passwordFile = toString (pkgs.writeText "keycloak-db-pass" "unused");  # Ignored by peer auth
     };
     settings = {
       hostname = "idp.scottylabs.org";
