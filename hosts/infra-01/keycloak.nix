@@ -9,6 +9,13 @@ let
     url = "https://github.com/wadahiro/keycloak-discord/releases/download/v0.6.1/keycloak-discord-0.6.1.jar";
     sha256 = "";
   };
+
+  theme = pkgs.fetchFromGitHub {
+    owner = "ScottyLabs";
+    repo = "keycloak";
+    rev = "a961ae70f06b11d94b56f4a7d43c4d1bbd10c6b9";
+    sha256 = "";
+  };
 in
 {
   age.secrets.keycloak = {
@@ -46,12 +53,9 @@ in
       log-level = "org.keycloak.broker:debug";
     };
     themes = {
-      terrier = (pkgs.fetchFromGitHub {
-        owner = "ScottyLabs";
-        repo = "keycloak";
-        rev = "a961ae70f06b11d94b56f4a7d43c4d1bbd10c6b9";
-        sha256 = "";
-      }) + "/themes/terrier";
+      terrier = pkgs.runCommand "keycloak-terrier-theme" {} ''
+        cp -r ${theme}/themes/terrier $out
+      '';
     };
     plugins = [ rememberMePlugin discordPlugin ];
   };
