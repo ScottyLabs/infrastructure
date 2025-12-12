@@ -21,8 +21,6 @@ in
   age.secrets.keycloak = {
     file = ../../secrets/infra-01/keycloak.age;
     mode = "0400";
-    owner = "keycloak";
-    group = "keycloak";
   };
 
   services.postgresql = {
