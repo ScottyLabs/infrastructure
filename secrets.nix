@@ -13,6 +13,7 @@ let
 in
 {
   "secrets/infra-01/minecraft.age".publicKeys = admins ++ [ infra-01 ];
+  "secrets/infra-01/keycloak.age".publicKeys = admins ++ [ infra-01 ];
 
   "secrets/acme-credentials.age".publicKeys = admins ++ hosts;
 }
