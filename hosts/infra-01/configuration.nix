@@ -4,11 +4,11 @@
   imports = [
     ../../platforms/campus-cloud
     ./minecraft.nix
-    ./keycloak.nix
+    # ./keycloak.nix
   ];
 
   scottylabs.postgresql.databases = [
-    "keycloak"
+    # "keycloak"
   ];
 
   system.stateVersion = "25.11";
