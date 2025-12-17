@@ -72,4 +72,8 @@ in
       '';
     };
   };
+
+  scottylabs.postgresql.databases = [
+    # "keycloak"
+  ];
 }

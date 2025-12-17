@@ -19,15 +19,21 @@
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # prod-01
+    dalmatian = {
+      url = "github:ScottyLabs/dalmatian/reaction-redirect";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs, home-manager, agenix, disko, neovim-nightly-overlay, ... }:
+  outputs = { self, nixpkgs, home-manager, agenix, disko, neovim-nightly-overlay, dalmatian, ... }:
   let
     users = import ./users.nix;
 
     mkSystem = hostname: nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
-      specialArgs = { inherit hostname users neovim-nightly-overlay; };
+      specialArgs = { inherit hostname users neovim-nightly-overlay dalmatian; };
       modules = [
         ./hosts/${hostname}/configuration.nix
         ./common
