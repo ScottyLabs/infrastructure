@@ -25,6 +25,6 @@ Before continuing, you must have permissions on NetReg. If you do not have permi
 
 You must then wait for the public IP to be assigned to the VM, which can take up to 30 minutes. Once you have the IP, create an `A` record on `hostname.scottylabs.org` pointing to this IP.
 
-For Cloudflare, disable Cloudflare proxy, add `netreg.net.cmu.edu` in the comment.
+For Cloudflare, disable Cloudflare proxy and add `netreg.net.cmu.edu` in the comment.
 
 <img src="./assets/cloudflare.png" alt="A record created in Cloudflare" height="300" />
