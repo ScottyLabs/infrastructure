@@ -1,4 +1,4 @@
-# Creating a Secret
+# Creating Secrets
 
 First, define the secret in [secrets.nix](../../secrets.nix). For example, to add a secret named `secret1` on `prod-02`, add this line:
 
@@ -18,4 +18,4 @@ Then, from the root of the repository (`/etc/nixos`), create the secret file:
 agenix -e secrets/prod-02/secret1.age
 ```
 
-This command will prompt you to enter the secret value. After entering the value, it will be encrypted and saved to the specified file, which should be committed to source control.
+This command will prompt you to enter the secret value. After entering the value, it will be encrypted and saved to the specified file, which should immediately be committed to source control.
