@@ -16,6 +16,7 @@ in
   "secrets/infra-01/keycloak.age".publicKeys = admins ++ [ infra-01 ];
 
   "secrets/prod-01/dalmatian.age".publicKeys = admins ++ [ prod-01 ];
+  "secrets/prod-01/discord-verify.age".publicKeys = admins ++ [ prod-01 ];
 
   "secrets/acme-credentials.age".publicKeys = admins ++ hosts;
 }

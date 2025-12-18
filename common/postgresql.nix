@@ -8,7 +8,7 @@ in
     databases = lib.mkOption {
       type = lib.types.listOf lib.types.str;
       default = [];
-      description = "List of databases to create (user with same name gets ownership)";
+      description = "List of databases to create";
       example = [ "keycloak" "vaultwarden" ];
     };
   };
