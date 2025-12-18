@@ -14,12 +14,16 @@
     environmentFile = config.age.secrets.discord-verify.path;
   };
 
-  services.nginx.virtualHosts."verify.scottylabs.org" = {
-    enableACME = true;
-    forceSSL = true;
-    locations."/" = {
-      proxyPass = "http://localhost:3000";
-      proxyWebsockets = true;
+  services.nginx = {
+    enable = true;
+
+    virtualHosts."verify.scottylabs.org" = {
+      enableACME = true;
+      forceSSL = true;
+      locations."/" = {
+        proxyPass = "http://localhost:3000";
+        proxyWebsockets = true;
+      };
     };
   };
 
