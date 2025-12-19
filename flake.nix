@@ -22,7 +22,7 @@
 
     # prod-01
     dalmatian = {
-      url = "github:ScottyLabs/dalmatian/reaction-redirect";
+      url = "github:ScottyLabs/dalmatian";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     discord-verify = {
