@@ -1,15 +1,6 @@
-{ config, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 
 let
-  rememberMe = pkgs.fetchurl {
-    url = "https://github.com/Herdo/keycloak-remember-me-authenticator/releases/download/v1.0.0/keycloak-remember-me-authenticator-1.0.0.jar";
-    sha256 = "sha256-C2SwwFZ9Z8BqczJx8Dx/jnvj8nApncOkyejQz0m+6eA=";
-  };
-  discord = pkgs.fetchurl {
-    url = "https://github.com/wadahiro/keycloak-discord/releases/download/v0.6.1/keycloak-discord-0.6.1.jar";
-    sha256 = "sha256-rz+YKV8oiYy+iuwrW0F01gOKuRt0w7FOkxMhFCbzNvs=";
-  };
-
   theme = pkgs.fetchFromGitHub {
     owner = "ScottyLabs";
     repo = "keycloak";
@@ -23,20 +14,25 @@ in
     mode = "0400";
   };
 
+  nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
+    "keycloak-magic-link"
+  ];
+
   # Load admin password from agenix secret
   systemd.services.keycloak.serviceConfig.EnvironmentFile = config.age.secrets.keycloak.path;
 
   services.keycloak = {
     enable = true;
+
     database = {
       type = "postgresql";
       createLocally = false;
-      host = "/run/postgresql"; # Unix socket path for peer auth
+      host = "/run/postgresql";
       name = "keycloak";
       username = "keycloak";
       useSSL = false;
-      passwordFile = toString (pkgs.writeText "keycloak-db-pass" "unused");  # Ignored by peer auth
     };
+
     settings = {
       hostname = "idp.scottylabs.org";
       hostname-strict = true;
@@ -46,12 +42,22 @@ in
       http-port = 8080;
       log-level = "org.keycloak.broker:debug";
     };
+
     themes = {
       terrier = pkgs.runCommand "keycloak-terrier-theme" {} ''
         cp -r ${theme}/themes/terrier $out
       '';
     };
-    plugins = [ rememberMe discord ];
+
+    plugins = with config.services.keycloak.package.plugins; [
+      keycloak-discord
+      keycloak-magic-link
+      keycloak-remember-me-authenticator
+
+      # needed for Unix socket auth 
+      junixsocket-common
+      junixsocket-native-common
+    ];
   };
 
   services.nginx.virtualHosts."idp.scottylabs.org" = {
@@ -73,7 +79,5 @@ in
     };
   };
 
-  scottylabs.postgresql.databases = [
-    # "keycloak"
-  ];
+  scottylabs.postgresql.databases = [ "keycloak" ];
 }

@@ -4,8 +4,10 @@
   imports = [
     ../../platforms/campus-cloud
     ./minecraft.nix
-    # ./keycloak.nix
+    ./keycloak.nix
   ];
+
+  networking.firewall.allowedTCPPorts = [ 80 443 ];
 
   system.stateVersion = "25.11";
 }
