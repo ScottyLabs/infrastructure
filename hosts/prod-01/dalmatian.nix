@@ -16,7 +16,5 @@
     environmentFile = config.age.secrets.dalmatian.path;
   };
 
-  scottylabs.postgresql.databases = [
-    "dalmatian"
-  ];
+  scottylabs.postgresql.databases = [ "dalmatian" ];
 }
