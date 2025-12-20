@@ -63,6 +63,7 @@
       settings = {
         user = userData.git;
         init.defaultBranch = "main";
+        pull.rebase = true;
         safe.directory = "/etc/nixos"; # trust this directory for operations
       };
     };
