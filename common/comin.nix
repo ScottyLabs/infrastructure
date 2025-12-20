@@ -6,7 +6,7 @@
   services.comin = {
     enable = true;
 
-    gpgPublicKeyPaths = lib.attrValues (lib.mapAttrs (_: u: u.gpgPublicKeyFile) users);
+    gpgPublicKeyPaths = lib.mapAttrsToList (_: u: toString u.gpgPublicKeyFile) users;
 
     remotes = [{
       name = "origin";
