@@ -56,14 +56,13 @@
     programs.git = {
       enable = true;
       signing = {
-        format = "openpgp";
-        key = userData.gpgFingerprint;
+        format = "ssh";
+        key = "key::${userData.sshPublicKey}";
         signByDefault = true;
       };
       settings = {
         user = userData.git;
         init.defaultBranch = "main";
-        tag.gpgSign = true;
         safe.directory = "/etc/nixos"; # trust this directory for operations
       };
     };

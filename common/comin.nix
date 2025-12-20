@@ -1,4 +1,4 @@
-{ config, lib, comin, users, ... }:
+{ config, lib, comin, ... }:
 
 {
   imports = [ comin.nixosModules.comin ];
@@ -6,7 +6,11 @@
   services.comin = {
     enable = true;
 
-    gpgPublicKeyPaths = lib.mapAttrsToList (_: u: toString u.gpgPublicKeyFile) users;
+    # We use SSH keys for signing commits because gpg key forwarding is
+    # complicated to set up. Once SSH key signing is supported by comin
+    # (https://github.com/nlewo/comin/issues/73), we can switch to that.
+
+    # gpgPublicKeyPaths = lib.mapAttrsToList (_: u: toString u.gpgPublicKeyFile) users;
 
     remotes = [{
       name = "origin";
