@@ -1,5 +1,5 @@
 let
-  users = import ./users.nix;
+  users = import ./users;
 
   # SSH public keys for users who can edit secrets
   admins = builtins.attrValues (builtins.mapAttrs (_: u: u.sshPublicKey) users);

@@ -48,7 +48,7 @@
     ...
   }:
   let
-    users = import ./users.nix;
+    users = import ./users;
 
     mkSystem = hostname: nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";

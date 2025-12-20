@@ -2,8 +2,9 @@
 
 {
   imports = [
+    ./users
+
     ./base.nix
-    ./users.nix
     ./btrfs.nix
     ./comin.nix
     ./acme.nix
