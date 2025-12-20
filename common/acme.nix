@@ -12,7 +12,7 @@
       email = "admin@scottylabs.org";
       server = "https://acme.sectigo.com/v2/InCommonRSAOV";
       environmentFile = config.age.secrets.acme-credentials.path;
-      extraLegoFlags = [ "--eab" ];
+      extraLegoFlags = [ "--eab" "--cert.timeout" "120" ];
     };
   };
 }
