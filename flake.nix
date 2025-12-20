@@ -52,7 +52,15 @@
 
     mkSystem = hostname: nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
-      specialArgs = { inherit hostname users neovim-nightly-overlay dalmatian discord-verify; };
+      specialArgs = {
+        inherit
+          hostname
+          users
+          comin
+          neovim-nightly-overlay
+          dalmatian
+          discord-verify;
+      };
       modules = [
         ./hosts/${hostname}/configuration.nix
         ./common
