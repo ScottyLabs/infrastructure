@@ -75,17 +75,18 @@
     fi
   '';
 
-  # Add alias for nixos-rebuild switch
-  environment.shellAliases = {
-    update = "sudo btrbk run && sudo nixos-rebuild switch --flake /etc/nixos#$(hostname)";
-    rollback = "sudo nixos-rebuild switch --rollback";
+  # nh and garbage collection
+  programs.nh = {
+    enable = true;
+    clean.enable = true;
+    clean.extraArgs = "--keep-since 7d --keep 3";
+    flake = "/etc/nixos";
   };
 
-  # Garbage collection
-  nix.gc = {
-    automatic = true;
-    dates = "weekly";
-    options = "--delete-older-than 7d";
+  # Add alias for nixos-rebuild switch using nh
+  environment.shellAliases = {
+    update = "sudo btrbk run && nh os switch";
+    rollback = "nh os switch --rollback";
   };
 
   # Nix
