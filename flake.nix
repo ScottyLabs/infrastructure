@@ -2,9 +2,10 @@
   description = "ScottyLabs Infrastructure";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
+    nixpkgs.url = "github:ap-1/nixpkgs/keycloak-plugins";
+
     home-manager = {
-      url = "github:nix-community/home-manager/release-25.11";
+      url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     neovim-nightly-overlay = {
