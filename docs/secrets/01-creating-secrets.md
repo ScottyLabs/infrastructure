@@ -1,6 +1,8 @@
 # Creating Secrets
 
-First, define the secret in [secrets.nix](../../secrets.nix). For example, to add a secret named `secret1` on `prod-02`, add this line:
+`agenix` relies on your SSH public key, so you must have a completed user entry in [users/default.nix](../../users/default.nix).
+
+Once that is done, define the secret in [secrets.nix](../../secrets.nix). For example, to add a secret named `secret1` on `prod-02`, add this line:
 
 ```nix
 "secrets/prod-02/secret1.age".publicKeys = admins ++ [ prod-02 ];

@@ -19,6 +19,10 @@
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    comin = {
+      url = "github:nlewo/comin";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     # prod-01
     dalmatian = {
@@ -37,6 +41,7 @@
     home-manager,
     agenix,
     disko,
+    comin,
     neovim-nightly-overlay,
     dalmatian,
     discord-verify,
