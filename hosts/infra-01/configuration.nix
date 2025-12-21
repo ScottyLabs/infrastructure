@@ -5,6 +5,7 @@
     ../../platforms/campus-cloud
     ./minecraft.nix
     ./keycloak.nix
+    ./vaultwarden.nix
   ];
 
   networking.firewall.allowedTCPPorts = [ 80 443 ];

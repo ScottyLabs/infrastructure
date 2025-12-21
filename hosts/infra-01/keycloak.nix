@@ -27,7 +27,7 @@ in
     database = {
       type = "postgresql";
       createLocally = false;
-      host = "/run/postgresql";
+      host = "/run/postgresql"; # unix socket
       name = "keycloak";
       username = "keycloak";
       useSSL = false;
