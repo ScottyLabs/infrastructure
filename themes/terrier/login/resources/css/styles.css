@@ -1,0 +1,538 @@
+/* Import Inter font from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* GLOBAL RESET & LAYOUT */
+body {
+    background: var(--Background-Neutral-Secondary-Enabled, #F5F5F5);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    color: #1a1a1a;
+}
+
+/* MAIN CARD CONTAINER */
+/* Targets the main wrapper div inside the body */
+body > div {
+    background-color: #FFF;
+    width: 100%;
+    max-width: 480px;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 2px 16px 0 rgba(0, 0, 0, 0.10);
+    box-sizing: border-box;
+    margin: 20px;
+}
+
+/* HEADER & LOGO */
+#kc-header {
+    margin-bottom: 24px;
+    text-align: center;
+}
+
+#kc-header-wrapper {
+    color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-transform: capitalize; /* Ensures 'Terrier' looks right */
+
+    /* Heading/2 */
+    font-family: Inter;
+    font-size: 30px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 38px;
+}
+
+/* Creating the "Dog" logo icon using CSS to match screenshot */
+#kc-header-wrapper::before {
+    content: '';
+    display: block;
+    width: 28px;
+    height: 28px;
+    margin-right: 12px;
+    background: url('../img/scottylabs_dog.svg') no-repeat center;
+}
+
+/* PAGE TITLE */
+/* Hiding "Sign in to your account" to match the clean look of the screenshot */
+#kc-page-title {
+    display: none; 
+}
+
+/* Show page title on specific pages that need it */
+[data-page-id="login-login-idp-link-confirm"] #kc-page-title,
+[data-page-id="login-idp-review-user-profile"] #kc-page-title,
+[data-page-id="login-error"] #kc-page-title,
+[data-page-id="login-login-page-expired"] #kc-page-title {
+    display: block;
+    font-family: 'Inter', sans-serif;
+    font-size: 24px;
+    font-weight: 600;
+    color: #1a1a1a;
+    text-align: center;
+    margin-bottom: 16px;
+}
+
+/* ALERT / ERROR MESSAGES */
+.alert-error,
+.pf-m-danger {
+    background-color: #FEF2F2;
+    border: 1px solid #FECACA;
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.alert-error span,
+.pf-m-danger span {
+    color: #991B1B;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.pf-c-alert__icon {
+    flex-shrink: 0;
+}
+
+.pf-c-alert__icon::before {
+    content: '⚠️';
+    font-size: 16px;
+}
+
+/* ACTION BUTTONS (Review profile, Add to existing account, etc.) */
+#kc-register-form button[type="submit"],
+button.pf-c-button,
+button[name="submitAction"] {
+    width: 100%;
+    border-radius: 100px;
+    background: #1E1E1E;
+    color: #ffffff;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    padding: 14px;
+    border: none;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background-color 0.2s;
+    line-height: 20px;
+}
+
+#kc-register-form button[type="submit"]:hover,
+button.pf-c-button:hover,
+button[name="submitAction"]:hover {
+    background-color: #333;
+}
+
+/* Secondary button style (for less prominent actions) */
+#kc-register-form button[type="submit"]:not(:first-of-type),
+button#linkAccount {
+    background: #fff;
+    color: #1E1E1E;
+    border: 1px solid #e5e7eb;
+}
+
+#kc-register-form button[type="submit"]:not(:first-of-type):hover,
+button#linkAccount:hover {
+    background-color: #f9fafb;
+    border-color: #d1d5db;
+}
+
+/* INSTRUCTION TEXT (Page expired, etc.) */
+.instruction,
+#instruction1 {
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    color: #666;
+    line-height: 1.6;
+    text-align: center;
+    margin: 16px 0;
+}
+
+.instruction a,
+#instruction1 a {
+    color: #2563EB;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.instruction a:hover,
+#instruction1 a:hover {
+    text-decoration: underline;
+}
+
+/* FORM LABELS */
+label {
+    display: inline;
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #1a1a1a;
+}
+
+/* Required field asterisks - keep on same line as label */
+.required,
+label + * {
+    color: #C41E3A;
+    font-weight: 500;
+}
+
+/* Label container - keep label and asterisk on same line */
+div > div:has(> label) {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 8px;
+}
+
+/* Hide the "Required fields" subtitle text or style it nicely */
+.subtitle {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+.subtitle .required {
+    color: #C41E3A;
+}
+
+/* INPUT FIELDS */
+input[type="text"],
+input[type="password"] {
+    width: 100%;
+    background-color: #F0F4F8; /* Matching the light gray input background */
+    border: 1px solid transparent;
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 15px;
+    color: #333;
+    box-sizing: border-box;
+    margin-bottom: 20px;
+    transition: all 0.2s ease;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus {
+    background-color: #fff;
+    border-color: #d1d5db;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+}
+
+/* PASSWORD TOGGLE BUTTON */
+/* Positioning the eye icon inside the password field */
+div[dir="ltr"] {
+    position: relative;
+}
+
+button[data-password-toggle] {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-85%); /* Adjust vertical alignment */
+    background: none;
+    border: none;
+    cursor: pointer;
+    opacity: 0.5;
+}
+
+/* PRIMARY BUTTON (Sign In) */
+#kc-login {
+    width: 100%;
+    border-radius: 100px;
+    background: #1E1E1E;
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 16px;
+    padding: 14px;
+    border: none;
+    border-radius: 30px; /* Pill shape */
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background-color 0.2s;
+
+    /* Label/Large */
+    font-family: Inter;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 20px; /* 142.857% */
+
+}
+
+#kc-login:hover {
+    background-color: #333;
+}
+
+/* REGISTER BUTTON */
+#kc-form-buttons input[type="submit"],
+#kc-register-form input[type="submit"] {
+    width: 100%;
+    border-radius: 100px;
+    background: #1E1E1E;
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 16px;
+    padding: 14px;
+    border: none;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background-color 0.2s;
+    font-family: Inter;
+    font-style: normal;
+    line-height: 20px;
+}
+
+#kc-form-buttons input[type="submit"]:hover,
+#kc-register-form input[type="submit"]:hover {
+    background-color: #333;
+}
+
+/* BACK TO LOGIN LINK */
+#kc-form-options {
+    margin-bottom: 16px;
+}
+
+#kc-form-options a {
+    color: #1E1E1E;
+    text-decoration: underline;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+#kc-form-options a:hover {
+    color: #333;
+}
+
+/* REGISTRATION SECTION - "New user? Register" */
+#kc-info {
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid #eee;
+    text-align: center;
+}
+
+#kc-registration {
+    font-size: 14px;
+    color: #666;
+}
+
+#kc-registration a {
+    color: #2563EB;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+#kc-registration a:hover {
+    text-decoration: underline;
+}
+
+/* SOCIAL LOGIN SECTION */
+#kc-social-providers hr {
+    margin: 30px 0 20px 0;
+    border: 0;
+    border-top: 1px solid #eee;
+}
+
+#kc-social-providers h2 {
+    font-size: 14px;
+    color: #666;
+    text-align: center;
+    font-weight: normal;
+    margin-bottom: 20px;
+    margin-top: -30px; /* Pull up to overlap HR */
+    background: #fff;
+    display: inline-block;
+    padding: 0 10px;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+#kc-social-providers ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    gap: 12px;
+    flex-direction: column; /* Stack them for mobile, or row for desktop */
+}
+
+#kc-social-providers li {
+    width: 100%;
+}
+
+/* SOCIAL BUTTONS STYLING */
+#kc-social-providers a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 12px;
+    background-color: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+    font-size: 14px;
+    transition: background-color 0.2s;
+    box-sizing: border-box;
+}
+
+#kc-social-providers a:hover {
+    background-color: #f9fafb;
+    border-color: #d1d5db;
+}
+
+/* SVG LOGOS FOR SOCIAL BUTTONS */
+/* Adding logos via pseudo-elements to ensure they appear without external image files */
+
+#social-github span::before {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    vertical-align: middle;
+    background-color: #333;
+    -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>') no-repeat center;
+    mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>') no-repeat center;
+}
+
+#social-google span::before {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    vertical-align: middle;
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><path fill="%23EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="%234285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="%23FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="%2334A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>') no-repeat center;
+}
+
+#social-cmu-saml span::before {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    vertical-align: middle;
+    background: url('../img/CMU_C.png') no-repeat center;
+}
+
+/* MOBILE RESPONSIVE STYLES */
+@media screen and (max-width: 520px) {
+    /* Make body full height and remove centering to fill screen */
+    body {
+        align-items: flex-start;
+        min-height: 100vh;
+        background: #FFF; /* White background on mobile */
+    }
+
+    /* Card fills the entire screen on mobile */
+    body > div {
+        padding: 32px 24px;
+        margin: 0;
+        border-radius: 0;
+        box-shadow: none;
+        max-width: 100%;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    /* Smaller header on mobile */
+    #kc-header {
+        margin-bottom: 24px;
+    }
+
+    #kc-header-wrapper {
+        font-size: 26px;
+        line-height: 34px;
+    }
+
+    #kc-header-wrapper::before {
+        width: 26px;
+        height: 26px;
+        margin-right: 10px;
+    }
+
+    /* Adjust form labels */
+    label {
+        font-size: 14px;
+        margin-bottom: 6px;
+    }
+
+    /* Adjust input fields for mobile */
+    input[type="text"],
+    input[type="password"] {
+        padding: 14px 16px;
+        font-size: 16px; /* Prevents iOS zoom on focus */
+        margin-bottom: 16px;
+        border-radius: 10px;
+    }
+
+    /* Adjust primary button */
+    #kc-login {
+        padding: 14px;
+        font-size: 16px;
+    }
+
+    /* Social login adjustments */
+    #kc-social-providers hr {
+        margin: 28px 0 20px 0;
+    }
+
+    #kc-social-providers h2 {
+        font-size: 14px;
+        margin-top: -28px;
+    }
+
+    #kc-social-providers ul {
+        gap: 12px;
+    }
+
+    #kc-social-providers a {
+        padding: 12px;
+        font-size: 14px;
+        border-radius: 8px;
+    }
+}
+
+/* Extra small screens (very small phones) */
+@media screen and (max-width: 360px) {
+    body > div {
+        padding: 24px 20px;
+    }
+
+    #kc-header-wrapper {
+        font-size: 24px;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+        padding: 12px 14px;
+    }
+}
+
+/* Ensure touch targets are large enough on mobile */
+@media (hover: none) and (pointer: coarse) {
+    input[type="text"],
+    input[type="password"],
+    #kc-login,
+    #kc-social-providers a {
+        min-height: 44px; /* Apple's recommended minimum touch target */
+    }
+
+    button[data-password-toggle] {
+        min-width: 44px;
+        min-height: 44px;
+    }
+}
