@@ -14,7 +14,7 @@
 
     remotes = [{
       name = "origin";
-      url = "https://github.com/ScottyLabs/infrastructure.git";
+      url = "https://codeberg.org/ScottyLabs/infrastructure.git";
       branches.main.name = "main";
     }];
   };

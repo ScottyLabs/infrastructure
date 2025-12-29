@@ -2,7 +2,7 @@
 set -e
 
 # Clone and move files
-git clone git@github.com:ScottyLabs/infrastructure.git ~/infrastructure
+git clone git@codeberg.org:ScottyLabs/infrastructure.git ~/infrastructure
 sudo mv ~/infrastructure/* /etc/nixos/
 sudo mv ~/infrastructure/.git /etc/nixos/
 rmdir ~/infrastructure

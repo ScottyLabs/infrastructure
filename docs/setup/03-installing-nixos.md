@@ -27,7 +27,7 @@ sudo passwd root
 Create a new entry in Vaultwarden, in the `Tech/Servers` collection, named `hostname.scottylabs.org`. The username should be `root` and the password should be the one you just set. Then, run the install script:
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/ScottyLabs/infrastructure/main/scripts/provision.sh | NAME=hostname bash
+curl -sSL https://codeberg.org/ScottyLabs/infrastructure/raw/branch/main/scripts/provision.sh | NAME=hostname bash
 ```
 
 When prompted, enter the root user password you set previously. This should complete without errors and automatically reboot into NixOS. It will take a short while, though (mostly due to Neovim).

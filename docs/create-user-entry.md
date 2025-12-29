@@ -20,4 +20,4 @@ Then copy your public key:
 cat ~/.ssh/id_ed25519.pub
 ```
 
-Copy the output and add it to the `sshPublicKey` field in your user entry. Make sure to add it as a signing key on [GitHub](https://github.com/settings/keys) so commits show as `Verified`.
+Copy the output and add it to the `sshPublicKey` field in your user entry. Make sure to add it as a signing key on [Codeberg](https://codeberg.org/user/settings/keys) (and optionally [GitHub](https://github.com/settings/keys)) so commits show as `Verified`.

@@ -10,4 +10,4 @@ fi
 # Run initial nixos-anywhere setup
 nix run --extra-experimental-features "nix-command flakes" \
     github:nix-community/nixos-anywhere -- \
-    --flake github:ScottyLabs/infrastructure#${NAME} root@localhost
+    --flake git+https://codeberg.org/ScottyLabs/infrastructure#${NAME} root@localhost

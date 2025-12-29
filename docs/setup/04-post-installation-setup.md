@@ -15,7 +15,7 @@ scp ~/.ssh/id_ed25519 andrewid@hostname:~/.ssh/
 Once you're in, run `update` once (do not forget this), and then the initial setup script:
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/ScottyLabs/infrastructure/main/scripts/initial-setup.sh | bash
+curl -sSL https://codeberg.org/ScottyLabs/infrastructure/raw/branch/main/scripts/initial-setup.sh | bash
 ```
 
 When making configuration changes, always make sure to use the `update` alias for  `sudo nixos rebuild-switch`. It creates a btrfs backup first, which you can use to roll back if something goes wrong.
