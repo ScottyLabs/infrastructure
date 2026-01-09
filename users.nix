@@ -20,4 +20,11 @@
     };
     sshPublicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICyfRV5/CqqyG6L7K+td/hw3Xl40Qt+yiXk8u4hMTnXi 55125103+TenType@users.noreply.github.com";
   };
+  tsurban = {
+    git = {
+      name = "Theo Urban";
+      email = "theo.s.urban@gmail.com";
+    };
+    sshPublicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA++gW8fgzwitDmKsdZdVfXWMD1b558g8KIqOPIGrIdN tsurban@andrew.cmu.edu";
+  }
 }
