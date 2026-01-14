@@ -9,6 +9,7 @@
     ./acme.nix
     ./postgresql.nix
     ./valkey.nix
+    ./minio.nix
   ];
 
   # Enforce that each host must have a disk configuration defined
