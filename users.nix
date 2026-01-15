@@ -26,5 +26,5 @@
       email = "theo.s.urban@gmail.com";
     };
     sshPublicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA++gW8fgzwitDmKsdZdVfXWMD1b558g8KIqOPIGrIdN tsurban@andrew.cmu.edu";
-  }
+  };
 }
