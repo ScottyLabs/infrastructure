@@ -24,16 +24,6 @@
       url = "github:nlewo/comin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
-    # prod-01
-    dalmatian = {
-      url = "github:ScottyLabs/dalmatian";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    discord-verify = {
-      url = "github:ScottyLabs/discord-verify";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
   outputs = {
@@ -44,8 +34,6 @@
     disko,
     comin,
     neovim-nightly-overlay,
-    dalmatian,
-    discord-verify,
     ...
   }:
   let
@@ -58,9 +46,7 @@
           hostname
           users
           comin
-          neovim-nightly-overlay
-          dalmatian
-          discord-verify;
+          neovim-nightly-overlay;
       };
       modules = [
         ./hosts/${hostname}/configuration.nix

@@ -1,5 +1,8 @@
 { config, discord-verify, ... }:
 
+let
+  discord-verify = builtins.getFlake "github:ScottyLabs/discord-verify";
+in
 {
   imports = [ discord-verify.nixosModules.default ];
 
