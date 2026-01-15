@@ -2,7 +2,7 @@
   description = "ScottyLabs Infrastructure";
 
   inputs = {
-    nixpkgs.url = "github:ap-1/nixpkgs/keycloak-plugins";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
     home-manager = {
       url = "github:nix-community/home-manager";
