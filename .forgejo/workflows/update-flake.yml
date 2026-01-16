@@ -1,0 +1,43 @@
+name: Update flake inputs
+on:
+  workflow_dispatch:
+    inputs:
+      input_name:
+        description: 'Which flake input to update (or "all")'
+        required: false
+        default: 'all'
+        type: string
+
+jobs:
+  update:
+    runs-on: nix
+    steps:
+      - uses: https://code.forgejo.org/actions/checkout@v4
+        with:
+          token: ${{ secrets.PUSH_TOKEN }}
+          
+      - name: Install Nix
+        uses: https://github.com/cachix/install-nix-action@v27
+        
+      - name: Update flake
+        run: |
+          if [ "${{ inputs.input_name }}" = "all" ]; then
+            nix flake update
+          else
+            nix flake update ${{ inputs.input_name }}
+          fi
+
+      - name: Commit and push
+        run: |
+          echo "${{ secrets.BOT_SSH_SIGNING_KEY }}" > /tmp/signing_key
+          chmod 600 /tmp/signing_key
+
+          git config user.name "scottylabs-bot"
+          git config user.email "ops+codeberg@scottylabs.org"
+          git config gpg.format ssh
+          git config user.signingkey /tmp/signing_key
+          git config commit.gpgsign true
+
+          git add flake.lock
+          git diff --cached --quiet || git commit -m "chore: update ${{ inputs.input_name }}"
+          git push
