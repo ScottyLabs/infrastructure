@@ -4,6 +4,7 @@
   age.secrets.forgejo-runner-token = {
     file = ../../secrets/infra-01/forgejo-runner-token.age;
     mode = "0400";
+    owner = "gitea-runner";
   };
 
   services.gitea-actions-runner = {
