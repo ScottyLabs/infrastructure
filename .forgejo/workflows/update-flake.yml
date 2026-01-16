@@ -15,10 +15,10 @@ jobs:
       - uses: https://code.forgejo.org/actions/checkout@v4
         with:
           token: ${{ secrets.PUSH_TOKEN }}
-          
+
       - name: Install Nix
         uses: https://github.com/cachix/install-nix-action@v27
-        
+
       - name: Update flake
         run: |
           if [ "${{ inputs.input_name }}" = "all" ]; then
