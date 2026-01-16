@@ -1,8 +1,5 @@
 { config, dalmatian, ... }:
 
-let
-  dalmatian = builtins.getFlake "github:ScottyLabs/dalmatian";
-in
 {
   imports = [
     dalmatian.nixosModules.default
