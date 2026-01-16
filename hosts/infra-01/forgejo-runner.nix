@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 
 {
   age.secrets.forgejo-runner-token = {
@@ -30,5 +30,19 @@
         runner.capacity = 2;
       };
     };
+  };
+
+  # Create a static user because gitea-actions-runner uses a dynamic one
+  users.users.gitea-runner = {
+    isSystemUser = true;
+    group = "gitea-runner";
+    home = "/var/lib/gitea-runner";
+  };
+  users.groups.gitea-runner = {};
+
+  systemd.services.gitea-runner-default.serviceConfig = {
+    DynamicUser = lib.mkForce false;
+    User = "gitea-runner";
+    Group = "gitea-runner";
   };
 }
