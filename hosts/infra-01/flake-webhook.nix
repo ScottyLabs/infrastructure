@@ -23,7 +23,6 @@ in
   services.webhook = {
     enable = true;
     port = 9000;
-    
     hooks = {
       flake-update = {
         execute-command = toString triggerScript;
@@ -32,14 +31,38 @@ in
           { source = "payload"; name = "repository.name"; }
         ];
         trigger-rule = {
-          match = {
-            type = "value";
-            value = "push";
-            parameter = {
-              source = "header";
-              name = "X-GitHub-Event";
-            };
-          };
+          or = [
+            {
+              match = {
+                type = "value";
+                value = "push";
+                parameter = {
+                  source = "header";
+                  name = "X-GitHub-Event";
+                };
+              };
+            }
+            {
+              match = {
+                type = "value";
+                value = "push";
+                parameter = {
+                  source = "header";
+                  name = "X-Forgejo-Event";
+                };
+              };
+            }
+            {
+              match = {
+                type = "value";
+                value = "push";
+                parameter = {
+                  source = "header";
+                  name = "X-Gitea-Event";
+                };
+              };
+            }
+          ];
         };
       };
     };
