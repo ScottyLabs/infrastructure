@@ -16,6 +16,7 @@
       name = "origin";
       url = "https://codeberg.org/ScottyLabs/infrastructure.git";
       branches.main.name = "main";
+      poller.period = 15;
     }];
   };
 }
