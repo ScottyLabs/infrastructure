@@ -10,7 +10,7 @@ on:
 
 jobs:
   update:
-    runs-on: nix
+    runs-on: docker
     steps:
       - uses: https://code.forgejo.org/actions/checkout@v4
         with:

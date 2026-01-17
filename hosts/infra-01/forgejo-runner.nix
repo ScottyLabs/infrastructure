@@ -16,7 +16,7 @@
       url = "https://codeberg.org";
       tokenFile = config.age.secrets.forgejo-runner-token.path;
 
-      labels = [ "nix:docker://nixos/nix" ];
+      labels = [ "docker:docker://ghcr.io/catthehacker/ubuntu:act-22.04" ];
 
       settings = {
         runner.capacity = 2;
