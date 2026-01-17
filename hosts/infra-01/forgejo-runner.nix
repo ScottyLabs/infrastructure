@@ -16,15 +16,7 @@
       url = "https://codeberg.org";
       tokenFile = config.age.secrets.forgejo-runner-token.path;
 
-      labels = [ "nix:host" ];
-
-      hostPackages = with pkgs; [
-        bash
-        coreutils
-        git
-        nix
-        openssh
-      ];
+      labels = [ "nix:docker://nixos/nix" ];
 
       settings = {
         runner.capacity = 2;
@@ -32,10 +24,13 @@
     };
   };
 
+  virtualisation.docker.enable = true;
+
   # Create a static user because gitea-actions-runner uses a dynamic one
   users.users.gitea-runner = {
     isSystemUser = true;
     group = "gitea-runner";
+    extraGroups = [ "docker" ];
     home = "/var/lib/gitea-runner";
   };
   users.groups.gitea-runner = {};
