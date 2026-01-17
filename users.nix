@@ -27,4 +27,11 @@
     };
     sshPublicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA++gW8fgzwitDmKsdZdVfXWMD1b558g8KIqOPIGrIdN tsurban@andrew.cmu.edu";
   };
+  ryanli2 = {
+    git = {
+      name = "Ryan Li";
+      email = "ryanli2@andrew.cmu.edu";
+    };
+    sshPublicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJwDoVJW6znMS503O/0SDpe8PUbN4PcTbZCDvVc9vhDg ryanli2@andrew.cmu.edu";
+  };
 }
