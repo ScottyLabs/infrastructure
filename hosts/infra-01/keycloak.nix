@@ -23,6 +23,13 @@ in
 
   services.keycloak = {
     enable = true;
+    package = pkgs.keycloak.overrideAttrs (old: rec {
+      version = "26.4.7";
+      src = pkgs.fetchzip {
+        url = "https://github.com/keycloak/keycloak/releases/download/${version}/keycloak-${version}.zip";
+        hash = "sha256-F214k6kCb+O6LH8bgsImkfPt8XAezuPEBpRS0TUeOy0=";
+      };
+    });
 
     database = {
       type = "postgresql";
