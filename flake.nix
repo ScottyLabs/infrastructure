@@ -31,7 +31,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     discord-verify = {
-      url = "github:ScottyLabs/discord-verify";
+      url = "git+https://codeberg.org/ScottyLabs/discord-verify";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    internet-archive = {
+      url = "git+https://codeberg.org/ScottyLabs/internet-archive";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
@@ -46,6 +50,7 @@
     neovim-nightly-overlay,
     dalmatian,
     discord-verify,
+    internet-archive,
     ...
   }:
   let
@@ -60,7 +65,8 @@
           comin
           neovim-nightly-overlay
           dalmatian
-          discord-verify;
+          discord-verify
+          internet-archive;
       };
       modules = [
         ./hosts/${hostname}/configuration.nix
