@@ -5,6 +5,7 @@
     ../../platforms/campus-cloud
     ./dalmatian.nix
     ./discord-verify.nix
+    ./internet-archive.nix
   ];
 
   networking.firewall.allowedTCPPorts = [ 80 443 ];
