@@ -1,4 +1,4 @@
-{ config, lib, pkgs, users, ... }:
+{ lib, pkgs, users, ... }:
 
 {
   users.users = builtins.mapAttrs (andrewId: userData: {
