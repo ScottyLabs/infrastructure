@@ -1,4 +1,4 @@
-{ config, lib, comin, ... }:
+{ comin, ... }:
 
 {
   imports = [ comin.nixosModules.comin ];

@@ -1,4 +1,4 @@
-{ config, pkgs, hostname, users, neovim-nightly-overlay, ... }:
+{ pkgs, hostname, users, neovim-nightly-overlay, ... }:
 
 {
   environment.systemPackages = with pkgs; [
