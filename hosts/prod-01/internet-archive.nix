@@ -14,7 +14,7 @@
   services.internet-archive = {
     enable = true;
     environmentFile = config.age.secrets.internet-archive.path;
-    url = "https://enr-apps.as.cmu.edu/assets/SOC/";
+    presets = [ "soc" ];
     schedule = "weekly";
     debug = true;
   };
