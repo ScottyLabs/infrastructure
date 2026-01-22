@@ -16,6 +16,11 @@
     environmentFile = "/run/secrets/discord-verify.env";
   };
 
+  systemd.services.discord-verify = {
+    after = [ "bao-agent.service" ];
+    wants = [ "bao-agent.service" ];
+  };
+
   services.nginx = {
     enable = true;
 
