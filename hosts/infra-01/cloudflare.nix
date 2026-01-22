@@ -8,6 +8,6 @@
 
   scottylabs.tofu.configurations.cloudflare = {
     source = ../../tofu/cloudflare;
-    environmentFiles = [ config.age.secrets.tofu-cloudflare.path ];
+    environmentFile = config.age.secrets.tofu-cloudflare.path;
   };
 }
