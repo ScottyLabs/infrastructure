@@ -1,4 +1,4 @@
-{ lib, ... }:
+{ ... }:
 
 {
   services.openbao = {
@@ -11,7 +11,7 @@
         tls_disable = true;
       };
 
-      storage.postgresql.connection_url = "postgresql://openbao@localhost/openbao?sslmode=disable";
+      storage.postgresql.connection_url = "postgresql:///openbao?host=/run/postgresql&user=openbao";
 
       log_level = "debug";
 
@@ -32,18 +32,4 @@
   };
 
   scottylabs.postgresql.databases = [ "openbao" ];
-
-  # Create a static user because the openbao module uses a dynamic one
-  users.users.openbao = {
-    isSystemUser = true;
-    group = "openbao";
-    home = "/var/lib/openbao";
-  };
-  users.groups.openbao = {};
-
-  systemd.services.openbao.serviceConfig = {
-    DynamicUser = lib.mkForce false;
-    User = "openbao";
-    Group = "openbao";
-  };
 }
