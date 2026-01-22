@@ -5,6 +5,11 @@ resource "vault_jwt_auth_backend" "oidc" {
   oidc_client_id     = "openbao"
   oidc_client_secret = var.oidc_client_secret
   default_role       = "default"
+
+  # Makes OIDC the default option on the login page
+  tune {
+    listing_visibility = "unauth"
+  }
 }
 
 resource "vault_jwt_auth_backend_role" "default" {
