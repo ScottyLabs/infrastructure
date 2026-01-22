@@ -17,10 +17,10 @@ locals {
   }
 }
 
-resource "cloudflare_record" "a" {
+resource "cloudflare_dns_record" "a" {
   for_each = local.a_records
 
-  zone_id = data.cloudflare_zone.scottylabs.id
+  zone_id = data.cloudflare_zone.scottylabs.zone_id
   name    = each.key
   content = each.value.ip
   type    = "A"
