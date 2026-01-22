@@ -118,8 +118,9 @@ in
           fi
 
           # Copy configuration files to state directory
-          rm -rf "$STATE_DIR"/*.tf
+          rm -rf "$STATE_DIR"/*.tf "$STATE_DIR"/*.json
           cp ${conf.source}/*.tf "$STATE_DIR/"
+          cp ${conf.source}/*.json "$STATE_DIR/" 2>/dev/null || true
           cd "$STATE_DIR"
 
           # Initialize and apply
