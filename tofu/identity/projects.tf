@@ -26,7 +26,7 @@ resource "vault_policy" "project_dev" {
       capabilities = ["create", "read", "update", "delete", "list"]
     }
     path "secret/metadata/projects/${each.key}/dev/*" {
-      capabilities = ["list", "read"]
+      capabilities = ["list", "read", "delete"]
     }
   EOT
 }
@@ -39,7 +39,7 @@ resource "vault_policy" "project_prod" {
       capabilities = ["create", "read", "update", "delete", "list"]
     }
     path "secret/metadata/projects/${each.key}/prod/*" {
-      capabilities = ["list", "read"]
+      capabilities = ["list", "read", "delete"]
     }
   EOT
 }
