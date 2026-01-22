@@ -1,8 +1,8 @@
 { config, pkgs, ... }:
 
 {
-  age.secrets.openbao = {
-    file = ../../secrets/infra-01/openbao.age;
+  age.secrets.tofu-identity = {
+    file = ../../secrets/infra-01/tofu-identity.age;
     mode = "0400";
   };
 
@@ -27,15 +27,12 @@
     };
   };
 
-  # Creates the JWT auth backend and role for Keycloak
-  scottylabs.tofu.configurations.openbao = {
-    source = ../../tofu/openbao;
-    environmentFile = config.age.secrets.openbao.path;
+  # Creates the JWT auth backend + role for Keycloak and configures project groups
+  scottylabs.tofu.configurations.identity = {
+    source = ../../tofu/identity;
+    environmentFile = config.age.secrets.tofu-identity.path;
     after = [ "openbao.service" ];
-
-    environment = {
-      VAULT_ADDR = "http://127.0.0.1:8200";
-    };
+    environment.VAULT_ADDR = "http://127.0.0.1:8200";
 
     # OpenBao must be unsealed before we can configure it
     preCheck = ''

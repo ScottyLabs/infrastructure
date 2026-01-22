@@ -1,3 +1,12 @@
+# Secrets engine
+resource "vault_mount" "kv" {
+  path        = "secret"
+  type        = "kv"
+  options     = { version = "2" }
+  description = "KV v2 secrets engine"
+}
+
+# OIDC auth
 resource "vault_jwt_auth_backend" "oidc" {
   path               = "oidc"
   type               = "oidc"
@@ -19,6 +28,7 @@ resource "vault_jwt_auth_backend_role" "default" {
 
   bound_audiences = ["openbao"]
   user_claim      = "preferred_username"
+  groups_claim    = "groups"
   token_policies  = ["default"]
 
   allowed_redirect_uris = [
