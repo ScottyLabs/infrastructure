@@ -12,6 +12,7 @@ let
   hosts = [ infra-01 prod-01 prod-02 ];
 in
 {
+  # infra-01
   "secrets/infra-01/codeberg-token.age".publicKeys = admins ++ [ infra-01 ];
   "secrets/infra-01/forgejo-runner-token.age".publicKeys = admins ++ [ infra-01 ];
   "secrets/infra-01/minecraft.age".publicKeys = admins ++ [ infra-01 ];
@@ -19,10 +20,20 @@ in
   "secrets/infra-01/vaultwarden.age".publicKeys = admins ++ [ infra-01 ];
   "secrets/infra-01/tofu-identity.age".publicKeys = admins ++ [ infra-01 ];
   "secrets/infra-01/tofu-cloudflare.age".publicKeys = admins ++ [ infra-01 ];
+  "secrets/infra-01/bao-role-id.age".publicKeys = admins ++ [ infra-01 ];
+  "secrets/infra-01/bao-secret-id.age".publicKeys = admins ++ [ infra-01 ];
 
+  # prod-01
   "secrets/prod-01/dalmatian.age".publicKeys = admins ++ [ prod-01 ];
   "secrets/prod-01/discord-verify.age".publicKeys = admins ++ [ prod-01 ];
   "secrets/prod-01/internet-archive.age".publicKeys = admins ++ [ prod-01 ];
+  "secrets/prod-01/bao-role-id.age".publicKeys = admins ++ [ prod-01 ];
+  "secrets/prod-01/bao-secret-id.age".publicKeys = admins ++ [ prod-01 ];
 
+  # prod-02
+  "secrets/prod-02/bao-role-id.age".publicKeys = admins ++ [ prod-02 ];
+  "secrets/prod-02/bao-secret-id.age".publicKeys = admins ++ [ prod-02 ];
+
+  # all
   "secrets/acme-credentials.age".publicKeys = admins ++ hosts;
 }
