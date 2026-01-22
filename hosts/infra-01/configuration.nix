@@ -9,6 +9,7 @@
     ./keycloak.nix
     ./vaultwarden.nix
     ./openbao.nix
+    ./cloudflare.nix
   ];
 
   networking.firewall.allowedTCPPorts = [ 80 443 ];
