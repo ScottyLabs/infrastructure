@@ -1,4 +1,4 @@
-{ config, ... }:
+{ lib, ... }:
 
 {
   services.openbao = {
@@ -19,7 +19,6 @@
       cluster_addr = "http://127.0.0.1:8201";
 
       api_addr = "https://secrets2.scottylabs.org";
-
     };
   };
 
@@ -33,4 +32,18 @@
   };
 
   scottylabs.postgresql.databases = [ "openbao" ];
+
+  # Create a static user because the openbao module uses a dynamic one
+  users.users.openbao = {
+    isSystemUser = true;
+    group = "openbao";
+    home = "/var/lib/openbao";
+  };
+  users.groups.openbao = {};
+
+  systemd.services.openbao.serviceConfig = {
+    DynamicUser = lib.mkForce false;
+    User = "openbao";
+    Group = "openbao";
+  };
 }
