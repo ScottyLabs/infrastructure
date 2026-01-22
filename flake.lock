@@ -77,11 +77,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1768704670,
-        "narHash": "sha256-02HApw5pUujb7jlmSo0ZNb4j1rMJzzjzcVzj5QU55Eg=",
+        "lastModified": 1769050895,
+        "narHash": "sha256-aJE/ge2I18sbrDtnMD5WykyHCn4uC1wWGrQioqG4kLU=",
         "owner": "ScottyLabs",
         "repo": "dalmatian",
-        "rev": "77df781ac04b0d0c0ac0f270f890605b56157b57",
+        "rev": "4fc9533deaa15d1235599f22cdb0e022f6acc146",
         "type": "github"
       },
       "original": {
