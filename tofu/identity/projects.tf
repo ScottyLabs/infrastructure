@@ -55,7 +55,7 @@ resource "vault_identity_group" "project_members" {
 resource "vault_identity_group_alias" "project_members" {
   for_each       = local.projects
   name           = "/projects/${each.key}"
-  mount_accessor = vault_jwt_auth_backend.keycloak.accessor
+  mount_accessor = vault_jwt_auth_backend.oidc.accessor
   canonical_id   = vault_identity_group.project_members[each.key].id
 }
 
@@ -69,6 +69,6 @@ resource "vault_identity_group" "project_admins" {
 resource "vault_identity_group_alias" "project_admins" {
   for_each       = local.projects
   name           = "/projects/${each.key}/admins"
-  mount_accessor = vault_jwt_auth_backend.keycloak.accessor
+  mount_accessor = vault_jwt_auth_backend.oidc.accessor
   canonical_id   = vault_identity_group.project_admins[each.key].id
 }
