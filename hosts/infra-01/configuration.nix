@@ -8,6 +8,7 @@
     ./minecraft.nix
     ./keycloak.nix
     ./vaultwarden.nix
+    ./openbao.nix
   ];
 
   networking.firewall.allowedTCPPorts = [ 80 443 ];
