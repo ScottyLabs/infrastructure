@@ -42,6 +42,12 @@ in
             default = {};
             description = "Additional environment variables for OpenTofu";
           };
+
+          extraFiles = lib.mkOption {
+            type = lib.types.attrsOf lib.types.path;
+            default = {};
+            description = "Additional files to copy into the working directory at apply time";
+          };
         };
       });
       default = {};
@@ -121,6 +127,12 @@ in
           rm -rf "$STATE_DIR"/*.tf "$STATE_DIR"/*.json
           cp ${conf.source}/*.tf "$STATE_DIR/"
           cp ${conf.source}/*.json "$STATE_DIR/" 2>/dev/null || true
+
+          # Copy extra files (e.g., generated from Nix)
+          ${lib.concatStrings (lib.mapAttrsToList (filename: path: ''
+            cp ${path} "$STATE_DIR/${filename}"
+          '') conf.extraFiles)}
+
           cd "$STATE_DIR"
 
           # Initialize and apply

@@ -1,4 +1,4 @@
-{ pkgs, hostname, users, neovim-nightly-overlay, ... }:
+{ pkgs, hostname, users, ... }:
 
 {
   environment.systemPackages = with pkgs; [
@@ -16,14 +16,10 @@
 
   users.defaultUserShell = pkgs.zsh;
 
-  # Neovim
-  programs.neovim = {
+  # Editor
+  programs.vim = {
     enable = true;
-    package = neovim-nightly-overlay.packages.${pkgs.stdenv.hostPlatform.system}.default;
-
     defaultEditor = true;
-    viAlias = true;
-    vimAlias = true;
   };
 
   # SSH
@@ -66,14 +62,6 @@
     krb5.enable = true;
     services.sshd.makeHomeDir = true;
   };
-
-  # Maintain /etc/nixos permissions for shared access
-  system.activationScripts.etcNixosPermissions = ''
-    if [ -d /etc/nixos ]; then
-      chgrp -R wheel /etc/nixos
-      chmod -R g+w /etc/nixos
-    fi
-  '';
 
   # nh and garbage collection
   programs.nh = {
