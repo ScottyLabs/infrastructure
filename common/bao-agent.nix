@@ -102,6 +102,11 @@ in
       wants = [ "network-online.target" ];
       wantedBy = [ "multi-user.target" ];
 
+      # Needed for the token helper
+      environment = {
+        HOME = "/var/lib/bao-agent";
+      };
+
       serviceConfig = {
         ExecStart = "${pkgs.openbao}/bin/bao agent -config=${agentConfig}";
         Restart = "always";
