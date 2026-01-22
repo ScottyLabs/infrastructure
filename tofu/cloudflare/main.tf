@@ -12,5 +12,7 @@ provider "cloudflare" {
 }
 
 data "cloudflare_zone" "scottylabs" {
-  name = "scottylabs.org"
+  filter = {
+    name = "scottylabs.org"
+  }
 }
