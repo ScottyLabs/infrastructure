@@ -11,6 +11,7 @@
     ./valkey.nix
     ./minio.nix
     ./tofu.nix
+    ./bao-agent.nix
   ];
 
   # Enforce that each host must have a disk configuration defined

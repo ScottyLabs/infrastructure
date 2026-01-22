@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, self, ... }:
 
 {
   age.secrets.tofu-identity = {
@@ -33,6 +33,10 @@
     environmentFile = config.age.secrets.tofu-identity.path;
     after = [ "openbao.service" ];
     environment.VAULT_ADDR = "http://127.0.0.1:8200";
+
+    extraFiles = {
+      "host-projects.json" = self.packages.x86_64-linux.host-projects;
+    };
 
     # OpenBao must be unsealed before we can configure it
     preCheck = ''

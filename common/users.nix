@@ -15,6 +15,7 @@
     home.packages = with pkgs; [
       eza
       bat
+      git
       pfetch
     ];
 
@@ -51,21 +52,6 @@
       enable = true;
       enableZshIntegration = true;
       options = [ "--cmd cd" ];
-    };
-
-    programs.git = {
-      enable = true;
-      signing = {
-        format = "ssh";
-        key = "key::${userData.sshPublicKey}";
-        signByDefault = true;
-      };
-      settings = {
-        user = userData.git;
-        init.defaultBranch = "main";
-        pull.rebase = true;
-        safe.directory = "/etc/nixos"; # trust this directory for operations
-      };
     };
   }) users;
 }

@@ -8,10 +8,6 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    neovim-nightly-overlay = {
-      url = "github:nix-community/neovim-nightly-overlay";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     agenix = {
       url = "github:ryantm/agenix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -47,7 +43,6 @@
     agenix,
     disko,
     comin,
-    neovim-nightly-overlay,
     dalmatian,
     discord-verify,
     internet-archive,
@@ -60,10 +55,10 @@
       system = "x86_64-linux";
       specialArgs = {
         inherit
+          self
           hostname
           users
           comin
-          neovim-nightly-overlay
           dalmatian
           discord-verify
           internet-archive;
@@ -84,5 +79,14 @@
       name = hostname;
       value = mkSystem hostname;
     }) hosts);
+
+    # Host-to-project mapping for OpenBao AppRole policies
+    packages.x86_64-linux.host-projects = let
+      pkgs = nixpkgs.legacyPackages.x86_64-linux;
+      mapping = builtins.listToAttrs (map (hostname: {
+        name = hostname;
+        value = self.nixosConfigurations.${hostname}.config.scottylabs.bao-agent.projects;
+      }) hosts);
+    in pkgs.writeText "host-projects.json" (builtins.toJSON mapping);
   };
 }
