@@ -77,11 +77,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1769050895,
-        "narHash": "sha256-aJE/ge2I18sbrDtnMD5WykyHCn4uC1wWGrQioqG4kLU=",
+        "lastModified": 1769129181,
+        "narHash": "sha256-g9JtdIwcG3K6o/pHcWWpU2IAqqGvZBWnn2iLXxpXvyA=",
         "owner": "ScottyLabs",
         "repo": "dalmatian",
-        "rev": "4fc9533deaa15d1235599f22cdb0e022f6acc146",
+        "rev": "7b3699fe5614b4733cda5f63f6fb63605653109c",
         "type": "github"
       },
       "original": {
@@ -209,27 +209,6 @@
         "type": "github"
       }
     },
-    "flake-parts_2": {
-      "inputs": {
-        "nixpkgs-lib": [
-          "neovim-nightly-overlay",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1768135262,
-        "narHash": "sha256-PVvu7OqHBGWN16zSi6tEmPwwHQ4rLPU9Plvs8/1TUBY=",
-        "owner": "hercules-ci",
-        "repo": "flake-parts",
-        "rev": "80daad04eddbbf5a4d883996a73f3f542fa437ac",
-        "type": "github"
-      },
-      "original": {
-        "owner": "hercules-ci",
-        "repo": "flake-parts",
-        "type": "github"
-      }
-    },
     "flake-utils": {
       "inputs": {
         "systems": "systems_3"
@@ -328,44 +307,6 @@
         "url": "https://codeberg.org/ScottyLabs/internet-archive"
       }
     },
-    "neovim-nightly-overlay": {
-      "inputs": {
-        "flake-parts": "flake-parts_2",
-        "neovim-src": "neovim-src",
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1769040284,
-        "narHash": "sha256-zgZfWwXyL9EDqkTEk0y7hB2wUrsNhpTjoVZpmGa3VHw=",
-        "owner": "nix-community",
-        "repo": "neovim-nightly-overlay",
-        "rev": "ce27c2327ff2e41f79aa0b5933b931708d6f6804",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nix-community",
-        "repo": "neovim-nightly-overlay",
-        "type": "github"
-      }
-    },
-    "neovim-src": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1768992167,
-        "narHash": "sha256-pCe5bvBt8VYF/IrDY2RDmA0412YR5Uq0kbYRp/zBI4g=",
-        "owner": "neovim",
-        "repo": "neovim",
-        "rev": "25ce44845d2adf94dfc91c70eb792a50d8274aa1",
-        "type": "github"
-      },
-      "original": {
-        "owner": "neovim",
-        "repo": "neovim",
-        "type": "github"
-      }
-    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1768886240,
@@ -456,7 +397,6 @@
         "disko": "disko",
         "home-manager": "home-manager_2",
         "internet-archive": "internet-archive",
-        "neovim-nightly-overlay": "neovim-nightly-overlay",
         "nixpkgs": "nixpkgs"
       }
     },
