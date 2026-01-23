@@ -1,19 +1,26 @@
-{ config, dalmatian, ... }:
+{  dalmatian, ... }:
 
 {
   imports = [
     dalmatian.nixosModules.default
   ];
 
-  age.secrets.dalmatian = {
-    file = ../../secrets/prod-01/dalmatian.age;
-    mode = "0400";
-    owner = "dalmatian";
+  scottylabs.bao-agent = {
+    enable = true;
+    secrets.dalmatian = {
+      project = "dalmatian";
+      user = "dalmatian";
+    };
   };
 
   services.dalmatian = {
     enable = true;
-    environmentFile = config.age.secrets.dalmatian.path;
+    environmentFile = "/run/secrets/dalmatian.env";
+  };
+
+  systemd.services.dalmatian = {
+    after = [ "bao-agent.service" ];
+    wants = [ "bao-agent.service" ];
   };
 
   scottylabs.postgresql.databases = [ "dalmatian" ];
