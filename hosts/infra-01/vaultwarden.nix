@@ -1,10 +1,12 @@
-{ config, ... }:
+{ ... }:
 
 {
-  age.secrets.vaultwarden = {
-    file = ../../secrets/infra-01/vaultwarden.age;
-    mode = "0400";
-    owner = "vaultwarden";
+  scottylabs.bao-agent = {
+    enable = true;
+    secrets.vaultwarden = {
+      project = "vaultwarden";
+      user = "vaultwarden";
+    };
   };
 
   services.vaultwarden = {
@@ -34,7 +36,12 @@
     };
 
     # SMTP_USERNAME, SMTP_PASSWORD, ADMIN_TOKEN
-    environmentFile = config.age.secrets.vaultwarden.path;
+    environmentFile = "/run/secrets/vaultwarden.env";
+  };
+
+  systemd.services.vaultwarden = {
+    after = [ "bao-agent.service" ];
+    wants = [ "bao-agent.service" ];
   };
 
   services.nginx.virtualHosts."vault.scottylabs.org" = {
