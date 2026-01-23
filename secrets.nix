@@ -24,7 +24,6 @@ in
   "secrets/infra-01/bao-secret-id.age".publicKeys = admins ++ [ infra-01 ];
 
   # prod-01
-  "secrets/prod-01/internet-archive.age".publicKeys = admins ++ [ prod-01 ];
   "secrets/prod-01/bao-role-id.age".publicKeys = admins ++ [ prod-01 ];
   "secrets/prod-01/bao-secret-id.age".publicKeys = admins ++ [ prod-01 ];
 
