@@ -10,6 +10,4 @@
 
   # Use GRUB for BIOS boot
   boot.loader.grub.enable = true;
-  boot.loader.grub.devices = [ "/dev/xvda" ];
-  boot.loader.grub.mirroredBoots = [];
 }
