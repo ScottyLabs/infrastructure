@@ -10,4 +10,8 @@
 
   # Enable VMware guest tools
   virtualisation.vmware.guest.enable = true;
+  
+  # UEFI boot for CampusCloud
+  boot.loader.systemd-boot.enable = true;
+  boot.loader.efi.canTouchEfiVariables = true;
 }

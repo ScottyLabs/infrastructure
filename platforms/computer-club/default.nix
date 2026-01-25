@@ -11,5 +11,4 @@
   # Use GRUB for BIOS boot
   boot.loader.grub.enable = true;
   boot.loader.grub.device = "/dev/xvda";
-  boot.loader.systemd-boot.enable = false;
 }
