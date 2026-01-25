@@ -73,7 +73,7 @@
       ];
     };
 
-    hosts = [ "infra-01" "prod-01" "prod-02" ];
+    hosts = [ "infra-01" "prod-01" "prod-02" "snoopy" ];
   in {
     nixosConfigurations = builtins.listToAttrs (map (hostname: {
       name = hostname;
