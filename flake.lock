@@ -77,11 +77,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1769129181,
-        "narHash": "sha256-g9JtdIwcG3K6o/pHcWWpU2IAqqGvZBWnn2iLXxpXvyA=",
+        "lastModified": 1769368565,
+        "narHash": "sha256-bnl8mnydLARHfFfvI+HilXz+0CWf6nqLeCrhSiD7snA=",
         "owner": "ScottyLabs",
         "repo": "dalmatian",
-        "rev": "7b3699fe5614b4733cda5f63f6fb63605653109c",
+        "rev": "5bcf391cff92d326d930c516d5abfa9fbdad097f",
         "type": "github"
       },
       "original": {
@@ -294,11 +294,11 @@
         "uv2nix": "uv2nix"
       },
       "locked": {
-        "lastModified": 1769014758,
-        "narHash": "sha256-J659YTTgSEZ8tuPfCgdqiNSh5WUarChJ5TowLvA9bAo=",
+        "lastModified": 1769211667,
+        "narHash": "sha256-VimpaveextrwpsAU0fgWLGSjcIFTRaZmMvca70PpyLQ=",
         "ref": "refs/heads/main",
-        "rev": "eafb8858ca5586ea48c086506ea3ec2da381f033",
-        "revCount": 7,
+        "rev": "65e68a50c0fac10a6b31896fbd2a98267f01c553",
+        "revCount": 8,
         "type": "git",
         "url": "https://codeberg.org/ScottyLabs/internet-archive"
       },
