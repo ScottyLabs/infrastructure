@@ -5,6 +5,7 @@
     enable = true;
     infraSecrets.tailscale = {
       path = "tailscale";
+      key = "TS_AUTHKEY";
       user = "root";
     };
   };
