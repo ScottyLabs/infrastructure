@@ -4,8 +4,17 @@ let
   cfg = config.scottylabs.bao-agent;
 
   # Generate template file that exports all keys from the secret
-  mkTemplate = name: secret: pkgs.writeText "${name}.env.tpl" ''
+  mkProjectTemplate = name: secret: pkgs.writeText "${name}.env.tpl" ''
     {{- with secret "secret/data/projects/${secret.project}/prod/env" -}}
+    {{- range $key, $value := .Data.data }}
+    {{ $key | toUpper }}={{ $value }}
+    {{- end }}
+    {{- end -}}
+  '';
+  
+  # Template for infra secrets
+  mkInfraTemplate = name: secret: pkgs.writeText "${name}.env.tpl" ''
+    {{- with secret "secret/data/infra/${secret.path}" -}}
     {{- range $key, $value := .Data.data }}
     {{ $key | toUpper }}={{ $value }}
     {{- end }}
@@ -43,12 +52,21 @@ let
 
     ${lib.concatStrings (lib.mapAttrsToList (name: secret: ''
       template {
-        source      = "${mkTemplate name secret}"
+        source      = "${mkProjectTemplate name secret}"
         destination = "/run/secrets/${name}.env"
         perms       = "0400"
         user        = "${secret.user}"
       }
     '') cfg.secrets)}
+
+    ${lib.concatStrings (lib.mapAttrsToList (name: secret: ''
+      template {
+        source      = "${mkInfraTemplate name secret}"
+        destination = "/run/secrets/${name}.env"
+        perms       = "0400"
+        user        = "${secret.user}"
+      }
+    '') cfg.infraSecrets)}
   '';
 in
 {
@@ -70,6 +88,23 @@ in
       });
       default = {};
       description = "Secrets to fetch from OpenBao";
+    };
+    
+    infraSecrets = lib.mkOption {
+      type = lib.types.attrsOf (lib.types.submodule {
+        options = {
+          path = lib.mkOption {
+            type = lib.types.str;
+            description = "Path under secret/data/infra/";
+          };
+          user = lib.mkOption {
+            type = lib.types.str;
+            description = "User that owns the rendered secret file";
+          };
+        };
+      });
+      default = {};
+      description = "Infrastructure secrets to fetch from OpenBao";
     };
 
     # Exposed for flake.nix to generate host-projects.json

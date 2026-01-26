@@ -30,7 +30,7 @@ resource "vault_approle_auth_backend_role" "host" {
   for_each       = local.host_projects
   backend        = vault_auth_backend.approle.path
   role_name      = each.key
-  token_policies = [vault_policy.host[each.key].name]
+  token_policies = [vault_policy.host[each.key].name, vault_policy.infra.name]
 
   token_ttl     = 3600   # 1 hour
   token_max_ttl = 86400  # 24 hours
