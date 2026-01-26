@@ -33,6 +33,8 @@ in
   "secrets/prod-02/bao-secret-id.age".publicKeys = admins ++ [ prod-02 ];
 
   # snoopy
+  "secrets/snoopy/bao-role-id.age".publicKeys = admins ++ [ snoopy ];
+  "secrets/snoopy/bao-secret-id.age".publicKeys = admins ++ [ snoopy ];
 
   # all
   "secrets/acme-credentials.age".publicKeys = admins ++ hosts;
