@@ -13,11 +13,9 @@ let
   '';
   
   # Template for infra secrets
-  mkInfraTemplate = name: secret: pkgs.writeText "${name}.env.tpl" ''
+  mkInfraTemplate = name: secret: pkgs.writeText "${name}.tpl" ''
     {{- with secret "secret/data/infra/${secret.path}" -}}
-    {{- range $key, $value := .Data.data }}
-    {{ $key | toUpper }}={{ $value }}
-    {{- end }}
+    {{ .Data.data.${secret.key} }}
     {{- end -}}
   '';
 
@@ -62,7 +60,7 @@ let
     ${lib.concatStrings (lib.mapAttrsToList (name: secret: ''
       template {
         source      = "${mkInfraTemplate name secret}"
-        destination = "/run/secrets/${name}.env"
+        destination = "/run/secrets/${name}"
         perms       = "0400"
         user        = "${secret.user}"
       }
@@ -97,6 +95,10 @@ in
             type = lib.types.str;
             description = "Path under secret/data/infra/";
           };
+          key = lib.mkOption {
+            type = lib.types.str;
+            description = "Key name within the secret";
+          };
           user = lib.mkOption {
             type = lib.types.str;
             description = "User that owns the rendered secret file";
@@ -104,7 +106,6 @@ in
         };
       });
       default = {};
-      description = "Infrastructure secrets to fetch from OpenBao";
     };
 
     # Exposed for flake.nix to generate host-projects.json
