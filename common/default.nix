@@ -12,6 +12,7 @@
     ./minio.nix
     ./tofu.nix
     ./bao-agent.nix
+    ./tailscale.nix
   ];
 
   # Enforce that each host must have a disk configuration defined
