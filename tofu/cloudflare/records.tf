@@ -14,6 +14,9 @@ locals {
 
     # hosts/prod-02
     prod-02     = { ip = "128.2.25.71", comment = "https://netreg.net.cmu.edu/" }
+
+    # hosts/snoopy
+    snoopy      = { ip = "128.237.157.156", comment = "Computer Club VM (g:scottylabs:snoopy)" }
   }
 }
 

@@ -12,13 +12,7 @@ The `-A` flag is necessary for forwarding your local SSH keys to the remote serv
 scp ~/.ssh/id_ed25519 andrewid@hostname:~/.ssh/
 ```
 
-Once you're in, run `update` once (do not forget this), and then the initial setup script:
-
-```bash
-curl -sSL https://codeberg.org/ScottyLabs/infrastructure/raw/branch/main/scripts/initial-setup.sh | bash
-```
-
-When making configuration changes, always make sure to use the `update` alias for  `sudo nixos rebuild-switch`. It creates a btrfs backup first, which you can use to roll back if something goes wrong.
+Once you're in, run `update` once. Always make sure to use the `update` alias for  `sudo nixos rebuild-switch`, since it creates a btrfs backup first. You can use `rollback` if something goes wrong.
 
 Finally, add the VM's SSH host key to [`secrets.nix`](../../secrets.nix) so that agenix can encrypt secrets for this host:
 
