@@ -48,7 +48,6 @@ in
       http-host = "127.0.0.1";
       http-port = 8080;
       log-level = "org.keycloak.broker:debug";
-      features = "scripts";
     };
 
     themes = {
