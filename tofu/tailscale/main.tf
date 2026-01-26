@@ -40,7 +40,7 @@ resource "tailscale_acl" "policy" {
       {
         action = "accept"
         src    = ["autogroup:member"]
-        dst    = ["tag:server"]
+        dst    = ["autogroup:self", "tag:server"]
         users  = ["autogroup:nonroot", "root"]
       }
     ]

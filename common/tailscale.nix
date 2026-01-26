@@ -14,7 +14,7 @@
   services.tailscale = {
     enable = true;
     useRoutingFeatures = "server";
-    authKeyFile = "/run/secrets/tailscale.env";
+    authKeyFile = "/run/secrets/tailscale";
     extraUpFlags = [ "--ssh" ];
   };
 
