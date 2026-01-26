@@ -6,6 +6,7 @@
     ./dalmatian.nix
     ./discord-verify.nix
     ./internet-archive.nix
+    ./webfinger.nix
   ];
 
   networking.firewall.allowedTCPPorts = [ 80 443 ];
