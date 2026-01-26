@@ -1,7 +1,7 @@
 locals {
   a_records = {
     # hosts/infra-01
-    infra-01    = { ip = "128.2.25.63", comment = "https://netreg.net.cmu.edu/" }
+    infra-01    = { ip = "128.2.25.63", comment = "Campus Cloud VM (https://netreg.net.cmu.edu/)" }
     idp         = { ip = "128.2.25.63", comment = "Keycloak" }
     secrets2    = { ip = "128.2.25.63", comment = "OpenBao" }
     vault       = { ip = "128.2.25.63", comment = "Vaultwarden" }
@@ -9,11 +9,13 @@ locals {
     "sunlit.mc" = { ip = "128.2.25.63", comment = "Sunlit Minecraft server" }
 
     # hosts/prod-01
-    prod-01     = { ip = "128.2.25.68", comment = "https://netreg.net.cmu.edu/" }
+    prod-01     = { ip = "128.2.25.68", comment = "Campus Cloud VM (https://netreg.net.cmu.edu/)" }
     verify      = { ip = "128.2.25.68", comment = "Discord Andrew ID verification bot" }
+    "@"         = { ip = "128.2.25.68", comment = "WebFinger for Tailscale OIDC, proxies to Vercel" }
+    www         = { ip = "76.76.21.21", comment = "Vercel" }
 
     # hosts/prod-02
-    prod-02     = { ip = "128.2.25.71", comment = "https://netreg.net.cmu.edu/" }
+    prod-02     = { ip = "128.2.25.71", comment = "Campus Cloud VM (https://netreg.net.cmu.edu/)" }
 
     # hosts/snoopy
     snoopy      = { ip = "128.237.157.156", comment = "Computer Club VM (g:scottylabs:snoopy)" }
