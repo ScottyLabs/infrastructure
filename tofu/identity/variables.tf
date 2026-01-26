@@ -13,3 +13,8 @@ variable "keycloak_admin_password" {
   type      = string
   sensitive = true
 }
+
+variable "tailscale_admin_password" {
+  type      = string
+  sensitive = true
+}
