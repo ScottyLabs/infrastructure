@@ -79,6 +79,20 @@ resource "keycloak_user" "tailscale_admin" {
   }
 }
 
+# Override email claim to use scottylabs.org domain for Tailscale
+resource "keycloak_openid_script_protocol_mapper" "tailscale_email" {
+  realm_id  = data.keycloak_realm.scottylabs.id
+  client_id = keycloak_openid_client.tailscale.id
+  name      = "scottylabs-email"
+
+  claim_name       = "email"
+  claim_value_type = "String"
+
+  script = <<-EOF
+    exports = user.getUsername() + '@scottylabs.org';
+  EOF
+}
+
 # Output the client secret for Tailscale configuration
 output "tailscale_client_secret" {
   value     = keycloak_openid_client.tailscale.client_secret
