@@ -1,9 +1,17 @@
-{ lib, pkgs, users, ... }:
+{
+  lib,
+  pkgs,
+  users,
+  ...
+}:
 
 {
   users.users = builtins.mapAttrs (andrewId: userData: {
     isNormalUser = true;
-    extraGroups = [ "wheel" "docker" ];
+    extraGroups = [
+      "wheel"
+      "docker"
+    ];
   }) users;
 
   home-manager.useGlobalPkgs = true;

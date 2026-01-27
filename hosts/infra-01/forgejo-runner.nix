@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 {
   age.secrets.forgejo-runner-token = {
@@ -33,7 +38,7 @@
     extraGroups = [ "docker" ];
     home = "/var/lib/gitea-runner";
   };
-  users.groups.gitea-runner = {};
+  users.groups.gitea-runner = { };
 
   systemd.services.gitea-runner-default.serviceConfig = {
     DynamicUser = lib.mkForce false;

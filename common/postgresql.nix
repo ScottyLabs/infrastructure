@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
   cfg = config.scottylabs.postgresql;
@@ -7,13 +12,16 @@ in
   options.scottylabs.postgresql = {
     databases = lib.mkOption {
       type = lib.types.listOf lib.types.str;
-      default = [];
+      default = [ ];
       description = "List of databases to create";
-      example = [ "keycloak" "vaultwarden" ];
+      example = [
+        "keycloak"
+        "vaultwarden"
+      ];
     };
   };
 
-  config = lib.mkIf (cfg.databases != []) {
+  config = lib.mkIf (cfg.databases != [ ]) {
     services.postgresql = {
       enable = true;
       package = pkgs.postgresql_16;

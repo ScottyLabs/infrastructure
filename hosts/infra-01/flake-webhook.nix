@@ -3,9 +3,9 @@
 let
   triggerScript = pkgs.writeShellScript "trigger-flake-update" ''
     set -euo pipefail
-    
+
     REPO="$1"
-    
+
     ${pkgs.curl}/bin/curl -X POST \
       -H "Authorization: token $(cat ${config.age.secrets.codeberg-token.path})" \
       -H "Content-Type: application/json" \
@@ -28,7 +28,10 @@ in
         execute-command = toString triggerScript;
         command-working-directory = "/tmp";
         pass-arguments-to-command = [
-          { source = "payload"; name = "repository.name"; }
+          {
+            source = "payload";
+            name = "repository.name";
+          }
         ];
         trigger-rule = {
           or = [

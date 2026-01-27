@@ -10,7 +10,7 @@
         partitions = {
           boot = {
             size = "1M";
-            type = "EF02";  # BIOS boot partition for GPT
+            type = "EF02"; # BIOS boot partition for GPT
           };
           swap = {
             size = "2G";
@@ -23,15 +23,25 @@
             size = "100%";
             content = {
               type = "btrfs";
-              extraArgs = [ "-f" "-L" "nixos" ];
+              extraArgs = [
+                "-f"
+                "-L"
+                "nixos"
+              ];
               subvolumes = {
                 "@" = {
                   mountpoint = "/";
-                  mountOptions = [ "compress=zstd" "noatime" ];
+                  mountOptions = [
+                    "compress=zstd"
+                    "noatime"
+                  ];
                 };
                 "@home" = {
                   mountpoint = "/home";
-                  mountOptions = [ "compress=zstd" "noatime" ];
+                  mountOptions = [
+                    "compress=zstd"
+                    "noatime"
+                  ];
                 };
               };
             };

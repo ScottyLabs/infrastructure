@@ -36,57 +36,77 @@
     };
   };
 
-  outputs = {
-    self,
-    nixpkgs,
-    home-manager,
-    agenix,
-    disko,
-    comin,
-    dalmatian,
-    discord-verify,
-    internet-archive,
-    ...
-  }:
-  let
-    users = import ./users.nix;
+  outputs =
+    {
+      self,
+      nixpkgs,
+      home-manager,
+      agenix,
+      disko,
+      comin,
+      dalmatian,
+      discord-verify,
+      internet-archive,
+      ...
+    }:
+    let
+      users = import ./users.nix;
 
-    mkSystem = hostname: nixpkgs.lib.nixosSystem {
-      system = "x86_64-linux";
-      specialArgs = {
-        inherit
-          self
-          hostname
-          users
-          comin
-          dalmatian
-          discord-verify
-          internet-archive;
-      };
-      modules = [
-        ./hosts/${hostname}/configuration.nix
-        ./common
+      mkSystem =
+        hostname:
+        nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          specialArgs = {
+            inherit
+              self
+              hostname
+              users
+              comin
+              dalmatian
+              discord-verify
+              internet-archive
+              ;
+          };
+          modules = [
+            ./hosts/${hostname}/configuration.nix
+            ./common
 
-        home-manager.nixosModules.home-manager
-        agenix.nixosModules.default
-        disko.nixosModules.disko
+            home-manager.nixosModules.home-manager
+            agenix.nixosModules.default
+            disko.nixosModules.disko
+          ];
+        };
+
+      hosts = [
+        "infra-01"
+        "prod-01"
+        "prod-02"
+        "snoopy"
       ];
+    in
+    {
+      formatter = nixpkgs.lib.genAttrs [ "x86_64-linux" "aarch64-darwin" ] (
+        system: nixpkgs.legacyPackages.${system}.nixfmt-tree
+      );
+
+      nixosConfigurations = builtins.listToAttrs (
+        map (hostname: {
+          name = hostname;
+          value = mkSystem hostname;
+        }) hosts
+      );
+
+      # Host-to-project mapping for OpenBao AppRole policies
+      packages.x86_64-linux.host-projects =
+        let
+          pkgs = nixpkgs.legacyPackages.x86_64-linux;
+          mapping = builtins.listToAttrs (
+            map (hostname: {
+              name = hostname;
+              value = self.nixosConfigurations.${hostname}.config.scottylabs.bao-agent.projects;
+            }) hosts
+          );
+        in
+        pkgs.writeText "host-projects.json" (builtins.toJSON mapping);
     };
-
-    hosts = [ "infra-01" "prod-01" "prod-02" "snoopy" ];
-  in {
-    nixosConfigurations = builtins.listToAttrs (map (hostname: {
-      name = hostname;
-      value = mkSystem hostname;
-    }) hosts);
-
-    # Host-to-project mapping for OpenBao AppRole policies
-    packages.x86_64-linux.host-projects = let
-      pkgs = nixpkgs.legacyPackages.x86_64-linux;
-      mapping = builtins.listToAttrs (map (hostname: {
-        name = hostname;
-        value = self.nixosConfigurations.${hostname}.config.scottylabs.bao-agent.projects;
-      }) hosts);
-    in pkgs.writeText "host-projects.json" (builtins.toJSON mapping);
-  };
 }

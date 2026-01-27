@@ -1,4 +1,4 @@
-{  dalmatian, ... }:
+{ dalmatian, ... }:
 
 {
   imports = [
