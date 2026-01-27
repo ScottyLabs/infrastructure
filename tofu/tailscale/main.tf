@@ -44,6 +44,10 @@ resource "tailscale_acl" "policy" {
         users  = ["autogroup:nonroot", "root"]
       }
     ]
+
+    autoApprovers = {
+      exitNode = ["tag:server"]
+    }
   })
 
   overwrite_existing_content = true
