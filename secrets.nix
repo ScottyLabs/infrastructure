@@ -44,4 +44,5 @@ in
 
   # all
   "secrets/acme-credentials.age".publicKeys = admins ++ hosts;
+  "secrets/pgadmin.age".publicKeys = admins ++ hosts;
 }

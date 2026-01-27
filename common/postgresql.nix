@@ -33,5 +33,19 @@ in
         ensureDBOwnership = true;
       }) cfg.databases;
     };
+
+    services.pgadmin = {
+      enable = true;
+      initialEmail = "admin@scottylabs.org";
+      initialPasswordFile = config.age.secrets.pgadmin.path;
+    };
+
+    age.secrets.pgadmin = {
+      file = ../secrets/pgadmin.age;
+      owner = "pgadmin";
+      mode = "0400";
+    };
+
+    networking.firewall.interfaces."tailscale0".allowedTCPPorts = [ 5050 ];
   };
 }
