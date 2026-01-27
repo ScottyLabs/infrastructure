@@ -29,15 +29,25 @@
             size = "100%";
             content = {
               type = "btrfs";
-              extraArgs = [ "-f" "-L" "nixos" ];
+              extraArgs = [
+                "-f"
+                "-L"
+                "nixos"
+              ];
               subvolumes = {
                 "@" = {
                   mountpoint = "/";
-                  mountOptions = [ "compress=zstd" "noatime" ];
+                  mountOptions = [
+                    "compress=zstd"
+                    "noatime"
+                  ];
                 };
                 "@home" = {
                   mountpoint = "/home";
-                  mountOptions = [ "compress=zstd" "noatime" ];
+                  mountOptions = [
+                    "compress=zstd"
+                    "noatime"
+                  ];
                 };
               };
             };

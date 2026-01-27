@@ -2,13 +2,17 @@
 
 let
   # Returns the Keycloak issuer URL for scottylabs.org domain
-  webfingerResponse = pkgs.writeText "webfinger.json" (builtins.toJSON {
-    subject = "acct:admin+tailscale@scottylabs.org";
-    links = [{
-      rel = "http://openid.net/specs/connect/1.0/issuer";
-      href = "https://idp.scottylabs.org/realms/scottylabs";
-    }];
-  });
+  webfingerResponse = pkgs.writeText "webfinger.json" (
+    builtins.toJSON {
+      subject = "acct:admin+tailscale@scottylabs.org";
+      links = [
+        {
+          rel = "http://openid.net/specs/connect/1.0/issuer";
+          href = "https://idp.scottylabs.org/realms/scottylabs";
+        }
+      ];
+    }
+  );
 in
 {
   services.nginx = {

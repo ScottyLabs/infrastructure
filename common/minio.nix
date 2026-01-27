@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
   cfg = config.scottylabs.minio;
@@ -7,28 +12,30 @@ in
 {
   options.scottylabs.minio = {
     instances = lib.mkOption {
-      type = lib.types.attrsOf (lib.types.submodule {
-        options = {
-          port = lib.mkOption {
-            type = lib.types.port;
-            description = "Port for MinIO API server";
-          };
-          consolePort = lib.mkOption {
-            type = lib.types.port;
-            description = "Port for MinIO console UI";
-          };
-          credentialsFile = lib.mkOption {
-            type = lib.types.path;
-            description = ''
-              Path to file containing MINIO_ROOT_USER and MINIO_ROOT_PASSWORD.
+      type = lib.types.attrsOf (
+        lib.types.submodule {
+          options = {
+            port = lib.mkOption {
+              type = lib.types.port;
+              description = "Port for MinIO API server";
+            };
+            consolePort = lib.mkOption {
+              type = lib.types.port;
+              description = "Port for MinIO console UI";
+            };
+            credentialsFile = lib.mkOption {
+              type = lib.types.path;
+              description = ''
+                Path to file containing MINIO_ROOT_USER and MINIO_ROOT_PASSWORD.
 
-              The file must be group-readable (mode 0440) with group set to
-              the instance name for the minio-<name> user to access it.
-            '';
+                The file must be group-readable (mode 0440) with group set to
+                the instance name for the minio-<name> user to access it.
+              '';
+            };
           };
-        };
-      });
-      default = {};
+        }
+      );
+      default = { };
       description = ''
         MinIO server instances to create.
 
@@ -48,7 +55,7 @@ in
     };
   };
 
-  config = lib.mkIf (cfg.instances != {}) {
+  config = lib.mkIf (cfg.instances != { }) {
     # Create a MinIO service for each instance
     systemd.services = lib.mapAttrs' (name: instanceCfg: {
       name = "minio-${name}";
@@ -119,12 +126,12 @@ in
 
     users.groups = lib.mapAttrs' (name: _: {
       name = "minio-${name}";
-      value = {};
+      value = { };
     }) cfg.instances;
 
     # Create data directories
-    systemd.tmpfiles.rules = map (name:
-      "d /var/lib/minio-${name} 0750 minio-${name} minio-${name} -"
+    systemd.tmpfiles.rules = map (
+      name: "d /var/lib/minio-${name} 0750 minio-${name} minio-${name} -"
     ) instanceList;
   };
 }

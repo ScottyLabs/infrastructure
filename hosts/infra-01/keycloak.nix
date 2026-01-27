@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
   theme = pkgs.fetchFromGitHub {
@@ -14,9 +19,11 @@ in
     mode = "0400";
   };
 
-  nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
-    "keycloak-magic-link"
-  ];
+  nixpkgs.config.allowUnfreePredicate =
+    pkg:
+    builtins.elem (lib.getName pkg) [
+      "keycloak-magic-link"
+    ];
 
   # Load admin password from agenix secret
   systemd.services.keycloak.serviceConfig.EnvironmentFile = config.age.secrets.keycloak.path;
@@ -51,7 +58,7 @@ in
     };
 
     themes = {
-      terrier = pkgs.runCommand "keycloak-terrier-theme" {} ''
+      terrier = pkgs.runCommand "keycloak-terrier-theme" { } ''
         cp -r ${theme}/themes/terrier $out
       '';
     };
@@ -61,7 +68,7 @@ in
       keycloak-magic-link
       keycloak-remember-me-authenticator
 
-      # needed for Unix socket auth 
+      # needed for Unix socket auth
       junixsocket-common
       junixsocket-native-common
     ];

@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
   cfg = config.scottylabs.tofu;
@@ -6,51 +11,53 @@ in
 {
   options.scottylabs.tofu = {
     configurations = lib.mkOption {
-      type = lib.types.attrsOf (lib.types.submodule {
-        options = {
-          source = lib.mkOption {
-            type = lib.types.path;
-            description = "Path to the OpenTofu configuration directory";
-          };
+      type = lib.types.attrsOf (
+        lib.types.submodule {
+          options = {
+            source = lib.mkOption {
+              type = lib.types.path;
+              description = "Path to the OpenTofu configuration directory";
+            };
 
-          environmentFile = lib.mkOption {
-            type = lib.types.path;
-            description = ''
-              Path to an environment file containing secrets.
-              This file should define any TF_VAR_* variables and auth tokens.
-            '';
-          };
+            environmentFile = lib.mkOption {
+              type = lib.types.path;
+              description = ''
+                Path to an environment file containing secrets.
+                This file should define any TF_VAR_* variables and auth tokens.
+              '';
+            };
 
-          after = lib.mkOption {
-            type = lib.types.listOf lib.types.str;
-            default = [];
-            description = "Systemd services to wait for before applying";
-          };
+            after = lib.mkOption {
+              type = lib.types.listOf lib.types.str;
+              default = [ ];
+              description = "Systemd services to wait for before applying";
+            };
 
-          preCheck = lib.mkOption {
-            type = lib.types.lines;
-            default = "";
-            description = ''
-              Shell script to run before applying.
-              Use this to wait for services to be ready (e.g., unsealed).
-              Exit 0 to proceed, exit non-zero to skip.
-            '';
-          };
+            preCheck = lib.mkOption {
+              type = lib.types.lines;
+              default = "";
+              description = ''
+                Shell script to run before applying.
+                Use this to wait for services to be ready (e.g., unsealed).
+                Exit 0 to proceed, exit non-zero to skip.
+              '';
+            };
 
-          environment = lib.mkOption {
-            type = lib.types.attrsOf lib.types.str;
-            default = {};
-            description = "Additional environment variables for OpenTofu";
-          };
+            environment = lib.mkOption {
+              type = lib.types.attrsOf lib.types.str;
+              default = { };
+              description = "Additional environment variables for OpenTofu";
+            };
 
-          extraFiles = lib.mkOption {
-            type = lib.types.attrsOf lib.types.path;
-            default = {};
-            description = "Additional files to copy into the working directory at apply time";
+            extraFiles = lib.mkOption {
+              type = lib.types.attrsOf lib.types.path;
+              default = { };
+              description = "Additional files to copy into the working directory at apply time";
+            };
           };
-        };
-      });
-      default = {};
+        }
+      );
+      default = { };
       description = ''
         OpenTofu configurations to apply declaratively.
 
@@ -72,12 +79,14 @@ in
     };
   };
 
-  config = lib.mkIf (cfg.configurations != {}) {
+  config = lib.mkIf (cfg.configurations != { }) {
     # Create state and backup directories for each configuration
-    systemd.tmpfiles.rules = lib.flatten (lib.mapAttrsToList (name: _: [
-      "d /var/lib/tofu-${name} 0700 root root -"
-      "d /var/lib/tofu-${name}/backups 0700 root root -"
-    ]) cfg.configurations);
+    systemd.tmpfiles.rules = lib.flatten (
+      lib.mapAttrsToList (name: _: [
+        "d /var/lib/tofu-${name} 0700 root root -"
+        "d /var/lib/tofu-${name}/backups 0700 root root -"
+      ]) cfg.configurations
+    );
 
     systemd.services = lib.mapAttrs' (name: conf: {
       name = "tofu-${name}";
@@ -90,7 +99,10 @@ in
         # Re-run when the source config changes
         restartTriggers = [ conf.source ];
 
-        path = [ pkgs.opentofu pkgs.gzip ];
+        path = [
+          pkgs.opentofu
+          pkgs.gzip
+        ];
         environment = conf.environment;
 
         serviceConfig = {
@@ -129,9 +141,11 @@ in
           cp ${conf.source}/*.json "$STATE_DIR/" 2>/dev/null || true
 
           # Copy extra files (e.g., generated from Nix)
-          ${lib.concatStrings (lib.mapAttrsToList (filename: path: ''
-            cp ${path} "$STATE_DIR/${filename}"
-          '') conf.extraFiles)}
+          ${lib.concatStrings (
+            lib.mapAttrsToList (filename: path: ''
+              cp ${path} "$STATE_DIR/${filename}"
+            '') conf.extraFiles
+          )}
 
           cd "$STATE_DIR"
 

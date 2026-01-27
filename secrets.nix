@@ -10,7 +10,12 @@ let
   prod-02 = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEYYPbjYn0jjTb50znqzhPc0Dl8EdImBzy97Mm+vOlz0 root@prod-02";
   snoopy = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJJxoj1W19busC7uwr4iNXlJHP3uMS7Wg3M+Kv6j0TPa root@snoopy";
 
-  hosts = [ infra-01 prod-01 prod-02 snoopy ];
+  hosts = [
+    infra-01
+    prod-01
+    prod-02
+    snoopy
+  ];
 in
 {
   # infra-01

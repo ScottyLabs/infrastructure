@@ -1,4 +1,9 @@
-{ pkgs, hostname, users, ... }:
+{
+  pkgs,
+  hostname,
+  users,
+  ...
+}:
 
 {
   environment.systemPackages = with pkgs; [
@@ -76,7 +81,10 @@
   # Nix
   nix.settings = {
     auto-optimise-store = true;
-    experimental-features = [ "nix-command" "flakes" ];
+    experimental-features = [
+      "nix-command"
+      "flakes"
+    ];
     download-buffer-size = 536870912; # 512 MiB
   };
 }
