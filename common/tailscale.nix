@@ -15,10 +15,14 @@
     enable = true;
     useRoutingFeatures = "server";
     authKeyFile = "/run/secrets/tailscale";
+<<<<<<< HEAD
     extraUpFlags = [
       "--ssh"
       "--advertise-exit-node"
     ];
+=======
+    extraUpFlags = [ "--ssh" ];
+>>>>>>> ddead43c49e1d00fb382e4686e0f0a3844a8210b
   };
 
   systemd.services.tailscaled = {

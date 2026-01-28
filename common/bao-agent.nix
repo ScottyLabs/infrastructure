@@ -21,6 +21,7 @@ let
     '';
 
   # Template for infra secrets
+<<<<<<< HEAD
   mkInfraTemplate =
     name: secret:
     pkgs.writeText "${name}.tpl" ''
@@ -28,6 +29,13 @@ let
       {{ .Data.data.${secret.key} }}
       {{- end -}}
     '';
+=======
+  mkInfraTemplate = name: secret: pkgs.writeText "${name}.tpl" ''
+    {{- with secret "secret/data/infra/${secret.path}" -}}
+    {{ .Data.data.${secret.key} }}
+    {{- end -}}
+  '';
+>>>>>>> ddead43c49e1d00fb382e4686e0f0a3844a8210b
 
   # Collect all projects from secrets
   allProjects = lib.unique (lib.mapAttrsToList (_: s: s.project) cfg.secrets);
@@ -69,6 +77,7 @@ let
       '') cfg.secrets
     )}
 
+<<<<<<< HEAD
     ${lib.concatStrings (
       lib.mapAttrsToList (name: secret: ''
         template {
@@ -79,6 +88,16 @@ let
         }
       '') cfg.infraSecrets
     )}
+=======
+    ${lib.concatStrings (lib.mapAttrsToList (name: secret: ''
+      template {
+        source      = "${mkInfraTemplate name secret}"
+        destination = "/run/secrets/${name}"
+        perms       = "0400"
+        user        = "${secret.user}"
+      }
+    '') cfg.infraSecrets)}
+>>>>>>> ddead43c49e1d00fb382e4686e0f0a3844a8210b
   '';
 in
 {
@@ -121,9 +140,23 @@ in
               description = "User that owns the rendered secret file";
             };
           };
+<<<<<<< HEAD
         }
       );
       default = { };
+=======
+          key = lib.mkOption {
+            type = lib.types.str;
+            description = "Key name within the secret";
+          };
+          user = lib.mkOption {
+            type = lib.types.str;
+            description = "User that owns the rendered secret file";
+          };
+        };
+      });
+      default = {};
+>>>>>>> ddead43c49e1d00fb382e4686e0f0a3844a8210b
     };
 
     # Exposed for flake.nix to generate host-projects.json
