@@ -35,11 +35,11 @@
         "treefmt-nix": "treefmt-nix"
       },
       "locked": {
-        "lastModified": 1765198123,
-        "narHash": "sha256-pkahE6wwIszQ8e107qa95wyNr4Qj94hEdL9fA/IE288=",
+        "lastModified": 1769533009,
+        "narHash": "sha256-nyA8w4lpwRtDI07pyje3kiyWVwBLa7YYcXrJtoVbJzA=",
         "owner": "nix-community",
         "repo": "bun2nix",
-        "rev": "29d2c26c269b2bc7d8885c6a2fc90ec0fc86ec40",
+        "rev": "52e294e3a6078280f89bdcc0d644d2100cd615f8",
         "type": "github"
       },
       "original": {
@@ -77,11 +77,19 @@
         ]
       },
       "locked": {
+<<<<<<< HEAD
         "lastModified": 1769465775,
         "narHash": "sha256-+/eZlTIXyQWR12L/cl8ENVQO+k64ym88yIziZnJ0ZqY=",
         "owner": "ScottyLabs",
         "repo": "dalmatian",
         "rev": "cf927c89228ecf0932d5195b3c1bb226e4774495",
+=======
+        "lastModified": 1769565180,
+        "narHash": "sha256-8G74qlJO188xDioUpQtYxgqTdtUARHOkZXU7I3bdZ5E=",
+        "owner": "ScottyLabs",
+        "repo": "dalmatian",
+        "rev": "ebd46434c6defe6efdede273619a70b367344369",
+>>>>>>> ddead43c49e1d00fb382e4686e0f0a3844a8210b
         "type": "github"
       },
       "original": {
