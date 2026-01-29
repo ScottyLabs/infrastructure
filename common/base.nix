@@ -10,7 +10,9 @@
     git
     curl
     ghostty.terminfo
+    foot.terminfo
     ragenix
+    opentofu
   ];
 
   # Shell
