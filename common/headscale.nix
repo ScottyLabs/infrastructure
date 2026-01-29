@@ -1,28 +1,26 @@
-{ config, pkgs, ... }:
+{ config, pkgs, hostname, ... }:
 
 {
   scottylabs.bao-agent = {
     enable = true;
-    infraSecrets.tailscale = {
-      path = "tailscale";
-      key = "TS_AUTHKEY";
+    infraSecrets.headscale = {
+      path = "headscale";
+      key = "HEADSCALE_AUTHKEY";
       user = "root";
     };
   };
 
-  # Enable Tailscale and IP forwarding
+  # Enable Headscale and IP forwarding
   services.tailscale = {
     enable = true;
     useRoutingFeatures = "server";
-    authKeyFile = "/run/secrets/tailscale";
-<<<<<<< HEAD
+    authKeyFile = "/run/secrets/headscale";
     extraUpFlags = [
+      "--login-server=https://headscale.scottylabs.org"
       "--ssh"
       "--advertise-exit-node"
+      "--hostname=${hostname}"
     ];
-=======
-    extraUpFlags = [ "--ssh" ];
->>>>>>> ddead43c49e1d00fb382e4686e0f0a3844a8210b
   };
 
   systemd.services.tailscaled = {
@@ -50,7 +48,6 @@
       RemainAfterExit = true;
     };
     script = ''
-      # Get the default route interface
       NETDEV=$(${pkgs.iproute2}/bin/ip -o route get 8.8.8.8 | cut -f 5 -d " ")
       if [ -n "$NETDEV" ]; then
         ${pkgs.ethtool}/bin/ethtool -K $NETDEV rx-udp-gro-forwarding on rx-gro-list off || true
