@@ -7,18 +7,22 @@ locals {
     vault       = { ip = "128.2.25.63", comment = "Vaultwarden" }
     webhooks    = { ip = "128.2.25.63", comment = "Nix flake updates for infrastructure" }
     "sunlit.mc" = { ip = "128.2.25.63", comment = "Sunlit Minecraft server" }
+    headscale   = { ip = "128.2.25.63", comment = "Headscale VPN coordination server" }
+    headplane   = { ip = "128.2.25.63", comment = "Headplane web UI for Headscale" }
 
     # hosts/prod-01
     prod-01     = { ip = "128.2.25.68", comment = "Campus Cloud VM (https://netreg.net.cmu.edu/)" }
     verify      = { ip = "128.2.25.68", comment = "Discord Andrew ID verification bot" }
-    "@"         = { ip = "128.2.25.68", comment = "WebFinger for Tailscale OIDC, proxies to Vercel" }
-    www         = { ip = "76.76.21.21", comment = "Vercel" }
 
     # hosts/prod-02
     prod-02     = { ip = "128.2.25.71", comment = "Campus Cloud VM (https://netreg.net.cmu.edu/)" }
 
     # hosts/snoopy
     snoopy      = { ip = "128.237.157.156", comment = "Computer Club VM (g:scottylabs:snoopy)" }
+
+    # other
+    "@"         = { ip = "76.76.21.21", comment = "Vercel" }
+    www         = { ip = "76.76.21.21", comment = "Vercel" }
   }
 }
 
