@@ -426,42 +426,57 @@ button[data-password-toggle] {
     background: url('../img/CMU_C.png') no-repeat center;
 }
 
-/* MOBILE RESPONSIVE STYLES */
-@media screen and (max-width: 520px) {
-    /* Make body full height and remove centering to fill screen */
+/* MOBILE RESPONSIVE STYLES - Tablet/medium screens */
+@media screen and (max-width: 768px) {
+    body > div {
+        max-width: 90%;
+        padding: 36px;
+        margin: 20px;
+    }
+}
+
+/* MOBILE RESPONSIVE STYLES - Small screens */
+@media screen and (max-width: 600px) {
+    /* Make body fill the entire viewport */
     body {
-        align-items: flex-start;
+        align-items: stretch;
         min-height: 100vh;
+        min-height: 100dvh; /* Dynamic viewport height for mobile browsers */
         background: #FFF; /* White background on mobile */
+        padding: 0;
+        margin: 0;
     }
 
-    /* Card fills the entire screen on mobile */
+    /* Login card fills the entire screen on mobile */
     body > div {
-        padding: 32px 24px;
+        padding: 40px 24px;
         margin: 0;
         border-radius: 0;
         box-shadow: none;
         max-width: 100%;
+        width: 100%;
         min-height: 100vh;
+        min-height: 100dvh; /* Dynamic viewport height for mobile browsers */
         display: flex;
         flex-direction: column;
         justify-content: center;
+        box-sizing: border-box;
     }
 
     /* Smaller header on mobile */
     #kc-header {
-        margin-bottom: 24px;
+        margin-bottom: 32px;
     }
 
     #kc-header-wrapper {
-        font-size: 26px;
-        line-height: 34px;
+        font-size: 28px;
+        line-height: 36px;
     }
 
     #kc-header-wrapper::before {
-        width: 26px;
-        height: 26px;
-        margin-right: 10px;
+        width: 28px;
+        height: 28px;
+        margin-right: 12px;
     }
 
     /* Adjust form labels */
@@ -470,55 +485,86 @@ button[data-password-toggle] {
         margin-bottom: 6px;
     }
 
-    /* Adjust input fields for mobile */
+    /* Adjust input fields for mobile - larger touch targets */
     input[type="text"],
     input[type="password"] {
-        padding: 14px 16px;
+        padding: 16px 18px;
         font-size: 16px; /* Prevents iOS zoom on focus */
         margin-bottom: 16px;
-        border-radius: 10px;
+        border-radius: 12px;
     }
 
-    /* Adjust primary button */
-    #kc-login {
-        padding: 14px;
+    /* Adjust primary button - larger on mobile */
+    #kc-login,
+    #kc-form-buttons input[type="submit"],
+    #kc-register-form input[type="submit"] {
+        padding: 16px;
         font-size: 16px;
+        margin-top: 12px;
     }
 
     /* Social login adjustments */
     #kc-social-providers hr {
-        margin: 28px 0 20px 0;
+        margin: 32px 0 24px 0;
     }
 
     #kc-social-providers h2 {
         font-size: 14px;
-        margin-top: -28px;
+        margin-top: -32px;
     }
 
     #kc-social-providers ul {
-        gap: 12px;
+        gap: 14px;
+    }
+
+    #kc-social-providers a {
+        padding: 14px;
+        font-size: 15px;
+        border-radius: 10px;
+    }
+
+    /* Improve registration section spacing */
+    #kc-info {
+        margin-top: 32px;
+        padding-top: 28px;
+    }
+}
+
+/* Extra small screens (very small phones) */
+@media screen and (max-width: 400px) {
+    body > div {
+        padding: 32px 20px;
+    }
+
+    #kc-header {
+        margin-bottom: 28px;
+    }
+
+    #kc-header-wrapper {
+        font-size: 24px;
+        line-height: 32px;
+    }
+
+    #kc-header-wrapper::before {
+        width: 24px;
+        height: 24px;
+        margin-right: 10px;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+        padding: 14px 16px;
+    }
+
+    #kc-login,
+    #kc-form-buttons input[type="submit"],
+    #kc-register-form input[type="submit"] {
+        padding: 14px;
     }
 
     #kc-social-providers a {
         padding: 12px;
         font-size: 14px;
-        border-radius: 8px;
-    }
-}
-
-/* Extra small screens (very small phones) */
-@media screen and (max-width: 360px) {
-    body > div {
-        padding: 24px 20px;
-    }
-
-    #kc-header-wrapper {
-        font-size: 24px;
-    }
-
-    input[type="text"],
-    input[type="password"] {
-        padding: 12px 14px;
     }
 }
 
