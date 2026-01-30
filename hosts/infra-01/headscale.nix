@@ -31,17 +31,17 @@ in
       headplane-oidc = {
         path = "headplane-oidc";
         key = "CLIENT_SECRET";
-        user = "headplane";
+        user = "headscale";
       };
       headplane-cookie = {
         path = "headplane-cookie";
         key = "SECRET";
-        user = "headplane";
+        user = "headscale";
       };
       headplane-agent-key = {
         path = "headplane-agent-key";
         key = "PREAUTH_KEY";
-        user = "headplane";
+        user = "headscale";
       };
     };
   };
