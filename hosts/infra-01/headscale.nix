@@ -122,7 +122,6 @@ in
         client_id = "headplane";
         client_secret_path = "/run/secrets/headplane-oidc";
         disable_api_key_login = false;
-        token_expiry = "7d";
       };
 
       integration.agent = {
