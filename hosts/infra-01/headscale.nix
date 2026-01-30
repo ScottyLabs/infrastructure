@@ -19,7 +19,7 @@ in
   imports = [
     headplane.nixosModules.headplane
   ];
-  
+
   scottylabs.bao-agent = {
     enable = true;
     infraSecrets = {
@@ -38,9 +38,9 @@ in
         key = "SECRET";
         user = "headplane";
       };
-      headplane-agent = {
-        path = "headplane-agent";
-        key = "SECRET";
+      headplane-agent-key = {
+        path = "headplane-agent-key";
+        key = "PREAUTH_KEY";
         user = "headplane";
       };
     };
@@ -121,14 +121,23 @@ in
         issuer = "https://idp.scottylabs.org/realms/scottylabs";
         client_id = "headplane";
         client_secret_path = "/run/secrets/headplane-oidc";
+        redirect_uri = "https://headplane.scottylabs.org/admin/oidc/callback";
         disable_api_key_login = false;
       };
 
-      integration.agent = {
-        enabled = true;
-        secret_path = "/run/secrets/headplane-agent";
+      integration = {
+        proc.enabled = true;
+        agent = {
+          enabled = true;
+          pre_authkey_path = "/run/secrets/headplane-agent-key";
+        };
       };
     };
+  };
+
+  systemd.services.headplane = {
+    after = [ "bao-agent.service" "headscale.service" ];
+    wants = [ "bao-agent.service" "headscale.service" ];
   };
 
   services.nginx.virtualHosts = {
