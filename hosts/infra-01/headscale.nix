@@ -77,7 +77,6 @@ in
         client_secret_path = "/run/secrets/headscale-oidc";
         scope = [ "openid" "profile" "email" ];
         allowed_groups = [ "/projects/devops" ];
-        strip_email_domain = false;
       };
 
       log.level = "info";
