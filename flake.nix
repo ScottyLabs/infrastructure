@@ -21,6 +21,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # infra-01
+    headplane = {
+      url = "github:tale/headplane";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # prod-01
     dalmatian = {
       url = "github:ScottyLabs/dalmatian";
@@ -44,6 +50,7 @@
       agenix,
       disko,
       comin,
+      headplane,
       dalmatian,
       discord-verify,
       internet-archive,
@@ -62,6 +69,7 @@
               hostname
               users
               comin
+              headplane
               dalmatian
               discord-verify
               internet-archive

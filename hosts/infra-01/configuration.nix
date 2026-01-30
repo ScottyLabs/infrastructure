@@ -10,6 +10,7 @@
     ./vaultwarden.nix
     ./openbao.nix
     ./opentofu.nix
+    ./headscale.nix
   ];
 
   networking.firewall.allowedTCPPorts = [
