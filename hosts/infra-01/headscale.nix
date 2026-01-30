@@ -28,7 +28,7 @@ let
       {
         action = "accept";
         src = [ "autogroup:member" ];
-        dst = [ "group:servers" ];
+        dst = [ "*" ];
         users = [
           "autogroup:nonroot"
           "root"
