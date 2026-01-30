@@ -23,7 +23,6 @@
     home.packages = with pkgs; [
       eza
       bat
-      git
       pfetch
     ];
 

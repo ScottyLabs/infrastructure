@@ -75,12 +75,12 @@ resource "vault_kv_secret_v2" "headplane_oidc" {
   })
 }
 
-resource "random_bytes" "headplane_cookie" {
+resource "random_bytes" "headplane_agent" {
   length = 32
 }
 
-resource "random_bytes" "headplane_agent" {
-  length = 32
+resource "random_password" "headplane_cookie" {
+  length  = 32
 }
 
 resource "vault_kv_secret_v2" "headplane_cookie" {
