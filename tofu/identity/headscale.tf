@@ -88,7 +88,7 @@ resource "vault_kv_secret_v2" "headplane_cookie" {
   name  = "infra/headplane-cookie"
 
   data_json = jsonencode({
-    SECRET = random_password.headplane_cookie.base64
+    SECRET = random_password.headplane_cookie.result
   })
 }
 
