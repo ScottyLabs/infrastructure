@@ -165,6 +165,7 @@ in
       server = {
         host = "127.0.0.1";
         port = 3100;
+        base_url = "https://headplane.scottylabs.org/";
         cookie_secret_path = "/run/secrets/headplane-cookie";
       };
 
@@ -178,7 +179,6 @@ in
         issuer = "https://idp.scottylabs.org/realms/scottylabs";
         client_id = "headplane";
         client_secret_path = "/run/secrets/headplane-oidc";
-        redirect_uri = "https://headplane.scottylabs.org/admin/oidc/callback";
         headscale_api_key_path = "/run/secrets/headplane-api-key";
         disable_api_key_login = false;
       };
