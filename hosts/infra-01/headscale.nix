@@ -36,9 +36,9 @@ let
       }
     ];
 
-    autoApprovers = {
-      exitNode = [ "group:servers" ];
-    };
+    # autoApprovers = {
+    #   exitNode = [ "group:servers" ];
+    # };
   };
 in
 {
