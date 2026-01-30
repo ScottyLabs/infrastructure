@@ -14,6 +14,32 @@ let
       tls_key_path = "";
     }
   );
+
+  aclPolicy = builtins.toJSON {
+    acls = [
+      {
+        action = "accept";
+        src = [ "*" ];
+        dst = [ "*:*" ];
+      }
+    ];
+
+    ssh = [
+      {
+        action = "accept";
+        src = [ "autogroup:member" ];
+        dst = [ "group:servers" ];
+        users = [
+          "autogroup:nonroot"
+          "root"
+        ];
+      }
+    ];
+
+    autoApprovers = {
+      exitNode = [ "group:servers" ];
+    };
+  };
 in
 {
   imports = [
@@ -51,6 +77,14 @@ in
     };
   };
 
+  # Write ACL policy file
+  environment.etc."headscale/acl.json" = {
+    text = aclPolicy;
+    user = "headscale";
+    group = "headscale";
+    mode = "0400";
+  };
+
   services.headscale = {
     enable = true;
     address = "127.0.0.1";
@@ -73,14 +107,21 @@ in
       dns = {
         magic_dns = true;
         base_domain = "tail.scottylabs.org";
-        nameservers.global = [ "1.1.1.1" "8.8.8.8" ];
+        nameservers.global = [
+          "1.1.1.1"
+          "8.8.8.8"
+        ];
       };
 
       oidc = {
         issuer = "https://idp.scottylabs.org/realms/scottylabs";
         client_id = "headscale";
         client_secret_path = "/run/secrets/headscale-oidc";
-        scope = [ "openid" "profile" "email" ];
+        scope = [
+          "openid"
+          "profile"
+          "email"
+        ];
         allowed_groups = [ "/projects/devops" ];
       };
 
@@ -96,7 +137,10 @@ in
         };
       };
 
-      policy.mode = "database";
+      policy = {
+        mode = "file";
+        path = "/etc/headscale/acl.json";
+      };
     };
   };
 
@@ -142,8 +186,14 @@ in
   };
 
   systemd.services.headplane = {
-    after = [ "bao-agent.service" "headscale.service" ];
-    wants = [ "bao-agent.service" "headscale.service" ];
+    after = [
+      "bao-agent.service"
+      "headscale.service"
+    ];
+    wants = [
+      "bao-agent.service"
+      "headscale.service"
+    ];
   };
 
   services.nginx.virtualHosts = {
