@@ -16,10 +16,6 @@ let
   );
 
   aclPolicy = builtins.toJSON {
-    tagOwners = {
-      "tag:server" = [ "autogroup:member" ];
-    };
-
     acls = [
       {
         action = "accept";
