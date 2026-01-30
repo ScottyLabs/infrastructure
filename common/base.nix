@@ -81,6 +81,7 @@
   };
 
   # Nix
+  nix.package = pkgs.lixPackageSets.stable.lix;
   nix.settings = {
     auto-optimise-store = true;
     experimental-features = [
