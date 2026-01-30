@@ -16,6 +16,10 @@ let
   );
 
   aclPolicy = builtins.toJSON {
+    tagOwners = {
+      "tag:server" = ["servers"];
+    };
+
     acls = [
       {
         action = "accept";
