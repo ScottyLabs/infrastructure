@@ -36,7 +36,7 @@ let
       {
         action = "accept";
         src = [ "autogroup:member" ];
-        dst = [ "*" ];
+        dst = ["autogroup:tagged"];
         users = [
           "autogroup:nonroot"
           "root"
