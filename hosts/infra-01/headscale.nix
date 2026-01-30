@@ -43,6 +43,11 @@ in
         key = "PREAUTH_KEY";
         user = "headscale";
       };
+      headplane-api-key = {
+        path = "headplane-api-key";
+        key = "API_KEY";
+        user = "headscale";
+      };
     };
   };
 
@@ -122,6 +127,7 @@ in
         client_id = "headplane";
         client_secret_path = "/run/secrets/headplane-oidc";
         redirect_uri = "https://headplane.scottylabs.org/admin/oidc/callback";
+        headscale_api_key_path = "/run/secrets/headplane-api-key";
         disable_api_key_login = false;
       };
 
