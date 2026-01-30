@@ -17,7 +17,7 @@ let
 
   aclPolicy = builtins.toJSON {
     groups = {
-      "group:servers" = ["servers"];
+      "group:servers" = ["servers@"];
     };
 
     tagOwners = {
