@@ -355,11 +355,11 @@
         "uv2nix": "uv2nix"
       },
       "locked": {
-        "lastModified": 1769211667,
-        "narHash": "sha256-VimpaveextrwpsAU0fgWLGSjcIFTRaZmMvca70PpyLQ=",
+        "lastModified": 1769763844,
+        "narHash": "sha256-j//oHUpkntRJDMznNhL7AX9uKKSzxLRwsrkru6CRshE=",
         "ref": "refs/heads/main",
-        "rev": "65e68a50c0fac10a6b31896fbd2a98267f01c553",
-        "revCount": 8,
+        "rev": "2565fefcd50c942876c7fb805012baa77580b627",
+        "revCount": 9,
         "type": "git",
         "url": "https://codeberg.org/ScottyLabs/internet-archive"
       },
