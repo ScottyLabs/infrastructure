@@ -55,3 +55,48 @@ output "headplane_client_secret" {
   value     = keycloak_openid_client.headplane.client_secret
   sensitive = true
 }
+
+# Store secrets in OpenBao for bao-agent to fetch
+resource "vault_kv_secret_v2" "headscale_oidc" {
+  mount = "secret"
+  name  = "infra/headscale-oidc"
+
+  data_json = jsonencode({
+    CLIENT_SECRET = keycloak_openid_client.headscale.client_secret
+  })
+}
+
+resource "vault_kv_secret_v2" "headplane_oidc" {
+  mount = "secret"
+  name  = "infra/headplane-oidc"
+
+  data_json = jsonencode({
+    CLIENT_SECRET = keycloak_openid_client.headplane.client_secret
+  })
+}
+
+resource "random_bytes" "headplane_cookie" {
+  length = 32
+}
+
+resource "random_bytes" "headplane_agent" {
+  length = 32
+}
+
+resource "vault_kv_secret_v2" "headplane_cookie" {
+  mount = "secret"
+  name  = "infra/headplane-cookie"
+
+  data_json = jsonencode({
+    SECRET = random_bytes.headplane_cookie.base64
+  })
+}
+
+resource "vault_kv_secret_v2" "headplane_agent" {
+  mount = "secret"
+  name  = "infra/headplane-agent"
+
+  data_json = jsonencode({
+    SECRET = random_bytes.headplane_agent.base64
+  })
+}
