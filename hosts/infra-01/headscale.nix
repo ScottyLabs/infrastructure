@@ -17,11 +17,11 @@ let
 
   aclPolicy = builtins.toJSON {
     groups = {
-      "group:servers" = ["servers@"];
+      "group:servers" = [ "servers@" ];
     };
 
     tagOwners = {
-      "tag:server" = ["group:servers"];
+      "tag:server" = [ "group:servers" ];
     };
 
     acls = [
@@ -36,7 +36,7 @@ let
       {
         action = "accept";
         src = [ "autogroup:member" ];
-        dst = ["autogroup:tagged"];
+        dst = [ "autogroup:tagged" ];
         users = [
           "autogroup:nonroot"
           "root"
