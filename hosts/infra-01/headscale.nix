@@ -165,7 +165,6 @@ in
       server = {
         host = "127.0.0.1";
         port = 3100;
-        base_url = "https://headplane.scottylabs.org/";
         cookie_secret_path = "/run/secrets/headplane-cookie";
       };
 
