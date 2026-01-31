@@ -15,7 +15,9 @@ locals {
     verify      = { ip = "128.2.25.68", comment = "Discord Andrew ID verification bot" }
 
     # hosts/prod-02
-    prod-02     = { ip = "128.2.25.71", comment = "Campus Cloud VM (https://netreg.net.cmu.edu/)" }
+    prod-02              = { ip = "128.2.25.71", comment = "Campus Cloud VM (https://netreg.net.cmu.edu/)" }
+    terrier-staging      = { ip = "128.2.25.71", comment = "Terrier staging environment" }
+    "s3.terrier-staging" = { ip = "128.2.25.71", comment = "Terrier staging MinIO S3 endpoint" }
 
     # hosts/snoopy
     snoopy      = { ip = "128.237.157.156", comment = "Computer Club VM (g:scottylabs:snoopy)" }

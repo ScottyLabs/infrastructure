@@ -60,7 +60,7 @@ let
         template {
           source      = "${mkProjectTemplate name secret}"
           destination = "/run/secrets/${name}.env"
-          perms       = "0400"
+          perms       = "0440"
           user        = "${secret.user}"
         }
       '') cfg.secrets

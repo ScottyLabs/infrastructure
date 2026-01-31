@@ -40,6 +40,12 @@
       url = "git+https://codeberg.org/ScottyLabs/internet-archive";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # prod-02
+    terrier = {
+      url = "github:ScottyLabs/terrier/judging";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -54,6 +60,7 @@
       dalmatian,
       discord-verify,
       internet-archive,
+      terrier,
       ...
     }:
     let
@@ -73,6 +80,7 @@
               dalmatian
               discord-verify
               internet-archive
+              terrier
               ;
           };
           modules = [
