@@ -27,6 +27,13 @@
     };
     sshPublicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA++gW8fgzwitDmKsdZdVfXWMD1b558g8KIqOPIGrIdN tsurban@andrew.cmu.edu";
   };
+  vboling = {
+    git = {
+      name = "Vincent Radford";
+      email = "vrad-general";
+    };
+    sshPublicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFvX35yP31JzF5aVQC6C7uD6ewV2K5R+9NgqQK2Cg3Jb vrad-general";
+  };
   ryanli2 = {
     git = {
       name = "Ryan Li";
