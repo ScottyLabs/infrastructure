@@ -826,11 +826,11 @@
         "rust-overlay": "rust-overlay"
       },
       "locked": {
-        "lastModified": 1770230988,
-        "narHash": "sha256-A6Oqm4slKsu0EPQ8yJLaJjDYao20J7D+ZdzpXfI6TIU=",
+        "lastModified": 1770234094,
+        "narHash": "sha256-H+JX1XvVGtL1RNZ3ZnuvlQadgguTokNBqL1vKJ4REFg=",
         "owner": "ScottyLabs",
         "repo": "terrier",
-        "rev": "566d318fb3a0b01c299ebde3aa215054ed93ec1a",
+        "rev": "a5bd53c5d554665031815fa1479cfcc99fbc774c",
         "type": "github"
       },
       "original": {
