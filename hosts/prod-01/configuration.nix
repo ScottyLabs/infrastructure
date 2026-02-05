@@ -6,6 +6,7 @@
     ./dalmatian.nix
     ./discord-verify.nix
     ./internet-archive.nix
+    ./groupme-mirror.nix
   ];
 
   networking.firewall.allowedTCPPorts = [
