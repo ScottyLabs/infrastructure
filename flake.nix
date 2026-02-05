@@ -40,6 +40,10 @@
       url = "git+https://codeberg.org/ScottyLabs/internet-archive";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    groupme-mirror = {
+      url = "git+https://codeberg.org/ScottyLabs/groupme-mirror";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     # prod-02
     terrier = {
@@ -60,6 +64,7 @@
       dalmatian,
       discord-verify,
       internet-archive,
+      groupme-mirror,
       terrier,
       ...
     }:
@@ -80,6 +85,7 @@
               dalmatian
               discord-verify
               internet-archive
+              groupme-mirror
               terrier
               ;
           };
