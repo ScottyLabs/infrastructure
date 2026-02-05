@@ -15,7 +15,7 @@ body {
 
 /* MAIN CARD CONTAINER */
 /* Targets the main wrapper div inside the body */
-body > div {
+body>div {
     background-color: #FFF;
     width: 100%;
     max-width: 480px;
@@ -37,7 +37,8 @@ body > div {
     display: flex;
     align-items: center;
     justify-content: center;
-    text-transform: capitalize; /* Ensures 'Terrier' looks right */
+    text-transform: capitalize;
+    /* Ensures 'Terrier' looks right */
 
     /* Heading/2 */
     font-family: Inter;
@@ -60,7 +61,7 @@ body > div {
 /* PAGE TITLE */
 /* Hiding "Sign in to your account" to match the clean look of the screenshot */
 #kc-page-title {
-    display: none; 
+    display: none;
 }
 
 /* Show page title on specific pages that need it */
@@ -179,13 +180,13 @@ label {
 
 /* Required field asterisks - keep on same line as label */
 .required,
-label + * {
+label+* {
     color: #C41E3A;
     font-weight: 500;
 }
 
 /* Label container - keep label and asterisk on same line */
-div > div:has(> label) {
+div>div:has(> label) {
     display: flex;
     align-items: center;
     gap: 4px;
@@ -207,7 +208,8 @@ div > div:has(> label) {
 input[type="text"],
 input[type="password"] {
     width: 100%;
-    background-color: #F0F4F8; /* Matching the light gray input background */
+    background-color: #F0F4F8;
+    /* Matching the light gray input background */
     border: 1px solid transparent;
     border-radius: 10px;
     padding: 14px 16px;
@@ -236,7 +238,8 @@ button[data-password-toggle] {
     position: absolute;
     right: 12px;
     top: 50%;
-    transform: translateY(-85%); /* Adjust vertical alignment */
+    transform: translateY(-85%);
+    /* Adjust vertical alignment */
     background: none;
     border: none;
     cursor: pointer;
@@ -253,7 +256,8 @@ button[data-password-toggle] {
     font-size: 16px;
     padding: 14px;
     border: none;
-    border-radius: 30px; /* Pill shape */
+    border-radius: 30px;
+    /* Pill shape */
     cursor: pointer;
     margin-top: 10px;
     transition: background-color 0.2s;
@@ -262,7 +266,8 @@ button[data-password-toggle] {
     font-family: Inter;
     font-style: normal;
     font-weight: 600;
-    line-height: 20px; /* 142.857% */
+    line-height: 20px;
+    /* 142.857% */
 
 }
 
@@ -346,7 +351,8 @@ button[data-password-toggle] {
     text-align: center;
     font-weight: normal;
     margin-bottom: 20px;
-    margin-top: -30px; /* Pull up to overlap HR */
+    margin-top: -30px;
+    /* Pull up to overlap HR */
     background: #fff;
     display: inline-block;
     padding: 0 10px;
@@ -361,7 +367,8 @@ button[data-password-toggle] {
     margin: 0;
     display: flex;
     gap: 12px;
-    flex-direction: column; /* Stack them for mobile, or row for desktop */
+    flex-direction: column;
+    /* Stack them for mobile, or row for desktop */
 }
 
 #kc-social-providers li {
@@ -428,27 +435,21 @@ button[data-password-toggle] {
 
 /* MOBILE RESPONSIVE STYLES - Tablet/medium screens */
 @media screen and (max-width: 768px) {
-    body > div {
-        max-width: 90%;
-        padding: 36px;
-        margin: 20px;
-    }
-}
 
-/* MOBILE RESPONSIVE STYLES - Small screens */
-@media screen and (max-width: 600px) {
     /* Make body fill the entire viewport */
     body {
         align-items: stretch;
         min-height: 100vh;
-        min-height: 100dvh; /* Dynamic viewport height for mobile browsers */
-        background: #FFF; /* White background on mobile */
+        min-height: 100dvh;
+        /* Dynamic viewport height for mobile browsers */
+        background: #FFF;
+        /* White background on mobile */
         padding: 0;
         margin: 0;
     }
 
     /* Login card fills the entire screen on mobile */
-    body > div {
+    body>div {
         padding: 40px 24px;
         margin: 0;
         border-radius: 0;
@@ -456,7 +457,8 @@ button[data-password-toggle] {
         max-width: 100%;
         width: 100%;
         min-height: 100vh;
-        min-height: 100dvh; /* Dynamic viewport height for mobile browsers */
+        min-height: 100dvh;
+        /* Dynamic viewport height for mobile browsers */
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -489,7 +491,8 @@ button[data-password-toggle] {
     input[type="text"],
     input[type="password"] {
         padding: 16px 18px;
-        font-size: 16px; /* Prevents iOS zoom on focus */
+        font-size: 16px;
+        /* Prevents iOS zoom on focus */
         margin-bottom: 16px;
         border-radius: 12px;
     }
@@ -532,12 +535,12 @@ button[data-password-toggle] {
 
 /* Extra small screens (very small phones) */
 @media screen and (max-width: 400px) {
-    body > div {
+    body>div {
         padding: 32px 20px;
     }
 
     #kc-header {
-        margin-bottom: 28px;
+        margin-bottom: 24px;
     }
 
     #kc-header-wrapper {
@@ -570,11 +573,13 @@ button[data-password-toggle] {
 
 /* Ensure touch targets are large enough on mobile */
 @media (hover: none) and (pointer: coarse) {
+
     input[type="text"],
     input[type="password"],
     #kc-login,
     #kc-social-providers a {
-        min-height: 44px; /* Apple's recommended minimum touch target */
+        min-height: 48px;
+        /* Slightly larger than Apple's recommended minimum */
     }
 
     button[data-password-toggle] {
