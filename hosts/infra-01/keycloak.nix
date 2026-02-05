@@ -6,11 +6,12 @@
 }:
 
 let
+  # update with: nix run nixpkgs#nix-prefetch-github -- ScottyLabs keycloak --rev <rev>
   theme = pkgs.fetchFromGitHub {
     owner = "ScottyLabs";
     repo = "keycloak";
-    rev = "a961ae70f06b11d94b56f4a7d43c4d1bbd10c6b9";
-    sha256 = "sha256-Z0gJGvAflUTi7g1bSzapWO9osBDHKzyyZ656+MJgbb8=";
+    rev = "135fb730fc9ce675e9053854a5728ede7b932858";
+    sha256 = "sha256-I3Nw0ifxag4M0HAA9z6hy/lSUUMGtK6WGi2iV5N2lwo=";
   };
 in
 {
