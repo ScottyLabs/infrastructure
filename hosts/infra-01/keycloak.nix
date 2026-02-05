@@ -10,8 +10,8 @@ let
   theme = pkgs.fetchFromGitHub {
     owner = "ScottyLabs";
     repo = "keycloak";
-    rev = "0652277cfb06e73eaa87821f8f37857b6b04ed64";
-    sha256 = "sha256-Njn2sr1XhCLPpHeQAzQaggY8NElDEfPJK/q81r/C3jE=";
+    rev = "135fb730fc9ce675e9053854a5728ede7b932858";
+    sha256 = "sha256-I3Nw0ifxag4M0HAA9z6hy/lSUUMGtK6WGi2iV5N2lwo=";
   };
 in
 {
