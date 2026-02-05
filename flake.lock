@@ -380,6 +380,24 @@
         "type": "github"
       }
     },
+    "flake-utils_3": {
+      "inputs": {
+        "systems": "systems_5"
+      },
+      "locked": {
+        "lastModified": 1731533236,
+        "narHash": "sha256-l0KFg5HjrsfsO/JpG+r7fRrqm12kzFHyUHqHCVpMMbI=",
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "11707dc2f618dd54ca8739b309ec4fc024de578b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "type": "github"
+      }
+    },
     "git-hooks": {
       "inputs": {
         "flake-compat": [
@@ -431,10 +449,31 @@
         "type": "github"
       }
     },
+    "groupme-mirror": {
+      "inputs": {
+        "flake-utils": "flake-utils",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1770328487,
+        "narHash": "sha256-p0ejKyCJM3GL+sI+M/7kzg9/dTrrSLEPEkgshvYxZtE=",
+        "ref": "refs/heads/main",
+        "rev": "b0ecd827ef7f56783f36ef301318cb7f28e92a64",
+        "revCount": 4,
+        "type": "git",
+        "url": "https://codeberg.org/ScottyLabs/groupme-mirror"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://codeberg.org/ScottyLabs/groupme-mirror"
+      }
+    },
     "headplane": {
       "inputs": {
         "devshell": "devshell",
-        "flake-utils": "flake-utils",
+        "flake-utils": "flake-utils_2",
         "nixpkgs": [
           "nixpkgs"
         ]
@@ -511,7 +550,7 @@
     },
     "internet-archive": {
       "inputs": {
-        "flake-utils": "flake-utils_2",
+        "flake-utils": "flake-utils_3",
         "nixpkgs": [
           "nixpkgs"
         ],
@@ -712,6 +751,7 @@
         "dalmatian": "dalmatian",
         "discord-verify": "discord-verify",
         "disko": "disko",
+        "groupme-mirror": "groupme-mirror",
         "headplane": "headplane",
         "home-manager": "home-manager_2",
         "internet-archive": "internet-archive",
@@ -803,6 +843,21 @@
       }
     },
     "systems_4": {
+      "locked": {
+        "lastModified": 1681028828,
+        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
+        "owner": "nix-systems",
+        "repo": "default",
+        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-systems",
+        "repo": "default",
+        "type": "github"
+      }
+    },
+    "systems_5": {
       "locked": {
         "lastModified": 1681028828,
         "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
