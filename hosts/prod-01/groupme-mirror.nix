@@ -1,4 +1,4 @@
-{ groupme-mirror, ... }:
+{ lib, groupme-mirror, ... }:
 
 {
   imports = [
