@@ -13,6 +13,22 @@ let
     rev = "135fb730fc9ce675e9053854a5728ede7b932858";
     sha256 = "sha256-I3Nw0ifxag4M0HAA9z6hy/lSUUMGtK6WGi2iV5N2lwo=";
   };
+
+  appleIdentityProvider = pkgs.stdenv.mkDerivation rec {
+    pname = "apple-identity-provider-keycloak";
+    version = "1.16.0"; # latest version for keycloak <= 26.4.7
+
+    src = pkgs.fetchurl {
+      url = "https://github.com/klausbetz/apple-identity-provider-keycloak/releases/download/${version}/apple-identity-provider-${version}.jar";
+      sha256 = "sha256-I5/oiCyv7SSOgrE+roAFqAovpaBmGdoGLVFpay8DFJE=";
+    };
+
+    dontUnpack = true;
+    installPhase = ''
+      mkdir -p $out
+      cp $src $out/apple-identity-provider-${version}.jar
+    '';
+  };
 in
 {
   age.secrets.keycloak = {
@@ -69,6 +85,7 @@ in
       keycloak-discord
       keycloak-magic-link
       keycloak-remember-me-authenticator
+      appleIdentityProvider
 
       # needed for Unix socket auth
       junixsocket-common
