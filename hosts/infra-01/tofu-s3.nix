@@ -1,12 +1,3 @@
-# tofu-s3.nix
-#
-# This module sets up:
-# 1. A MinIO S3 bucket for storing OpenTofu configuration data (like projects.json)
-# 2. The OpenTofu identity configuration that was previously in openbao.nix
-#
-# The idea: Instead of hardcoding JSON files in the repo (tofu/identity/projects.json),
-# we can store them in S3 and have OpenTofu read them at runtime. This allows for
-# more dynamic configuration without requiring repo changes.
 {
   config,
   pkgs,
@@ -15,25 +6,20 @@
 }:
 
 {
-  # Mostly moved from openbao.nix
   age.secrets.tofu-identity = {
     file = ../../secrets/infra-01/tofu-identity.age;
     mode = "0400"; 
   };
 
-  # MinIO credentials secret - you'll need to create this file containing:
-  #   MINIO_ROOT_USER=<username>
-  #   MINIO_ROOT_PASSWORD=<password>
-  # Then encrypt it with: agenix -e secrets/infra-01/minio-tofu.age
   age.secrets.minio-tofu = {
     file = ../../secrets/infra-01/minio-tofu.age;
-    mode = "0440"; # Group-readable for minio service
-    group = "tofu"; # The minio-tofu user needs access via this group
+    mode = "0440"; 
+    group = "tofu";
   };
 
   scottylabs.minio.instances.tofu = {
-    port = 9100; # S3 API port (pick unused ports)
-    consolePort = 9101; # Web UI port for managing buckets
+    port = 9100;
+    consolePort = 9101; 
     credentialsFile = config.age.secrets.minio-tofu.path;
   };
 

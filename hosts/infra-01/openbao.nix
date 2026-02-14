@@ -1,5 +1,3 @@
-# The OpenTofu configuration that sets up OpenBao policies/groups has been
-# moved to tofu-s3.nix to colocate it with the MinIO S3 storage for tofu data.
 { ... }:
 
 {
