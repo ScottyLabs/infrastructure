@@ -26,6 +26,7 @@ in
   "secrets/infra-01/vaultwarden.age".publicKeys = admins ++ [ infra-01 ];
   "secrets/infra-01/tofu-identity.age".publicKeys = admins ++ [ infra-01 ];
   "secrets/infra-01/tofu-cloudflare.age".publicKeys = admins ++ [ infra-01 ];
+  "secrets/infra-01/minio-tofu.age".publicKeys = admins ++ [ infra-01 ]; # MinIO credentials for tofu S3 bucket
   "secrets/infra-01/bao-role-id.age".publicKeys = admins ++ [ infra-01 ];
   "secrets/infra-01/bao-secret-id.age".publicKeys = admins ++ [ infra-01 ];
 

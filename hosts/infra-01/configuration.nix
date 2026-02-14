@@ -10,6 +10,7 @@
     ./vaultwarden.nix
     ./openbao.nix
     ./opentofu.nix
+    ./tofu-s3.nix # MinIO S3 storage + OpenTofu identity config
     ./headscale.nix
   ];
 

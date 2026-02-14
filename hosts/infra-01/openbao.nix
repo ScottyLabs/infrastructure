@@ -1,16 +1,8 @@
-{
-  config,
-  pkgs,
-  self,
-  ...
-}:
+# The OpenTofu configuration that sets up OpenBao policies/groups has been
+# moved to tofu-s3.nix to colocate it with the MinIO S3 storage for tofu data.
+{ ... }:
 
 {
-  age.secrets.tofu-identity = {
-    file = ../../secrets/infra-01/tofu-identity.age;
-    mode = "0400";
-  };
-
   services.openbao = {
     enable = true;
     settings = {
@@ -30,32 +22,6 @@
 
       api_addr = "https://secrets2.scottylabs.org";
     };
-  };
-
-  # Creates the JWT auth backend + role for Keycloak and configures project groups
-  scottylabs.tofu.configurations.identity = {
-    source = ../../tofu/identity;
-    environmentFile = config.age.secrets.tofu-identity.path;
-    after = [ "openbao.service" ];
-    environment.VAULT_ADDR = "http://127.0.0.1:8200";
-
-    extraFiles = {
-      "host-projects.json" = self.packages.x86_64-linux.host-projects;
-    };
-
-    # OpenBao must be unsealed before we can configure it
-    preCheck = ''
-      for i in $(seq 1 60); do
-        if ${pkgs.openbao}/bin/bao status 2>/dev/null | grep -q "Sealed.*false"; then
-          echo "OpenBao is unsealed"
-          exit 0
-        fi
-        echo "Waiting for OpenBao to be unsealed... ($i/60)"
-        sleep 5
-      done
-      echo "OpenBao still sealed after 5 minutes, skipping configuration"
-      exit 1
-    '';
   };
 
   services.nginx.virtualHosts."secrets2.scottylabs.org" = {
