@@ -47,7 +47,7 @@
 
     # prod-02
     terrier = {
-      url = "github:ScottyLabs/terrier/judging";
+      url = "git+https://codeberg.org/ScottyLabs/terrier";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };

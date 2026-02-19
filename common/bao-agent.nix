@@ -27,7 +27,18 @@ let
       {{- end -}}
     '';
 
-  allProjects = lib.unique (lib.mapAttrsToList (_: s: s.project) cfg.secrets);
+  mkProjectFileTemplate =
+    name: secret:
+    pkgs.writeText "${name}.tpl" ''
+      {{- with secret "secret/data/projects/${secret.project}/prod/${secret.path}" -}}
+      {{ .Data.data.${secret.key} }}
+      {{- end -}}
+    '';
+
+  allProjects = lib.unique (
+    (lib.mapAttrsToList (_: s: s.project) cfg.secrets)
+    ++ (lib.mapAttrsToList (_: s: s.project) cfg.secretFiles)
+  );
 
   agentConfig = pkgs.writeText "bao-agent.hcl" ''
     vault {
@@ -76,6 +87,17 @@ let
         }
       '') cfg.infraSecrets
     )}
+
+    ${lib.concatStrings (
+      lib.mapAttrsToList (name: secret: ''
+        template {
+          source      = "${mkProjectFileTemplate name secret}"
+          destination = "/run/secrets/${name}"
+          perms       = "0400"
+          user        = "${secret.user}"
+        }
+      '') cfg.secretFiles
+    )}
   '';
 in
 {
@@ -99,6 +121,33 @@ in
       );
       default = { };
       description = "Secrets to fetch from OpenBao";
+    };
+
+    secretFiles = lib.mkOption {
+      type = lib.types.attrsOf (
+        lib.types.submodule {
+          options = {
+            project = lib.mkOption {
+              type = lib.types.str;
+              description = "Project name in OpenBao path";
+            };
+            path = lib.mkOption {
+              type = lib.types.str;
+              description = "Path under secret/data/projects/<project>/prod/";
+            };
+            key = lib.mkOption {
+              type = lib.types.str;
+              description = "Key name within the secret";
+            };
+            user = lib.mkOption {
+              type = lib.types.str;
+              description = "User that owns the rendered secret file";
+            };
+          };
+        }
+      );
+      default = { };
+      description = "Individual secret files to fetch from project secrets in OpenBao";
     };
 
     infraSecrets = lib.mkOption {

@@ -3,7 +3,8 @@
 {
   imports = [
     ../../platforms/campus-cloud
-    ./terrier-staging.nix
+    ./saml-proxy.nix
+    ./terrier-docs.nix
   ];
 
   networking.firewall.allowedTCPPorts = [
