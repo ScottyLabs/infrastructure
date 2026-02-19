@@ -23,7 +23,7 @@ let
     name: secret:
     pkgs.writeText "${name}.tpl" ''
       {{- with secret "secret/data/infra/${secret.path}" -}}
-      {{ .Data.data.${secret.key} }}
+      {{ index .Data.data "${secret.key}" }}
       {{- end -}}
     '';
 
@@ -31,7 +31,7 @@ let
     name: secret:
     pkgs.writeText "${name}.tpl" ''
       {{- with secret "secret/data/projects/${secret.project}/prod/${secret.path}" -}}
-      {{ .Data.data.${secret.key} }}
+      {{ index .Data.data "${secret.key}" }}
       {{- end -}}
     '';
 
