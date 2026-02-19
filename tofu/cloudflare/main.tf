@@ -16,3 +16,9 @@ data "cloudflare_zone" "scottylabs" {
     name = "scottylabs.org"
   }
 }
+
+data "cloudflare_zone" "terrier_build" {
+  filter = {
+    name = "terrier.build"
+  }
+}

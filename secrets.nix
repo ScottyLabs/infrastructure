@@ -42,6 +42,6 @@ in
   "secrets/snoopy/bao-secret-id.age".publicKeys = admins ++ [ snoopy ];
 
   # all
-  "secrets/acme-credentials.age".publicKeys = admins ++ hosts;
+  "secrets/cloudflare-api-token.age".publicKeys = admins ++ hosts;
   "secrets/pgadmin.age".publicKeys = admins ++ hosts;
 }

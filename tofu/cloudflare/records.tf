@@ -15,9 +15,7 @@ locals {
     verify      = { ip = "128.2.25.68", comment = "Discord Andrew ID verification bot" }
 
     # hosts/prod-02
-    prod-02              = { ip = "128.2.25.71", comment = "Campus Cloud VM (https://netreg.net.cmu.edu/)" }
-    terrier-staging      = { ip = "128.2.25.71", comment = "Terrier staging environment" }
-    "s3.terrier-staging" = { ip = "128.2.25.71", comment = "Terrier staging MinIO S3 endpoint" }
+    prod-02     = { ip = "128.2.25.71", comment = "Campus Cloud VM (https://netreg.net.cmu.edu/)" }
 
     # hosts/snoopy
     snoopy      = { ip = "128.237.157.156", comment = "Computer Club VM (g:scottylabs:snoopy)" }
@@ -28,10 +26,29 @@ locals {
   }
 }
 
+locals {
+  terrier_build_a_records = {
+    auth = { ip = "128.2.25.71", comment = "SAML proxy for university authentication" }
+    docs = { ip = "128.2.25.71", comment = "Terrier documentation" }
+  }
+}
+
 resource "cloudflare_dns_record" "a" {
   for_each = local.a_records
 
   zone_id = data.cloudflare_zone.scottylabs.zone_id
+  name    = each.key
+  content = each.value.ip
+  type    = "A"
+  ttl     = 1
+  proxied = false
+  comment = "${each.value.comment} - managed by OpenTofu"
+}
+
+resource "cloudflare_dns_record" "terrier_build_a" {
+  for_each = local.terrier_build_a_records
+
+  zone_id = data.cloudflare_zone.terrier_build.zone_id
   name    = each.key
   content = each.value.ip
   type    = "A"

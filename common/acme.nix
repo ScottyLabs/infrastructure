@@ -1,8 +1,8 @@
 { config, ... }:
 
 {
-  age.secrets.acme-credentials = {
-    file = ../secrets/acme-credentials.age;
+  age.secrets.cloudflare-api-token = {
+    file = ../secrets/cloudflare-api-token.age;
     mode = "0400";
   };
 
@@ -10,9 +10,8 @@
     acceptTerms = true;
     defaults = {
       email = "admin@scottylabs.org";
-      server = "https://acme.sectigo.com/v2/InCommonRSAOV";
-      environmentFile = config.age.secrets.acme-credentials.path;
-      extraLegoFlags = [ "--eab" ];
+      dnsProvider = "cloudflare";
+      environmentFile = config.age.secrets.cloudflare-api-token.path;
     };
   };
 }
