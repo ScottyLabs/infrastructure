@@ -39,6 +39,6 @@
       name = "Ryan Li";
       email = "ryanli2@andrew.cmu.edu";
     };
-    sshPublicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJwDoVJW6znMS503O/0SDpe8PUbN4PcTbZCDvVc9vhDg ryanli2@andrew.cmu.edu";
+    sshPublicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIG9FNNvXTaDbNyOfk348QhQKQuikd1PMeXCV/dNoGpdG ryanli2@andrew.cmu.edu";
   };
 }
