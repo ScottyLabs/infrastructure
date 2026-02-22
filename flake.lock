@@ -107,11 +107,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1771784863,
-        "narHash": "sha256-d53j5gW4WQG6kPndzvxOtH10N25T5jY9CT8t8/WbbAQ=",
+        "lastModified": 1771790786,
+        "narHash": "sha256-qA9trLM3Mz+T1JtaBpqYiUDXCorl7x02SCN6rQr8cJg=",
         "owner": "ScottyLabs",
         "repo": "bus-sign",
-        "rev": "e07845613f478eae8b176b79e48855383c387e59",
+        "rev": "a352de782fbe6f06f2e874ccecf2a223e7feb902",
         "type": "github"
       },
       "original": {
