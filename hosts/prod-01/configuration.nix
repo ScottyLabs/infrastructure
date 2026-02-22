@@ -7,6 +7,7 @@
     ./discord-verify.nix
     ./internet-archive.nix
     ./groupme-mirror.nix
+    ./bus-sign.nix
   ];
 
   networking.firewall.allowedTCPPorts = [

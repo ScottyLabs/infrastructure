@@ -39,6 +39,10 @@
       url = "github:ScottyLabs/dalmatian";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    bus-sign = {
+      url = "github:ScottyLabs/bus-sign";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     discord-verify = {
       url = "git+https://codeberg.org/ScottyLabs/discord-verify";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -69,6 +73,7 @@
       comin,
       headplane,
       dalmatian,
+      bus-sign,
       discord-verify,
       internet-archive,
       groupme-mirror,
@@ -90,6 +95,7 @@
               comin
               headplane
               dalmatian
+              bus-sign
               discord-verify
               internet-archive
               groupme-mirror
