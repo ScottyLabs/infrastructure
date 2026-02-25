@@ -107,11 +107,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1771784863,
-        "narHash": "sha256-d53j5gW4WQG6kPndzvxOtH10N25T5jY9CT8t8/WbbAQ=",
+        "lastModified": 1771882166,
+        "narHash": "sha256-jmahPcTUamcFqyy/9rXQ37lvxQYZh2CkV+eGoFoAm90=",
         "owner": "ScottyLabs",
         "repo": "bus-sign",
-        "rev": "e07845613f478eae8b176b79e48855383c387e59",
+        "rev": "ee2d8dc7bba8f94ad6be7af28944db4c52f21809",
         "type": "github"
       },
       "original": {
@@ -223,11 +223,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1770863778,
-        "narHash": "sha256-RvNNw2O2CHHUQPMJ7jj1NsZGtzvV9DGgQs5ma3SlZ34=",
+        "lastModified": 1772002375,
+        "narHash": "sha256-79iux8sS5+iSAU1sqKLMo3IOOmWpDCO8ern1wfrlttg=",
         "owner": "ScottyLabs",
         "repo": "dalmatian",
-        "rev": "d45f06e085070c30c545b121a4e3e8b3254c05d4",
+        "rev": "6f9db8d1142469d82b0028b0a9305c0cb61acec2",
         "type": "github"
       },
       "original": {
@@ -269,11 +269,11 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1771672827,
-        "narHash": "sha256-N9oNxNcx/R4WRFTBREr/Q3UAuUng4a3MAKI/jHuXXNw=",
+        "lastModified": 1771852244,
+        "narHash": "sha256-4t3gQ4s7kqtDwSiE74Px6szKJtKtcoHgUiNmIm+Xl9Y=",
         "owner": "cachix",
         "repo": "devenv",
-        "rev": "6757a742f6393c7070f159eed9a59cbe20690aa3",
+        "rev": "c88c14a32d06173867e26b7d4f5daed38a3f6f1e",
         "type": "github"
       },
       "original": {
@@ -1337,11 +1337,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1771554929,
-        "narHash": "sha256-xqoua2ua8Gy35o7muv2R5o6uXOVOWAgUKamiUDGERxg=",
+        "lastModified": 1771960075,
+        "narHash": "sha256-Q6EN+j0ZBqGRfGy7u2EL3XfRDrMrab1LT5RR2WRe+50=",
         "ref": "refs/heads/main",
-        "rev": "bcbcb00ea032c8c0d5cea0a2b8e1440e43a9de49",
-        "revCount": 40,
+        "rev": "e6407db6fad4330dd8560455fc89336ca03de4fc",
+        "revCount": 44,
         "type": "git",
         "url": "https://codeberg.org/ScottyLabs/terrier"
       },
