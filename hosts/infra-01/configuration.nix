@@ -13,6 +13,9 @@
     ./headscale.nix
   ];
 
+  # Allow building aarch64 packages via QEMU emulation
+  boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
+
   networking.firewall.allowedTCPPorts = [
     80
     443
