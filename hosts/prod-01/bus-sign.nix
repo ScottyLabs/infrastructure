@@ -21,8 +21,14 @@ in
 
   systemd.services.bus-sign = {
     description = "CUC Bus Sign Backend";
-    after = [ "network-online.target" "bao-agent.service" ];
-    wants = [ "network-online.target" "bao-agent.service" ];
+    after = [
+      "network-online.target"
+      "bao-agent.service"
+    ];
+    wants = [
+      "network-online.target"
+      "bao-agent.service"
+    ];
     wantedBy = [ "multi-user.target" ];
 
     serviceConfig = {

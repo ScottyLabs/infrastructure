@@ -10,6 +10,10 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixos-hardware = {
+      url = "github:NixOS/nixos-hardware";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     home-manager = {
       url = "github:nix-community/home-manager";
@@ -67,6 +71,7 @@
     {
       self,
       nixpkgs,
+      nixos-hardware,
       home-manager,
       agenix,
       disko,
@@ -84,15 +89,16 @@
       users = import ./users.nix;
 
       mkSystem =
-        hostname:
+        hostname: system:
         nixpkgs.lib.nixosSystem {
-          system = "x86_64-linux";
+          inherit system;
           specialArgs = {
             inherit
               self
               hostname
               users
               comin
+              nixos-hardware
               headplane
               dalmatian
               bus-sign
@@ -112,35 +118,28 @@
           ];
         };
 
-      hosts = [
-        "infra-01"
-        "prod-01"
-        "prod-02"
-        "snoopy"
-      ];
+      hosts = {
+        infra-01 = "x86_64-linux";
+        prod-01 = "x86_64-linux";
+        prod-02 = "x86_64-linux";
+        snoopy = "x86_64-linux";
+        bus-sign-display = "aarch64-linux";
+      };
     in
     {
-      formatter = nixpkgs.lib.genAttrs [ "x86_64-linux" "aarch64-darwin" ] (
+      formatter = nixpkgs.lib.genAttrs [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" ] (
         system: nixpkgs.legacyPackages.${system}.nixfmt-tree
       );
 
-      nixosConfigurations = builtins.listToAttrs (
-        map (hostname: {
-          name = hostname;
-          value = mkSystem hostname;
-        }) hosts
-      );
+      nixosConfigurations = builtins.mapAttrs mkSystem hosts;
 
       # Host-to-project mapping for OpenBao AppRole policies
       packages.x86_64-linux.host-projects =
         let
           pkgs = nixpkgs.legacyPackages.x86_64-linux;
-          mapping = builtins.listToAttrs (
-            map (hostname: {
-              name = hostname;
-              value = self.nixosConfigurations.${hostname}.config.scottylabs.bao-agent.projects;
-            }) hosts
-          );
+          mapping = builtins.mapAttrs (
+            hostname: _: self.nixosConfigurations.${hostname}.config.scottylabs.bao-agent.projects
+          ) hosts;
         in
         pkgs.writeText "host-projects.json" (builtins.toJSON mapping);
     };

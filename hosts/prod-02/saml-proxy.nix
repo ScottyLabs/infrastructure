@@ -32,8 +32,14 @@ in
 
   systemd.services.saml-proxy = {
     description = "SAML Proxy for University Authentication";
-    after = [ "network-online.target" "bao-agent.service" ];
-    wants = [ "network-online.target" "bao-agent.service" ];
+    after = [
+      "network-online.target"
+      "bao-agent.service"
+    ];
+    wants = [
+      "network-online.target"
+      "bao-agent.service"
+    ];
     wantedBy = [ "multi-user.target" ];
 
     serviceConfig = {
