@@ -107,11 +107,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1771882166,
-        "narHash": "sha256-jmahPcTUamcFqyy/9rXQ37lvxQYZh2CkV+eGoFoAm90=",
+        "lastModified": 1772480835,
+        "narHash": "sha256-igWfANZLk1fz09ooMTYGPDkiLAZeYB1eLPhyUuO6jsU=",
         "owner": "ScottyLabs",
         "repo": "bus-sign",
-        "rev": "ee2d8dc7bba8f94ad6be7af28944db4c52f21809",
+        "rev": "28eef17c36ef80d36d64d78d4fd2577f6d6a19a5",
         "type": "github"
       },
       "original": {
@@ -269,11 +269,11 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1771852244,
-        "narHash": "sha256-4t3gQ4s7kqtDwSiE74Px6szKJtKtcoHgUiNmIm+Xl9Y=",
+        "lastModified": 1772475261,
+        "narHash": "sha256-hplWgNoR4wKlBMyP7FyALmX7xUtSROPpUc/FhqHfLX8=",
         "owner": "cachix",
         "repo": "devenv",
-        "rev": "c88c14a32d06173867e26b7d4f5daed38a3f6f1e",
+        "rev": "61e0c7f2fb03937559e396343c69f4bd5cbf277d",
         "type": "github"
       },
       "original": {
@@ -1353,11 +1353,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1771960075,
-        "narHash": "sha256-Q6EN+j0ZBqGRfGy7u2EL3XfRDrMrab1LT5RR2WRe+50=",
+        "lastModified": 1773044568,
+        "narHash": "sha256-7nOEC5Z5g6436fY1MzmM/MJhNSGj4oW1p1IBkdiJVwY=",
         "ref": "refs/heads/main",
-        "rev": "e6407db6fad4330dd8560455fc89336ca03de4fc",
-        "revCount": 44,
+        "rev": "86ffd0232d96509606c9f565e24df934c8bc3135",
+        "revCount": 49,
         "type": "git",
         "url": "https://codeberg.org/ScottyLabs/terrier"
       },
