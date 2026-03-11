@@ -71,7 +71,7 @@ in
       http-enabled = true;
       http-host = "127.0.0.1";
       http-port = 8080;
-      log-level = "org.keycloak.broker:debug";
+      log-level = "org.keycloak.broker:debug,org.keycloak.events:debug,org.keycloak.saml:debug,org.keycloak.federation.ldap:debug";
       features = "scripts";
     };
 
