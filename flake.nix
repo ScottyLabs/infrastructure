@@ -33,6 +33,10 @@
     };
 
     # infra-01
+    keycloak-theme = {
+      url = "github:ScottyLabs/keycloak-theme";
+      flake = false;
+    };
     headplane = {
       url = "github:tale/headplane";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -76,6 +80,7 @@
       agenix,
       disko,
       comin,
+      keycloak-theme,
       headplane,
       dalmatian,
       bus-sign,
@@ -99,6 +104,7 @@
               users
               comin
               nixos-hardware
+              keycloak-theme
               headplane
               dalmatian
               bus-sign

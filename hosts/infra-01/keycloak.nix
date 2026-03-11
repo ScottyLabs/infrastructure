@@ -2,18 +2,10 @@
   config,
   lib,
   pkgs,
+  keycloak-theme,
   ...
 }:
 
-let
-  # update with: nix run nixpkgs#nix-prefetch-github -- ScottyLabs keycloak --rev <rev>
-  theme = pkgs.fetchFromGitHub {
-    owner = "ScottyLabs";
-    repo = "keycloak";
-    rev = "8e022f984ca13f235e5a23afc65ab454e1f85585";
-    sha256 = "sha256-dF34CikDdSIdhr3lrUH5iz91Ju5A6yFNX+n5ZzdLiKA=";
-  };
-in
 {
   age.secrets.keycloak = {
     file = ../../secrets/infra-01/keycloak.age;
@@ -61,7 +53,7 @@ in
 
     themes = {
       terrier = pkgs.runCommand "keycloak-terrier-theme" { } ''
-        cp -r ${theme}/themes/terrier $out
+        cp -r ${keycloak-theme}/themes/terrier $out
       '';
     };
 
