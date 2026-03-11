@@ -34,7 +34,7 @@
 
     # infra-01
     keycloak-theme = {
-      url = "github:ScottyLabs/keycloak-theme";
+      url = "git+https://codeberg.org/ScottyLabs/keycloak-theme";
       flake = false;
     };
     headplane = {
