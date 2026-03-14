@@ -69,8 +69,6 @@ in
       enable_metrics = false;
       # This is used to verify shared secrets for registration
       registration_shared_secret_path = config.age.secrets.matrix-shared-secret.path;
-      # This is used to prevent bots from registering
-      enable_registration_captcha = true;
 
       trusted_key_servers = [
         {
