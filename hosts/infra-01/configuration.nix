@@ -11,6 +11,7 @@
     ./openbao.nix
     ./opentofu.nix
     ./headscale.nix
+    ./matrix.nix
   ];
 
   # Allow building aarch64 packages via QEMU emulation
