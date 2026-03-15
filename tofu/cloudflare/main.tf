@@ -22,3 +22,9 @@ data "cloudflare_zone" "terrier_build" {
     name = "terrier.build"
   }
 }
+
+data "cloudflare_zone" "doggylabs" {
+  filter = {
+    name = "doggylabs.org"
+  }
+}

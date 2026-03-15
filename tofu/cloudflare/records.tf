@@ -28,6 +28,14 @@ locals {
 }
 
 locals {
+  doggylabs_a_records = {
+    # hosts/infra-01
+    "@"    = { ip = "128.2.25.63", comment = "Matrix homeserver (Synapse)" }
+    matrix = { ip = "128.2.25.63", comment = "Matrix homeserver (Synapse)" }
+  }
+}
+
+locals {
   terrier_build_a_records = {
     auth = { ip = "128.2.25.71", comment = "SAML proxy for university authentication" }
     docs = { ip = "128.2.25.71", comment = "Terrier documentation" }
@@ -38,6 +46,18 @@ resource "cloudflare_dns_record" "a" {
   for_each = local.a_records
 
   zone_id = data.cloudflare_zone.scottylabs.zone_id
+  name    = each.key
+  content = each.value.ip
+  type    = "A"
+  ttl     = 1
+  proxied = false
+  comment = "${each.value.comment} - managed by OpenTofu"
+}
+
+resource "cloudflare_dns_record" "doggylabs_a" {
+  for_each = local.doggylabs_a_records
+
+  zone_id = data.cloudflare_zone.doggylabs.zone_id
   name    = each.key
   content = each.value.ip
   type    = "A"
