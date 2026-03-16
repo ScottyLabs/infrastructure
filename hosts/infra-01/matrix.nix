@@ -35,6 +35,17 @@ in
       server_name = domain;
       public_baseurl = "https://${matrixDomain}";
 
+      rc_joins = {
+        local = {
+          per_second = 50;
+          burst_count = 200;
+        };
+        remote = {
+          per_second = 10;
+          burst_count = 50;
+        };
+      };
+
       # HTTP listener for clients and federation
       listeners = [
         {
