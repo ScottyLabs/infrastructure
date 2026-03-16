@@ -159,6 +159,7 @@ in
         permissions = {
           "*" = "relay";
           "${domain}" = "user";
+          "@ap-1:matrix.org" = "admin";
         };
       };
     };
