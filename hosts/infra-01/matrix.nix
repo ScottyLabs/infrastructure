@@ -159,10 +159,6 @@ in
         };
         delete_portal_on_channel_delete = true;
         enable_webhook_avatars = true;
-        encryption = {
-          allow = true;
-          default = true;
-        };
         relay = {
           enabled = true;
           admin_only = false;
