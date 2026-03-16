@@ -23,8 +23,14 @@ let
   '';
 in
 {
+  nixpkgs.config.permittedInsecurePackages = [
+    "olm-3.2.16"
+  ];
+
   services.matrix-synapse = {
     enable = true;
+    plugins = [ pkgs.matrix-synapse-plugins.matrix-synapse-shared-secret-auth ];
+    extraConfigFiles = [ config.age.secrets.double-puppet.path ];
     settings = {
       server_name = domain;
       public_baseurl = "https://${matrixDomain}";
@@ -65,7 +71,7 @@ in
       # allowing them to register on other trusted servers
       enable_registration = false;
       enable_metrics = false;
-      registration_shared_secret_path = config.age.secrets.matrix.path;
+      registration_shared_secret_path = config.age.secrets.matrix-registration.path;
 
       trusted_key_servers = [
         {
@@ -75,9 +81,21 @@ in
     };
   };
 
-  age.secrets.matrix = {
-    file = ../../secrets/infra-01/matrix.age;
+  age.secrets.matrix-registration = {
+    file = ../../secrets/infra-01/matrix-registration.age;
     owner = "matrix-synapse";
+    mode = "0400";
+  };
+
+  age.secrets.double-puppet = {
+    file = ../../secrets/infra-01/double-puppet.age;
+    owner = "matrix-synapse";
+    mode = "0400";
+  };
+
+  age.secrets.double-puppet-env = {
+    file = ../../secrets/infra-01/double-puppet-env.age;
+    owner = "mautrix-discord";
     mode = "0400";
   };
 
@@ -103,7 +121,42 @@ in
     };
   };
 
+  services.mautrix-discord = {
+    enable = true;
+    environmentFile = config.age.secrets.double-puppet-env.path;
+    settings = {
+      homeserver = {
+        address = "http://127.0.0.1:8008";
+        domain = domain;
+      };
+      appservice = {
+        database = {
+          type = "postgres";
+          uri = "postgresql:///mautrix-discord?host=/run/postgresql";
+        };
+        bot = {
+          username = "discord";
+          displayname = "Discord Bridge";
+        };
+      };
+      bridge = {
+        double_puppet_server_map = {
+          "${domain}" = "https://${matrixDomain}";
+        };
+        login_shared_secret_map = {
+          "${domain}" = "$DOUBLE_PUPPET_SECRET";
+        };
+        permissions = {
+          "${domain}" = "user";
+        };
+      };
+    };
+  };
+
   networking.firewall.allowedTCPPorts = [ 8448 ];
 
-  scottylabs.postgresql.databases = [ "matrix-synapse" ];
+  scottylabs.postgresql.databases = [
+    "matrix-synapse"
+    "mautrix-discord"
+  ];
 }

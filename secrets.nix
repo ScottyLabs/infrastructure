@@ -24,11 +24,13 @@ in
   "secrets/infra-01/minecraft.age".publicKeys = admins ++ [ infra-01 ];
   "secrets/infra-01/keycloak.age".publicKeys = admins ++ [ infra-01 ];
   "secrets/infra-01/vaultwarden.age".publicKeys = admins ++ [ infra-01 ];
+  "secrets/infra-01/matrix-registration.age".publicKeys = admins ++ [ infra-01 ];
+  "secrets/infra-01/double-puppet.age".publicKeys = admins ++ [ infra-01 ];
+  "secrets/infra-01/double-puppet-env.age".publicKeys = admins ++ [ infra-01 ];
   "secrets/infra-01/tofu-identity.age".publicKeys = admins ++ [ infra-01 ];
   "secrets/infra-01/tofu-cloudflare.age".publicKeys = admins ++ [ infra-01 ];
   "secrets/infra-01/bao-role-id.age".publicKeys = admins ++ [ infra-01 ];
   "secrets/infra-01/bao-secret-id.age".publicKeys = admins ++ [ infra-01 ];
-  "secrets/infra-01/matrix.age".publicKeys = admins ++ [ infra-01 ];
 
   # prod-01
   "secrets/prod-01/bao-role-id.age".publicKeys = admins ++ [ prod-01 ];
