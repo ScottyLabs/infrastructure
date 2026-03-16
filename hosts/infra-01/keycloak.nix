@@ -53,7 +53,7 @@
 
     themes = {
       terrier = pkgs.runCommand "keycloak-terrier-theme" { } ''
-        cp -r ${keycloak-theme}/themes/terrier $out
+        cp -r ${keycloak-theme}/themes/scottylabs $out
       '';
     };
 
