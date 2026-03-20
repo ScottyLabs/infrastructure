@@ -8,6 +8,7 @@
     ./internet-archive.nix
     ./groupme-mirror.nix
     ./bus-sign.nix
+    ./voting-app.nix
   ];
 
   networking.firewall.allowedTCPPorts = [
