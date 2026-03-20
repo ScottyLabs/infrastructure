@@ -51,6 +51,10 @@
       url = "github:ScottyLabs/bus-sign";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    voting-app = {
+      url = "github:ScottyLabs/voting-app";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     discord-verify = {
       url = "git+https://codeberg.org/ScottyLabs/discord-verify";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -108,6 +112,7 @@
               headplane
               dalmatian
               bus-sign
+              voting-app
               discord-verify
               internet-archive
               groupme-mirror
