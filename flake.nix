@@ -88,6 +88,7 @@
       headplane,
       dalmatian,
       bus-sign,
+      voting-app,
       discord-verify,
       internet-archive,
       groupme-mirror,
