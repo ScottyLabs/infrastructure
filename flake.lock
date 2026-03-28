@@ -3114,11 +3114,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1774213637,
-        "narHash": "sha256-ZoOrYCEcPT2iHg0Hn0y+hZ+YyFalglc3l5yIZoHTNTI=",
+        "lastModified": 1774649757,
+        "narHash": "sha256-BvboHlcy5QYXzqd36qSRSnFIXmcEWQRqbtu8eNgjC0I=",
         "owner": "ScottyLabs",
         "repo": "voting-app",
-        "rev": "f723b098ccb862b019e411c6d63f3fb58ba02e5d",
+        "rev": "61ed2dafc5f6a913874823bb5ed04a68eb12716c",
         "type": "github"
       },
       "original": {
