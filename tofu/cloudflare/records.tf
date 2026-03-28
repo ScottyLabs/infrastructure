@@ -10,14 +10,11 @@ locals {
     headscale   = { ip = "128.2.25.63", comment = "Headscale VPN coordination server" }
     headplane   = { ip = "128.2.25.63", comment = "Headplane web UI for Headscale" }
 
-    # hosts/prod-01
-    prod-01     = { ip = "128.2.25.68", comment = "Campus Cloud VM (https://netreg.net.cmu.edu/)" }
+    # hosts/deploy-01
+    deploy-01   = { ip = "128.2.25.68", comment = "Campus Cloud VM (https://netreg.net.cmu.edu/)" }
     verify      = { ip = "128.2.25.68", comment = "Discord Andrew ID verification bot" }
     bus-sign    = { ip = "128.2.25.68", comment = "CUC Bus Sign" }
     voting-app  = { ip = "128.2.25.68", comment = "Senate Voting Application" }
-
-    # hosts/prod-02
-    prod-02     = { ip = "128.2.25.71", comment = "Campus Cloud VM (https://netreg.net.cmu.edu/)" }
 
     # hosts/snoopy
     snoopy      = { ip = "128.237.157.156", comment = "Computer Club VM (g:scottylabs:snoopy)" }
