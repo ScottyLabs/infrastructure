@@ -15,6 +15,7 @@ locals {
     verify      = { ip = "128.2.25.68", comment = "Discord Andrew ID verification bot" }
     bus-sign    = { ip = "128.2.25.68", comment = "CUC Bus Sign" }
     voting-app  = { ip = "128.2.25.68", comment = "Senate Voting Application" }
+    mcp-server  = { ip = "128.2.25.68", comment = "ScottyLabs MCPs" }
 
     # hosts/prod-02
     prod-02     = { ip = "128.2.25.71", comment = "Campus Cloud VM (https://netreg.net.cmu.edu/)" }

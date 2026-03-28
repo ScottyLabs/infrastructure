@@ -47,6 +47,10 @@
       url = "github:ScottyLabs/dalmatian";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    mcp-server = {
+      url = "github:ScottyLabs/mcp-server";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     bus-sign = {
       url = "github:ScottyLabs/bus-sign";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -87,6 +91,7 @@
       keycloak-theme,
       headplane,
       dalmatian,
+      mcp-server,
       bus-sign,
       voting-app,
       discord-verify,
@@ -112,6 +117,7 @@
               keycloak-theme
               headplane
               dalmatian
+              mcp-server
               bus-sign
               voting-app
               discord-verify
