@@ -15,6 +15,7 @@ locals {
     verify      = { ip = "128.2.25.68", comment = "Discord Andrew ID verification bot" }
     bus-sign    = { ip = "128.2.25.68", comment = "CUC Bus Sign" }
     voting-app  = { ip = "128.2.25.68", comment = "Senate Voting Application" }
+    mcp-server  = { ip = "128.2.25.68", comment = "ScottyLabs MCPs" }
 
     # hosts/snoopy
     snoopy      = { ip = "128.237.157.156", comment = "Computer Club VM (g:scottylabs:snoopy)" }
