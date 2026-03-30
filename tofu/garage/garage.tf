@@ -1,33 +1,26 @@
-resource "garage_cluster_layout" "this" {
-  roles {
-    id       = var.garage_node_id
-    zone     = "dc1"
-    capacity = "1T"
-  }
-}
-
 resource "garage_bucket" "tofu_state" {
-  global_alias = "tofu-state"
+  name = "tofu-state"
 }
 
-resource "garage_key" "governance" {
-  name = "governance-tofu"
+resource "garage_access_key" "governance" {
+  name          = "governance-tofu"
+  never_expires = true
 }
 
-resource "garage_bucket_key" "governance_tofu_state" {
+resource "garage_permission" "governance_tofu_state" {
+  access_key_id = garage_access_key.governance.access_key_id
   bucket_id     = garage_bucket.tofu_state.id
-  access_key_id = garage_key.governance.access_key_id
   read          = true
   write         = true
   owner         = false
 }
 
 output "governance_access_key_id" {
-  value     = garage_key.governance.access_key_id
+  value     = garage_access_key.governance.access_key_id
   sensitive = true
 }
 
 output "governance_secret_access_key" {
-  value     = garage_key.governance.secret_access_key
+  value     = garage_access_key.governance.secret_access_key
   sensitive = true
 }
