@@ -12,7 +12,7 @@ resource "garage_permission" "governance_tofu_state" {
   bucket_id     = garage_bucket.tofu_state.id
   read          = true
   write         = true
-  owner         = false
+  owner         = true
 }
 
 output "governance_access_key_id" {
