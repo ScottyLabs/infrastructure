@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     garage = {
-      source  = "henrywhitaker3/garage"
+      source  = "registry.terraform.io/henrywhitaker3/garage"
       version = "~> 1.0"
     }
   }
