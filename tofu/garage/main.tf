@@ -1,8 +1,8 @@
 terraform {
   required_providers {
     garage = {
-      source  = "Arsolitt/garagehq"
-      version = "~> 0.1"
+      source  = "henrywhitaker3/garage"
+      version = "~> 1.0"
     }
   }
 }
