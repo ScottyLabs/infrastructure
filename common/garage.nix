@@ -49,7 +49,7 @@ in
   config = lib.mkIf cfg.enable {
     services.garage = {
       enable = true;
-      package = pkgs.garage;
+      package = pkgs.garage_2;
 
       inherit (cfg) environmentFile;
 
