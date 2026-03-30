@@ -9,6 +9,7 @@ locals {
     "sunlit.mc" = { ip = "128.2.25.63", comment = "Sunlit Minecraft server" }
     headscale   = { ip = "128.2.25.63", comment = "Headscale VPN coordination server" }
     headplane   = { ip = "128.2.25.63", comment = "Headplane web UI for Headscale" }
+    s3          = { ip = "128.2.25.63", comment = "Garage S3-compatible object storage" }
 
     # hosts/prod-01
     prod-01     = { ip = "128.2.25.68", comment = "Campus Cloud VM (https://netreg.net.cmu.edu/)" }

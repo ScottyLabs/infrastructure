@@ -12,6 +12,7 @@
     ./opentofu.nix
     ./headscale.nix
     ./matrix.nix
+    ./garage.nix
   ];
 
   # Allow building aarch64 packages via QEMU emulation

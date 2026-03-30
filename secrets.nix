@@ -27,6 +27,8 @@ in
   "secrets/infra-01/matrix-registration.age".publicKeys = admins ++ [ infra-01 ];
   "secrets/infra-01/double-puppet.age".publicKeys = admins ++ [ infra-01 ];
   "secrets/infra-01/double-puppet-env.age".publicKeys = admins ++ [ infra-01 ];
+  "secrets/infra-01/garage.age".publicKeys = admins ++ [ infra-01 ];
+  "secrets/infra-01/tofu-garage.age".publicKeys = admins ++ [ infra-01 ];
   "secrets/infra-01/tofu-identity.age".publicKeys = admins ++ [ infra-01 ];
   "secrets/infra-01/tofu-cloudflare.age".publicKeys = admins ++ [ infra-01 ];
   "secrets/infra-01/bao-role-id.age".publicKeys = admins ++ [ infra-01 ];
