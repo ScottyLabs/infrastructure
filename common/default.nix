@@ -9,7 +9,7 @@
     ./acme.nix
     ./postgresql.nix
     ./valkey.nix
-    ./minio.nix
+    ./garage.nix
     ./tofu.nix
     ./bao-agent.nix
     ./headscale.nix
