@@ -28,6 +28,9 @@
         cache = {
           enabled = true;
           dir = "/var/lib/gitea-runner/cache";
+          host = "0.0.0.0";
+          port = 8088;
+          external_server = "http://host.docker.internal:8088";
         };
       };
     };
