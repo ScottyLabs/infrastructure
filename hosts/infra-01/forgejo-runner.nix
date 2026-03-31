@@ -25,6 +25,10 @@
 
       settings = {
         runner.capacity = 2;
+        cache = {
+          enabled = true;
+          dir = "/var/lib/gitea-runner/cache";
+        };
       };
     };
   };
