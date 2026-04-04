@@ -132,11 +132,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1773975278,
-        "narHash": "sha256-xeduXdQykp1l4yJfpEgrHZ56N87XQiOxdjaGWx7EKsU=",
+        "lastModified": 1775338240,
+        "narHash": "sha256-BK83L5e/wTfT5ch9lXEK7HcydxPgJx0kxPKInBuZKh8=",
         "owner": "ScottyLabs",
         "repo": "bus-sign",
-        "rev": "91673c3e8701caa0a094c672236e99ddeaaf902d",
+        "rev": "fbcce0f1b5e9e9d6caa928baed2fc14ccbd82d1d",
         "type": "github"
       },
       "original": {
@@ -418,16 +418,17 @@
         "pre-commit-hooks": "pre-commit-hooks_2"
       },
       "locked": {
-        "lastModified": 1773440526,
-        "narHash": "sha256-OcX1MYqUdoalY3/vU67PEx8m6RvqGxX0LwKonjzXn7I=",
-        "owner": "nix-community",
+        "lastModified": 1772186516,
+        "narHash": "sha256-8s28pzmQ6TOIUzznwFibtW1CMieMUl1rYJIxoQYor58=",
+        "owner": "rossng",
         "repo": "crate2nix",
-        "rev": "e697d3049c909580128caa856ab8eb709556a97b",
+        "rev": "ba5dd398e31ee422fbe021767eb83b0650303a6e",
         "type": "github"
       },
       "original": {
-        "owner": "nix-community",
+        "owner": "rossng",
         "repo": "crate2nix",
+        "rev": "ba5dd398e31ee422fbe021767eb83b0650303a6e",
         "type": "github"
       }
     },
@@ -578,11 +579,11 @@
         "rust-overlay": "rust-overlay"
       },
       "locked": {
-        "lastModified": 1774725838,
-        "narHash": "sha256-Y5/p+IcOWvTBC3aQ39GroyzWFKo/edJVG537Yzel/Mc=",
+        "lastModified": 1775334024,
+        "narHash": "sha256-vg1CVojgtjLPZNFe7QVd/d97E12TLUgBQDlCqMqbEGU=",
         "owner": "cachix",
         "repo": "devenv",
-        "rev": "488860aa6389de926c6f465f176e0ed83cbe8077",
+        "rev": "f30a244f8175ef14ed1a4e4dfc737d28ecc5d852",
         "type": "github"
       },
       "original": {
