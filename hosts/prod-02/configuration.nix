@@ -3,12 +3,8 @@
 {
   imports = [
     ../../platforms/campus-cloud
-    ./dalmatian.nix
-    ./discord-verify.nix
-    ./internet-archive.nix
-    ./groupme-mirror.nix
-    ./bus-sign.nix
-    ./voting-app.nix
+    ./saml-proxy.nix
+    ./terrier-docs.nix
   ];
 
   networking.firewall.allowedTCPPorts = [

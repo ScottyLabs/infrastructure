@@ -42,7 +42,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # deploy-01
+    # prod-01
     dalmatian = {
       url = "github:ScottyLabs/dalmatian";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -71,6 +71,8 @@
       url = "git+https://codeberg.org/ScottyLabs/groupme-mirror";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # prod-02
     terrier = {
       url = "git+https://codeberg.org/ScottyLabs/terrier";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -136,7 +138,8 @@
 
       hosts = {
         infra-01 = "x86_64-linux";
-        deploy-01 = "x86_64-linux";
+        prod-01 = "x86_64-linux";
+        prod-02 = "x86_64-linux";
         snoopy = "x86_64-linux";
         bus-sign-display = "aarch64-linux";
       };

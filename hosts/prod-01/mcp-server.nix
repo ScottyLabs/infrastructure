@@ -22,8 +22,4 @@
     after = [ "bao-agent.service" ];
     wants = [ "bao-agent.service" ];
   };
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> deploy-01-setup
