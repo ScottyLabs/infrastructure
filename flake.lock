@@ -3135,11 +3135,19 @@
         ]
       },
       "locked": {
+<<<<<<< HEAD
+        "lastModified": 1774728867,
+        "narHash": "sha256-j/v4Ty1KfbtJCU96xiSDiOrxD1DfpEqixUErFhQYj1A=",
+        "owner": "ScottyLabs",
+        "repo": "voting-app",
+        "rev": "ed75d057f65efdde86fb411b3d0d29aa5d37f534",
+=======
         "lastModified": 1774649757,
         "narHash": "sha256-BvboHlcy5QYXzqd36qSRSnFIXmcEWQRqbtu8eNgjC0I=",
         "owner": "ScottyLabs",
         "repo": "voting-app",
         "rev": "61ed2dafc5f6a913874823bb5ed04a68eb12716c",
+>>>>>>> deploy-01-setup
         "type": "github"
       },
       "original": {
