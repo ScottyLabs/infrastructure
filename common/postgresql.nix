@@ -25,7 +25,7 @@ in
     services.postgresql = {
       enable = true;
       package = pkgs.postgresql_16;
-      extraPlugins = ps: [ ps.pg_uuidv7 ];
+      extensions = ps: [ ps.pg_uuidv7 ];
 
       ensureDatabases = cfg.databases;
 
