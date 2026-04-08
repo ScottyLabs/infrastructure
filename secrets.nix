@@ -12,8 +12,7 @@ let
 
   hosts = [
     infra-01
-    prod-01
-    prod-02
+    deploy-01
     snoopy
   ];
 in
@@ -34,13 +33,9 @@ in
   "secrets/infra-01/bao-role-id.age".publicKeys = admins ++ [ infra-01 ];
   "secrets/infra-01/bao-secret-id.age".publicKeys = admins ++ [ infra-01 ];
 
-  # prod-01
-  "secrets/prod-01/bao-role-id.age".publicKeys = admins ++ [ prod-01 ];
-  "secrets/prod-01/bao-secret-id.age".publicKeys = admins ++ [ prod-01 ];
-
-  # prod-02
-  "secrets/prod-02/bao-role-id.age".publicKeys = admins ++ [ prod-02 ];
-  "secrets/prod-02/bao-secret-id.age".publicKeys = admins ++ [ prod-02 ];
+  # deploy-01
+  "secrets/deploy-01/bao-role-id.age".publicKeys = admins ++ [ deploy-01 ];
+  "secrets/deploy-01/bao-secret-id.age".publicKeys = admins ++ [ deploy-01 ];
 
   # snoopy
   "secrets/snoopy/bao-role-id.age".publicKeys = admins ++ [ snoopy ];
