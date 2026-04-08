@@ -75,6 +75,10 @@
       url = "git+https://codeberg.org/ScottyLabs/terrier";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    kennel = {
+      url = "git+https://codeberg.org/ScottyLabs/kennel";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -96,6 +100,7 @@
       internet-archive,
       groupme-mirror,
       terrier,
+      kennel,
       ...
     }:
     let
@@ -122,6 +127,7 @@
               internet-archive
               groupme-mirror
               terrier
+              kennel
               ;
           };
           modules = [
