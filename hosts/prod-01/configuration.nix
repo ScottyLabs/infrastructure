@@ -8,6 +8,7 @@
     ./internet-archive.nix
     ./groupme-mirror.nix
     ./bus-sign.nix
+    ./cmugpt-backend.nix
     ./voting-app.nix
   ];
 

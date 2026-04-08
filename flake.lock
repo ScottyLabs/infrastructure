@@ -380,6 +380,23 @@
         "type": "github"
       }
     },
+    "cmugpt-agent": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "upstream": "upstream"
+      },
+      "locked": {
+        "path": "./nix/cmugpt-agent",
+        "type": "path"
+      },
+      "original": {
+        "path": "./nix/cmugpt-agent",
+        "type": "path"
+      },
+      "parent": []
+    },
     "comin": {
       "inputs": {
         "flake-compat": "flake-compat_4",
@@ -2706,6 +2723,7 @@
       "inputs": {
         "agenix": "agenix",
         "bus-sign": "bus-sign",
+        "cmugpt-agent": "cmugpt-agent",
         "comin": "comin",
         "dalmatian": "dalmatian",
         "discord-verify": "discord-verify",
@@ -3098,6 +3116,22 @@
       "original": {
         "owner": "numtide",
         "repo": "treefmt-nix",
+        "type": "github"
+      }
+    },
+    "upstream": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1775337401,
+        "narHash": "sha256-PKvaMPqjWdnW7JZ1rD3DWBQPZUnRyvT1CMLY/xNZF/0=",
+        "owner": "ScottyLabs",
+        "repo": "cmugpt-agent",
+        "rev": "661d117d0f9265fbc27ed0cf72221b8de84fa6bb",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ScottyLabs",
+        "repo": "cmugpt-agent",
         "type": "github"
       }
     },

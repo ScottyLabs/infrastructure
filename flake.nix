@@ -55,6 +55,10 @@
       url = "github:ScottyLabs/bus-sign";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    cmugpt-agent = {
+      url = "path:./nix/cmugpt-agent";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     voting-app = {
       url = "github:ScottyLabs/voting-app";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -93,6 +97,7 @@
       dalmatian,
       mcp-server,
       bus-sign,
+      cmugpt-agent,
       voting-app,
       discord-verify,
       internet-archive,
@@ -119,6 +124,7 @@
               dalmatian
               mcp-server
               bus-sign
+              cmugpt-agent
               voting-app
               discord-verify
               internet-archive
