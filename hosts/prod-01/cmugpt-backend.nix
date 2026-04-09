@@ -32,7 +32,7 @@ in
 
     environment = {
       CMUGPT_HOST = "127.0.0.1";
-      CMUGPT_PORT = "8000";
+      CMUGPT_PORT = "5000";
       CMUGPT_DEBUG = "false";
     };
 
@@ -60,7 +60,7 @@ in
       forceSSL = true;
 
       locations."/" = {
-        proxyPass = "http://127.0.0.1:8000";
+        proxyPass = "http://127.0.0.1:5000";
         proxyWebsockets = true;
         extraConfig = ''
           client_max_body_size 25m;
