@@ -53,7 +53,7 @@
       enable = true;
       cloudflare = {
         zones = {
-          "scottylabs.org" = "f8b0a968c44462e7f9128ad43151d2c4";
+          "scottylabs.org" = "ab365d7cec88f972e0b26bf59afd174f";
         };
       };
       serverIpv4 = "128.2.25.68";
