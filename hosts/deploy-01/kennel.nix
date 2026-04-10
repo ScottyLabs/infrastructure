@@ -19,6 +19,7 @@
     environmentFile = config.age.secrets.kennel.path;
 
     router = {
+      address = "0.0.0.0:8090";
       baseDomain = "scottylabs.org";
       tls = {
         enable = true;
