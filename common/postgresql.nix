@@ -37,7 +37,7 @@ in
 
     systemd.services.postgresql.postStart = lib.mkAfter (
       lib.concatMapStringsSep "\n" (db: ''
-        $PSQL -d ${db} -c 'CREATE EXTENSION IF NOT EXISTS pg_uuidv7;'
+        psql --port=${toString config.services.postgresql.settings.port} -d ${db} -c 'CREATE EXTENSION IF NOT EXISTS pg_uuidv7;'
       '') cfg.databases
     );
 

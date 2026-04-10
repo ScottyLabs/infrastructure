@@ -10,6 +10,7 @@
     ./postgresql.nix
     ./valkey.nix
     ./garage.nix
+    ./atlantis.nix
     ./tofu.nix
     ./bao-agent.nix
     ./headscale.nix
