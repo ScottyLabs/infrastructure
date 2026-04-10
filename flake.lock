@@ -593,11 +593,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1775625057,
-        "narHash": "sha256-i6BjCWsE88a7j+fw9p+Tsfuwkl8uz10xBiVKtIOmtxU=",
+        "lastModified": 1775786153,
+        "narHash": "sha256-QI7QaJYKfeWXeo51ayy9rzB+/JtexiCuzUcwTUuPvxo=",
         "owner": "ScottyLabs",
         "repo": "dalmatian",
-        "rev": "1604e1a5820f5880e5c102e96c282f3516d2f444",
+        "rev": "43face9f7f530e11b6285573226823cb438dd8e2",
         "type": "github"
       },
       "original": {
@@ -2126,11 +2126,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1775686190,
-        "narHash": "sha256-9vMxyRc+WHTgoOnRK+cWPtfJR2g0plr5waqJnRRnlSo=",
+        "lastModified": 1775849153,
+        "narHash": "sha256-oQzT6hS0ChYit1zBs4WIbLBydCP1o+cshJwrjEz0zMY=",
         "ref": "refs/heads/main",
-        "rev": "09dccaea6c2f9e6ca7118b2554456c373c6efbb2",
-        "revCount": 61,
+        "rev": "9101f1060b754b379a97aabd340cb7e19c22094e",
+        "revCount": 66,
         "type": "git",
         "url": "https://codeberg.org/ScottyLabs/kennel"
       },
