@@ -12,6 +12,13 @@
     mode = "0440";
   };
 
+  age.secrets.kennel-webhook-secret = {
+    file = ../../secrets/deploy-01/kennel-webhook-secret.age;
+    owner = "kennel";
+    group = "kennel";
+    mode = "0400";
+  };
+
   services.kennel = {
     enable = true;
     package = kennel.packages.x86_64-linux.kennel;
@@ -36,6 +43,12 @@
       };
     };
 
+    projects.kennel = {
+      repoUrl = "https://codeberg.org/ScottyLabs/kennel";
+      repoType = "forgejo";
+      webhookSecretFile = config.age.secrets.kennel-webhook-secret.path;
+    };
+
     dns = {
       enable = true;
       cloudflare = {
@@ -44,6 +57,14 @@
         };
       };
       serverIpv4 = "128.2.25.68";
+    };
+  };
+
+  services.nginx.virtualHosts."kennel.scottylabs.org" = {
+    enableACME = true;
+    forceSSL = true;
+    locations."/webhook" = {
+      proxyPass = "http://localhost:3001";
     };
   };
 
