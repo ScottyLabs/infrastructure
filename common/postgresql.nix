@@ -24,7 +24,7 @@ in
   config = lib.mkIf (cfg.databases != [ ]) {
     services.postgresql = {
       enable = true;
-      package = pkgs.postgresql_16;
+      package = pkgs.postgresql_18;
       extensions = ps: [ ps.pg_uuidv7 ];
 
       ensureDatabases = cfg.databases;
