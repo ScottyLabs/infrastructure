@@ -35,6 +35,12 @@ in
       }) cfg.databases;
     };
 
+    systemd.services.postgresql.postStart = lib.mkAfter (
+      lib.concatMapStringsSep "\n" (db: ''
+        $PSQL -d ${db} -c 'CREATE EXTENSION IF NOT EXISTS pg_uuidv7;'
+      '') cfg.databases
+    );
+
     services.pgadmin = {
       enable = true;
       initialEmail = "admin@scottylabs.org";
