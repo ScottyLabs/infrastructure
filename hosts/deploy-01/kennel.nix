@@ -18,13 +18,15 @@
     database.createLocally = false;
     environmentFile = config.age.secrets.kennel.path;
 
+    api.port = 3001;
+
     router = {
       address = "0.0.0.0:8090";
       baseDomain = "scottylabs.org";
-      tls = {
-        enable = true;
-        email = "admin@scottylabs.org";
-      };
+      # tls = {
+      #   enable = true;
+      #   email = "admin@scottylabs.org";
+      # };
     };
 
     builder = {
