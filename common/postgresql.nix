@@ -35,7 +35,8 @@ in
       }) cfg.databases;
     };
 
-    systemd.services.postgresql.postStart = lib.mkAfter (
+    # ensureDatabases runs in postgresql-setup; extensions must run after that script, not in postgresql.postStart.
+    systemd.services.postgresql-setup.postStart = lib.mkAfter (
       lib.concatMapStringsSep "\n" (db: ''
         psql --port=${toString config.services.postgresql.settings.port} -d ${db} -c 'CREATE EXTENSION IF NOT EXISTS pg_uuidv7;'
       '') cfg.databases
