@@ -13,6 +13,7 @@
     ./headscale.nix
     ./matrix.nix
     ./garage.nix
+    ./atlantis.nix
   ];
 
   # Allow building aarch64 packages via QEMU emulation

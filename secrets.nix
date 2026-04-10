@@ -29,6 +29,7 @@ in
   "secrets/infra-01/tofu-garage.age".publicKeys = admins ++ [ infra-01 ];
   "secrets/infra-01/tofu-identity.age".publicKeys = admins ++ [ infra-01 ];
   "secrets/infra-01/tofu-cloudflare.age".publicKeys = admins ++ [ infra-01 ];
+  "secrets/infra-01/atlantis.age".publicKeys = admins ++ [ infra-01 ];
   "secrets/infra-01/bao-role-id.age".publicKeys = admins ++ [ infra-01 ];
   "secrets/infra-01/bao-secret-id.age".publicKeys = admins ++ [ infra-01 ];
 
