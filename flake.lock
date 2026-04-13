@@ -154,11 +154,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1776033165,
-        "narHash": "sha256-RWb8oAyyGZHaHUFOzROGItYXvWSLPDLDvsbNL2yYiq4=",
+        "lastModified": 1776094676,
+        "narHash": "sha256-sunejLUNwPu88EHACzYY4ognqtubgEx/L9mMbaA1P4w=",
         "owner": "ScottyLabs",
         "repo": "bus-sign",
-        "rev": "0df29e5491b8a3f8a5ea9b67ddd0af197846403e",
+        "rev": "942529d15c81209f24dd877bcd35050b6a1fc2cd",
         "type": "github"
       },
       "original": {
@@ -638,11 +638,11 @@
         "rust-overlay": "rust-overlay"
       },
       "locked": {
-        "lastModified": 1775997427,
-        "narHash": "sha256-JUXHTRFoHQanKoAKvHTM4Z0YdbCnmZUGqgMPw95KxUw=",
+        "lastModified": 1776080969,
+        "narHash": "sha256-2uZxF6q0KOIH8tq3r65ZCz7dM+XYP3avtRP8IBq5zYY=",
         "owner": "cachix",
         "repo": "devenv",
-        "rev": "88ac631cf8b6582ed372b8b22e3bd12240c61f64",
+        "rev": "8d558a84fa38242a7f13781670fee1a6a8902b48",
         "type": "github"
       },
       "original": {
