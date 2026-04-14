@@ -16,6 +16,11 @@ resource "vault_policy" "governance" {
     path "sys/auth" {
       capabilities = ["read"]
     }
+
+    # Allow vault provider to create child tokens
+    path "auth/token/create" {
+      capabilities = ["create", "update"]
+    }
   EOT
 }
 
