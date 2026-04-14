@@ -12,8 +12,12 @@ resource "vault_policy" "governance" {
       capabilities = ["create", "read", "update", "delete", "list"]
     }
 
-    # Read OIDC auth backend config (for mount accessor)
+    # Read auth backend config (for mount accessor lookup)
     path "sys/auth" {
+      capabilities = ["read"]
+    }
+
+    path "sys/mounts/auth/*" {
       capabilities = ["read"]
     }
 
