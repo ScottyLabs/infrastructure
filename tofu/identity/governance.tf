@@ -12,6 +12,10 @@ resource "vault_policy" "governance" {
       capabilities = ["create", "read", "update", "delete", "list"]
     }
 
+    path "identity/group-alias/*" {
+      capabilities = ["create", "read", "update", "delete", "list"]
+    }
+
     # Read auth backend config (for mount accessor lookup)
     path "sys/auth" {
       capabilities = ["read"]
