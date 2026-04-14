@@ -44,6 +44,16 @@ locals {
   }
 }
 
+resource "cloudflare_dns_record" "kennel_wildcard" {
+  zone_id = data.cloudflare_zone.scottylabs_net.zone_id
+  name    = "*"
+  content = "128.2.25.68"
+  type    = "A"
+  ttl     = 1
+  proxied = false
+  comment = "Kennel deployment platform wildcard - managed by OpenTofu"
+}
+
 resource "cloudflare_dns_record" "a" {
   for_each = local.a_records
 

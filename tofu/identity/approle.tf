@@ -15,10 +15,10 @@ resource "vault_policy" "host" {
   name     = "host-${each.key}"
   policy   = length(each.value) > 0 ? join("\n", [
     for project in each.value : <<-EOT
-      path "secret/data/projects/${project}/prod/*" {
+      path "secret/data/secretspec/${project}/prod/*" {
         capabilities = ["read"]
       }
-      path "secret/metadata/projects/${project}/prod/*" {
+      path "secret/metadata/secretspec/${project}/prod/*" {
         capabilities = ["list", "read"]
       }
     EOT

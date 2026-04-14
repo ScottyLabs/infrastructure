@@ -16,9 +16,3 @@ resource "keycloak_openid_group_membership_protocol_mapper" "openbao_groups" {
   claim_name = "groups"
   full_path  = true
 }
-
-# Parent group for all projects
-resource "keycloak_group" "projects" {
-  realm_id = data.keycloak_realm.scottylabs.id
-  name     = "projects"
-}

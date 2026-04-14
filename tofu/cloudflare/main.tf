@@ -28,3 +28,9 @@ data "cloudflare_zone" "doggylabs" {
     name = "doggylabs.org"
   }
 }
+
+data "cloudflare_zone" "scottylabs_net" {
+  filter = {
+    name = "scottylabs.net"
+  }
+}

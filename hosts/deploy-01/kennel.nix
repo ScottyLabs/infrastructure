@@ -22,49 +22,29 @@
   services.kennel = {
     enable = true;
     package = kennel.packages.x86_64-linux.kennel;
-    database.createLocally = false;
+    webhookSecretFile = config.age.secrets.kennel-webhook-secret.path;
     environmentFile = config.age.secrets.kennel.path;
 
-    api.port = 3001;
-
-    router = {
-      address = "0.0.0.0:8090";
-      baseDomain = "scottylabs.org";
-      # tls = {
-      #   enable = true;
-      #   email = "admin@scottylabs.org";
-      # };
-    };
-
-    builder = {
-      cachix = {
-        enable = true;
-        cacheName = "scottylabs";
+    domains = {
+      ephemeral = "scottylabs.net";
+      cloudflare.zones = {
+        "scottylabs.org" = "ab365d7cec88f972e0b26bf59afd174f";
       };
     };
 
-    projects.kennel = {
-      repoUrl = "https://codeberg.org/ScottyLabs/kennel";
-      repoType = "forgejo";
-      webhookSecretFile = config.age.secrets.kennel-webhook-secret.path;
-    };
-
-    dns = {
+    builder.cachix = {
       enable = true;
-      cloudflare = {
-        zones = {
-          "scottylabs.org" = "ab365d7cec88f972e0b26bf59afd174f";
-        };
-      };
-      serverIpv4 = "128.2.25.68";
+      cacheName = "scottylabs";
     };
-  };
 
-  services.nginx.virtualHosts."kennel.scottylabs.org" = {
-    enableACME = true;
-    forceSSL = true;
-    locations."/webhook" = {
-      proxyPass = "http://127.0.0.1:3001";
+    resources.postgres = {
+      enable = true;
+      socketDir = "/run/postgresql";
+    };
+
+    secrets = {
+      enable = true;
+      vaultEndpoint = "https://secrets2.scottylabs.org";
     };
   };
 
