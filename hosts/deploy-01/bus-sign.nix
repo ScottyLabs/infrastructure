@@ -52,22 +52,14 @@ in
     };
   };
 
-  services.nginx = {
-    enable = true;
-
-    virtualHosts."bus-sign.scottylabs.org" = {
-      enableACME = true;
-      forceSSL = true;
-
-      root = busSignFrontend;
-
-      locations."/" = {
-        tryFiles = "$uri $uri/ /index.html";
-      };
-
-      locations."/predictions" = {
-        proxyPass = "http://127.0.0.1:8080";
-      };
-    };
-  };
+  services.caddy.virtualHosts."bus-sign.scottylabs.org".extraConfig = ''
+    root * ${busSignFrontend}
+    handle /predictions* {
+      reverse_proxy 127.0.0.1:8080
+    }
+    handle {
+      try_files {path} {path}/ /index.html
+      file_server
+    }
+  '';
 }

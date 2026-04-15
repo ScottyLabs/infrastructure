@@ -58,22 +58,14 @@ in
 
   scottylabs.postgresql.databases = [ "voting-app" ];
 
-  services.nginx = {
-    enable = true;
-
-    virtualHosts."voting.scottylabs.org" = {
-      enableACME = true;
-      forceSSL = true;
-
-      root = votingAppFrontend;
-
-      locations."/" = {
-        tryFiles = "$uri $uri/ /index.html";
-      };
-
-      locations."/api/" = {
-        proxyPass = "http://127.0.0.1:8081";
-      };
-    };
-  };
+  services.caddy.virtualHosts."voting.scottylabs.org".extraConfig = ''
+    root * ${votingAppFrontend}
+    handle /api/* {
+      reverse_proxy 127.0.0.1:8081
+    }
+    handle {
+      try_files {path} {path}/ /index.html
+      file_server
+    }
+  '';
 }
