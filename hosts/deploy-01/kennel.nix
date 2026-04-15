@@ -22,6 +22,7 @@
   services.kennel = {
     enable = true;
     package = kennel.packages.x86_64-linux.kennel;
+    devenvPackage = kennel.packages.x86_64-linux.devenv;
     webhookSecretFile = config.age.secrets.kennel-webhook-secret.path;
     environmentFile = config.age.secrets.kennel.path;
     api.port = 3001;
