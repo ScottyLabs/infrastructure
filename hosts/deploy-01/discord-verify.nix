@@ -21,18 +21,9 @@
     wants = [ "bao-agent.service" ];
   };
 
-  services.nginx = {
-    enable = true;
-
-    virtualHosts."verify.scottylabs.org" = {
-      enableACME = true;
-      forceSSL = true;
-      locations."/" = {
-        proxyPass = "http://localhost:3000";
-        proxyWebsockets = true;
-      };
-    };
-  };
+  services.caddy.virtualHosts."verify.scottylabs.org".extraConfig = ''
+    reverse_proxy localhost:3000
+  '';
 
   scottylabs.valkey.servers = [ "discord-verify" ];
 }
