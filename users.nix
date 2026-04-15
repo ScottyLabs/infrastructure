@@ -6,13 +6,6 @@
     };
     sshPublicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDwjDM2gTgro+aN81I65BFexfLXq1u/8AJ3PmCTX5X/a i@anish.land";
   };
-  jefferyo = {
-    git = {
-      name = "Jeffery Oo";
-      email = "jefferyo@andrew.cmu.edu";
-    };
-    sshPublicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILdJH1Tg/yryBKrmCgtJk02cfj6+OBIqfPHLuKQvtfyu oojefferywm@protonmail.com";
-  };
   maxwen = {
     git = {
       name = "Max Wen";
@@ -26,13 +19,6 @@
       email = "theo.s.urban@gmail.com";
     };
     sshPublicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA++gW8fgzwitDmKsdZdVfXWMD1b558g8KIqOPIGrIdN tsurban@andrew.cmu.edu";
-  };
-  vboling = {
-    git = {
-      name = "Vincent Radford";
-      email = "vrad-general";
-    };
-    sshPublicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFvX35yP31JzF5aVQC6C7uD6ewV2K5R+9NgqQK2Cg3Jb vrad-general";
   };
   ryanli2 = {
     git = {
