@@ -8,8 +8,16 @@ resource "vault_policy" "governance" {
     }
 
     # Manage identity groups and aliases
+    path "identity/group" {
+      capabilities = ["create", "update"]
+    }
+
     path "identity/group/*" {
       capabilities = ["create", "read", "update", "delete", "list"]
+    }
+
+    path "identity/group-alias" {
+      capabilities = ["create", "update"]
     }
 
     path "identity/group-alias/*" {
