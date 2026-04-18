@@ -1,8 +1,10 @@
 { bus-sign, ... }:
 
 let
-  busSignBackend = bus-sign.packages.x86_64-linux.busSignBackend;
-  busSignFrontend = bus-sign.packages.x86_64-linux.busSignFrontend;
+  bs = bus-sign.packages.x86_64-linux;
+  # bus-sign flake renamed packages: busSign* → backend / frontend
+  busSignBackend = if bs ? backend then bs.backend else bs.busSignBackend;
+  busSignFrontend = if bs ? frontend then bs.frontend else bs.busSignFrontend;
 in
 {
   scottylabs.bao-agent = {
