@@ -51,10 +51,6 @@
       url = "github:ScottyLabs/mcp-server";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    bus-sign = {
-      url = "github:ScottyLabs/bus-sign";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     voting-app = {
       url = "github:ScottyLabs/voting-app";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -94,7 +90,6 @@
       headplane,
       dalmatian,
       mcp-server,
-      bus-sign,
       voting-app,
       discord-verify,
       internet-archive,
@@ -121,7 +116,6 @@
               headplane
               dalmatian
               mcp-server
-              bus-sign
               voting-app
               discord-verify
               internet-archive
