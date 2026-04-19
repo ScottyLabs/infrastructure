@@ -46,7 +46,7 @@
 
     secrets = {
       enable = true;
-      vaultEndpoint = "vault://secrets2.scottylabs.org/secret";
+      vaultEndpoint = "vault://secrets2.scottylabs.org/secret?auth=approle";
     };
   };
 
