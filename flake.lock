@@ -2265,11 +2265,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1776558209,
-        "narHash": "sha256-iwMOHzZpdK48XnfdJJxbh5/TjAti3YdBB7HYLpFqfjo=",
+        "lastModified": 1776633741,
+        "narHash": "sha256-s1Vxt5/Hcswehv/+QZdxDFgg6SFDS/m71SSqFbREOx8=",
         "ref": "refs/heads/main",
-        "rev": "b6d80da7efff6338d10dbd527a1f75b2c324a936",
-        "revCount": 60,
+        "rev": "b47efc44ab035828f9a18657945f40e3f16c4a48",
+        "revCount": 63,
         "type": "git",
         "url": "https://codeberg.org/ScottyLabs/terrier"
       },
