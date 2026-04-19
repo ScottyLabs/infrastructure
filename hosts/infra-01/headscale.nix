@@ -72,11 +72,6 @@ in
         key = "SECRET";
         user = "headscale";
       };
-      headplane-agent-key = {
-        path = "headplane-agent-key";
-        key = "PREAUTH_KEY";
-        user = "headscale";
-      };
       headplane-api-key = {
         path = "headplane-api-key";
         key = "API_KEY";
@@ -186,7 +181,6 @@ in
         proc.enabled = true;
         agent = {
           enabled = true;
-          pre_authkey_path = "/run/secrets/headplane-agent-key";
         };
       };
     };
