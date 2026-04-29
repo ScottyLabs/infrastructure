@@ -1425,11 +1425,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1777351139,
-        "narHash": "sha256-z+PVS0BlVyJEOYQlrZJy9xKO/uZG35ON0jeYivxWfKQ=",
+        "lastModified": 1777430519,
+        "narHash": "sha256-Z146YHbxTfprl35uUYl7ZQ+VNvJ8ZGVUiE4Eu3HMynw=",
         "ref": "refs/heads/main",
-        "rev": "826a188fbf95046375f77d51ba1be5010a149d48",
-        "revCount": 113,
+        "rev": "c6b106c72e669dd82ec97f2662393d6d802c4936",
+        "revCount": 115,
         "type": "git",
         "url": "https://codeberg.org/ScottyLabs/kennel"
       },
@@ -2505,11 +2505,11 @@
         "treefmt-nix": "treefmt-nix_8"
       },
       "locked": {
-        "lastModified": 1777406222,
-        "narHash": "sha256-rI+KVZotxoEUPsVqT5yPyGOQeofLWxaINQ4L0e8G3/8=",
+        "lastModified": 1777499626,
+        "narHash": "sha256-O8d+FQZkslcm9KKEsIT9hRJUQvrzJD1epM4xmWWC16k=",
         "owner": "ScottyLabs",
         "repo": "voting-app",
-        "rev": "f75d8cce0e1f5b1a2f082ad287356bf69263993f",
+        "rev": "3cc757e35633e1af741b67365aa94178c55d178f",
         "type": "github"
       },
       "original": {
