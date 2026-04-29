@@ -2505,11 +2505,11 @@
         "treefmt-nix": "treefmt-nix_8"
       },
       "locked": {
-        "lastModified": 1777406222,
+        "lastModified": 1777430201,
         "narHash": "sha256-rI+KVZotxoEUPsVqT5yPyGOQeofLWxaINQ4L0e8G3/8=",
         "owner": "ScottyLabs",
         "repo": "voting-app",
-        "rev": "f75d8cce0e1f5b1a2f082ad287356bf69263993f",
+        "rev": "df583f7cc9576debfe0c47d7c1fc462111b292ec",
         "type": "github"
       },
       "original": {
