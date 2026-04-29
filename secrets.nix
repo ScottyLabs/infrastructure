@@ -38,6 +38,7 @@ in
   "secrets/deploy-01/bao-secret-id.age".publicKeys = admins ++ [ deploy-01 ];
   "secrets/deploy-01/kennel.age".publicKeys = admins ++ [ deploy-01 ];
   "secrets/deploy-01/kennel-webhook-secret.age".publicKeys = admins ++ [ deploy-01 ];
+  "secrets/deploy-01/kennel-forgejo-token.age".publicKeys = admins ++ [ deploy-01 ];
 
   # snoopy
   "secrets/snoopy/bao-role-id.age".publicKeys = admins ++ [ snoopy ];

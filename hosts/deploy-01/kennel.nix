@@ -19,6 +19,13 @@
     mode = "0400";
   };
 
+  age.secrets.kennel-forgejo-token = {
+    file = ../../secrets/deploy-01/kennel-forgejo-token.age;
+    owner = "kennel";
+    group = "kennel";
+    mode = "0400";
+  };
+
   services.kennel = {
     enable = true;
     package = kennel.packages.x86_64-linux.kennel;
@@ -48,6 +55,8 @@
       enable = true;
       vaultEndpoint = "vault://secrets2.scottylabs.org/secret?auth=approle";
     };
+
+    forgejo.apiTokenFile = config.age.secrets.kennel-forgejo-token.path;
   };
 
   scottylabs.postgresql.databases = [ "kennel" ];
