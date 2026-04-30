@@ -40,7 +40,7 @@
         publicIp = "128.2.25.68";
         zones = {
           "scottylabs.org" = "ab365d7cec88f972e0b26bf59afd174f";
-          "cmu.quest" = "dbedf6cff671263c0d6f69b482895ee4";
+          "cmu.quest" = "2bf8696c7e2fdc56f9b9e98443f001cc";
         };
       };
     };
