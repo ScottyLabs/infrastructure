@@ -1425,11 +1425,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1777516880,
-        "narHash": "sha256-XQHT8ibg4QXSmwWSwJDqDL/ZrVYrE+8zJNbYXWZA6bs=",
+        "lastModified": 1777518182,
+        "narHash": "sha256-ole18169G0jaHwiH+yXJpOBYghE0lZI0OJTowYDhfvE=",
         "ref": "refs/heads/main",
-        "rev": "d6c0e14a90766e1e1115b30db12511d6a0f98b1e",
-        "revCount": 120,
+        "rev": "d56df1efd9d86ab679902fca41727400c04c6e13",
+        "revCount": 121,
         "type": "git",
         "url": "https://codeberg.org/ScottyLabs/kennel"
       },
