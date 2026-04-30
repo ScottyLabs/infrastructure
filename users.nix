@@ -34,4 +34,11 @@
     };
     sshPublicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJei93BdSEZ/IfrOx10yzghN9tuiX3fvg/wd6zZxP8eR yuxiangh142857@gmail.com";
   };
+  tkanz = {
+    git = {
+      name = "Thomas Kanz";
+      email = "sunfishtk@gmail.com";
+    };
+    sshPublicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHrIsBlUeyAUNdk5qWQvd/aTWksrFPr4z8zdExiDajES sunfishtk@gmail.com";
+  };
 }
