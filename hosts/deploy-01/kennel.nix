@@ -61,6 +61,26 @@
     };
 
     forgejo.apiTokenFile = config.age.secrets.kennel-forgejo-token.path;
+
+    keycloak = {
+      url = "https://idp.scottylabs.org";
+      adminClientId = "kennel";
+      adminClientSecretFile = "/run/secrets/kennel-keycloak-admin";
+    };
+  };
+
+  scottylabs.bao-agent = {
+    enable = true;
+    infraSecrets.kennel-keycloak-admin = {
+      path = "kennel-keycloak-admin";
+      key = "CLIENT_SECRET";
+      user = "kennel";
+    };
+  };
+
+  systemd.services.kennel = {
+    after = [ "bao-agent.service" ];
+    wants = [ "bao-agent.service" ];
   };
 
   scottylabs.postgresql.databases = [ "kennel" ];
