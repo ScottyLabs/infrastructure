@@ -39,6 +39,17 @@ in
       description = "Port for the admin API";
     };
 
+    webPort = lib.mkOption {
+      type = lib.types.port;
+      default = 3902;
+      description = ''
+        Port for the s3_web (anonymous public-read) API. Serves only
+        buckets that have been flagged via PutBucketWebsite. Routes
+        requests to a bucket by matching the Host header against the
+        bucket's globalAlias.
+      '';
+    };
+
     domain = lib.mkOption {
       type = lib.types.str;
       default = "s3.scottylabs.org";
@@ -61,6 +72,14 @@ in
         s3_api = {
           s3_region = "us-east-1";
           api_bind_addr = "[::]:${toString cfg.s3Port}";
+        };
+
+        s3_web = {
+          bind_addr = "[::]:${toString cfg.webPort}";
+          # An empty root_domain makes bucket lookup a full Host-header
+          # match against the bucket's globalAlias. Per-bucket nginx
+          # vhosts handle public hostname mapping by rewriting Host.
+          root_domain = "";
         };
 
         admin = {
