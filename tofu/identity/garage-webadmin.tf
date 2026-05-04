@@ -27,16 +27,25 @@ resource "random_password" "garage_webadmin_jwt" {
   special = false
 }
 
-# Combined env file consumed by caddy via bao-agent's project-secret template.
-# bao-agent renders /run/secrets/garage-webadmin.env with KEY=VALUE pairs by
-# uppercasing each map key.
-resource "vault_kv_secret_v2" "garage_webadmin_env" {
+# Stored under secret/data/infra/* because that is the path the all-hosts
+# `infra` vault policy grants read access to. The `secret/data/projects/*`
+# path that bao-agent's project-secret template reads from is not currently
+# routable from the per-host approle policy.
+resource "vault_kv_secret_v2" "garage_webadmin_oidc" {
   mount = "secret"
-  name  = "projects/garage-webadmin/prod/env"
+  name  = "infra/garage-webadmin-oidc"
 
   data_json = jsonencode({
-    oidc_client_secret = keycloak_openid_client.garage_webadmin.client_secret
-    jwt_shared_key     = random_password.garage_webadmin_jwt.result
+    CLIENT_SECRET = keycloak_openid_client.garage_webadmin.client_secret
+  })
+}
+
+resource "vault_kv_secret_v2" "garage_webadmin_jwt" {
+  mount = "secret"
+  name  = "infra/garage-webadmin-jwt"
+
+  data_json = jsonencode({
+    SECRET = random_password.garage_webadmin_jwt.result
   })
 }
 
