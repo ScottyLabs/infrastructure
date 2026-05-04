@@ -27,10 +27,6 @@ resource "random_password" "garage_webadmin_jwt" {
   special = false
 }
 
-# Stored under secret/data/infra/* because that is the path the all-hosts
-# `infra` vault policy grants read access to. The `secret/data/projects/*`
-# path that bao-agent's project-secret template reads from is not currently
-# routable from the per-host approle policy.
 resource "vault_kv_secret_v2" "garage_webadmin_oidc" {
   mount = "secret"
   name  = "infra/garage-webadmin-oidc"
