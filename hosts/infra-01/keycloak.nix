@@ -33,7 +33,7 @@
     };
 
     settings = {
-      hostname = "idp.scottylabs.org";
+      hostname = "https://idp.scottylabs.org";
       hostname-strict = true;
       proxy-headers = "xforwarded";
       http-enabled = true;
