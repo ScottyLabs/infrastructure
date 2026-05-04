@@ -18,9 +18,17 @@
 
   scottylabs.bao-agent = {
     enable = true;
-    secrets.garage-webadmin = {
-      project = "garage-webadmin";
-      user = "caddy";
+    infraSecrets = {
+      garage-webadmin-oidc = {
+        path = "garage-webadmin-oidc";
+        key = "CLIENT_SECRET";
+        user = "caddy";
+      };
+      garage-webadmin-jwt = {
+        path = "garage-webadmin-jwt";
+        key = "SECRET";
+        user = "caddy";
+      };
     };
   };
 
