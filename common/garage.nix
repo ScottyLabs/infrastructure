@@ -238,6 +238,12 @@ in
             (pkgs.writeShellScript "compose-garage-webadmin-env" ''
               set -eu
               umask 0077
+              for i in $(seq 1 60); do
+                if ${pkgs.curl}/bin/curl -sf -o /dev/null --max-time 2 ${cfg.webadmin.keycloakMetadataUrl}; then
+                  break
+                fi
+                sleep 1
+              done
               if [ -s ${cfg.webadmin.oidcSecretFile} ] && [ -s ${cfg.webadmin.jwtSecretFile} ]; then
                 {
                   printf 'OIDC_CLIENT_SECRET=%s\n' "$(cat ${cfg.webadmin.oidcSecretFile})"
