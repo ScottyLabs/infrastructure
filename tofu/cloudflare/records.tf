@@ -11,6 +11,7 @@ locals {
     headplane   = { ip = "128.2.25.63", comment = "Headplane web UI for Headscale" }
     s3          = { ip = "128.2.25.63", comment = "Garage S3-compatible object storage" }
     assets      = { ip = "128.2.25.63", comment = "Garage public-read website endpoint for the scottylabs-assets bucket" }
+    garage      = { ip = "128.2.25.63", comment = "Garage web admin UI fronted by caddy with Keycloak OIDC" }
     atlantis    = { ip = "128.2.25.63", comment = "Atlantis OpenTofu PR automation" }
 
     # hosts/deploy-01
