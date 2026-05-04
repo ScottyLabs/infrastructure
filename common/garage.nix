@@ -186,6 +186,7 @@ in
               client_secret {env.OIDC_CLIENT_SECRET}
               scopes openid email profile
               metadata_url ${cfg.webadmin.keycloakMetadataUrl}
+              disable key verification
             }
 
             authentication portal garageportal {
