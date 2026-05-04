@@ -195,7 +195,7 @@ in
               enable identity provider keycloak
               cookie domain ${cfg.webadmin.domain}
               transform user {
-                match origin keycloak
+                match origin ${cfg.webadmin.keycloakRealm}
                 action add role authp/user
               }
             }
