@@ -209,6 +209,8 @@ in
         '';
 
         virtualHosts.${cfg.webadmin.domain}.extraConfig = ''
+          redir /auth/login https://${cfg.webadmin.domain}/auth/oauth2/${cfg.webadmin.keycloakRealm}/ 302
+
           route /auth* {
             authenticate with garageportal
           }
