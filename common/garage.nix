@@ -101,6 +101,12 @@ in
         description = "Keycloak base URL without the realm path";
       };
 
+      keycloakMetadataUrl = lib.mkOption {
+        type = lib.types.str;
+        default = "http://127.0.0.1:8080/realms/scottylabs/.well-known/openid-configuration";
+        description = "Direct backchannel URL caddy uses to fetch Keycloak OIDC metadata";
+      };
+
       oidcSecretFile = lib.mkOption {
         type = lib.types.path;
         default = "/run/secrets/garage-webadmin-oidc";
@@ -179,7 +185,7 @@ in
               client_id garage-webadmin
               client_secret {env.OIDC_CLIENT_SECRET}
               scopes openid email profile
-              metadata_url ${cfg.webadmin.keycloakIssuerBase}/realms/${cfg.webadmin.keycloakRealm}/.well-known/openid-configuration
+              metadata_url ${cfg.webadmin.keycloakMetadataUrl}
             }
 
             authentication portal garageportal {
@@ -241,8 +247,8 @@ in
             '')
           ];
         };
-        after = [ "bao-agent.service" ];
-        wants = [ "bao-agent.service" ];
+        after = [ "bao-agent.service" "keycloak.service" ];
+        wants = [ "bao-agent.service" "keycloak.service" ];
       };
     })
   ];
