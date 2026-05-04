@@ -214,8 +214,14 @@ in
       };
 
       systemd.services.caddy = {
+        # Leading "-" makes the env file optional. On first deploy the file
+        # has not yet been rendered by bao-agent (which depends on
+        # tofu-identity having run, which depends on caddy already serving
+        # idp.scottylabs.org), and a hard requirement here would break every
+        # caddy-served vhost. Once the file appears, run
+        # `systemctl restart caddy` to pick up the OIDC env vars.
         serviceConfig.EnvironmentFile = [
-          cfg.webadmin.environmentFile
+          "-${cfg.webadmin.environmentFile}"
         ];
         after = [ "bao-agent.service" ];
         wants = [ "bao-agent.service" ];
