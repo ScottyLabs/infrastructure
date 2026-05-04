@@ -9,7 +9,7 @@ resource "keycloak_openid_client" "garage_webadmin" {
   direct_access_grants_enabled = false
 
   valid_redirect_uris = [
-    "https://garage.scottylabs.org/auth/oauth2/keycloak/authorization-code-callback"
+    "https://garage.scottylabs.org/auth/oauth2/scottylabs/authorization-code-callback"
   ]
 }
 
