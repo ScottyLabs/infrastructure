@@ -88,22 +88,14 @@ in
       };
     };
 
-    services.nginx = {
+    services.caddy = {
       enable = true;
-      virtualHosts.${cfg.domain} = {
-        enableACME = true;
-        forceSSL = true;
-        locations."/" = {
-          proxyPass = "http://localhost:${toString cfg.s3Port}";
-          extraConfig = ''
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-            client_max_body_size 100M;
-          '';
-        };
-      };
+      virtualHosts.${cfg.domain}.extraConfig = ''
+        request_body {
+          max_size 100MB
+        }
+        reverse_proxy localhost:${toString cfg.s3Port}
+      '';
     };
   };
 }

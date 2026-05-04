@@ -16,11 +16,6 @@ let
     # Tell other homeservers where to find this one
     "m.server" = "${matrixDomain}:443";
   };
-  mkWellKnown = data: ''
-    default_type application/json;
-    add_header Access-Control-Allow-Origin "*";
-    return 200 '${builtins.toJSON data}';
-  '';
 in
 {
   nixpkgs.config.permittedInsecurePackages = [
@@ -110,27 +105,20 @@ in
     mode = "0400";
   };
 
-  services.nginx.virtualHosts."${domain}" = {
-    forceSSL = true;
-    enableACME = true;
-    locations."= /.well-known/matrix/server".extraConfig = mkWellKnown serverConfig;
-    locations."= /.well-known/matrix/client".extraConfig = mkWellKnown clientConfig;
-  };
+  services.caddy.virtualHosts."${domain}".extraConfig = ''
+    header /.well-known/matrix/* Content-Type application/json
+    header /.well-known/matrix/* Access-Control-Allow-Origin *
 
-  services.nginx.virtualHosts."${matrixDomain}" = {
-    forceSSL = true;
-    enableACME = true;
-    locations."/" = {
-      proxyPass = "http://127.0.0.1:8008";
-      extraConfig = ''
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_set_header Host $host;
-        client_max_body_size 100M;
-      '';
-      proxyWebsockets = true;
-    };
-  };
+    respond /.well-known/matrix/server `${builtins.toJSON serverConfig}` 200
+    respond /.well-known/matrix/client `${builtins.toJSON clientConfig}` 200
+  '';
+
+  services.caddy.virtualHosts."${matrixDomain}".extraConfig = ''
+    request_body {
+      max_size 100MB
+    }
+    reverse_proxy 127.0.0.1:8008
+  '';
 
   services.mautrix-discord = {
     enable = true;

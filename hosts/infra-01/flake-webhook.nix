@@ -71,11 +71,7 @@ in
     };
   };
 
-  services.nginx.virtualHosts."webhooks.scottylabs.org" = {
-    enableACME = true;
-    forceSSL = true;
-    locations."/" = {
-      proxyPass = "http://127.0.0.1:9000";
-    };
-  };
+  services.caddy.virtualHosts."webhooks.scottylabs.org".extraConfig = ''
+    reverse_proxy 127.0.0.1:9000
+  '';
 }

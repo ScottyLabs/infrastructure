@@ -82,16 +82,11 @@ in
     };
     users.groups.atlantis = { };
 
-    services.nginx = {
+    services.caddy = {
       enable = true;
-      virtualHosts.${cfg.domain} = {
-        enableACME = true;
-        forceSSL = true;
-        locations."/" = {
-          proxyPass = "http://localhost:${toString cfg.port}";
-          proxyWebsockets = true;
-        };
-      };
+      virtualHosts.${cfg.domain}.extraConfig = ''
+        reverse_proxy localhost:${toString cfg.port}
+      '';
     };
   };
 }
