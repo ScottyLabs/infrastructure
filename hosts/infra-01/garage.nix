@@ -5,7 +5,13 @@
     enable = true;
     environmentFile = config.age.secrets.garage.path;
     webadmin = {
-      enable = true;
+      # Re-enable after tofu-identity has populated
+      # secret/data/projects/garage-webadmin/prod/env in OpenBao and
+      # bao-agent has rendered /run/secrets/garage-webadmin.env. caddy-security
+      # rejects empty OIDC_CLIENT_SECRET / JWT_SHARED_KEY at config parse time,
+      # so enabling this before the secrets exist crashes caddy and takes down
+      # every other vhost on infra-01.
+      enable = false;
       domain = "garage.scottylabs.org";
     };
   };
