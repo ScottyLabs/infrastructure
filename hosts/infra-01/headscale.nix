@@ -197,31 +197,16 @@ in
     ];
   };
 
-  services.nginx.virtualHosts = {
-    "headscale.scottylabs.org" = {
-      enableACME = true;
-      forceSSL = true;
-      locations."/" = {
-        proxyPass = "http://127.0.0.1:${toString config.services.headscale.port}";
-        proxyWebsockets = true;
-        extraConfig = ''
-          proxy_set_header Host $host;
-          proxy_set_header X-Real-IP $remote_addr;
-          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-          proxy_set_header X-Forwarded-Proto $scheme;
-          proxy_buffering off;
-        '';
-      };
-    };
+  services.caddy.virtualHosts = {
+    "headscale.scottylabs.org".extraConfig = ''
+      reverse_proxy 127.0.0.1:${toString config.services.headscale.port} {
+        flush_interval -1
+      }
+    '';
 
-    "headplane.scottylabs.org" = {
-      enableACME = true;
-      forceSSL = true;
-      locations."/" = {
-        proxyPass = "http://127.0.0.1:3100";
-        proxyWebsockets = true;
-      };
-    };
+    "headplane.scottylabs.org".extraConfig = ''
+      reverse_proxy 127.0.0.1:3100
+    '';
   };
 
   scottylabs.postgresql.databases = [ "headscale" ];

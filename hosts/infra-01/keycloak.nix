@@ -60,27 +60,13 @@
     ];
   };
 
-  services.nginx = {
+  services.caddy = {
     enable = true;
-
-    virtualHosts."idp.scottylabs.org" = {
-      forceSSL = true;
-      enableACME = true;
-      locations."/" = {
-        proxyPass = "http://127.0.0.1:8080";
-        extraConfig = ''
-          proxy_set_header Host $host;
-          proxy_set_header X-Real-IP $remote_addr;
-          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-          proxy_set_header X-Forwarded-Proto $scheme;
-          proxy_set_header X-Forwarded-Host $host;
-          proxy_set_header X-Forwarded-Port $server_port;
-          proxy_buffer_size 128k;
-          proxy_buffers 4 256k;
-          proxy_busy_buffers_size 256k;
-        '';
-      };
-    };
+    virtualHosts."idp.scottylabs.org".extraConfig = ''
+      reverse_proxy 127.0.0.1:8080 {
+        header_up X-Forwarded-Port {server_port}
+      }
+    '';
   };
 
   scottylabs.postgresql.databases = [ "keycloak" ];

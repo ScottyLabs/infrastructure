@@ -58,14 +58,9 @@
     '';
   };
 
-  services.nginx.virtualHosts."secrets2.scottylabs.org" = {
-    enableACME = true;
-    forceSSL = true;
-    locations."/" = {
-      proxyPass = "http://127.0.0.1:8200";
-      proxyWebsockets = true;
-    };
-  };
+  services.caddy.virtualHosts."secrets2.scottylabs.org".extraConfig = ''
+    reverse_proxy 127.0.0.1:8200
+  '';
 
   scottylabs.postgresql.databases = [ "openbao" ];
 }
