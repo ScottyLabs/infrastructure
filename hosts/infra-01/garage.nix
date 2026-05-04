@@ -4,6 +4,18 @@
   scottylabs.garage = {
     enable = true;
     environmentFile = config.age.secrets.garage.path;
+    webadmin = {
+      enable = true;
+      domain = "garage.scottylabs.org";
+    };
+  };
+
+  scottylabs.bao-agent = {
+    enable = true;
+    secrets.garage-webadmin = {
+      project = "garage-webadmin";
+      user = "caddy";
+    };
   };
 
   age.secrets.garage = {
