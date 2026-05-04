@@ -27,10 +27,10 @@ output "governance_secret_access_key" {
 
 # Durable, org-wide bucket for static assets that outlive any single
 # kennel deployment (team-page photos, etc.). Anonymous public read is
-# enabled by aws_s3_bucket_website_configuration below, which calls the
-# S3-standard PutBucketWebsite. Garage serves anonymous traffic for
-# website-flagged buckets through its s3_web listener (configured in
-# common/garage.nix), not through the s3_api endpoint at s3.scottylabs.org.
+# enabled by calling the garage admin API once manually after the bucket
+# is created, since the henrywhitaker3/garage provider does not expose
+# website configuration. The exact request is documented in
+# docs/troubleshooting.md under "Enabling website mode on a bucket".
 resource "garage_bucket" "scottylabs_assets" {
   name = "scottylabs-assets"
 }
@@ -46,16 +46,6 @@ resource "garage_permission" "scottylabs_assets_writer" {
   read          = true
   write         = true
   owner         = true
-}
-
-resource "aws_s3_bucket_website_configuration" "scottylabs_assets" {
-  bucket = garage_bucket.scottylabs_assets.name
-
-  index_document {
-    suffix = "index.html"
-  }
-
-  depends_on = [garage_permission.scottylabs_assets_writer]
 }
 
 output "scottylabs_assets_writer_access_key_id" {
