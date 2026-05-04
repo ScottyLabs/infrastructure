@@ -223,21 +223,20 @@ in
 
       systemd.services.caddy = {
         serviceConfig = {
+          RuntimeDirectory = "caddy";
+          RuntimeDirectoryMode = "0750";
           EnvironmentFile = [
             "-${cfg.webadmin.runtimeEnvFile}"
           ];
           ExecStartPre = [
             (pkgs.writeShellScript "compose-garage-webadmin-env" ''
               set -eu
-              install -d -m 0750 -o caddy -g caddy /run/caddy
+              umask 0077
               if [ -s ${cfg.webadmin.oidcSecretFile} ] && [ -s ${cfg.webadmin.jwtSecretFile} ]; then
                 {
                   printf 'OIDC_CLIENT_SECRET=%s\n' "$(cat ${cfg.webadmin.oidcSecretFile})"
                   printf 'JWT_SHARED_KEY=%s\n' "$(cat ${cfg.webadmin.jwtSecretFile})"
-                } > ${cfg.webadmin.runtimeEnvFile}.tmp
-                chown caddy:caddy ${cfg.webadmin.runtimeEnvFile}.tmp
-                chmod 0440 ${cfg.webadmin.runtimeEnvFile}.tmp
-                mv ${cfg.webadmin.runtimeEnvFile}.tmp ${cfg.webadmin.runtimeEnvFile}
+                } > ${cfg.webadmin.runtimeEnvFile}
               fi
             '')
           ];
