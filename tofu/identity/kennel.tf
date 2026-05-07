@@ -13,11 +13,11 @@ resource "vault_policy" "kennel" {
     # here after reconciling each client; secretspec then resolves them like
     # any other declared secret.
     path "secret/data/secretspec/+/+/OIDC_CLIENT_ID" {
-      capabilities = ["create", "update"]
+      capabilities = ["create", "update", "read"]
     }
 
     path "secret/data/secretspec/+/+/OIDC_CLIENT_SECRET" {
-      capabilities = ["create", "update"]
+      capabilities = ["create", "update", "read"]
     }
   EOT
 }
