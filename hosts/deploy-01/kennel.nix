@@ -84,4 +84,11 @@
   };
 
   scottylabs.postgresql.databases = [ "kennel" ];
+
+  services.postgresql.ensureUsers = [
+    {
+      name = "kennel";
+      ensureClauses.createdb = true;
+    }
+  ];
 }
