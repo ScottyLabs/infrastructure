@@ -1,0 +1,35 @@
+name: Lint dashboards and alerts
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: docker
+    steps:
+      - uses: https://code.forgejo.org/actions/checkout@v4
+
+      - name: Validate dashboard JSON
+        run: |
+          set -euo pipefail
+          fail=0
+          for f in $(find dashboards -name '*.json' 2>/dev/null); do
+            if ! jq empty "$f"; then
+              echo "Invalid JSON: $f"
+              fail=1
+            fi
+          done
+          exit $fail
+
+      - name: Validate alert YAML
+        run: |
+          set -euo pipefail
+          fail=0
+          for f in $(find alerts -name '*.yaml' -o -name '*.yml' 2>/dev/null); do
+            if ! python3 -c "import yaml,sys; yaml.safe_load(open('$f'))"; then
+              echo "Invalid YAML: $f"
+              fail=1
+            fi
+          done
+          exit $fail

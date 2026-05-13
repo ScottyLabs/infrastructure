@@ -1,0 +1,16 @@
+# Nix / devenv
+.devenv/
+.devenv.flake.nix
+.pre-commit-config.yaml
+result
+result-*
+
+# AI
+.mcp.json
+.claude
+
+# direnv
+.direnv/
+
+# OS
+.DS_Store
