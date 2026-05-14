@@ -22,12 +22,14 @@
     ./node-exporter.nix
     ./systemd-exporter.nix
     ./alloy.nix
+    ./cadvisor.nix
   ];
 
   scottylabs.nodeExporter.enable = true;
   scottylabs.systemdExporter.enable = true;
   scottylabs.alloy.enable = true;
   scottylabs.otelCollector.enable = true;
+  scottylabs.cadvisor.enable = true;
 
   services.caddy.globalConfig = ''
     servers {
