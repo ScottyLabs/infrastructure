@@ -1,0 +1,66 @@
+{
+  "title": "OpenBao",
+  "uid": "infra-openbao",
+  "schemaVersion": 39,
+  "tags": ["infra"],
+  "timezone": "browser",
+  "time": { "from": "now-1h", "to": "now" },
+  "refresh": "30s",
+  "panels": [
+    {
+      "id": 1, "type": "stat", "title": "Sealed",
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "vault_core_unsealed" }],
+      "fieldConfig": { "defaults": { "mappings": [{ "type": "value", "options": { "0": { "text": "SEALED", "color": "red" }, "1": { "text": "unsealed", "color": "green" } } }] } }
+    },
+    {
+      "id": 2, "type": "stat", "title": "Active token count",
+      "gridPos": { "h": 6, "w": 6, "x": 6, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "vault_token_count" }],
+      "fieldConfig": { "defaults": { "unit": "short" } }
+    },
+    {
+      "id": 3, "type": "timeseries", "title": "Request rate",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "rate(vault_core_handle_request_count[5m])", "legendFormat": "requests/sec" }],
+      "fieldConfig": { "defaults": { "unit": "reqps" } }
+    },
+    {
+      "id": 4, "type": "timeseries", "title": "Request latency (p95)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 6 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "histogram_quantile(0.95, sum by (le) (rate(vault_core_handle_request_bucket[5m])))", "legendFormat": "p95" }],
+      "fieldConfig": { "defaults": { "unit": "ms" } }
+    },
+    {
+      "id": 5, "type": "timeseries", "title": "Token operations/sec",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "expr": "rate(vault_token_creation_count[5m])", "legendFormat": "create" },
+        { "expr": "rate(vault_token_revoke_count[5m])", "legendFormat": "revoke" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "ops" } }
+    },
+    {
+      "id": 6, "type": "timeseries", "title": "Audit log volume",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 14 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "rate(vault_audit_log_request_count[5m])", "legendFormat": "{{type}}" }],
+      "fieldConfig": { "defaults": { "unit": "ops" } }
+    },
+    {
+      "id": 7, "type": "timeseries", "title": "Lease activity",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "expr": "rate(vault_expire_num_leases[5m])", "legendFormat": "active leases" },
+        { "expr": "rate(vault_expire_revoke[5m])", "legendFormat": "revoked" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "short" } }
+    }
+  ]
+}

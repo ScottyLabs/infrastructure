@@ -1,0 +1,46 @@
+{
+  "title": "Headscale",
+  "uid": "infra-headscale",
+  "schemaVersion": 39,
+  "tags": ["infra"],
+  "timezone": "browser",
+  "time": { "from": "now-6h", "to": "now" },
+  "refresh": "30s",
+  "panels": [
+    {
+      "id": 1, "type": "stat", "title": "Online nodes",
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "headscale_open_connections" }],
+      "fieldConfig": { "defaults": { "unit": "short" } }
+    },
+    {
+      "id": 2, "type": "stat", "title": "Total registered",
+      "gridPos": { "h": 6, "w": 6, "x": 6, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "headscale_machine_registrations" }],
+      "fieldConfig": { "defaults": { "unit": "short" } }
+    },
+    {
+      "id": 3, "type": "timeseries", "title": "Open connections over time",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "headscale_open_connections", "legendFormat": "connections" }],
+      "fieldConfig": { "defaults": { "unit": "short" } }
+    },
+    {
+      "id": 4, "type": "timeseries", "title": "API request rate",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 6 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "sum by (path) (rate(headscale_http_requests_total[5m]))", "legendFormat": "{{path}}" }],
+      "fieldConfig": { "defaults": { "unit": "reqps" } }
+    },
+    {
+      "id": 5, "type": "timeseries", "title": "ACL policy evaluations",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "rate(headscale_acl_policy_evaluations_total[5m])", "legendFormat": "{{result}}" }],
+      "fieldConfig": { "defaults": { "unit": "ops" } }
+    }
+  ]
+}
