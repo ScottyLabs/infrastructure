@@ -1,0 +1,31 @@
+apiVersion: 1
+groups:
+  - orgId: 1
+    name: services
+    folder: alerts
+    interval: 1m
+    rules:
+      - uid: infra-service-flapping
+        title: Service flapping (>3 restarts in 1h)
+        condition: A
+        for: 5m
+        noDataState: OK
+        execErrState: Alerting
+        annotations:
+          summary: "{{ $labels.name }} on {{ $labels.instance }} has restarted {{ $values.A.Value }} times in the last hour"
+        labels:
+          severity: warning
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 3600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+              expr: increase(systemd_service_restart_total[1h]) > 3
+              instant: true
+              intervalMs: 60000
+              refId: A
