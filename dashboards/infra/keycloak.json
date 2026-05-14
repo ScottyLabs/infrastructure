@@ -8,38 +8,35 @@
   "refresh": "30s",
   "panels": [
     {
-      "id": 1, "type": "timeseries", "title": "Login attempts (success vs failure)",
+      "id": 1, "type": "timeseries", "title": "Login-action activity by status",
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [
-        { "expr": "sum by (realm) (rate(keycloak_logins_total[5m]))", "legendFormat": "success {{realm}}" },
-        { "expr": "sum by (realm, error) (rate(keycloak_failed_login_attempts[5m]))", "legendFormat": "fail {{realm}} {{error}}" }
-      ],
+      "targets": [{ "expr": "sum by (code) (rate(keycloak_response_total{resource=~\".*login-actions.*\"}[5m]))", "legendFormat": "{{code}}" }],
       "fieldConfig": { "defaults": { "unit": "ops" } }
     },
     {
-      "id": 2, "type": "timeseries", "title": "User registrations/sec",
+      "id": 2, "type": "timeseries", "title": "OIDC token-endpoint activity",
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [{ "expr": "sum by (realm) (rate(keycloak_registrations_total[5m]))", "legendFormat": "{{realm}}" }],
+      "targets": [{ "expr": "sum by (code) (rate(keycloak_response_total{resource=~\".*openid-connect.*\",method=\"POST\"}[5m]))", "legendFormat": "{{code}}" }],
       "fieldConfig": { "defaults": { "unit": "ops" } }
     },
     {
-      "id": 3, "type": "timeseries", "title": "HTTP response errors/sec",
+      "id": 3, "type": "timeseries", "title": "Total HTTP response rate by status",
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [{ "expr": "sum by (code) (rate(keycloak_response_errors_total[5m]))", "legendFormat": "{{code}}" }],
+      "targets": [{ "expr": "sum by (code) (rate(keycloak_response_total[5m]))", "legendFormat": "{{code}}" }],
+      "fieldConfig": { "defaults": { "unit": "ops", "custom": { "stacking": { "mode": "normal" } } } }
+    },
+    {
+      "id": 4, "type": "timeseries", "title": "Error responses (4xx + 5xx)",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "sum by (code, resource) (rate(keycloak_response_errors_total[5m]))", "legendFormat": "{{code}} {{resource}}" }],
       "fieldConfig": { "defaults": { "unit": "ops" } }
     },
     {
-      "id": 4, "type": "timeseries", "title": "Request duration (p95)",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [{ "expr": "histogram_quantile(0.95, sum by (le) (rate(keycloak_request_duration_bucket[5m])))", "legendFormat": "p95" }],
-      "fieldConfig": { "defaults": { "unit": "ms" } }
-    },
-    {
-      "id": 5, "type": "timeseries", "title": "JVM heap used",
+      "id": 5, "type": "timeseries", "title": "JVM heap used / committed / max",
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [
@@ -50,7 +47,7 @@
       "fieldConfig": { "defaults": { "unit": "bytes" } }
     },
     {
-      "id": 6, "type": "timeseries", "title": "DB connection pool (active vs available)",
+      "id": 6, "type": "timeseries", "title": "DB connection pool",
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [
