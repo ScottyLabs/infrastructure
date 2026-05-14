@@ -21,12 +21,12 @@
     ./otel-collector.nix
     ./node-exporter.nix
     ./systemd-exporter.nix
-    ./promtail.nix
+    ./alloy.nix
   ];
 
   scottylabs.nodeExporter.enable = true;
   scottylabs.systemdExporter.enable = true;
-  scottylabs.promtail.enable = true;
+  scottylabs.alloy.enable = true;
   scottylabs.otelCollector.enable = true;
 
   # Enforce that each host must have a disk configuration defined

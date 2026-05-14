@@ -18,6 +18,11 @@ in
       key  = "CLIENT_SECRET";
       user = "grafana";
     };
+    grafana-secret-key = {
+      path = "grafana-secret-key";
+      key  = "SECRET_KEY";
+      user = "grafana";
+    };
     loki-s3 = {
       path = "loki-s3";
       key  = "ENV";

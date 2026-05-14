@@ -29,3 +29,17 @@ resource "vault_kv_secret_v2" "grafana_oidc" {
     CLIENT_SECRET = keycloak_openid_client.grafana.client_secret
   })
 }
+
+resource "random_password" "grafana_secret_key" {
+  length  = 64
+  special = false
+}
+
+resource "vault_kv_secret_v2" "grafana_secret_key" {
+  mount = "secret"
+  name  = "infra/grafana-secret-key"
+
+  data_json = jsonencode({
+    SECRET_KEY = random_password.grafana_secret_key.result
+  })
+}
