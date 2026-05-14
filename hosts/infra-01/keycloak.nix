@@ -42,6 +42,8 @@
       http-port = 8080;
       log-level = "org.keycloak.broker:debug,org.keycloak.events:debug,org.keycloak.saml:debug,org.keycloak.federation.ldap:debug";
       features = "scripts";
+      metrics-enabled = true;
+      health-enabled = true;
     };
 
     themes = {

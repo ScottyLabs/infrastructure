@@ -130,6 +130,8 @@ in
 
       log.level = "info";
 
+      metrics_listen_addr = "127.0.0.1:9091";
+
       database = {
         type = "postgres";
         postgres = {

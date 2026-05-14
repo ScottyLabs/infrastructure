@@ -67,6 +67,32 @@ in
         job_name = "otel-collector";
         static_configs = [{ targets = [ "localhost:8888" ]; }];
       }
+      {
+        job_name = "postgres";
+        static_configs = [{ targets = [ "infra-01:9187" "deploy-01:9187" ]; }];
+      }
+      {
+        job_name = "caddy";
+        static_configs = [{ targets = [ "localhost:2019" ]; }];
+      }
+      {
+        job_name = "openbao";
+        static_configs = [{ targets = [ "localhost:8200" ]; }];
+        metrics_path = "/v1/sys/metrics";
+        params.format = [ "prometheus" ];
+      }
+      {
+        job_name = "garage";
+        static_configs = [{ targets = [ "localhost:3903" ]; }];
+      }
+      {
+        job_name = "headscale";
+        static_configs = [{ targets = [ "localhost:9091" ]; }];
+      }
+      {
+        job_name = "keycloak";
+        static_configs = [{ targets = [ "localhost:9000" ]; }];
+      }
     ];
   };
 
