@@ -55,5 +55,10 @@ in
     };
 
     networking.firewall.interfaces."tailscale0".allowedTCPPorts = [ 5050 ];
+
+    services.prometheus.exporters.postgres = {
+      enable = true;
+      runAsLocalSuperUser = true;
+    };
   };
 }

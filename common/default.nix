@@ -29,6 +29,12 @@
   scottylabs.alloy.enable = true;
   scottylabs.otelCollector.enable = true;
 
+  services.caddy.globalConfig = ''
+    servers {
+      metrics
+    }
+  '';
+
   # Enforce that each host must have a disk configuration defined
   assertions = [
     {

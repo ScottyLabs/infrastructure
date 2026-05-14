@@ -29,6 +29,12 @@
       cluster_addr = "http://127.0.0.1:8201";
 
       api_addr = "https://secrets2.scottylabs.org";
+
+      telemetry = {
+        prometheus_retention_time = "24h";
+        disable_hostname = true;
+        unauthenticated_metrics_access = true;
+      };
     };
   };
 
