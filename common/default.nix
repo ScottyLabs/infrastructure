@@ -14,7 +14,20 @@
     ./tofu.nix
     ./bao-agent.nix
     ./headscale.nix
+    ./prometheus.nix
+    ./loki.nix
+    ./tempo.nix
+    ./grafana.nix
+    ./otel-collector.nix
+    ./node-exporter.nix
+    ./systemd-exporter.nix
+    ./promtail.nix
   ];
+
+  scottylabs.nodeExporter.enable = true;
+  scottylabs.systemdExporter.enable = true;
+  scottylabs.promtail.enable = true;
+  scottylabs.otelCollector.enable = true;
 
   # Enforce that each host must have a disk configuration defined
   assertions = [

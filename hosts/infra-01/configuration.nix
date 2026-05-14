@@ -14,6 +14,7 @@
     ./matrix.nix
     ./garage.nix
     ./atlantis.nix
+    ./observability.nix
   ];
 
   # Allow building aarch64 packages via QEMU emulation
