@@ -323,8 +323,8 @@
       },
       "targets": [
         {
-          "expr": "rate(container_cpu_usage_seconds_total{name=~\"kennel-.*\\\\.service\"}[5m])",
-          "legendFormat": "{{name}}"
+          "expr": "label_replace(rate(container_cpu_usage_seconds_total{id=~\"/kennel\\\\.slice/kennel-.*\\\\.service\",cpu=\"total\"}[5m]), \"unit\", \"$1\", \"id\", \"/kennel\\\\.slice/(.+)\\\\.service\")",
+          "legendFormat": "{{unit}}"
         }
       ],
       "fieldConfig": {
@@ -349,8 +349,8 @@
       },
       "targets": [
         {
-          "expr": "container_memory_working_set_bytes{name=~\"kennel-.*\\\\.service\"}",
-          "legendFormat": "{{name}}"
+          "expr": "label_replace(container_memory_working_set_bytes{id=~\"/kennel\\\\.slice/kennel-.*\\\\.service\"}, \"unit\", \"$1\", \"id\", \"/kennel\\\\.slice/(.+)\\\\.service\")",
+          "legendFormat": "{{unit}}"
         }
       ],
       "fieldConfig": {
