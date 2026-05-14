@@ -19,6 +19,7 @@
         type = "tcp";
         address = "127.0.0.1:8200";
         tls_disable = true;
+        telemetry.unauthenticated_metrics_access = true;
       };
 
       storage.postgresql.connection_url = "postgresql:///openbao?host=/run/postgresql&user=openbao";
@@ -33,7 +34,6 @@
       telemetry = {
         prometheus_retention_time = "24h";
         disable_hostname = true;
-        unauthenticated_metrics_access = true;
       };
     };
   };
