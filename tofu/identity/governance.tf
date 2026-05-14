@@ -37,6 +37,16 @@ resource "vault_policy" "governance" {
     path "auth/token/create" {
       capabilities = ["create", "update"]
     }
+
+    # Per-project Sentry DSNs written by the sentry tfgen output. Narrow scope:
+    # only the SENTRY_DSN key across any project/profile, no other secretspec keys.
+    path "secret/data/secretspec/+/+/SENTRY_DSN" {
+      capabilities = ["create", "read", "update"]
+    }
+
+    path "secret/metadata/secretspec/+/+/SENTRY_DSN" {
+      capabilities = ["read"]
+    }
   EOT
 }
 
