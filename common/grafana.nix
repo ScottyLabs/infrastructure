@@ -28,6 +28,12 @@ in
       description = "Path to the file containing the Keycloak OIDC client_secret.";
     };
 
+    secretKeyFile = lib.mkOption {
+      type = lib.types.path;
+      default = "/run/secrets/grafana-secret-key";
+      description = "Path to the file containing the Grafana security.secret_key value.";
+    };
+
     prometheusUrl = lib.mkOption {
       type = lib.types.str;
       default = "http://localhost:9090";
@@ -58,13 +64,14 @@ in
 
         analytics.reporting_enabled = false;
 
+        security.secret_key = "$__file{${cfg.secretKeyFile}}";
+
         users = {
           allow_sign_up = false;
           allow_org_create = false;
           auto_assign_org = true;
           auto_assign_org_role = "Viewer";
           viewers_can_edit = true;
-          editors_can_admin = false;
         };
 
         auth = {
