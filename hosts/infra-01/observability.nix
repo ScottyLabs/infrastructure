@@ -102,6 +102,12 @@ in
         job_name = "kennel";
         static_configs = [{ targets = [ "deploy-01:3001" ]; }];
       }
+      {
+        job_name = "cadvisor";
+        static_configs = [{
+          targets = [ "infra-01:4194" "deploy-01:4194" "snoopy:4194" ];
+        }];
+      }
     ];
   };
 
