@@ -95,6 +95,17 @@ in
       extraFlags = [ "-config.expand-env=true" ];
     };
 
-    systemd.services.tempo.serviceConfig.EnvironmentFile = cfg.s3CredentialsFile;
+    users.users.tempo = {
+      isSystemUser = true;
+      group = "tempo";
+    };
+    users.groups.tempo = { };
+
+    systemd.services.tempo.serviceConfig = {
+      DynamicUser = lib.mkForce false;
+      User = lib.mkForce "tempo";
+      Group = lib.mkForce "tempo";
+      EnvironmentFile = cfg.s3CredentialsFile;
+    };
   };
 }
