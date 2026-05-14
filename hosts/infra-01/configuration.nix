@@ -15,6 +15,7 @@
     ./garage.nix
     ./atlantis.nix
     ./observability.nix
+    ./uptime.nix
   ];
 
   # Allow building aarch64 packages via QEMU emulation

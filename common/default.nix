@@ -23,6 +23,7 @@
     ./systemd-exporter.nix
     ./alloy.nix
     ./cadvisor.nix
+    ./uptime-kuma.nix
   ];
 
   scottylabs.nodeExporter.enable = true;
