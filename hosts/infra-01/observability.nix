@@ -93,6 +93,11 @@ in
         job_name = "keycloak";
         static_configs = [{ targets = [ "localhost:9092" ]; }];
       }
+      {
+        job_name = "keycloak-events";
+        static_configs = [{ targets = [ "localhost:8080" ]; }];
+        metrics_path = "/realms/master/metrics";
+      }
     ];
   };
 
