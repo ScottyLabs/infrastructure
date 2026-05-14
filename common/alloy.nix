@@ -49,7 +49,7 @@ in
 
     lokiUrl = lib.mkOption {
       type = lib.types.str;
-      default = "http://infra-01:3100/loki/api/v1/push";
+      default = "http://infra-01:3101/loki/api/v1/push";
     };
   };
 

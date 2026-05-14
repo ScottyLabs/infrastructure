@@ -18,12 +18,12 @@ in
 
     otlpGrpcPort = lib.mkOption {
       type = lib.types.port;
-      default = 4317;
+      default = 4327;
     };
 
     otlpHttpPort = lib.mkOption {
       type = lib.types.port;
-      default = 4318;
+      default = 4328;
     };
 
     bucket = lib.mkOption {

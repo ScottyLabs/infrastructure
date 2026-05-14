@@ -41,7 +41,7 @@ in
 
     lokiUrl = lib.mkOption {
       type = lib.types.str;
-      default = "http://localhost:3100";
+      default = "http://localhost:3101";
     };
 
     tempoUrl = lib.mkOption {
