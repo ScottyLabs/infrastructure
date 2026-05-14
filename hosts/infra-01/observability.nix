@@ -33,6 +33,11 @@ in
       key  = "ENV";
       user = "tempo";
     };
+    discord-webhook-alerts = {
+      path = "discord-webhook-alerts";
+      key  = "URL";
+      user = "grafana";
+    };
   };
 
   scottylabs.prometheus = {
