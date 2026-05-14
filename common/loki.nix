@@ -98,6 +98,7 @@ in
           reject_old_samples_max_age = "168h";
           ingestion_rate_mb = 16;
           ingestion_burst_size_mb = 32;
+          allow_structured_metadata = true;
         };
 
         analytics.reporting_enabled = false;
