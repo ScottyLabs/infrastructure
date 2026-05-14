@@ -361,13 +361,7 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "bytes",
-          "custom": {
-            "stacking": {
-              "mode": "normal"
-            },
-            "fillOpacity": 30
-          }
+          "unit": "bytes"
         }
       }
     },
