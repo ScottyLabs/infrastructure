@@ -308,6 +308,58 @@
       ]
     },
     {
+      "id": 10,
+      "type": "timeseries",
+      "title": "CPU usage per deployment",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 33
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "expr": "rate(container_cpu_usage_seconds_total{name=~\"kennel-.*\\\\.service\"}[5m])",
+          "legendFormat": "{{name}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit"
+        }
+      }
+    },
+    {
+      "id": 11,
+      "type": "timeseries",
+      "title": "Memory working set per deployment",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 33
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "expr": "container_memory_working_set_bytes{name=~\"kennel-.*\\\\.service\"}",
+          "legendFormat": "{{name}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes"
+        }
+      }
+    },
+    {
       "id": 9,
       "type": "timeseries",
       "title": "Tasks per deployment",
@@ -315,7 +367,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 33
+        "y": 41
       },
       "datasource": {
         "type": "prometheus",
