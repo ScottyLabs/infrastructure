@@ -149,7 +149,11 @@ in
           };
         }];
 
-        alerting.rules.path = "${observability}/alerts";
+        alerting = {
+          rules.path = "${observability}/alerts/rules";
+          contactPoints.path = "${observability}/alerts/contact-points";
+          policies.path = "${observability}/alerts/policies";
+        };
       };
     };
 
