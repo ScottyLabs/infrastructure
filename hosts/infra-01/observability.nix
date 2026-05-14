@@ -98,6 +98,10 @@ in
         static_configs = [{ targets = [ "localhost:8080" ]; }];
         metrics_path = "/realms/master/metrics";
       }
+      {
+        job_name = "kennel";
+        static_configs = [{ targets = [ "deploy-01:3001" ]; }];
+      }
     ];
   };
 
