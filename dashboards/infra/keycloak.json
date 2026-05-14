@@ -4,7 +4,7 @@
   "schemaVersion": 39,
   "tags": ["infra"],
   "timezone": "browser",
-  "time": { "from": "now-1h", "to": "now" },
+  "time": { "from": "now-6h", "to": "now" },
   "refresh": "30s",
   "panels": [
     {
@@ -12,45 +12,66 @@
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [
-        { "expr": "rate(keycloak_user_event_user_login_total[5m])", "legendFormat": "success {{realm}}" },
-        { "expr": "rate(keycloak_user_event_user_login_error_total[5m])", "legendFormat": "fail {{realm}} {{error}}" }
+        { "expr": "sum by (realm) (rate(keycloak_logins_total[5m]))", "legendFormat": "success {{realm}}" },
+        { "expr": "sum by (realm, error) (rate(keycloak_failed_login_attempts[5m]))", "legendFormat": "fail {{realm}} {{error}}" }
       ],
       "fieldConfig": { "defaults": { "unit": "ops" } }
     },
     {
-      "id": 2, "type": "timeseries", "title": "HTTP request rate",
+      "id": 2, "type": "timeseries", "title": "User registrations/sec",
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [{ "expr": "sum by (status) (rate(http_server_requests_seconds_count[5m]))", "legendFormat": "{{status}}" }],
-      "fieldConfig": { "defaults": { "unit": "reqps" } }
+      "targets": [{ "expr": "sum by (realm) (rate(keycloak_registrations_total[5m]))", "legendFormat": "{{realm}}" }],
+      "fieldConfig": { "defaults": { "unit": "ops" } }
     },
     {
-      "id": 3, "type": "timeseries", "title": "HTTP latency p95",
+      "id": 3, "type": "timeseries", "title": "HTTP response errors/sec",
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [{ "expr": "histogram_quantile(0.95, sum by (le, uri) (rate(http_server_requests_seconds_bucket[5m])))", "legendFormat": "{{uri}}" }],
-      "fieldConfig": { "defaults": { "unit": "s" } }
+      "targets": [{ "expr": "sum by (code) (rate(keycloak_response_errors_total[5m]))", "legendFormat": "{{code}}" }],
+      "fieldConfig": { "defaults": { "unit": "ops" } }
     },
     {
-      "id": 4, "type": "timeseries", "title": "JVM heap used",
+      "id": 4, "type": "timeseries", "title": "Request duration (p95)",
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [{ "expr": "jvm_memory_used_bytes{area=\"heap\"}", "legendFormat": "{{id}}" }],
+      "targets": [{ "expr": "histogram_quantile(0.95, sum by (le) (rate(keycloak_request_duration_bucket[5m])))", "legendFormat": "p95" }],
+      "fieldConfig": { "defaults": { "unit": "ms" } }
+    },
+    {
+      "id": 5, "type": "timeseries", "title": "JVM heap used",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "expr": "base_memory_used_heap_bytes", "legendFormat": "used" },
+        { "expr": "base_memory_committedHeap_bytes", "legendFormat": "committed" },
+        { "expr": "base_memory_maxHeap_bytes", "legendFormat": "max" }
+      ],
       "fieldConfig": { "defaults": { "unit": "bytes" } }
     },
     {
-      "id": 5, "type": "timeseries", "title": "JVM threads",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+      "id": 6, "type": "timeseries", "title": "DB connection pool (active vs available)",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [{ "expr": "jvm_threads_live_threads", "legendFormat": "live" }],
+      "targets": [
+        { "expr": "agroal_active_count", "legendFormat": "active" },
+        { "expr": "agroal_available_count", "legendFormat": "available" }
+      ],
       "fieldConfig": { "defaults": { "unit": "short" } }
     },
     {
-      "id": 6, "type": "timeseries", "title": "JVM GC pause time",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+      "id": 7, "type": "timeseries", "title": "GC time rate",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [{ "expr": "rate(jvm_gc_pause_seconds_sum[5m])", "legendFormat": "{{action}}" }],
-      "fieldConfig": { "defaults": { "unit": "s" } }
+      "targets": [{ "expr": "rate(base_gc_time[5m])", "legendFormat": "{{name}}" }],
+      "fieldConfig": { "defaults": { "unit": "ms" } }
+    },
+    {
+      "id": 8, "type": "timeseries", "title": "Cache size",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "cache_size", "legendFormat": "{{cache}}" }],
+      "fieldConfig": { "defaults": { "unit": "short" } }
     }
   ]
 }

@@ -8,39 +8,39 @@
   "refresh": "30s",
   "panels": [
     {
-      "id": 1, "type": "stat", "title": "Online nodes",
+      "id": 1, "type": "stat", "title": "Nodes in store",
       "gridPos": { "h": 6, "w": 6, "x": 0, "y": 0 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [{ "expr": "headscale_open_connections" }],
+      "targets": [{ "expr": "headscale_nodestore_nodes_total" }],
       "fieldConfig": { "defaults": { "unit": "short" } }
     },
     {
-      "id": 2, "type": "stat", "title": "Total registered",
-      "gridPos": { "h": 6, "w": 6, "x": 6, "y": 0 },
+      "id": 2, "type": "timeseries", "title": "MapResponses sent/sec",
+      "gridPos": { "h": 8, "w": 9, "x": 6, "y": 0 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [{ "expr": "headscale_machine_registrations" }],
-      "fieldConfig": { "defaults": { "unit": "short" } }
+      "targets": [{ "expr": "sum by (type) (rate(headscale_mapresponse_sent_total[5m]))", "legendFormat": "{{type}}" }],
+      "fieldConfig": { "defaults": { "unit": "ops" } }
     },
     {
-      "id": 3, "type": "timeseries", "title": "Open connections over time",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "id": 3, "type": "timeseries", "title": "Endpoint updates from clients/sec",
+      "gridPos": { "h": 8, "w": 9, "x": 15, "y": 0 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [{ "expr": "headscale_open_connections", "legendFormat": "connections" }],
-      "fieldConfig": { "defaults": { "unit": "short" } }
+      "targets": [{ "expr": "rate(headscale_mapresponse_endpoint_updates_total[5m])", "legendFormat": "updates" }],
+      "fieldConfig": { "defaults": { "unit": "ops" } }
     },
     {
-      "id": 4, "type": "timeseries", "title": "API request rate",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 6 },
+      "id": 4, "type": "timeseries", "title": "HTTP latency (p95)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [{ "expr": "sum by (path) (rate(headscale_http_requests_total[5m]))", "legendFormat": "{{path}}" }],
-      "fieldConfig": { "defaults": { "unit": "reqps" } }
+      "targets": [{ "expr": "histogram_quantile(0.95, sum by (le, path) (rate(headscale_http_duration_seconds_bucket[5m])))", "legendFormat": "{{path}}" }],
+      "fieldConfig": { "defaults": { "unit": "s" } }
     },
     {
-      "id": 5, "type": "timeseries", "title": "ACL policy evaluations",
+      "id": 5, "type": "timeseries", "title": "NodeStore operation duration (p95)",
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [{ "expr": "rate(headscale_acl_policy_evaluations_total[5m])", "legendFormat": "{{result}}" }],
-      "fieldConfig": { "defaults": { "unit": "ops" } }
+      "targets": [{ "expr": "histogram_quantile(0.95, sum by (le, operation) (rate(headscale_nodestore_operation_duration_seconds_bucket[5m])))", "legendFormat": "{{operation}}" }],
+      "fieldConfig": { "defaults": { "unit": "s" } }
     }
   ]
 }

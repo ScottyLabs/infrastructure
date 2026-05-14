@@ -29,10 +29,10 @@
       "fieldConfig": { "defaults": { "unit": "reqps", "custom": { "stacking": { "mode": "normal" } } } }
     },
     {
-      "id": 4, "type": "timeseries", "title": "Request rate by vhost",
+      "id": 4, "type": "timeseries", "title": "Request rate by server",
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [{ "expr": "sum by (host) (rate(caddy_http_requests_total[5m]))", "legendFormat": "{{host}}" }],
+      "targets": [{ "expr": "sum by (server) (rate(caddy_http_requests_total[5m]))", "legendFormat": "{{server}}" }],
       "fieldConfig": { "defaults": { "unit": "reqps" } }
     },
     {
@@ -47,11 +47,18 @@
       "fieldConfig": { "defaults": { "unit": "s" } }
     },
     {
-      "id": 6, "type": "timeseries", "title": "5xx by vhost",
-      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 16 },
+      "id": 6, "type": "timeseries", "title": "5xx by server",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [{ "expr": "sum by (host) (rate(caddy_http_requests_total{code=~\"5..\"}[5m]))", "legendFormat": "{{host}}" }],
+      "targets": [{ "expr": "sum by (server) (rate(caddy_http_requests_total{code=~\"5..\"}[5m]))", "legendFormat": "{{server}}" }],
       "fieldConfig": { "defaults": { "unit": "reqps" } }
+    },
+    {
+      "id": 7, "type": "timeseries", "title": "Requests in flight",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "sum by (server) (caddy_http_requests_in_flight)", "legendFormat": "{{server}}" }],
+      "fieldConfig": { "defaults": { "unit": "short" } }
     }
   ]
 }
