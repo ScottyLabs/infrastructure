@@ -70,12 +70,12 @@ in
 
     tempoOtlpPort = lib.mkOption {
       type = lib.types.port;
-      default = 4318;
+      default = 4328;
     };
 
     lokiPort = lib.mkOption {
       type = lib.types.port;
-      default = 3100;
+      default = 3101;
     };
   };
 

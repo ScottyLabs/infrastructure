@@ -52,7 +52,7 @@ in
       }
       {
         job_name = "loki";
-        static_configs = [{ targets = [ "localhost:3100" ]; }];
+        static_configs = [{ targets = [ "localhost:3101" ]; }];
         metrics_path = "/metrics";
       }
       {

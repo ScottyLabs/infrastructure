@@ -13,7 +13,7 @@ in
 
     port = lib.mkOption {
       type = lib.types.port;
-      default = 3100;
+      default = 3101;
     };
 
     bucket = lib.mkOption {
