@@ -1932,6 +1932,21 @@
         "type": "github"
       }
     },
+    "observability": {
+      "locked": {
+        "lastModified": 1778717686,
+        "narHash": "sha256-12m2XkB0oA6CzOAfqkly057eO1uJFmVh3pTMrUCsr4c=",
+        "ref": "refs/heads/main",
+        "rev": "405c47cd5b208e1511b14877465312ccfb354c0a",
+        "revCount": 2,
+        "type": "git",
+        "url": "https://codeberg.org/ScottyLabs/observability"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://codeberg.org/ScottyLabs/observability"
+      }
+    },
     "pre-commit-hooks": {
       "inputs": {
         "flake-compat": [
@@ -2060,6 +2075,7 @@
         "mcp-server": "mcp-server",
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs_3",
+        "observability": "observability",
         "terrier": "terrier",
         "voting-app": "voting-app"
       }

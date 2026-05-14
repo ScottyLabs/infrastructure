@@ -75,10 +75,7 @@
       url = "git+https://codeberg.org/ScottyLabs/kennel";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    observability = {
-      url = "git+https://codeberg.org/ScottyLabs/observability";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    observability.url = "git+https://codeberg.org/ScottyLabs/observability";
   };
 
   outputs =
