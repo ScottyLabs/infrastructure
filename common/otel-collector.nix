@@ -21,10 +21,6 @@ let
         spike_limit_percentage = 25;
       };
       batch = { };
-      "resourcedetection/host" = {
-        detectors = [ "env" "system" ];
-        override = false;
-      };
     };
 
     exporters = {
@@ -32,21 +28,22 @@ let
         endpoint = "http://${cfg.upstreamHost}:${toString cfg.tempoOtlpPort}";
         tls.insecure = true;
       };
-      loki = {
-        endpoint = "http://${cfg.upstreamHost}:${toString cfg.lokiPort}/loki/api/v1/push";
+      "otlphttp/loki" = {
+        endpoint = "http://${cfg.upstreamHost}:${toString cfg.lokiPort}/otlp";
+        tls.insecure = true;
       };
     };
 
     service.pipelines = {
       traces = {
         receivers = [ "otlp" ];
-        processors = [ "memory_limiter" "resourcedetection/host" "batch" ];
+        processors = [ "memory_limiter" "batch" ];
         exporters = [ "otlphttp/tempo" ];
       };
       logs = {
         receivers = [ "otlp" ];
-        processors = [ "memory_limiter" "resourcedetection/host" "batch" ];
-        exporters = [ "loki" ];
+        processors = [ "memory_limiter" "batch" ];
+        exporters = [ "otlphttp/loki" ];
       };
     };
   });
