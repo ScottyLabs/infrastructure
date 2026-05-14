@@ -91,7 +91,7 @@ in
       }
       {
         job_name = "keycloak";
-        static_configs = [{ targets = [ "localhost:9000" ]; }];
+        static_configs = [{ targets = [ "localhost:9092" ]; }];
       }
     ];
   };

@@ -44,6 +44,7 @@
       features = "scripts";
       metrics-enabled = true;
       health-enabled = true;
+      http-management-port = 9092;
     };
 
     themes = {
