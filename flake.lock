@@ -1934,11 +1934,11 @@
     },
     "observability": {
       "locked": {
-        "lastModified": 1778784680,
-        "narHash": "sha256-I1Iv0JoKw3dtp7GzW37HhBBe/7KJBAe+0B0Kr+ealxI=",
+        "lastModified": 1778881956,
+        "narHash": "sha256-XFdyAzguvvHFk/gkQ0renYKy7dEazFBIbEeEmbborzw=",
         "ref": "refs/heads/main",
-        "rev": "ad04ab0abd5f09a62034d071029620e7905fe145",
-        "revCount": 12,
+        "rev": "a2ed7cd5fcfd1a32132edb91301a8c76538583c3",
+        "revCount": 13,
         "type": "git",
         "url": "https://codeberg.org/ScottyLabs/observability"
       },
