@@ -1,0 +1,67 @@
+{
+  "title": "Comin",
+  "uid": "infra-comin",
+  "schemaVersion": 39,
+  "tags": ["infra"],
+  "timezone": "browser",
+  "time": { "from": "now-6h", "to": "now" },
+  "refresh": "30s",
+  "panels": [
+    {
+      "id": 1, "type": "stat", "title": "Hosts with failed last deploy",
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "count(comin_deployment_info{status=\"failed\"} == 1) or vector(0)" }],
+      "fieldConfig": { "defaults": { "unit": "short", "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 1 }] } } }
+    },
+    {
+      "id": 2, "type": "stat", "title": "Hosts needing reboot",
+      "gridPos": { "h": 6, "w": 6, "x": 6, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "sum(comin_need_to_reboot) or vector(0)" }],
+      "fieldConfig": { "defaults": { "unit": "short", "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 1 }] } } }
+    },
+    {
+      "id": 3, "type": "stat", "title": "Suspended hosts",
+      "gridPos": { "h": 6, "w": 6, "x": 12, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "sum(comin_is_suspended) or vector(0)" }],
+      "fieldConfig": { "defaults": { "unit": "short", "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 1 }] } } }
+    },
+    {
+      "id": 4, "type": "stat", "title": "Hosts currently deploying",
+      "gridPos": { "h": 6, "w": 6, "x": 18, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "count(comin_deployment_info{status=\"running\"} == 1) or vector(0)" }],
+      "fieldConfig": { "defaults": { "unit": "short" } }
+    },
+    {
+      "id": 5, "type": "table", "title": "Last deployment per host",
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 6 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "comin_deployment_info == 1", "format": "table", "instant": true }],
+      "transformations": [{ "id": "organize", "options": { "excludeByName": { "__name__": true, "Time": true, "Value": true, "job": true } } }]
+    },
+    {
+      "id": 6, "type": "timeseries", "title": "Successful fetches per minute",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "rate(comin_fetch_count{status=\"succeeded\"}[5m]) * 60", "legendFormat": "{{instance}} {{remote_name}}" }],
+      "fieldConfig": { "defaults": { "unit": "short", "min": 0 } }
+    },
+    {
+      "id": 7, "type": "timeseries", "title": "Failed fetches per minute",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "rate(comin_fetch_count{status=\"failed\"}[5m]) * 60", "legendFormat": "{{instance}} {{remote_name}}" }],
+      "fieldConfig": { "defaults": { "unit": "short", "min": 0 } }
+    },
+    {
+      "id": 8, "type": "timeseries", "title": "Comin process up",
+      "gridPos": { "h": 6, "w": 24, "x": 0, "y": 24 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "up{job=\"comin\"}", "legendFormat": "{{instance}}" }],
+      "fieldConfig": { "defaults": { "unit": "short", "min": 0, "max": 1 } }
+    }
+  ]
+}
