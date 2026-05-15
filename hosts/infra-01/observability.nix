@@ -38,6 +38,16 @@ in
       key  = "URL";
       user = "grafana";
     };
+    slack-webhook-alerts = {
+      path = "slack-webhook-alerts";
+      key  = "URL";
+      user = "grafana";
+    };
+    uptime-kuma-metrics = {
+      path = "uptime-kuma-metrics";
+      key  = "API_KEY";
+      user = "prometheus";
+    };
   };
 
   scottylabs.prometheus = {
@@ -113,6 +123,15 @@ in
           targets = [ "infra-01:4194" "deploy-01:4194" "snoopy:4194" ];
         }];
       }
+      {
+        job_name = "uptime-kuma";
+        static_configs = [{ targets = [ "localhost:3001" ]; }];
+        metrics_path = "/metrics";
+        basic_auth = {
+          username = "prometheus";
+          password_file = "/run/secrets/uptime-kuma-metrics";
+        };
+      }
     ];
   };
 
@@ -139,6 +158,11 @@ in
   };
 
   systemd.services.grafana = {
+    after = [ "bao-agent.service" ];
+    wants = [ "bao-agent.service" ];
+  };
+
+  systemd.services.prometheus = {
     after = [ "bao-agent.service" ];
     wants = [ "bao-agent.service" ];
   };
