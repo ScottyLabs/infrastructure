@@ -132,6 +132,12 @@ in
           password_file = "/run/secrets/uptime-kuma-metrics";
         };
       }
+      {
+        job_name = "comin";
+        static_configs = [{
+          targets = map (h: "${h}:4243") (builtins.attrValues hosts);
+        }];
+      }
     ];
   };
 
