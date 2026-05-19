@@ -56,19 +56,23 @@ in
 
       path = [
         pkgs.git
-      ] ++ cfg.extraPackages;
+      ]
+      ++ cfg.extraPackages;
 
       serviceConfig = {
         Type = "simple";
         User = "atlantis";
         Group = "atlantis";
         EnvironmentFile = cfg.environmentFile;
-        ExecStart = lib.concatStringsSep " " ([
-          "${cfg.package}/bin/atlantis server"
-          "--atlantis-url=https://${cfg.domain}"
-          "--port=${toString cfg.port}"
-          "--data-dir=/var/lib/atlantis"
-        ] ++ cfg.extraArgs);
+        ExecStart = lib.concatStringsSep " " (
+          [
+            "${cfg.package}/bin/atlantis server"
+            "--atlantis-url=https://${cfg.domain}"
+            "--port=${toString cfg.port}"
+            "--data-dir=/var/lib/atlantis"
+          ]
+          ++ cfg.extraArgs
+        );
         StateDirectory = "atlantis";
         Restart = "always";
         RestartSec = 5;

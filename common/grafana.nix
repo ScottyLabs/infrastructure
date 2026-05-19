@@ -114,12 +114,14 @@ in
             type = "loki";
             uid = "loki";
             url = cfg.lokiUrl;
-            jsonData.derivedFields = [{
-              datasourceUid = "tempo";
-              matcherRegex = "trace_id=(\\w+)";
-              name = "TraceID";
-              url = "\${__value.raw}";
-            }];
+            jsonData.derivedFields = [
+              {
+                datasourceUid = "tempo";
+                matcherRegex = "trace_id=(\\w+)";
+                name = "TraceID";
+                url = "\${__value.raw}";
+              }
+            ];
           }
           {
             name = "Tempo";
@@ -131,23 +133,30 @@ in
                 datasourceUid = "loki";
                 spanStartTimeShift = "-1m";
                 spanEndTimeShift = "1m";
-                tags = [ { key = "service.name"; value = "service_name"; } ];
+                tags = [
+                  {
+                    key = "service.name";
+                    value = "service_name";
+                  }
+                ];
               };
             };
           }
         ];
 
-        dashboards.settings.providers = [{
-          name = "scottylabs";
-          type = "file";
-          updateIntervalSeconds = 30;
-          allowUiUpdates = false;
-          disableDeletion = true;
-          options = {
-            path = "${observability}/dashboards";
-            foldersFromFilesStructure = true;
-          };
-        }];
+        dashboards.settings.providers = [
+          {
+            name = "scottylabs";
+            type = "file";
+            updateIntervalSeconds = 30;
+            allowUiUpdates = false;
+            disableDeletion = true;
+            options = {
+              path = "${observability}/dashboards";
+              foldersFromFilesStructure = true;
+            };
+          }
+        ];
 
         alerting = {
           rules.path = "${observability}/alerts/rules";

@@ -2,50 +2,50 @@
 
 let
   hosts = {
-    infra-01         = "infra-01";
-    deploy-01        = "deploy-01";
-    snoopy           = "snoopy";
+    infra-01 = "infra-01";
+    deploy-01 = "deploy-01";
+    snoopy = "snoopy";
     bus-sign-display = "bus-sign-display";
   };
 
-  nodeTargets    = map (h: "${h}:9100") (builtins.attrValues hosts);
+  nodeTargets = map (h: "${h}:9100") (builtins.attrValues hosts);
   systemdTargets = map (h: "${h}:9558") (builtins.attrValues hosts);
 in
 {
   scottylabs.bao-agent.infraSecrets = {
     grafana-oidc = {
       path = "grafana-oidc";
-      key  = "CLIENT_SECRET";
+      key = "CLIENT_SECRET";
       user = "grafana";
     };
     grafana-secret-key = {
       path = "grafana-secret-key";
-      key  = "SECRET_KEY";
+      key = "SECRET_KEY";
       user = "grafana";
     };
     loki-s3 = {
       path = "loki-s3";
-      key  = "ENV";
+      key = "ENV";
       user = "loki";
     };
     tempo-s3 = {
       path = "tempo-s3";
-      key  = "ENV";
+      key = "ENV";
       user = "tempo";
     };
     discord-webhook-alerts = {
       path = "discord-webhook-alerts";
-      key  = "URL";
+      key = "URL";
       user = "grafana";
     };
     slack-webhook-alerts = {
       path = "slack-webhook-alerts";
-      key  = "URL";
+      key = "URL";
       user = "grafana";
     };
     uptime-kuma-metrics = {
       path = "uptime-kuma-metrics";
-      key  = "API_KEY";
+      key = "API_KEY";
       user = "prometheus";
     };
   };
@@ -55,77 +55,90 @@ in
     scrapeJobs = [
       {
         job_name = "prometheus";
-        static_configs = [{ targets = [ "localhost:9090" ]; }];
+        static_configs = [ { targets = [ "localhost:9090" ]; } ];
       }
       {
         job_name = "node";
-        static_configs = [{ targets = nodeTargets; }];
+        static_configs = [ { targets = nodeTargets; } ];
       }
       {
         job_name = "systemd";
-        static_configs = [{ targets = systemdTargets; }];
+        static_configs = [ { targets = systemdTargets; } ];
       }
       {
         job_name = "loki";
-        static_configs = [{ targets = [ "localhost:3101" ]; }];
+        static_configs = [ { targets = [ "localhost:3101" ]; } ];
         metrics_path = "/metrics";
       }
       {
         job_name = "tempo";
-        static_configs = [{ targets = [ "localhost:3200" ]; }];
+        static_configs = [ { targets = [ "localhost:3200" ]; } ];
       }
       {
         job_name = "grafana";
-        static_configs = [{ targets = [ "localhost:3000" ]; }];
+        static_configs = [ { targets = [ "localhost:3000" ]; } ];
       }
       {
         job_name = "otel-collector";
-        static_configs = [{ targets = [ "localhost:8888" ]; }];
+        static_configs = [ { targets = [ "localhost:8888" ]; } ];
       }
       {
         job_name = "postgres";
-        static_configs = [{ targets = [ "infra-01:9187" "deploy-01:9187" ]; }];
+        static_configs = [
+          {
+            targets = [
+              "infra-01:9187"
+              "deploy-01:9187"
+            ];
+          }
+        ];
       }
       {
         job_name = "caddy";
-        static_configs = [{ targets = [ "localhost:2019" ]; }];
+        static_configs = [ { targets = [ "localhost:2019" ]; } ];
       }
       {
         job_name = "openbao";
-        static_configs = [{ targets = [ "localhost:8200" ]; }];
+        static_configs = [ { targets = [ "localhost:8200" ]; } ];
         metrics_path = "/v1/sys/metrics";
         params.format = [ "prometheus" ];
       }
       {
         job_name = "garage";
-        static_configs = [{ targets = [ "localhost:3903" ]; }];
+        static_configs = [ { targets = [ "localhost:3903" ]; } ];
       }
       {
         job_name = "headscale";
-        static_configs = [{ targets = [ "localhost:9091" ]; }];
+        static_configs = [ { targets = [ "localhost:9091" ]; } ];
       }
       {
         job_name = "keycloak";
-        static_configs = [{ targets = [ "localhost:9092" ]; }];
+        static_configs = [ { targets = [ "localhost:9092" ]; } ];
       }
       {
         job_name = "keycloak-events";
-        static_configs = [{ targets = [ "localhost:8080" ]; }];
+        static_configs = [ { targets = [ "localhost:8080" ]; } ];
         metrics_path = "/realms/master/metrics";
       }
       {
         job_name = "kennel";
-        static_configs = [{ targets = [ "deploy-01:3001" ]; }];
+        static_configs = [ { targets = [ "deploy-01:3001" ]; } ];
       }
       {
         job_name = "cadvisor";
-        static_configs = [{
-          targets = [ "infra-01:4194" "deploy-01:4194" "snoopy:4194" ];
-        }];
+        static_configs = [
+          {
+            targets = [
+              "infra-01:4194"
+              "deploy-01:4194"
+              "snoopy:4194"
+            ];
+          }
+        ];
       }
       {
         job_name = "uptime-kuma";
-        static_configs = [{ targets = [ "localhost:3001" ]; }];
+        static_configs = [ { targets = [ "localhost:3001" ]; } ];
         metrics_path = "/metrics";
         basic_auth = {
           username = "prometheus";
@@ -134,9 +147,11 @@ in
       }
       {
         job_name = "comin";
-        static_configs = [{
-          targets = map (h: "${h}:4243") (builtins.attrValues hosts);
-        }];
+        static_configs = [
+          {
+            targets = map (h: "${h}:4243") (builtins.attrValues hosts);
+          }
+        ];
       }
     ];
   };

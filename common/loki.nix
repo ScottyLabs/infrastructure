@@ -58,16 +58,18 @@ in
           ring.kvstore.store = "inmemory";
         };
 
-        schema_config.configs = [{
-          from = "2026-01-01";
-          store = "tsdb";
-          object_store = "s3";
-          schema = "v13";
-          index = {
-            prefix = "index_";
-            period = "24h";
-          };
-        }];
+        schema_config.configs = [
+          {
+            from = "2026-01-01";
+            store = "tsdb";
+            object_store = "s3";
+            schema = "v13";
+            index = {
+              prefix = "index_";
+              period = "24h";
+            };
+          }
+        ];
 
         storage_config = {
           tsdb_shipper = {
