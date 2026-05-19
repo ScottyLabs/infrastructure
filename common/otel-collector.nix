@@ -8,45 +8,53 @@
 let
   cfg = config.scottylabs.otelCollector;
 
-  collectorConfig = pkgs.writeText "otel-collector.yaml" (builtins.toJSON {
-    receivers.otlp.protocols = {
-      grpc.endpoint = "127.0.0.1:${toString cfg.grpcPort}";
-      http.endpoint = "127.0.0.1:${toString cfg.httpPort}";
-    };
+  collectorConfig = pkgs.writeText "otel-collector.yaml" (
+    builtins.toJSON {
+      receivers.otlp.protocols = {
+        grpc.endpoint = "127.0.0.1:${toString cfg.grpcPort}";
+        http.endpoint = "127.0.0.1:${toString cfg.httpPort}";
+      };
 
-    processors = {
-      memory_limiter = {
-        check_interval = "1s";
-        limit_percentage = 75;
-        spike_limit_percentage = 25;
+      processors = {
+        memory_limiter = {
+          check_interval = "1s";
+          limit_percentage = 75;
+          spike_limit_percentage = 25;
+        };
+        batch = { };
       };
-      batch = { };
-    };
 
-    exporters = {
-      "otlphttp/tempo" = {
-        endpoint = "http://${cfg.upstreamHost}:${toString cfg.tempoOtlpPort}";
-        tls.insecure = true;
+      exporters = {
+        "otlphttp/tempo" = {
+          endpoint = "http://${cfg.upstreamHost}:${toString cfg.tempoOtlpPort}";
+          tls.insecure = true;
+        };
+        "otlphttp/loki" = {
+          endpoint = "http://${cfg.upstreamHost}:${toString cfg.lokiPort}/otlp";
+          tls.insecure = true;
+        };
       };
-      "otlphttp/loki" = {
-        endpoint = "http://${cfg.upstreamHost}:${toString cfg.lokiPort}/otlp";
-        tls.insecure = true;
-      };
-    };
 
-    service.pipelines = {
-      traces = {
-        receivers = [ "otlp" ];
-        processors = [ "memory_limiter" "batch" ];
-        exporters = [ "otlphttp/tempo" ];
+      service.pipelines = {
+        traces = {
+          receivers = [ "otlp" ];
+          processors = [
+            "memory_limiter"
+            "batch"
+          ];
+          exporters = [ "otlphttp/tempo" ];
+        };
+        logs = {
+          receivers = [ "otlp" ];
+          processors = [
+            "memory_limiter"
+            "batch"
+          ];
+          exporters = [ "otlphttp/loki" ];
+        };
       };
-      logs = {
-        receivers = [ "otlp" ];
-        processors = [ "memory_limiter" "batch" ];
-        exporters = [ "otlphttp/loki" ];
-      };
-    };
-  });
+    }
+  );
 in
 {
   options.scottylabs.otelCollector = {

@@ -255,8 +255,14 @@ in
             '')
           ];
         };
-        after = [ "bao-agent.service" "keycloak.service" ];
-        wants = [ "bao-agent.service" "keycloak.service" ];
+        after = [
+          "bao-agent.service"
+          "keycloak.service"
+        ];
+        wants = [
+          "bao-agent.service"
+          "keycloak.service"
+        ];
       };
     })
   ];
