@@ -41,6 +41,10 @@
       url = "github:tale/headplane";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    llm-agents = {
+      url = "github:numtide/llm-agents.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     # deploy-01
     dalmatian = {
@@ -89,6 +93,7 @@
       comin,
       keycloak-theme,
       headplane,
+      llm-agents,
       dalmatian,
       mcp-server,
       voting-app,
@@ -116,6 +121,7 @@
               nixos-hardware
               keycloak-theme
               headplane
+              llm-agents
               dalmatian
               mcp-server
               voting-app
