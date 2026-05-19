@@ -11,6 +11,7 @@
     ./valkey.nix
     ./garage.nix
     ./atlantis.nix
+    ./cli-proxy-api.nix
     ./tofu.nix
     ./bao-agent.nix
     ./headscale.nix

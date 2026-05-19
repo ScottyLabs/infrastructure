@@ -14,6 +14,7 @@
     ./matrix.nix
     ./garage.nix
     ./atlantis.nix
+    ./cli-proxy.nix
     ./observability.nix
     ./uptime.nix
   ];
