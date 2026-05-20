@@ -153,6 +153,11 @@ in
           }
         ];
       }
+      {
+        job_name = "litellm";
+        static_configs = [ { targets = [ "localhost:4000" ]; } ];
+        metrics_path = "/metrics";
+      }
     ];
   };
 

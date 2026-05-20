@@ -239,6 +239,7 @@ in
 
         litellm_settings = {
           drop_params = true;
+          callbacks = [ "prometheus" ];
         };
       } cfg.settings;
     };
