@@ -180,6 +180,7 @@ in
 
         PROXY_BASE_URL = "https://${cfg.domain}";
         DATABASE_URL = databaseUrl;
+        LITELLM_MIGRATION_DIR = "/var/lib/litellm/migrations";
 
         # Engine binaries the Python client resolves at runtime.
         PRISMA_QUERY_ENGINE_BINARY = "${prismaEngines5}/bin/query-engine";
