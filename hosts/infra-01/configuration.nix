@@ -3,14 +3,12 @@
 {
   imports = [
     ../../platforms/campus-cloud
-    ./flake-webhook.nix
-    ./forgejo-runner.nix
-    ./minecraft.nix
+    ./forgejo-ci.nix
     ./keycloak.nix
     ./vaultwarden.nix
     ./openbao.nix
     ./opentofu.nix
-    ./headscale.nix
+    ./tailnet.nix
     ./matrix.nix
     ./garage.nix
     ./atlantis.nix

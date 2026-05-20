@@ -19,7 +19,6 @@ in
   # infra-01
   "secrets/infra-01/codeberg-token.age".publicKeys = admins ++ [ infra-01 ];
   "secrets/infra-01/forgejo-runner-token.age".publicKeys = admins ++ [ infra-01 ];
-  "secrets/infra-01/minecraft.age".publicKeys = admins ++ [ infra-01 ];
   "secrets/infra-01/keycloak.age".publicKeys = admins ++ [ infra-01 ];
   "secrets/infra-01/vaultwarden.age".publicKeys = admins ++ [ infra-01 ];
   "secrets/infra-01/matrix-registration.age".publicKeys = admins ++ [ infra-01 ];
