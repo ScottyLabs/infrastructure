@@ -223,7 +223,10 @@ in
         DynamicUser = lib.mkForce false;
         User = "litellm";
         Group = "litellm";
+        EnvironmentFile = lib.mkForce [ "-${cfg.runtimeEnvFile}" ];
         ExecStartPre = lib.mkBefore [ composeEnvScript ];
+        Restart = "on-failure";
+        RestartSec = 5;
       };
     };
 
