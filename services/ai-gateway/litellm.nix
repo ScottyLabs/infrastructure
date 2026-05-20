@@ -31,13 +31,6 @@ let
       printf 'CLI_PROXY_API_KEY=%s\n' "$(cat ${cfg.cliProxyApiKeyFile})"
     } > ${cfg.runtimeEnvFile}
   '';
-
-  prepareMigrationsScript = pkgs.writeShellScript "litellm-prepare-migrations" ''
-    set -eu
-    ${pkgs.coreutils}/bin/mkdir -p /var/lib/litellm/migrations
-    ${pkgs.coreutils}/bin/chown -R litellm:litellm /var/lib/litellm/migrations
-    ${pkgs.coreutils}/bin/chmod -R u+rwX /var/lib/litellm/migrations
-  '';
 in
 {
   options.scottylabs.ai-gateway.litellm = {
@@ -187,7 +180,6 @@ in
 
         PROXY_BASE_URL = "https://${cfg.domain}";
         DATABASE_URL = databaseUrl;
-        LITELLM_MIGRATION_DIR = "/var/lib/litellm/migrations";
 
         # Engine binaries the Python client resolves at runtime.
         PRISMA_QUERY_ENGINE_BINARY = "${prismaEngines5}/bin/query-engine";
@@ -258,7 +250,7 @@ in
         User = "litellm";
         Group = "litellm";
         EnvironmentFile = lib.mkForce [ "-${cfg.runtimeEnvFile}" ];
-        ExecStartPre = lib.mkBefore [ "+${prepareMigrationsScript}" composeEnvScript ];
+        ExecStartPre = lib.mkBefore [ composeEnvScript ];
         Restart = "on-failure";
         RestartSec = 5;
       };
