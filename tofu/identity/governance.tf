@@ -38,13 +38,26 @@ resource "vault_policy" "governance" {
       capabilities = ["create", "update"]
     }
 
-    # Per-project Sentry DSNs written by the sentry tfgen output. Narrow scope:
-    # only the SENTRY_DSN key across any project/profile, no other secretspec keys.
+    # Sentry DSNs written by the sentry tfgen output
     path "secret/data/secretspec/+/+/SENTRY_DSN" {
       capabilities = ["create", "read", "update"]
     }
 
     path "secret/metadata/secretspec/+/+/SENTRY_DSN" {
+      capabilities = ["read"]
+    }
+
+    # LiteLLM virtual keys written by the ai_gateway tfgen output
+    path "secret/data/secretspec/+/+/LITELLM_API_KEY" {
+      capabilities = ["create", "read", "update"]
+    }
+
+    path "secret/metadata/secretspec/+/+/LITELLM_API_KEY" {
+      capabilities = ["read"]
+    }
+
+    # LiteLLM master key for governance to call the management API
+    path "secret/data/infra/litellm-master-key" {
       capabilities = ["read"]
     }
   EOT

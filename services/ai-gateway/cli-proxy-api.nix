@@ -10,7 +10,7 @@ let
   yamlFormat = pkgs.formats.yaml { };
 
   defaultSettings = {
-    host = "";
+    host = "127.0.0.1";
     port = cfg.port;
     auth-dir = "/var/lib/cli-proxy-api/auth";
 
@@ -26,6 +26,11 @@ let
   baseConfig = yamlFormat.generate "cli-proxy-api-base.yaml" (
     lib.recursiveUpdate defaultSettings cfg.settings
   );
+
+  collectDeclKeys = lib.concatMapStringsSep "\n" (f: ''
+    declarative=$(${pkgs.jq}/bin/jq -nc --argjson cur "$declarative" --rawfile k ${lib.escapeShellArg f} \
+      '$cur + [$k | rtrimstr("\n") | rtrimstr("\r")]')
+  '') cfg.apiKeyFiles;
 in
 {
   options.scottylabs.cli-proxy-api = {
@@ -51,8 +56,21 @@ in
         YAML config merged on top of the module defaults (recursiveUpdate).
         See https://help.router-for.me/configuration/options for the full
         schema. The `api-keys` list and `remote-management.secret-key`
-        field are overwritten at runtime from environmentFile — setting
-        them here has no effect.
+        field are overwritten at runtime from `apiKeyFiles` and
+        `environmentFile` respectively — setting them here has no effect.
+      '';
+    };
+
+    apiKeyFiles = lib.mkOption {
+      type = lib.types.listOf lib.types.path;
+      default = [ ];
+      description = ''
+        Files (readable by the cli-proxy-api user) each containing exactly
+        one API key. At startup the server's `api-keys` list is rewritten
+        to the union of these declarative keys and any keys persisted in
+        /var/lib/cli-proxy-api/config.yaml from the management API.
+        Declarative keys come first and survive across restarts even if
+        wiped from the persisted config.
       '';
     };
 
@@ -81,8 +99,8 @@ in
 
     systemd.services.cli-proxy-api = {
       description = "CLI Proxy API";
-      after = [ "network-online.target" ];
-      wants = [ "network-online.target" ];
+      after = [ "network-online.target" ] ++ lib.optional (cfg.apiKeyFiles != [ ]) "bao-agent.service";
+      wants = [ "network-online.target" ] ++ lib.optional (cfg.apiKeyFiles != [ ]) "bao-agent.service";
       wantedBy = [ "multi-user.target" ];
 
       serviceConfig = {
@@ -99,16 +117,21 @@ in
           umask 077
           : "''${CLI_PROXY_MANAGEMENT_SECRET_KEY:?CLI_PROXY_MANAGEMENT_SECRET_KEY must be set in environmentFile}"
           CONFIG=/var/lib/cli-proxy-api/config.yaml
+
+          declarative='[]'
+          ${collectDeclKeys}
+
           if [ -f "$CONFIG" ]; then
-            CONFIG="$CONFIG" ${pkgs.yq-go}/bin/yq eval \
-              '.api-keys = (load(strenv(CONFIG)).api-keys // [])
-               | .remote-management.secret-key = strenv(CLI_PROXY_MANAGEMENT_SECRET_KEY)' \
-              ${baseConfig} > "$CONFIG.new"
+            existing=$(${pkgs.yq-go}/bin/yq -o=json '.api-keys // []' "$CONFIG")
           else
-            ${pkgs.yq-go}/bin/yq eval \
-              '.remote-management.secret-key = strenv(CLI_PROXY_MANAGEMENT_SECRET_KEY)' \
-              ${baseConfig} > "$CONFIG.new"
+            existing='[]'
           fi
+          combined=$(${pkgs.jq}/bin/jq -nc --argjson a "$declarative" --argjson b "$existing" '$a + ($b - $a)')
+
+          COMBINED="$combined" ${pkgs.yq-go}/bin/yq eval \
+            '.api-keys = (strenv(COMBINED) | from_json)
+             | .remote-management.secret-key = strenv(CLI_PROXY_MANAGEMENT_SECRET_KEY)' \
+            ${baseConfig} > "$CONFIG.new"
           ${pkgs.coreutils}/bin/mv "$CONFIG.new" "$CONFIG"
           ${pkgs.coreutils}/bin/mkdir -p /var/lib/cli-proxy-api/auth
         '';

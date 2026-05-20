@@ -12,7 +12,7 @@
     ./matrix.nix
     ./garage.nix
     ./atlantis.nix
-    ./cli-proxy.nix
+    ./ai-gateway.nix
     ./observability.nix
     ./uptime.nix
   ];
