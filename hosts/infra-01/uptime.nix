@@ -1,3 +1,3 @@
 {
-  scottylabs.uptimeKuma.enable = true;
+  scottylabs.uptime-kuma.enable = true;
 }

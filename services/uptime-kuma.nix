@@ -5,10 +5,10 @@
 }:
 
 let
-  cfg = config.scottylabs.uptimeKuma;
+  cfg = config.scottylabs.uptime-kuma;
 in
 {
-  options.scottylabs.uptimeKuma = {
+  options.scottylabs.uptime-kuma = {
     enable = lib.mkEnableOption "Uptime Kuma uptime monitor and status page";
 
     port = lib.mkOption {

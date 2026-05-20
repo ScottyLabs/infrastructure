@@ -14,6 +14,7 @@ locals {
     atlantis    = { ip = "128.2.25.63", comment = "Atlantis OpenTofu PR automation" }
     grafana     = { ip = "128.2.25.63", comment = "Grafana observability frontend" }
     uptime      = { ip = "128.2.25.63", comment = "Uptime Kuma public status page" }
+    litellm     = { ip = "128.2.25.63", comment = "LiteLLM AI gateway fronting cli-proxy-api" }
 
     # hosts/deploy-01
     deploy-01   = { ip = "128.2.25.68", comment = "Campus Cloud VM (https://netreg.net.cmu.edu/)" }
