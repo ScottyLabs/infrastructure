@@ -9,12 +9,10 @@
   litellmProxyExtras,
 }:
 
-# prisma-client-py 0.15.0 raises at runtime unless a project-specific
-# Prisma client has been generated against a schema. We bake that
-# generation into the derivation by running `python -m prisma generate`
-# against litellm's schema during postFixup, writing the rendered
-# templates (`client.py`, `models.py`, ...) into this derivation's own
-# `site-packages/prisma/` so consumers get a ready-to-import package.
+# `prisma-client-py` with the Python client modules pre-generated against
+# LiteLLM's `schema.prisma`. The generator's templates (`client.py`,
+# `models.py`, etc.) land in this derivation's own `site-packages/prisma/`
+# and are imported by `litellm.proxy.utils` at runtime.
 prisma.overridePythonAttrs (old: {
   pname = "prisma-with-litellm-schema";
 
@@ -23,15 +21,15 @@ prisma.overridePythonAttrs (old: {
   postFixup = (old.postFixup or "") + ''
     echo "[prisma-with-litellm-schema] generating Prisma client for litellm schema"
 
-    # Engine binaries are picked up by both the JS prisma CLI (during
-    # schema parsing) and the Python client (at runtime).
+    # Engine binaries used by the JS CLI during schema parsing and by
+    # the Python client at runtime.
     export PRISMA_QUERY_ENGINE_BINARY="${prismaEngines5}/bin/query-engine"
     export PRISMA_QUERY_ENGINE_LIBRARY="${lib.getLib prismaEngines5}/lib/libquery_engine.node"
     export PRISMA_SCHEMA_ENGINE_BINARY="${prismaEngines5}/bin/schema-engine"
     export PRISMA_FMT_BINARY="${prismaEngines5}/bin/prisma-fmt"
 
-    # `ensure_cached()` looks for $PRISMA_BINARY_CACHE_DIR/node_modules/prisma/build/index.js;
-    # when present, it skips the `npm install prisma@<ver>` it would otherwise run.
+    # Pre-populated cache; `ensure_cached()` finds the entrypoint here and
+    # skips its `npm install prisma@<ver>` path.
     export PRISMA_BINARY_CACHE_DIR="${prismaCliCache5}"
     export PRISMA_HIDE_UPDATE_MESSAGE=true
     export PRISMA_USE_GLOBAL_NODE=true

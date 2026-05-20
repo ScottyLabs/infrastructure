@@ -5,20 +5,15 @@
   prismaWithLitellm,
 }:
 
-# Upstream nixpkgs ships `pkgs.litellm` as
-# `toPythonApplication(litellm.overridePythonAttrs (... ++ proxy ++ extra_proxy))`.
-# Recreate that shape with two substitutions so the proxy actually
-# starts against PostgreSQL:
+# `pkgs.litellm` packaged with the dependencies required to run the proxy
+# against PostgreSQL: the full `proxy` and `extra_proxy` extras with
+# `prisma` swapped for `prismaWithLitellm` (the pre-generated client), and
+# `litellmProxyExtras` appended for schema + migrations.
 #
-#   * Drop the bare `prisma` from `extra_proxy` and add the generated
-#     `prismaWithLitellm` instead.
-#   * Append `litellmProxyExtras`, which upstream nixpkgs notes as
-#     `# FIXME package litellm-proxy-extras` and excludes outright.
-#
-# Filtering by `pname == "prisma"` is the only reliable hook because
-# both packages share that derivation name; otherwise both would end
-# up in `site-packages/prisma/` and one would non-deterministically
-# shadow the other.
+# Filtering `extra_proxy` by `pname == "prisma"` is required because both
+# the upstream `prisma` and `prismaWithLitellm` derivations share that
+# pname and would otherwise collide in `site-packages/prisma/`.
+
 let
   base = python3Packages.litellm;
 

@@ -3,16 +3,16 @@
   lib,
 }:
 
-# Pre-populated PRISMA_BINARY_CACHE_DIR layout consumed by
-# prisma-client-py 0.15.0's `prisma.cli.prisma.ensure_cached()`, which
-# expects `<cache>/node_modules/prisma/build/index.js` to exist and a
-# top-level `package.json`. We ship those offline so the Python CLI
-# never reaches for npm at runtime.
+# Offline `PRISMA_BINARY_CACHE_DIR` for `prisma-client-py` 0.15.0.
 #
-# `--ignore-scripts` is required: prisma@5.17.0's preinstall and
-# @prisma/engines' postinstall both download platform-specific engine
-# binaries over HTTPS. We supply those separately via prisma-engines-5
-# and the PRISMA_*_BINARY env vars.
+# `prisma.cli.prisma.ensure_cached()` looks for
+# `<cache>/node_modules/prisma/build/index.js` and a top-level
+# `package.json`; this derivation provides both.
+#
+# `--ignore-scripts` skips the `prisma` and `@prisma/engines` postinstall
+# hooks, which would otherwise reach out to S3 for engine binaries.
+# Engines are supplied separately through `prisma-engines-5` and the
+# `PRISMA_*_BINARY` environment variables.
 buildNpmPackage (finalAttrs: {
   pname = "prisma-cli-cache-5";
   version = "5.17.0";
