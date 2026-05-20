@@ -19,6 +19,7 @@ let
   litellmPkg = pkgs.callPackage ../../packages/litellm.nix {
     inherit litellmProxyExtras prismaWithLitellm;
   };
+  databaseUrl = "postgresql://litellm@localhost/litellm?host=/run/postgresql";
 
   composeEnvScript = pkgs.writeShellScript "compose-litellm-env" ''
     set -eu
@@ -178,6 +179,7 @@ in
         ANONYMIZED_TELEMETRY = "False";
 
         PROXY_BASE_URL = "https://${cfg.domain}";
+        DATABASE_URL = databaseUrl;
 
         # Engine binaries the Python client resolves at runtime.
         PRISMA_QUERY_ENGINE_BINARY = "${prismaEngines5}/bin/query-engine";
@@ -223,7 +225,7 @@ in
         }) cfg.models;
 
         general_settings = {
-          database_url = "postgresql:///litellm?host=/run/postgresql&user=litellm";
+          database_url = databaseUrl;
           allow_user_auth = true;
           ui_access_mode = "admin_only";
         };
