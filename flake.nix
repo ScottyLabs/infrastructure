@@ -51,14 +51,6 @@
       url = "github:ScottyLabs/dalmatian";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    mcp-server = {
-      url = "github:ScottyLabs/mcp-server";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    voting-app = {
-      url = "github:ScottyLabs/voting-app";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     discord-verify = {
       url = "git+https://codeberg.org/ScottyLabs/discord-verify";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -95,8 +87,6 @@
       headplane,
       llm-agents,
       dalmatian,
-      mcp-server,
-      voting-app,
       discord-verify,
       internet-archive,
       groupme-mirror,
@@ -123,8 +113,6 @@
               headplane
               llm-agents
               dalmatian
-              mcp-server
-              voting-app
               discord-verify
               internet-archive
               groupme-mirror
@@ -136,6 +124,7 @@
           modules = [
             ./hosts/${hostname}/configuration.nix
             ./common
+            ./services
 
             home-manager.nixosModules.home-manager
             agenix.nixosModules.default
