@@ -185,6 +185,13 @@ in
         PRISMA_SCHEMA_ENGINE_BINARY = "${prismaEngines5}/bin/schema-engine";
         PRISMA_FMT_BINARY = "${prismaEngines5}/bin/prisma-fmt";
 
+        # Prisma CLI bootstrap: point at the pre-populated cache and the
+        # node binary the wrapper invokes. Without these the CLI tries
+        # `python -m nodeenv` and fails on a closed system.
+        PRISMA_BINARY_CACHE_DIR = "${prismaCliCache5}";
+        PRISMA_USE_GLOBAL_NODE = "true";
+        PRISMA_HIDE_UPDATE_MESSAGE = "true";
+
         GENERIC_CLIENT_ID = "litellm";
         GENERIC_AUTHORIZATION_ENDPOINT = "${keycloakRealmBase}/protocol/openid-connect/auth";
         GENERIC_TOKEN_ENDPOINT = "${keycloakRealmBase}/protocol/openid-connect/token";
@@ -245,6 +252,7 @@ in
         Restart = "on-failure";
         RestartSec = 5;
       };
+      path = [ pkgs.nodejs ];
     };
 
     services.caddy.virtualHosts.${cfg.domain}.extraConfig = ''
