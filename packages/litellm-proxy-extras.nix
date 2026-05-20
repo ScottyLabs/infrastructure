@@ -22,6 +22,14 @@ buildPythonPackage {
   inherit (litellm) src;
   sourceRoot = "${litellm.src.name}/litellm-proxy-extras";
 
+  # The tarball ships ~50 historical pre-built wheels under `dist/`.
+  # pypaInstallPhase installs every `dist/*.whl` it finds, which collides
+  # on `litellm_proxy_extras/__init__.py`. Wipe the directory so only the
+  # freshly built 0.4.56 wheel is installed.
+  postPatch = ''
+    rm -rf dist
+  '';
+
   build-system = [ poetry-core ];
 
   pythonImportsCheck = [ "litellm_proxy_extras" ];
