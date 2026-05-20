@@ -211,7 +211,7 @@ in
         GENERIC_ROLE_MAPPINGS_ROLES = builtins.toJSON {
           proxy_admin = [ cfg.adminGroupPath ];
         };
-        GENERIC_ROLE_MAPPINGS_DEFAULT_ROLE = "";
+        GENERIC_ROLE_MAPPINGS_DEFAULT_ROLE = "internal_user";
 
         # Skip the username/password form and jump straight to Keycloak.
         AUTO_REDIRECT_UI_LOGIN_TO_SSO = "true";
