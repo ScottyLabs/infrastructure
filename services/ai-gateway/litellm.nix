@@ -194,12 +194,6 @@ in
         PRISMA_USE_GLOBAL_NODE = "true";
         PRISMA_HIDE_UPDATE_MESSAGE = "true";
 
-        # Temporary startup diagnostics for the prisma engine handshake.
-        LITELLM_LOG = "DEBUG";
-        PRISMA_PY_DEBUG = "1";
-        PYTHONUNBUFFERED = "1";
-        RUST_LOG = "info";
-
         GENERIC_CLIENT_ID = "litellm";
         GENERIC_AUTHORIZATION_ENDPOINT = "${keycloakRealmBase}/protocol/openid-connect/auth";
         GENERIC_TOKEN_ENDPOINT = "${keycloakRealmBase}/protocol/openid-connect/token";
@@ -260,7 +254,12 @@ in
         Restart = "on-failure";
         RestartSec = 5;
       };
-      path = [ pkgs.nodejs ];
+      path = [
+        pkgs.nodejs
+        # prisma's python client shells out to `openssl version -v` to derive
+        # the binary platform name, even when PRISMA_QUERY_ENGINE_BINARY is set.
+        pkgs.openssl
+      ];
     };
 
 
