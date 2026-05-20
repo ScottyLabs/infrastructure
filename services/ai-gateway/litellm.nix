@@ -230,7 +230,11 @@ in
         general_settings = {
           database_url = databaseUrl;
           allow_user_auth = true;
-          ui_access_mode = "admin_only";
+          ui_access_mode = {
+            type = "restricted_sso_group";
+            restricted_sso_group = cfg.adminGroupPath;
+            sso_group_jwt_field = "groups";
+          };
         };
 
         litellm_settings = {
