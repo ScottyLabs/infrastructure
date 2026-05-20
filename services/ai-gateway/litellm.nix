@@ -179,9 +179,7 @@ in
 
         PROXY_BASE_URL = "https://${cfg.domain}";
 
-        # Runtime Prisma engine resolution: prisma-client-py picks these
-        # up directly. Without them the client tries to introspect a
-        # download cache that doesn't exist on a closed/Nix system.
+        # Engine binaries the Python client resolves at runtime.
         PRISMA_QUERY_ENGINE_BINARY = "${prismaEngines5}/bin/query-engine";
         PRISMA_QUERY_ENGINE_LIBRARY = "${lib.getLib prismaEngines5}/lib/libquery_engine.node";
         PRISMA_SCHEMA_ENGINE_BINARY = "${prismaEngines5}/bin/schema-engine";

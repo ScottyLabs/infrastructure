@@ -1,79 +1,77 @@
 {
   lib,
-  fetchFromGitHub,
-  openssl,
-  pkg-config,
-  rustPlatform,
   stdenv,
+  fetchurl,
+  autoPatchelfHook,
+  gzip,
+  openssl,
+  zlib,
 }:
 
-# prisma-client-py 0.15.0 pins engine 5.17.0 (commit
-# 393aa359c9ad4a4bb28630fb5613f9c281cde053) and refuses to run against
-# anything else. nixpkgs only ships `prisma-engines_6` / `_7`.
+# Prisma engine binaries for the commit
+# `393aa359c9ad4a4bb28630fb5613f9c281cde053` (the 5.17.0 release), fetched
+# from `binaries.prisma.sh` and patchelf'd for NixOS.
 #
-# Mirror the upstream `prisma-engines_6` derivation freshly instead of
-# `overrideAttrs`ing it. `rustPlatform.buildRustPackage` bakes the parent's
-# `pname-version-vendor` derivation name into the cargo vendor hook, so an
-# `overrideAttrs` of pname/version/src/cargoHash fails with
-# "Cargo.lock is not the same in <parent-vendor>".
-rustPlatform.buildRustPackage (finalAttrs: {
+# `prisma-client-py` 0.15.0 hardcodes this commit hash and rejects any
+# other engine version.
+
+let
+  commit = "393aa359c9ad4a4bb28630fb5613f9c281cde053";
+  platform = "debian-openssl-3.0.x";
+  base = "https://binaries.prisma.sh/all_commits/${commit}/${platform}";
+
+  fetchEngine =
+    name: hash:
+    fetchurl {
+      url = "${base}/${name}.gz";
+      inherit hash;
+    };
+
+  queryEngine = fetchEngine "query-engine" "sha256-m8hX3r4NV2DFce5icQdiI9lL6YHCmiJAHeaB8/cOBn0=";
+  schemaEngine = fetchEngine "schema-engine" "sha256-mK1DP9ZNouoettVlVTqaQzns8w8cIRsotpaQ9ZEmmkE=";
+  prismaFmt = fetchEngine "prisma-fmt" "sha256-5r8j2x5/5FauFn9HRKcd+tkHVyfObQ9lWCpb7l/oeT8=";
+  libqueryEngine = fetchEngine "libquery_engine.so.node" "sha256-El11c5vX/NuOq7VCg1W1vgD1QAQ+a8H1swJolHr6sb0=";
+in
+stdenv.mkDerivation {
   pname = "prisma-engines-5";
   version = "5.17.0";
 
-  src = fetchFromGitHub {
-    owner = "prisma";
-    repo = "prisma-engines";
-    tag = finalAttrs.version;
-    hash = "sha256-52nmCBWzcZtuPp5X9wE6QbPqNtpxN5Wsrwzc2RubX18=";
-  };
+  dontUnpack = true;
 
-  # Cargo.lock bump for `time` from 0.3.25 → 0.3.36. The 0.3.25 release
-  # fails to compile under rustc >= 1.80 with E0282 in
-  # `format_description/parse/mod.rs`; the fix landed in time 0.3.27.
-  # Applied as `cargoPatches` so the vendor FOD regenerates with the
-  # bumped lockfile.
-  cargoPatches = [ ./bump-time.patch ];
-
-  cargoHash = "sha256-eMhRMzCIO8wcPn3i7aqwQCI5r+KTp2/j1brcAa6U6uk=";
-
-  env.OPENSSL_NO_VENDOR = 1;
-
-  nativeBuildInputs = [ pkg-config ];
-
-  buildInputs = [ openssl ];
-
-  preBuild = ''
-    export OPENSSL_DIR=${lib.getDev openssl}
-    export OPENSSL_LIB_DIR=${lib.getLib openssl}/lib
-
-    export SQLITE_MAX_VARIABLE_NUMBER=250000
-    export SQLITE_MAX_EXPR_DEPTH=10000
-
-    export GIT_HASH=0000000000000000000000000000000000000000
-  '';
-
-  cargoBuildFlags = [
-    "-p"
-    "query-engine"
-    "-p"
-    "query-engine-node-api"
-    "-p"
-    "schema-engine-cli"
-    "-p"
-    "prisma-fmt"
+  nativeBuildInputs = [
+    autoPatchelfHook
+    gzip
   ];
 
-  postInstall = ''
-    mv $out/lib/libquery_engine${stdenv.hostPlatform.extensions.sharedLibrary} $out/lib/libquery_engine.node
+  buildInputs = [
+    openssl
+    zlib
+    stdenv.cc.cc.lib
+  ];
+
+  installPhase = ''
+    runHook preInstall
+
+    mkdir -p $out/bin $out/lib
+
+    gunzip -c ${queryEngine}     > $out/bin/query-engine
+    gunzip -c ${schemaEngine}    > $out/bin/schema-engine
+    gunzip -c ${prismaFmt}       > $out/bin/prisma-fmt
+    gunzip -c ${libqueryEngine}  > $out/lib/libquery_engine.node
+
+    chmod +x $out/bin/*
+
+    runHook postInstall
   '';
 
-  doCheck = false;
-
   meta = {
-    description = "Prisma engines pinned to 5.17.0 for prisma-client-py 0.15.0";
+    description = "Prisma engines pinned to commit 393aa359 (5.17.0) for prisma-client-py 0.15.0";
     homepage = "https://www.prisma.io/";
     license = lib.licenses.asl20;
-    platforms = lib.platforms.unix;
-    mainProgram = "prisma";
+    platforms = [
+      "x86_64-linux"
+      "aarch64-linux"
+    ];
+    mainProgram = "query-engine";
   };
-})
+}
