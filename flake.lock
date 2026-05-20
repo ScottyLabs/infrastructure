@@ -235,11 +235,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1779241513,
-        "narHash": "sha256-MB4R8Mz/gS4lTp6Yfx0i+BG2pk1p62R44jAx94mdAOk=",
+        "lastModified": 1779298959,
+        "narHash": "sha256-o/5mxCQUKbrkxJhYXkatq1wxmk5g+OI+URZ8eOu/358=",
         "owner": "ScottyLabs",
         "repo": "dalmatian",
-        "rev": "108d32a96722a1ea4c8d92d956f6845aa8f68b1c",
+        "rev": "ab20f884cad7665e63f4c7c5fad24155b54768ce",
         "type": "github"
       },
       "original": {
@@ -1193,11 +1193,11 @@
     },
     "observability": {
       "locked": {
-        "lastModified": 1778882965,
-        "narHash": "sha256-8BJi0rmgGko+L+idEXAPqM2Q2kHnev+XT3T1sixfXuI=",
+        "lastModified": 1779305245,
+        "narHash": "sha256-ZWzHGZLFU1wMo992IV9trlOMFWlH8FMdbx6PYtbFL2I=",
         "ref": "refs/heads/main",
-        "rev": "a5eea04f1685fea024738731739eb648e2a1d5b0",
-        "revCount": 14,
+        "rev": "c7c6206d4e3c10a02460d345518afd39f58878ba",
+        "revCount": 15,
         "type": "git",
         "url": "https://codeberg.org/ScottyLabs/observability"
       },
