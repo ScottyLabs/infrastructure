@@ -27,7 +27,14 @@ rustPlatform.buildRustPackage (finalAttrs: {
     hash = "sha256-52nmCBWzcZtuPp5X9wE6QbPqNtpxN5Wsrwzc2RubX18=";
   };
 
-  cargoHash = "sha256-scpezBG+qCaKq2AGUz7ypnOAFvWOL3F9BF3oBwPaWuo=";
+  # Cargo.lock bump for `time` from 0.3.25 → 0.3.36. The 0.3.25 release
+  # fails to compile under rustc >= 1.80 with E0282 in
+  # `format_description/parse/mod.rs`; the fix landed in time 0.3.27.
+  # Applied as `cargoPatches` so the vendor FOD regenerates with the
+  # bumped lockfile.
+  cargoPatches = [ ./bump-time.patch ];
+
+  cargoHash = "sha256-eMhRMzCIO8wcPn3i7aqwQCI5r+KTp2/j1brcAa6U6uk=";
 
   env.OPENSSL_NO_VENDOR = 1;
 

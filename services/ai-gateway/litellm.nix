@@ -11,7 +11,7 @@ let
   keycloakRealmBase = "${cfg.keycloakIssuerBase}/realms/${cfg.keycloakRealm}";
 
   litellmProxyExtras = pkgs.python3Packages.callPackage ../../packages/litellm-proxy-extras.nix { };
-  prismaEngines5 = pkgs.callPackage ../../packages/prisma-engines-5.nix { };
+  prismaEngines5 = pkgs.callPackage ../../packages/prisma-engines-5 { };
   prismaCliCache5 = pkgs.callPackage ../../packages/prisma-cli-cache-5 { };
   prismaWithLitellm = pkgs.python3Packages.callPackage ../../packages/python3-prisma-litellm.nix {
     inherit prismaEngines5 prismaCliCache5 litellmProxyExtras;
