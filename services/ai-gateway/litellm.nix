@@ -212,6 +212,9 @@ in
           proxy_admin = [ cfg.adminGroupPath ];
         };
         GENERIC_ROLE_MAPPINGS_DEFAULT_ROLE = "";
+
+        # Skip the username/password form and jump straight to Keycloak.
+        AUTO_REDIRECT_UI_LOGIN_TO_SSO = "true";
       };
 
       settings = lib.recursiveUpdate {
@@ -264,6 +267,7 @@ in
 
 
     services.caddy.virtualHosts.${cfg.domain}.extraConfig = ''
+      redir / /ui/ permanent
       reverse_proxy ${cfg.host}:${toString cfg.port}
     '';
 
