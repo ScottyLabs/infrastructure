@@ -10,6 +10,16 @@ let
 
   keycloakRealmBase = "${cfg.keycloakIssuerBase}/realms/${cfg.keycloakRealm}";
 
+  litellmProxyExtras = pkgs.python3Packages.callPackage ../../packages/litellm-proxy-extras.nix { };
+  prismaEngines5 = pkgs.callPackage ../../packages/prisma-engines-5.nix { };
+  prismaCliCache5 = pkgs.callPackage ../../packages/prisma-cli-cache-5 { };
+  prismaWithLitellm = pkgs.python3Packages.callPackage ../../packages/python3-prisma-litellm.nix {
+    inherit prismaEngines5 prismaCliCache5 litellmProxyExtras;
+  };
+  litellmPkg = pkgs.callPackage ../../packages/litellm.nix {
+    inherit litellmProxyExtras prismaWithLitellm;
+  };
+
   composeEnvScript = pkgs.writeShellScript "compose-litellm-env" ''
     set -eu
     umask 0077
@@ -158,6 +168,7 @@ in
 
     services.litellm = {
       enable = true;
+      package = litellmPkg;
       inherit (cfg) host port;
       environmentFile = cfg.runtimeEnvFile;
 
@@ -167,6 +178,14 @@ in
         ANONYMIZED_TELEMETRY = "False";
 
         PROXY_BASE_URL = "https://${cfg.domain}";
+
+        # Runtime Prisma engine resolution: prisma-client-py picks these
+        # up directly. Without them the client tries to introspect a
+        # download cache that doesn't exist on a closed/Nix system.
+        PRISMA_QUERY_ENGINE_BINARY = "${prismaEngines5}/bin/query-engine";
+        PRISMA_QUERY_ENGINE_LIBRARY = "${lib.getLib prismaEngines5}/lib/libquery_engine.node";
+        PRISMA_SCHEMA_ENGINE_BINARY = "${prismaEngines5}/bin/schema-engine";
+        PRISMA_FMT_BINARY = "${prismaEngines5}/bin/prisma-fmt";
 
         GENERIC_CLIENT_ID = "litellm";
         GENERIC_AUTHORIZATION_ENDPOINT = "${keycloakRealmBase}/protocol/openid-connect/auth";
