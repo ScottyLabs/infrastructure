@@ -7,8 +7,9 @@
 
 # `pkgs.litellm` packaged with the dependencies required to run the proxy
 # against PostgreSQL: the full `proxy` and `extra_proxy` extras with
-# `prisma` swapped for `prismaWithLitellm` (the pre-generated client), and
-# `litellmProxyExtras` appended for schema + migrations.
+# `prisma` swapped for `prismaWithLitellm` (the pre-generated client),
+# `litellmProxyExtras` appended for schema + migrations, and
+# `prometheus-client` added for the prometheus callback exposed at `/metrics`.
 #
 # Filtering `extra_proxy` by `pname == "prisma"` is required because both
 # the upstream `prisma` and `prismaWithLitellm` derivations share that
@@ -28,6 +29,7 @@ python3Packages.toPythonApplication (
       ++ [
         litellmProxyExtras
         prismaWithLitellm
+        python3Packages.prometheus-client
       ];
 
     pythonImportsCheck = (old.pythonImportsCheck or [ ]) ++ [
