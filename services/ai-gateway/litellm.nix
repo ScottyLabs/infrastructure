@@ -258,6 +258,10 @@ in
       path = [ pkgs.nodejs ];
     };
 
+    systemd.tmpfiles.rules = [
+      "Z /var/lib/litellm/migrations 0700 litellm litellm - -"
+    ];
+
     services.caddy.virtualHosts.${cfg.domain}.extraConfig = ''
       reverse_proxy ${cfg.host}:${toString cfg.port}
     '';
