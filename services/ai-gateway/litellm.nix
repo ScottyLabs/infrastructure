@@ -31,6 +31,13 @@ let
       printf 'CLI_PROXY_API_KEY=%s\n' "$(cat ${cfg.cliProxyApiKeyFile})"
     } > ${cfg.runtimeEnvFile}
   '';
+
+  prepareMigrationsScript = pkgs.writeShellScript "litellm-prepare-migrations" ''
+    set -eu
+    ${pkgs.coreutils}/bin/mkdir -p /var/lib/litellm/migrations
+    ${pkgs.coreutils}/bin/chown -R litellm:litellm /var/lib/litellm/migrations
+    ${pkgs.coreutils}/bin/chmod -R u+rwX /var/lib/litellm/migrations
+  '';
 in
 {
   options.scottylabs.ai-gateway.litellm = {
@@ -251,16 +258,13 @@ in
         User = "litellm";
         Group = "litellm";
         EnvironmentFile = lib.mkForce [ "-${cfg.runtimeEnvFile}" ];
-        ExecStartPre = lib.mkBefore [ composeEnvScript ];
+        ExecStartPre = lib.mkBefore [ "+${prepareMigrationsScript}" composeEnvScript ];
         Restart = "on-failure";
         RestartSec = 5;
       };
       path = [ pkgs.nodejs ];
     };
 
-    systemd.tmpfiles.rules = [
-      "Z /var/lib/litellm/migrations 0700 litellm litellm - -"
-    ];
 
     services.caddy.virtualHosts.${cfg.domain}.extraConfig = ''
       reverse_proxy ${cfg.host}:${toString cfg.port}
