@@ -6,7 +6,7 @@
 
 let
   cfg = config.scottylabs.matrix;
-  bridge = cfg.bridges.discord;
+  bridge = cfg.bridges.slack;
   bridgePermissions =
     {
       "*" = "user";
@@ -18,8 +18,10 @@ let
     }) bridge.adminUsers);
 in
 {
-  options.scottylabs.matrix.bridges.discord = {
-    enable = lib.mkEnableOption "mautrix-discord bridge";
+  imports = [ ./nixos-mautrix-slack.nix ];
+
+  options.scottylabs.matrix.bridges.slack = {
+    enable = lib.mkEnableOption "mautrix-slack bridge";
 
     environmentFile = lib.mkOption {
       type = lib.types.path;
@@ -34,7 +36,7 @@ in
   };
 
   config = lib.mkIf (cfg.enable && bridge.enable) {
-    services.mautrix-discord = {
+    services.mautrix-slack = {
       enable = true;
       environmentFile = bridge.environmentFile;
       settings = {
@@ -42,14 +44,14 @@ in
           address = "http://127.0.0.1:${toString cfg.synapse.listenPort}";
           domain = cfg.domain;
         };
+        database = {
+          type = "postgres";
+          uri = "postgresql:///mautrix-slack?host=/run/postgresql";
+        };
         appservice = {
-          database = {
-            type = "postgres";
-            uri = "postgresql:///mautrix-discord?host=/run/postgresql";
-          };
           bot = {
-            username = "discord";
-            displayname = "Discord Bridge";
+            username = "slack";
+            displayname = "Slack Bridge";
           };
         };
         bridge = {
@@ -59,8 +61,6 @@ in
           login_shared_secret_map = {
             "${cfg.domain}" = "$DOUBLE_PUPPET_SECRET";
           };
-          delete_portal_on_channel_delete = true;
-          enable_webhook_avatars = true;
           encryption = {
             allow = true;
             default = false;
@@ -74,6 +74,6 @@ in
       };
     };
 
-    scottylabs.postgresql.databases = [ "mautrix-discord" ];
+    scottylabs.postgresql.databases = [ "mautrix-slack" ];
   };
 }
