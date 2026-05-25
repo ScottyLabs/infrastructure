@@ -7,6 +7,15 @@
 let
   cfg = config.scottylabs.matrix;
   bridge = cfg.bridges.discord;
+  bridgePermissions =
+    {
+      "*" = "user";
+      "${cfg.domain}" = "user";
+    }
+    // lib.listToAttrs (map (uid: {
+      name = uid;
+      value = "admin";
+    }) bridge.adminUsers);
 in
 {
   options.scottylabs.matrix.bridges.discord = {
@@ -54,20 +63,13 @@ in
           enable_webhook_avatars = true;
           encryption = {
             allow = true;
-            default = true;
+            default = false;
           };
           relay = {
-            enabled = true;
+            enabled = false;
             admin_only = false;
           };
-          permissions = {
-            "*" = "relay";
-            "${cfg.domain}" = "user";
-          }
-          // builtins.listToAttrs (map (uid: {
-            name = uid;
-            value = "admin";
-          }) bridge.adminUsers);
+          permissions = bridgePermissions;
         };
       };
     };
