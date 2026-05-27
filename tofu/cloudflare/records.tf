@@ -44,15 +44,6 @@ locals {
   }
 }
 
-# Drop legacy matrix-reconciler from state without calling Cloudflare (service removed).
-removed {
-  from = cloudflare_dns_record.a["matrix-reconciler"]
-
-  lifecycle {
-    destroy = false
-  }
-}
-
 resource "cloudflare_dns_record" "kennel_wildcard" {
   zone_id = data.cloudflare_zone.scottylabs_net.zone_id
   name    = "*"
