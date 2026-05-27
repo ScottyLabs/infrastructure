@@ -43,13 +43,19 @@
     bridges.discord = {
       enable = true;
       environmentFile = config.age.secrets.double-puppet-env.path;
-      adminUsers = [ "@ap-1:matrix.org", "@thesuperrl:matrix.org" ];
+      adminUsers = [
+        "@ap-1:matrix.org"
+        "@thesuperrl:matrix.org"
+      ];
     };
 
     bridges.slack = {
       enable = true;
       environmentFile = config.age.secrets.double-puppet-env-slack.path;
-      adminUsers = [ "@ap-1:matrix.org", "@thesuperrl:matrix.org" ];
+      adminUsers = [
+        "@ap-1:matrix.org"
+        "@thesuperrl:matrix.org"
+      ];
     };
 
     reconciler = {
