@@ -22,7 +22,6 @@ in
   "secrets/infra-01/keycloak.age".publicKeys = admins ++ [ infra-01 ];
   "secrets/infra-01/vaultwarden.age".publicKeys = admins ++ [ infra-01 ];
   "secrets/infra-01/matrix-registration.age".publicKeys = admins ++ [ infra-01 ];
-  "secrets/infra-01/matrix-reconciler.age".publicKeys = admins ++ [ infra-01 ];
   "secrets/infra-01/double-puppet.age".publicKeys = admins ++ [ infra-01 ];
   "secrets/infra-01/double-puppet-env.age".publicKeys = admins ++ [ infra-01 ];
   "secrets/infra-01/garage.age".publicKeys = admins ++ [ infra-01 ];

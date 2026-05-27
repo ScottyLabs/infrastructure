@@ -25,12 +25,6 @@
     mode = "0400";
   };
 
-  age.secrets.matrix-reconciler = {
-    file = ../../secrets/infra-01/matrix-reconciler.age;
-    owner = "matrix-reconciler";
-    mode = "0400";
-  };
-
   scottylabs.matrix = {
     enable = true;
     domain = "doggylabs.org";
@@ -56,13 +50,6 @@
         "@ap-1:matrix.org"
         "@thesuperrl:matrix.org"
       ];
-    };
-
-    reconciler = {
-      enable = true;
-      environmentFile = config.age.secrets.matrix-reconciler.path;
-      interval = "hourly";
-      webhook.enable = true;
     };
   };
 }
