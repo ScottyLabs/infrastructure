@@ -10,26 +10,32 @@ jobs:
     steps:
       - uses: https://code.forgejo.org/actions/checkout@v4
 
-      - name: Validate dashboard JSON
+      - name: Install validator dependencies
+        run: |
+          set -euo pipefail
+          if ! python3 -c 'import yaml' 2>/dev/null; then
+            apt-get update -qq
+            DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends python3-yaml
+          fi
+          command -v jq >/dev/null
+
+      - name: Validate dashboards and alerts
         run: |
           set -euo pipefail
           fail=0
-          for f in $(find dashboards -name '*.json' 2>/dev/null); do
+
+          while IFS= read -r -d '' f; do
             if ! jq empty "$f"; then
               echo "Invalid JSON: $f"
               fail=1
             fi
-          done
-          exit $fail
+          done < <(find dashboards -type f -name '*.json' -print0)
 
-      - name: Validate alert YAML
-        run: |
-          set -euo pipefail
-          fail=0
-          for f in $(find alerts -name '*.yaml' -o -name '*.yml' 2>/dev/null); do
-            if ! python3 -c "import yaml,sys; yaml.safe_load(open('$f'))"; then
+          while IFS= read -r -d '' f; do
+            if ! python3 -c 'import sys, yaml; yaml.safe_load(open(sys.argv[1]))' "$f"; then
               echo "Invalid YAML: $f"
               fail=1
             fi
-          done
-          exit $fail
+          done < <(find alerts -type f \( -name '*.yaml' -o -name '*.yml' \) -print0)
+
+          exit "$fail"
