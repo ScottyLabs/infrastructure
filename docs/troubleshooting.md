@@ -92,3 +92,40 @@ curl -fsSL -X POST \
 ```
 
 The setting persists across garage restarts. Recreating the bucket through terraform would clear it; in that case, re-run this command.
+
+## `tofu-cloudflare` fails with Cloudflare 81054 (CNAME already exists)
+
+OpenTofu manages **A** records in `tofu/cloudflare/records.tf`. Cloudflare returns error `81054` when an **A** record is created for a hostname that already has a **CNAME** (or another conflicting record).
+
+This often happens when OpenTofu tries to create an **A** record but Cloudflare already has a **CNAME** on that name. On scottylabs.org, **`@` and `www` are Railway CNAMEs** and must not be in `local.a_records` (see `records.tf`).
+
+**Find the failing hostname:**
+
+```bash
+cd /var/lib/tofu-cloudflare
+tofu init -input=false
+tofu plan
+```
+
+**Fix:**
+
+1. In the [Cloudflare DNS dashboard](https://dash.cloudflare.com), delete the conflicting record for that hostname (commonly `matrix-reconciler` on `scottylabs.org`), **or**
+2. If you want to keep a CNAME, do not manage that name in `records.tf`.
+
+Then re-run apply:
+
+```bash
+sudo systemctl start tofu-cloudflare.service
+```
+
+Or redeploy with comin. A failed `tofu-cloudflare` oneshot during switch causes the whole NixOS activation to roll back even when Matrix bridges started.
+
+## `alloy.service` fails on boot
+
+Grafana Alloy ships journald logs to Loki. A bad River config (for example `relabel_rules = ""` on `loki.source.journal`) makes the process exit immediately.
+
+```bash
+journalctl -u alloy -n 50 --no-pager
+```
+
+Fix is in `common/alloy.nix` (`relabel_rules = loki.relabel.journal.rules`). Alloy failures do not block Matrix bridging but do fail the deploy if `alloy` is enabled on that host.

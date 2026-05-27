@@ -11,7 +11,7 @@ let
 
   alloyConfig = pkgs.writeText "scottylabs.alloy" ''
     loki.relabel "journal" {
-      forward_to = [loki.write.default.receiver]
+      forward_to = []
       rule {
         source_labels = ["__journal__systemd_unit"]
         target_label  = "unit"
@@ -27,9 +27,9 @@ let
     }
 
     loki.source.journal "default" {
-      forward_to    = [loki.relabel.journal.receiver]
+      forward_to    = [loki.write.default.receiver]
       max_age       = "12h"
-      relabel_rules = ""
+      relabel_rules = loki.relabel.journal.rules
       labels        = {
         job  = "systemd-journal",
         host = "${hostname}",
