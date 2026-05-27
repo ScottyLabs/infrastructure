@@ -25,9 +25,7 @@ locals {
     # hosts/snoopy
     snoopy      = { ip = "128.237.157.156", comment = "Computer Club VM (g:scottylabs:snoopy)" }
 
-    # other
-    "@"         = { ip = "76.76.21.21", comment = "Vercel" }
-    www         = { ip = "76.76.21.21", comment = "Vercel" }
+    # scottylabs.org apex and www are CNAMEs (Railway) in Cloudflare — do not manage as A records here.
   }
 }
 
@@ -43,6 +41,15 @@ locals {
   terrier_build_a_records = {
     auth = { ip = "128.2.25.71", comment = "SAML proxy for university authentication" }
     docs = { ip = "128.2.25.71", comment = "Terrier documentation" }
+  }
+}
+
+# Drop legacy matrix-reconciler from state without calling Cloudflare (service removed).
+removed {
+  from = cloudflare_dns_record.a["matrix-reconciler"]
+
+  lifecycle {
+    destroy = false
   }
 }
 
