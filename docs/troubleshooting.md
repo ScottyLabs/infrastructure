@@ -129,3 +129,66 @@ journalctl -u alloy -n 50 --no-pager
 ```
 
 Fix is in `common/alloy.nix` (`relabel_rules = loki.relabel.journal.rules`). Alloy failures do not block Matrix bridging but do fail the deploy if `alloy` is enabled on that host.
+
+## `@slack` bridge appears offline or stops responding
+
+Element often shows bridge bots with a **grey offline dot** even when they work. Send `help` in the DM — if the bot replies, it is up.
+
+### 1. Check the service on infra-01
+
+```bash
+systemctl status mautrix-slack
+journalctl -u mautrix-slack -n 80 --no-pager
+```
+
+Look for:
+
+- `the supplied account key is invalid` — E2EE pickle key mismatch (common after deploys)
+- `Homeserver -> bridge connection is not working` — Synapse cannot reach the appservice URL
+- `ForeignTablesFound` / database errors — Postgres issue
+
+Restart after fixing config:
+
+```bash
+sudo systemctl restart mautrix-slack
+```
+
+### 2. Pickle key must be stable across deploys
+
+Nix regenerates `/var/lib/mautrix-slack/config.yaml` on config changes. If `encryption.pickle_key` is set to `generate` in Nix, each deploy can overwrite the key and break the bridge DB.
+
+`mautrix-slack.nix` expects a stable key in the agenix env file:
+
+```bash
+# On infra-01, read the key the bridge already generated (if service ever worked):
+sudo yq '.encryption.pickle_key' /var/lib/mautrix-slack/config.yaml
+
+# Or generate a new one:
+head -c 32 /dev/urandom | base64
+```
+
+Add to `secrets/infra-01/double-puppet-env.age` (same file as `DOUBLE_PUPPET_SECRET`):
+
+```bash
+ENCRYPTION_PICKLE_KEY=<paste key here>
+```
+
+Re-encrypt with agenix, redeploy, then restart `mautrix-slack`. If you generated a **new** key instead of copying the existing one, you may need to reset the bridge DB (`sudo systemctl stop mautrix-slack`, drop/recreate `mautrix-slack` postgres db, restart) and re-run Slack `login token`.
+
+### 3. Login-level “offline” vs bot offline
+
+`list-logins` can show **BAD_CREDENTIALS** for one Slack account while the bot still responds. That only affects messages sent as that login — run `logout <login ID>` and `login token` again, or use relay mode.
+
+### 4. Synapse not delivering events to the bridge
+
+If the bot accepts invites but never replies, grep Synapse for failed appservice transactions:
+
+```bash
+journalctl -u matrix-synapse -n 200 --no-pager | rg transactions
+```
+
+Regenerate registration if tokens drifted:
+
+```bash
+sudo systemctl restart mautrix-slack-registration matrix-synapse mautrix-slack
+```

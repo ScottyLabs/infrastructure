@@ -67,11 +67,14 @@ in
             "${cfg.domain}" = "as_token:$DOUBLE_PUPPET_SECRET";
           };
         };
+        # Stable key via environmentFile — "generate" in Nix settings is rewritten on
+        # every deploy and breaks the bridge DB (invalid pickle key / E2EE failures).
         encryption = {
           allow = true;
           default = true;
           allow_key_sharing = true;
-          pickle_key = "generate";
+          pickle_key = "$ENCRYPTION_PICKLE_KEY";
+          self_sign = true;
         };
       };
     };
