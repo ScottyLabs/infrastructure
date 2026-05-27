@@ -2,7 +2,6 @@
   config,
   lib,
   pkgs,
-  headplane,
   ...
 }:
 
@@ -18,9 +17,7 @@ let
   );
 in
 {
-  imports = [
-    headplane.nixosModules.headplane
-  ];
+  # headplane is in nixpkgs; do not import tale/headplane's module (duplicate options).
 
   options.scottylabs.tailnet.headplane = {
     enable = lib.mkEnableOption "Headplane web UI for Headscale";
@@ -54,11 +51,14 @@ in
       type = lib.types.path;
       description = "Path to a file containing a Headscale API key for headplane.";
     };
+
+    agentPreAuthKeyFile = lib.mkOption {
+      type = lib.types.path;
+      description = "Path to a file containing the Headplane agent pre-auth key (32+ chars).";
+    };
   };
 
   config = lib.mkIf cfg.enable {
-    nixpkgs.overlays = [ headplane.overlays.default ];
-
     services.headplane = {
       enable = true;
       settings = {
@@ -86,6 +86,7 @@ in
           proc.enabled = true;
           agent = {
             enabled = true;
+            pre_authkey_path = cfg.agentPreAuthKeyFile;
           };
         };
       };

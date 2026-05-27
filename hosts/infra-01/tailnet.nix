@@ -24,6 +24,11 @@
         key = "API_KEY";
         user = "headscale";
       };
+      headplane-agent = {
+        path = "headplane-agent";
+        key = "SECRET";
+        user = "headscale";
+      };
     };
   };
 
@@ -37,6 +42,7 @@
       oidcClientSecretFile = "/run/secrets/headplane-oidc";
       cookieSecretFile = "/run/secrets/headplane-cookie";
       apiKeyFile = "/run/secrets/headplane-api-key";
+      agentPreAuthKeyFile = "/run/secrets/headplane-agent";
     };
   };
 }

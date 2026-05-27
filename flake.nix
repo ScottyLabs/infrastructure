@@ -110,7 +110,6 @@
               comin
               nixos-hardware
               keycloak-theme
-              headplane
               llm-agents
               dalmatian
               discord-verify
