@@ -55,21 +55,23 @@ in
           };
         };
         bridge = {
-          double_puppet_server_map = {
-            "${cfg.domain}" = "https://${cfg.matrixDomain}";
-          };
-          login_shared_secret_map = {
-            "${cfg.domain}" = "$DOUBLE_PUPPET_SECRET";
-          };
-          encryption = {
-            allow = true;
-            default = false;
-          };
           relay = {
             enabled = false;
             admin_only = false;
           };
           permissions = bridgePermissions;
+        };
+        # mautrix-slack v25+ uses top-level encryption (bridge.encryption is ignored).
+        double_puppet = {
+          secrets = {
+            "${cfg.domain}" = "as_token:$DOUBLE_PUPPET_SECRET";
+          };
+        };
+        encryption = {
+          allow = true;
+          default = true;
+          allow_key_sharing = true;
+          pickle_key = "generate";
         };
       };
     };

@@ -63,7 +63,9 @@ in
           enable_webhook_avatars = true;
           encryption = {
             allow = true;
-            default = false;
+            default = true;
+            allow_key_sharing = true;
+            pickle_key = "generate";
           };
           relay = {
             enabled = false;
