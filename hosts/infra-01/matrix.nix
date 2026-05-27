@@ -39,6 +39,7 @@
       environmentFile = config.age.secrets.double-puppet-env.path;
       adminUsers = [
         "@ap-1:matrix.org"
+        "@reconciler:doggylabs.org"
         "@thesuperrl:matrix.org"
       ];
     };
@@ -48,6 +49,7 @@
       environmentFile = config.age.secrets.double-puppet-env-slack.path;
       adminUsers = [
         "@ap-1:matrix.org"
+        "@reconciler:doggylabs.org"
         "@thesuperrl:matrix.org"
       ];
     };
