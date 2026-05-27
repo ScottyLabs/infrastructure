@@ -12,7 +12,6 @@ locals {
     assets      = { ip = "128.2.25.63", comment = "Garage public-read website endpoint for the scottylabs-assets bucket" }
     garage      = { ip = "128.2.25.63", comment = "Garage web admin UI fronted by caddy with Keycloak OIDC" }
     atlantis    = { ip = "128.2.25.63", comment = "Atlantis OpenTofu PR automation" }
-    matrix-reconciler = { ip = "128.2.25.63", comment = "Matrix bridge reconciler manifest webhook" }
     grafana     = { ip = "128.2.25.63", comment = "Grafana observability frontend" }
     uptime      = { ip = "128.2.25.63", comment = "Uptime Kuma public status page" }
     litellm     = { ip = "128.2.25.63", comment = "LiteLLM AI gateway fronting cli-proxy-api" }

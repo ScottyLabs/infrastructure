@@ -12,7 +12,6 @@ in
     ./synapse.nix
     ./mautrix-discord.nix
     ./mautrix-slack.nix
-    ./reconciler.nix
     ./well-known.nix
   ];
 
