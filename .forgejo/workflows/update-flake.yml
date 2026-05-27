@@ -21,11 +21,26 @@ jobs:
 
       - name: Update flake
         run: |
+          set -u
           if [ "${{ inputs.input_name }}" = "all" ]; then
-            nix flake update
+            args=()
           else
-            nix flake update ${{ inputs.input_name }}
+            args=("${{ inputs.input_name }}")
           fi
+          # Codeberg occasionally returns 5xx for git fetches; nix has no built-in retry
+          # and leaves a half-populated ~/.cache/nix/gitv3 entry that breaks subsequent
+          # attempts with "revspec 'refs/heads/main' not found". Wipe between tries.
+          for attempt in 1 2 3 4 5; do
+            rm -rf "$HOME/.cache/nix/gitv3"
+            if nix flake update "${args[@]}"; then
+              exit 0
+            fi
+            delay=$((10 * attempt))
+            echo "::warning::flake update attempt $attempt failed; retrying in ${delay}s"
+            sleep "$delay"
+          done
+          echo "::error::flake update failed after 5 attempts"
+          exit 1
 
       - name: Commit and push
         run: |
