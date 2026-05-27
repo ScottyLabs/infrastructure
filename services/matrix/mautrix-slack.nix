@@ -1,12 +1,15 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }:
 
 let
   cfg = config.scottylabs.matrix;
   bridge = cfg.bridges.slack;
+  # synapse_mautrix_slack_link and manual plumbing need `!slack bridge` (added in v26.04).
+  slackPackage = pkgs.mautrix-slack;
   bridgePermissions =
     {
       "*" = "user";
@@ -36,8 +39,16 @@ in
   };
 
   config = lib.mkIf (cfg.enable && bridge.enable) {
+    assertions = [
+      {
+        assertion = lib.versionAtLeast slackPackage.version "26.04";
+        message = "mautrix-slack >= 26.04 is required for !slack bridge (plumbing into Discord portals). Update nixpkgs (nix flake update nixpkgs).";
+      }
+    ];
+
     services.mautrix-slack = {
       enable = true;
+      package = slackPackage;
       environmentFile = bridge.environmentFile;
       settings = {
         homeserver = {
