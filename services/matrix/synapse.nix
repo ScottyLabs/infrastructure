@@ -26,6 +26,12 @@ in
       description = "HTTP listener port for clients and federation.";
     };
 
+    metricsPort = lib.mkOption {
+      type = lib.types.port;
+      default = 9008;
+      description = "Prometheus metrics listener port (synapse exposes /_synapse/metrics).";
+    };
+
     maxUploadSize = lib.mkOption {
       type = lib.types.str;
       default = "100M";
@@ -73,6 +79,12 @@ in
               }
             ];
           }
+          {
+            port = cfg.synapse.metricsPort;
+            bind_addresses = [ "127.0.0.1" ];
+            type = "metrics";
+            tls = false;
+          }
         ];
 
         database = {
@@ -90,7 +102,7 @@ in
         # Disallow users from registering on this homeserver, while
         # allowing them to register on other trusted servers
         enable_registration = false;
-        enable_metrics = false;
+        enable_metrics = true;
         registration_shared_secret_path = cfg.synapse.registrationSecretFile;
 
         trusted_key_servers = [

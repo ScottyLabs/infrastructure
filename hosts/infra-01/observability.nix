@@ -158,6 +158,16 @@ in
         static_configs = [ { targets = [ "localhost:4000" ]; } ];
         metrics_path = "/metrics";
       }
+      {
+        job_name = "atlantis";
+        static_configs = [ { targets = [ "localhost:4141" ]; } ];
+        metrics_path = "/metrics";
+      }
+      {
+        job_name = "synapse";
+        static_configs = [ { targets = [ "localhost:9008" ]; } ];
+        metrics_path = "/_synapse/metrics";
+      }
     ];
   };
 
