@@ -192,3 +192,36 @@ Regenerate registration if tokens drifted:
 ```bash
 sudo systemctl restart mautrix-slack-registration matrix-synapse mautrix-slack
 ```
+
+### `!slack bridge` fails with insufficient permissions for `m.bridge`
+
+When plumbing Slack into an existing mautrix-discord portal room, `@slack` must be able to send `m.bridge` state events. Discord portal rooms default `@slack` to power level 0, which is below the room's `m.bridge` threshold.
+
+**Manual fix** (in the Discord portal room, e.g. `#discord_1461933322505818156` for DevOps):
+
+1. Room settings → Permissions → set `@slack:doggylabs.org` to at least **50** (or promote to admin).
+2. Re-run `!slack bridge <slack-channel-id>`.
+
+Bridge admins can also pass `--ignore-permissions` to skip the pre-check:
+
+```text
+!slack bridge C08K3Q77ZQF --ignore-permissions
+```
+
+`synapse_mautrix_slack_link` (terraform-provider-synapse) promotes `@slack` via the Synapse admin API before sending the bridge command; rebuild/redeploy the provider if you hit this during OpenTofu apply.
+
+### Discord → Slack: “Your message was not bridged: You're not logged in”
+
+mautrix-slack only sends a Matrix user's messages to Slack when that user has run `login token` in the `@slack` management room — unless **relay mode** is on. Discord-originated messages appear as `@discord_…:doggylabs.org` puppets, which do not have Slack logins.
+
+ScottyLabs enables relay on infra-01 (`bridge.relay` + `default_relays` for the `ops+slack` login in `mautrix-slack.nix`). The reconciler runs `!slack bridge <relay-login> <team>-<channel>` and `!slack set-relay` in each Discord portal room.
+
+**Immediate fix** in the Discord portal room (DevOps example):
+
+```text
+!slack set-relay T03EVH29W-U0A7HGVMPB6
+```
+
+**After deploy** (relay enabled in config): restart `mautrix-slack`, then re-run set-relay in any already-plumbed portal rooms (or re-apply `synapse_mautrix_slack_link`).
+
+Optional: team members can still run `login token` in `@slack` to post to Slack under their own Slack identity instead of through the relay.
