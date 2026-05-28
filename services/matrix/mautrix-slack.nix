@@ -90,15 +90,16 @@ in
                 prefer_default = true;
                 default_relays = [ bridge.relayLoginId ];
                 # Per-message display names on Slack (Discord puppet names, etc.).
+                # Keys must be quoted — unquoted m.text becomes nested YAML { m: { text: ... } }.
                 message_formats = {
-                  m.text = "{{ .Message }}";
-                  m.notice = "{{ .Message }}";
-                  m.emote = "{{ .Message }}";
-                  m.file = "{{ .Message }}";
-                  m.image = "{{ .Message }}";
-                  m.audio = "{{ .Message }}";
-                  m.video = "{{ .Message }}";
-                  m.location = "{{ .Message }}";
+                  "m.text" = "{{ .Message }}";
+                  "m.notice" = "{{ .Message }}";
+                  "m.emote" = "{{ .Message }}";
+                  "m.file" = "{{ .Message }}";
+                  "m.image" = "{{ .Message }}";
+                  "m.audio" = "{{ .Message }}";
+                  "m.video" = "{{ .Message }}";
+                  "m.location" = "{{ .Message }}";
                 };
                 displayname_format = "{{ .DisambiguatedName }}";
               };
