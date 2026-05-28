@@ -347,11 +347,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1779836966,
-        "narHash": "sha256-r4rODrPbqPhAhS+Z7zWoGoTGLkLV0YtoOd/2yW0qyYA=",
+        "lastModified": 1779948576,
+        "narHash": "sha256-1go2jYJk1Kokvu/qRu5cg1PLW5uMAWqEGFJtANrWQV4=",
         "ref": "refs/heads/main",
-        "rev": "2577fb1a02e0e43a3287bb82f093a1aa6ba2f871",
-        "revCount": 66,
+        "rev": "cad386d166876b87c8e9c24b3ea58296424ff82b",
+        "revCount": 67,
         "type": "git",
         "url": "https://codeberg.org/ScottyLabs/discord-verify"
       },
@@ -389,11 +389,11 @@
         "rust-analyzer-src": "rust-analyzer-src"
       },
       "locked": {
-        "lastModified": 1779790483,
-        "narHash": "sha256-2wCMtmVmkCcyHaH6hkrbx7XdUgLYP5E1wl/jc1YxxTY=",
+        "lastModified": 1779876442,
+        "narHash": "sha256-O25HomVNmdROO13PEQ3Ran8Hq5EsyLmVn8Gb8JvJtJE=",
         "owner": "nix-community",
         "repo": "fenix",
-        "rev": "6012e5463531342033571efe294ec880bf13dd95",
+        "rev": "2eff81fc84390a35e1565395ae945d9394856824",
         "type": "github"
       },
       "original": {
@@ -1279,11 +1279,11 @@
     "rust-analyzer-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1779742949,
-        "narHash": "sha256-Dk0hnFTXbmNmigsJyQkCz2NEEgtpe+MN500dPnki9Ic=",
+        "lastModified": 1779827300,
+        "narHash": "sha256-J6pHxKoZzWCrAvOVInwBcYYWix/NWwM10Ad+i29Qc5s=",
         "owner": "rust-lang",
         "repo": "rust-analyzer",
-        "rev": "462d95ca60fa7360b44258be94105bc20e203684",
+        "rev": "c3af07ad84d68adc5e652e86f0c20009caa29014",
         "type": "github"
       },
       "original": {
