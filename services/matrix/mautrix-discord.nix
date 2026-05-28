@@ -53,6 +53,8 @@ in
           };
         };
         bridge = {
+          # Matrix ghost display names for relay formatting on mautrix-slack (GlobalName, then username).
+          displayname_template = "{{if .Webhook}}Webhook{{else}}{{or .GlobalName .Username}}{{if .Bot}} (bot){{end}}{{end}}";
           double_puppet_server_map = {
             "${cfg.domain}" = "https://${cfg.matrixDomain}";
           };
