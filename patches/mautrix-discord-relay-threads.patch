@@ -1,9 +1,7 @@
 diff --git a/main.go b/main.go
-index 1111111..2222222 100644
 --- a/main.go
 +++ b/main.go
-@@ -118,6 +118,18 @@ func (br *DiscordBridge) Stop() {
- 	}
+@@ -128,3 +128,16 @@
  }
  
 +// getLoggedInUserForPortal returns any bridge user with an active Discord session.
@@ -20,13 +18,10 @@ index 1111111..2222222 100644
 +}
 +
  func (br *DiscordBridge) GetIPortal(mxid id.RoomID) bridge.Portal {
- 	p := br.GetPortalByMXID(mxid)
- 	if p == nil {
 diff --git a/portal.go b/portal.go
-index 3333333..4444444 100644
 --- a/portal.go
 +++ b/portal.go
-@@ -1578,11 +1578,14 @@ func (portal *Portal) handleMatrixMessage(sender *User, evt *event.Event) {
+@@ -1578,11 +1578,14 @@
  			threadID = existingThread.ID
  			existingThread.initialBackfillAttempted = true
  		} else {
@@ -45,5 +40,3 @@ index 3333333..4444444 100644
 -			threadID, err = portal.startThreadFromMatrix(sender, threadRoot)
 +			threadID, err = portal.startThreadFromMatrix(threadSender, threadRoot)
  			if err != nil {
- 				portal.log.Warn().Err(err).
- 					Str("thread_root_mxid", threadRoot.String()).
