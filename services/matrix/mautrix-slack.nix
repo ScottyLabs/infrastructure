@@ -89,19 +89,19 @@ in
                 admin_only = false;
                 prefer_default = true;
                 default_relays = [ bridge.relayLoginId ];
-                # Per-message display names on Slack (Discord puppet names, etc.).
+                # Prefix with Matrix sender (Discord puppet display name, etc.). Relay posts as
+                # ops+slack; displayname_format alone often still shows the relay Slack user.
                 # Keys must be quoted — unquoted m.text becomes nested YAML { m: { text: ... } }.
                 message_formats = {
-                  "m.text" = "{{ .Message }}";
-                  "m.notice" = "{{ .Message }}";
-                  "m.emote" = "{{ .Message }}";
-                  "m.file" = "{{ .Message }}";
-                  "m.image" = "{{ .Message }}";
-                  "m.audio" = "{{ .Message }}";
-                  "m.video" = "{{ .Message }}";
-                  "m.location" = "{{ .Message }}";
+                  "m.text" = "{{ .Sender.DisambiguatedName }}: {{ .Message }}";
+                  "m.notice" = "{{ .Sender.DisambiguatedName }}: {{ .Message }}";
+                  "m.emote" = "* {{ .Sender.DisambiguatedName }} {{ .Message }}";
+                  "m.file" = "{{ .Sender.DisambiguatedName }} sent a file{{ if .Caption }}: {{ .Caption }}{{ end }}";
+                  "m.image" = "{{ .Sender.DisambiguatedName }} sent an image{{ if .Caption }}: {{ .Caption }}{{ end }}";
+                  "m.audio" = "{{ .Sender.DisambiguatedName }} sent an audio file{{ if .Caption }}: {{ .Caption }}{{ end }}";
+                  "m.video" = "{{ .Sender.DisambiguatedName }} sent a video{{ if .Caption }}: {{ .Caption }}{{ end }}";
+                  "m.location" = "{{ .Sender.DisambiguatedName }} sent a location{{ if .Caption }}: {{ .Caption }}{{ end }}";
                 };
-                displayname_format = "{{ .DisambiguatedName }}";
               };
           permissions = bridgePermissions;
         };
