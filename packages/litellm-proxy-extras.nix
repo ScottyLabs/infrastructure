@@ -11,12 +11,12 @@
 # Built from the official PyPI wheel; nixpkgs does not yet package this.
 buildPythonPackage rec {
   pname = "litellm-proxy-extras";
-  version = "0.4.56";
+  version = "0.4.73";
   format = "wheel";
 
   src = fetchurl {
-    url = "https://files.pythonhosted.org/packages/7a/91/b54c96cfd1f0fabeca686bf400cb7d7c3c12f15df4359d42deefd0fc2bb2/litellm_proxy_extras-0.4.56-py3-none-any.whl";
-    hash = "sha256-UtvjtTWMeQ534S8exe+OdQizg8Kq9BKZdQtvtACQjuc=";
+    url = "https://files.pythonhosted.org/packages/1d/64/7e85f5f47495ebb0bb5f30a4f4b54b64277a40a14be79c34052df97ac7ab/litellm_proxy_extras-0.4.73-py3-none-any.whl";
+    hash = "sha256-pPRg0V3QGgldrbJvdmCiWfoqh1ep4n3uaMFZqHK4234=";
   };
 
   pythonImportsCheck = [ "litellm_proxy_extras" ];
