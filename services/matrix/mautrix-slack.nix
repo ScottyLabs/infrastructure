@@ -19,6 +19,9 @@ let
       name = uid;
       value = "admin";
     }) bridge.adminUsers);
+  # Discord puppets attach com.beeper.per_message_profile (GlobalName/username). Do not use
+  # DisambiguatedName — it becomes "Name via other (@discord_…:domain)" when names collide.
+  relaySenderName = "{{ or .Sender.PerMessageProfile.Displayname .Sender.Displayname }}";
 in
 {
   imports = [ ./nixos-mautrix-slack.nix ];
@@ -89,18 +92,18 @@ in
                 admin_only = false;
                 prefer_default = true;
                 default_relays = [ bridge.relayLoginId ];
-                # Prefix with Matrix sender (Discord puppet display name, etc.). Relay posts as
+                # Prefix with readable sender (Discord puppet display name). Relay posts as
                 # ops+slack; displayname_format alone often still shows the relay Slack user.
                 # Keys must be quoted — unquoted m.text becomes nested YAML { m: { text: ... } }.
                 message_formats = {
-                  "m.text" = "{{ .Sender.DisambiguatedName }}: {{ .Message }}";
-                  "m.notice" = "{{ .Sender.DisambiguatedName }}: {{ .Message }}";
-                  "m.emote" = "* {{ .Sender.DisambiguatedName }} {{ .Message }}";
-                  "m.file" = "{{ .Sender.DisambiguatedName }} sent a file{{ if .Caption }}: {{ .Caption }}{{ end }}";
-                  "m.image" = "{{ .Sender.DisambiguatedName }} sent an image{{ if .Caption }}: {{ .Caption }}{{ end }}";
-                  "m.audio" = "{{ .Sender.DisambiguatedName }} sent an audio file{{ if .Caption }}: {{ .Caption }}{{ end }}";
-                  "m.video" = "{{ .Sender.DisambiguatedName }} sent a video{{ if .Caption }}: {{ .Caption }}{{ end }}";
-                  "m.location" = "{{ .Sender.DisambiguatedName }} sent a location{{ if .Caption }}: {{ .Caption }}{{ end }}";
+                  "m.text" = "${relaySenderName}: {{ .Message }}";
+                  "m.notice" = "${relaySenderName}: {{ .Message }}";
+                  "m.emote" = "* ${relaySenderName} {{ .Message }}";
+                  "m.file" = "${relaySenderName} sent a file{{ if .Caption }}: {{ .Caption }}{{ end }}";
+                  "m.image" = "${relaySenderName} sent an image{{ if .Caption }}: {{ .Caption }}{{ end }}";
+                  "m.audio" = "${relaySenderName} sent an audio file{{ if .Caption }}: {{ .Caption }}{{ end }}";
+                  "m.video" = "${relaySenderName} sent a video{{ if .Caption }}: {{ .Caption }}{{ end }}";
+                  "m.location" = "${relaySenderName} sent a location{{ if .Caption }}: {{ .Caption }}{{ end }}";
                 };
               };
           permissions = bridgePermissions;
