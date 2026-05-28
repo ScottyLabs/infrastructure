@@ -22,6 +22,9 @@ let
   # Discord puppets attach com.beeper.per_message_profile (GlobalName/username). Do not use
   # DisambiguatedName — it becomes "Name via other (@discord_…:domain)" when names collide.
   relaySenderName = "{{ or .Sender.PerMessageProfile.Displayname .Sender.Displayname }}";
+  # Relay templates also receive .Content (see mautrix-go bridgeconfig formatData). Prefix when
+  # Matrix m.mentions is set (@user / @room from Discord pings).
+  relayMentionPrefix = "{{ with .Content.Mentions }}{{ if or .Room .UserIDs }}[ping] {{ end }}{{ end }}";
 in
 {
   imports = [ ./nixos-mautrix-slack.nix ];
@@ -96,9 +99,9 @@ in
                 # ops+slack; displayname_format alone often still shows the relay Slack user.
                 # Keys must be quoted — unquoted m.text becomes nested YAML { m: { text: ... } }.
                 message_formats = {
-                  "m.text" = "${relaySenderName}: {{ .Message }}";
-                  "m.notice" = "${relaySenderName}: {{ .Message }}";
-                  "m.emote" = "* ${relaySenderName} {{ .Message }}";
+                  "m.text" = "${relayMentionPrefix}${relaySenderName}: {{ .Message }}";
+                  "m.notice" = "${relayMentionPrefix}${relaySenderName}: {{ .Message }}";
+                  "m.emote" = "${relayMentionPrefix}* ${relaySenderName} {{ .Message }}";
                   "m.file" = "${relaySenderName} sent a file{{ if .Caption }}: {{ .Caption }}{{ end }}";
                   "m.image" = "${relaySenderName} sent an image{{ if .Caption }}: {{ .Caption }}{{ end }}";
                   "m.audio" = "${relaySenderName} sent an audio file{{ if .Caption }}: {{ .Caption }}{{ end }}";
