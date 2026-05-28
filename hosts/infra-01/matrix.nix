@@ -47,6 +47,7 @@
     bridges.slack = {
       enable = true;
       environmentFile = config.age.secrets.double-puppet-env-slack.path;
+      relayLoginId = "T03EVH29W-U0A7HGVMPB6";
       adminUsers = [
         "@ap-1:matrix.org"
         "@reconciler:doggylabs.org"

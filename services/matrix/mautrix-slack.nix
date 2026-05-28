@@ -36,6 +36,17 @@ in
       default = [ ];
       description = "Matrix user IDs granted bridge admin permissions.";
     };
+
+    relayLoginId = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      example = "T03EVH29W-U0A7HGVMPB6";
+      description = ''
+        mautrix-slack login ID for ops+slack (from `list-logins` in the @slack management room).
+        When set, relay mode is enabled so Discord-originated messages in plumbed portal rooms
+        reach Slack without each user running `login token`.
+      '';
+    };
   };
 
   config = lib.mkIf (cfg.enable && bridge.enable) {
@@ -66,10 +77,31 @@ in
           };
         };
         bridge = {
-          relay = {
-            enabled = false;
-            admin_only = false;
-          };
+          relay =
+            if bridge.relayLoginId == null then
+              {
+                enabled = false;
+                admin_only = false;
+              }
+            else
+              {
+                enabled = true;
+                admin_only = false;
+                prefer_default = true;
+                default_relays = [ bridge.relayLoginId ];
+                # Per-message display names on Slack (Discord puppet names, etc.).
+                message_formats = {
+                  m.text = "{{ .Message }}";
+                  m.notice = "{{ .Message }}";
+                  m.emote = "{{ .Message }}";
+                  m.file = "{{ .Message }}";
+                  m.image = "{{ .Message }}";
+                  m.audio = "{{ .Message }}";
+                  m.video = "{{ .Message }}";
+                  m.location = "{{ .Message }}";
+                };
+                displayname_format = "{{ .DisambiguatedName }}";
+              };
           permissions = bridgePermissions;
         };
         # mautrix-slack v25+ uses top-level encryption (bridge.encryption is ignored).
