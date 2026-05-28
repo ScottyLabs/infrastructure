@@ -228,4 +228,25 @@ Optional: team members can still run `login token` in `@slack` to post to Slack 
 
 ### Discord → Slack: spotting ping messages
 
-Relay `message_formats` in `mautrix-slack.nix` prefix messages that have Matrix `m.mentions` (user IDs or `@room`) with `[ping]`, e.g. `[ping] Alice: hey @you`. The message body may still contain `@displayname` text from Discord; the prefix marks that the message was a ping.
+Relay `message_formats` in `mautrix-slack.nix` prefix messages that have Matrix `m.mentions` (user IDs or `@room`) with `[ping]`, e.g. `[ping] hey @you`. Sender names and avatars use `displayname_format` plus Slack `icon_url` (not the message body).
+
+### Profile pictures (Discord ↔ Slack)
+
+**Discord → Slack** (relay): mautrix-slack posts with per-message username and avatar when `public_media` is enabled and `appservice.public_address` points at the Matrix client domain. Caddy on `matrix.<domain>` proxies `/_mautrix/publicmedia/*` to the slack appservice (port 29335).
+
+**Slack → Discord**: Matrix Slack ghosts carry avatars; Discord only shows them on webhook relay sends. In each plumbed portal room, someone logged into `@discord` must run:
+
+```text
+!discord set-relay --create mautrix
+```
+
+(`enable_webhook_avatars` and `bridge.public_address` must be set — see `mautrix-discord.nix`. Caddy proxies `/mautrix-discord/*` to the discord appservice on port 29334.)
+
+Add stable keys to `secrets/infra-01/double-puppet-env.age` (same file as `DOUBLE_PUPPET_SECRET`), then re-encrypt and redeploy:
+
+```bash
+PUBLIC_MEDIA_SIGNING_KEY=<random base64, e.g. head -c 32 /dev/urandom | base64>
+AVATAR_PROXY_KEY=<random base64>
+```
+
+If you change `AVATAR_PROXY_KEY` after Discord was already using signed avatar URLs, restart `mautrix-discord` and re-run `!discord set-relay --create` in plumbed rooms if avatars break.

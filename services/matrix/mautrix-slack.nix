@@ -19,9 +19,11 @@ let
       name = uid;
       value = "admin";
     }) bridge.adminUsers);
+  bridgePublicURL = "https://${cfg.matrixDomain}";
   # Discord puppets attach com.beeper.per_message_profile (GlobalName/username). Do not use
   # DisambiguatedName — it becomes "Name via other (@discord_…:domain)" when names collide.
-  relaySenderName = "{{ or .Sender.PerMessageProfile.Displayname .Sender.Displayname }}";
+  # message_formats use .Sender.*; displayname_format uses the same fields without that prefix.
+  relayDisplayName = "{{ or .PerMessageProfile.Displayname .Displayname }}";
   # Relay templates also receive .Content (see mautrix-go bridgeconfig formatData). Prefix when
   # Matrix m.mentions is set (@user / @room from Discord pings).
   relayMentionPrefix = "{{ with .Content.Mentions }}{{ if or .Room .UserIDs }}[ping] {{ end }}{{ end }}";
@@ -34,7 +36,10 @@ in
 
     environmentFile = lib.mkOption {
       type = lib.types.path;
-      description = "Path to env file containing DOUBLE_PUPPET_SECRET and other bridge-runtime values.";
+      description = ''
+        Path to env file containing DOUBLE_PUPPET_SECRET, ENCRYPTION_PICKLE_KEY, and
+        PUBLIC_MEDIA_SIGNING_KEY (for relay avatar URLs on Slack).
+      '';
     };
 
     adminUsers = lib.mkOption {
@@ -77,10 +82,17 @@ in
           uri = "postgresql:///mautrix-slack?host=/run/postgresql";
         };
         appservice = {
+          hostname = "127.0.0.1";
+          port = 29335;
+          public_address = bridgePublicURL;
           bot = {
             username = "slack";
             displayname = "Slack Bridge";
           };
+        };
+        public_media = {
+          enabled = true;
+          signing_key = "$PUBLIC_MEDIA_SIGNING_KEY";
         };
         bridge = {
           relay =
@@ -95,18 +107,19 @@ in
                 admin_only = false;
                 prefer_default = true;
                 default_relays = [ bridge.relayLoginId ];
-                # Prefix with readable sender (Discord puppet display name). Relay posts as
-                # ops+slack; displayname_format alone often still shows the relay Slack user.
+                # displayname_format + icon_url (needs public_media) show Discord sender on Slack;
+                # message body only carries text and optional [ping] prefix.
+                displayname_format = relayDisplayName;
                 # Keys must be quoted — unquoted m.text becomes nested YAML { m: { text: ... } }.
                 message_formats = {
-                  "m.text" = "${relayMentionPrefix}${relaySenderName}: {{ .Message }}";
-                  "m.notice" = "${relayMentionPrefix}${relaySenderName}: {{ .Message }}";
-                  "m.emote" = "${relayMentionPrefix}* ${relaySenderName} {{ .Message }}";
-                  "m.file" = "${relaySenderName} sent a file{{ if .Caption }}: {{ .Caption }}{{ end }}";
-                  "m.image" = "${relaySenderName} sent an image{{ if .Caption }}: {{ .Caption }}{{ end }}";
-                  "m.audio" = "${relaySenderName} sent an audio file{{ if .Caption }}: {{ .Caption }}{{ end }}";
-                  "m.video" = "${relaySenderName} sent a video{{ if .Caption }}: {{ .Caption }}{{ end }}";
-                  "m.location" = "${relaySenderName} sent a location{{ if .Caption }}: {{ .Caption }}{{ end }}";
+                  "m.text" = "${relayMentionPrefix}{{ .Message }}";
+                  "m.notice" = "${relayMentionPrefix}{{ .Message }}";
+                  "m.emote" = "${relayMentionPrefix}* {{ .Message }}";
+                  "m.file" = "sent a file{{ if .Caption }}: {{ .Caption }}{{ end }}";
+                  "m.image" = "sent an image{{ if .Caption }}: {{ .Caption }}{{ end }}";
+                  "m.audio" = "sent an audio file{{ if .Caption }}: {{ .Caption }}{{ end }}";
+                  "m.video" = "sent a video{{ if .Caption }}: {{ .Caption }}{{ end }}";
+                  "m.location" = "sent a location{{ if .Caption }}: {{ .Caption }}{{ end }}";
                 };
               };
           permissions = bridgePermissions;
