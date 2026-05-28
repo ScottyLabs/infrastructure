@@ -1,0 +1,49 @@
+diff --git a/main.go b/main.go
+index 1111111..2222222 100644
+--- a/main.go
++++ b/main.go
+@@ -118,6 +118,18 @@ func (br *DiscordBridge) Stop() {
+ 	}
+ }
+ 
++// getLoggedInUserForPortal returns any bridge user with an active Discord session.
++// Used when relay/webhook sends need to create a thread on Discord.
++func (br *DiscordBridge) getLoggedInUserForPortal() *User {
++	br.usersLock.Lock()
++	defer br.usersLock.Unlock()
++	for _, user := range br.usersByMXID {
++		if user.Session != nil && user.IsLoggedIn() {
++			return user
++		}
++	}
++	return nil
++}
++
+ func (br *DiscordBridge) GetIPortal(mxid id.RoomID) bridge.Portal {
+ 	p := br.GetPortalByMXID(mxid)
+ 	if p == nil {
+diff --git a/portal.go b/portal.go
+index 3333333..4444444 100644
+--- a/portal.go
++++ b/portal.go
+@@ -1578,11 +1578,14 @@ func (portal *Portal) handleMatrixMessage(sender *User, evt *event.Event) {
+ 			threadID = existingThread.ID
+ 			existingThread.initialBackfillAttempted = true
+ 		} else {
++			threadSender := sender
+ 			if isWebhookSend {
+-				// TODO start thread with bot?
+-				go portal.sendMessageMetrics(evt, errCantStartThread, "Dropping")
+-				return
++				threadSender = portal.bridge.getLoggedInUserForPortal()
++				if threadSender == nil {
++					go portal.sendMessageMetrics(evt, errCantStartThread, "Dropping")
++					return
++				}
+ 			}
+ 			var err error
+-			threadID, err = portal.startThreadFromMatrix(sender, threadRoot)
++			threadID, err = portal.startThreadFromMatrix(threadSender, threadRoot)
+ 			if err != nil {
+ 				portal.log.Warn().Err(err).
+ 					Str("thread_root_mxid", threadRoot.String()).
