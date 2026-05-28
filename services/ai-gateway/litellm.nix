@@ -31,13 +31,6 @@ let
       printf 'CLI_PROXY_API_KEY=%s\n' "$(cat ${cfg.cliProxyApiKeyFile})"
     } > ${cfg.runtimeEnvFile}
   '';
-
-  prepareMigrationsScript = pkgs.writeShellScript "litellm-prepare-migrations" ''
-    set -eu
-    ${pkgs.coreutils}/bin/mkdir -p /var/lib/litellm/migrations
-    ${pkgs.coreutils}/bin/chown -R litellm:litellm /var/lib/litellm/migrations
-    ${pkgs.coreutils}/bin/chmod -R u+rwX /var/lib/litellm/migrations
-  '';
 in
 {
   options.scottylabs.ai-gateway.litellm = {
@@ -201,9 +194,6 @@ in
         PRISMA_USE_GLOBAL_NODE = "true";
         PRISMA_HIDE_UPDATE_MESSAGE = "true";
 
-        # Migrations can't write to the read-only Nix store; copy to state dir.
-        LITELLM_MIGRATION_DIR = "/var/lib/litellm/migrations";
-
         GENERIC_CLIENT_ID = "litellm";
         GENERIC_AUTHORIZATION_ENDPOINT = "${keycloakRealmBase}/protocol/openid-connect/auth";
         GENERIC_TOKEN_ENDPOINT = "${keycloakRealmBase}/protocol/openid-connect/token";
@@ -268,7 +258,7 @@ in
         User = "litellm";
         Group = "litellm";
         EnvironmentFile = lib.mkForce [ "-${cfg.runtimeEnvFile}" ];
-        ExecStartPre = lib.mkBefore [ "+${prepareMigrationsScript}" composeEnvScript ];
+        ExecStartPre = lib.mkBefore [ composeEnvScript ];
         Restart = "on-failure";
         RestartSec = 5;
       };
