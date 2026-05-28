@@ -225,3 +225,7 @@ ScottyLabs enables relay on infra-01 (`bridge.relay` + `default_relays` for the 
 **After deploy** (relay enabled in config): restart `mautrix-slack`, then re-run set-relay in any already-plumbed portal rooms (or re-apply `synapse_mautrix_slack_link`).
 
 Optional: team members can still run `login token` in `@slack` to post to Slack under their own Slack identity instead of through the relay.
+
+### Discord → Slack: spotting ping messages
+
+Relay `message_formats` in `mautrix-slack.nix` prefix messages that have Matrix `m.mentions` (user IDs or `@room`) with `[ping]`, e.g. `[ping] Alice: hey @you`. The message body may still contain `@displayname` text from Discord; the prefix marks that the message was a ping.

@@ -1,12 +1,19 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }:
 
 let
   cfg = config.scottylabs.matrix;
   bridge = cfg.bridges.discord;
+  # Relay/webhook Matrix→Discord posts cannot start threads upstream; use any logged-in bridge user.
+  mautrixDiscord = pkgs.mautrix-discord.overrideAttrs (old: {
+    patches = (old.patches or [ ]) ++ [
+      ../../patches/mautrix-discord-relay-threads.patch
+    ];
+  });
   bridgePermissions =
     {
       "*" = "user";
@@ -36,6 +43,7 @@ in
   config = lib.mkIf (cfg.enable && bridge.enable) {
     services.mautrix-discord = {
       enable = true;
+      package = mautrixDiscord;
       environmentFile = bridge.environmentFile;
       settings = {
         homeserver = {
@@ -63,6 +71,7 @@ in
           };
           delete_portal_on_channel_delete = true;
           enable_webhook_avatars = true;
+          autojoin_thread_on_open = true;
           encryption = {
             allow = true;
             default = true;
