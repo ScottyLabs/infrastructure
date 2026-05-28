@@ -194,6 +194,9 @@ in
         PRISMA_USE_GLOBAL_NODE = "true";
         PRISMA_HIDE_UPDATE_MESSAGE = "true";
 
+        # Migrations can't write to the read-only Nix store; copy to state dir.
+        LITELLM_MIGRATION_DIR = "/var/lib/litellm/migrations";
+
         GENERIC_CLIENT_ID = "litellm";
         GENERIC_AUTHORIZATION_ENDPOINT = "${keycloakRealmBase}/protocol/openid-connect/auth";
         GENERIC_TOKEN_ENDPOINT = "${keycloakRealmBase}/protocol/openid-connect/token";
