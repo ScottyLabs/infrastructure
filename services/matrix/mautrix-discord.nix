@@ -30,7 +30,10 @@ in
 
     environmentFile = lib.mkOption {
       type = lib.types.path;
-      description = "Path to env file containing DOUBLE_PUPPET_SECRET and other bridge-runtime values.";
+      description = ''
+        Path to env file containing DOUBLE_PUPPET_SECRET and AVATAR_PROXY_KEY
+        (for relay webhook profile pictures).
+      '';
     };
 
     adminUsers = lib.mkOption {
@@ -70,6 +73,9 @@ in
             "${cfg.domain}" = "$DOUBLE_PUPPET_SECRET";
           };
           delete_portal_on_channel_delete = true;
+          # Slack→Discord relay webhooks need a URL Discord can fetch for Matrix ghost avatars.
+          public_address = "https://${cfg.matrixDomain}";
+          avatar_proxy_key = "$AVATAR_PROXY_KEY";
           enable_webhook_avatars = true;
           autojoin_thread_on_open = true;
           encryption = {
