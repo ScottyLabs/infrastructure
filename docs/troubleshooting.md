@@ -167,7 +167,7 @@ sudo yq '.encryption.pickle_key' /var/lib/mautrix-slack/config.yaml
 head -c 32 /dev/urandom | base64
 ```
 
-Add to `secrets/infra-01/double-puppet-env.age` (same file as `DOUBLE_PUPPET_SECRET`):
+Add to `secrets/infra-01/double-puppet-env.age` (same file as `DOUBLE_PUPPET_SECRET`; see [`double-puppet-env.example`](../secrets/infra-01/double-puppet-env.example)):
 
 ```bash
 ENCRYPTION_PICKLE_KEY=<paste key here>
@@ -214,17 +214,64 @@ Bridge admins can also pass `--ignore-permissions` to skip the pre-check:
 
 mautrix-slack only sends a Matrix user's messages to Slack when that user has run `login token` in the `@slack` management room — unless **relay mode** is on. Discord-originated messages appear as `@discord_…:doggylabs.org` puppets, which do not have Slack logins.
 
-ScottyLabs enables relay on infra-01 (`bridge.relay` + `default_relays` for the `ops+slack` login in `mautrix-slack.nix`). The reconciler runs `!slack bridge <relay-login> <team>-<channel>` and `!slack set-relay` in each Discord portal room.
+ScottyLabs enables relay on infra-01 (`bridges.slack.relay.enable` + `default_relays` from `SLACK_RELAY_LOGIN_ID` in `double-puppet-env.age`). OpenTofu / `synapse_mautrix_slack_link` runs `!slack bridge <relay-login> <team>-<channel>` and `!slack set-relay` when `matrix_slack_relay_login_id` is set.
 
 **Immediate fix** in the Discord portal room (DevOps example):
 
 ```text
-!slack set-relay T03EVH29W-U0A7HGVMPB6
+!slack set-relay <SLACK_APP_LOGIN_ID>
 ```
 
-**After deploy** (relay enabled in config): restart `mautrix-slack`, then re-run set-relay in any already-plumbed portal rooms (or re-apply `synapse_mautrix_slack_link`).
+Use the login ID from `list-logins` after `login app` (see below). The legacy user-token login (`T03EVH29W-U0A7HGVMPB6` / ops+slack) relays text but **cannot** set per-message Slack avatars.
+
+**After deploy**: restart `mautrix-slack`, then re-run `set-relay` in already-plumbed portal rooms (or re-apply `synapse_mautrix_slack_link`). Generate portal commands:
+
+```bash
+./infrastructure/scripts/portal-relay-commands.sh "$SLACK_RELAY_LOGIN_ID"
+```
 
 Optional: team members can still run `login token` in `@slack` to post to Slack under their own Slack identity instead of through the relay.
+
+### Slack app relay setup (Discord → Slack names + avatars)
+
+Per-message Slack avatars require a **Slack app** relay (`login app`), not a user session (`login token`). User-token relay (e.g. ops+slack) can show names in the message body or via limited customize support, but the supported path for avatar mirroring is app + `chat:write.customize` + `public_media`.
+
+**1. Create the Slack app** (Slack workspace admin, one-time):
+
+- Manifest: [`infrastructure/services/matrix/slack-app-manifest.yaml`](../services/matrix/slack-app-manifest.yaml) (includes `chat:write.customize`).
+- Create app → install to workspace `scottylabs` → note **bot token** (`xoxb-`) and **app token** (`xapp-`, socket mode).
+- **Invite the app bot** to every bridged Slack channel (DevOps `C08K3Q77ZQF`, hub `C096TM8EMS8`, quest, cmu-courses, etc.).
+
+**2. Register on the bridge** (dedicated Matrix account, DM `@slack:doggylabs.org`):
+
+```text
+login app
+list-logins
+```
+
+Copy the new app login ID. Optionally `logout <old-user-login-id>` after cutover.
+
+**3. Store secrets** — edit `secrets/infra-01/double-puppet-env.age` (template: [`double-puppet-env.example`](../secrets/infra-01/double-puppet-env.example)):
+
+```bash
+PUBLIC_MEDIA_SIGNING_KEY=<head -c 32 /dev/urandom | base64>
+AVATAR_PROXY_KEY=<head -c 32 /dev/urandom | base64>
+SLACK_RELAY_LOGIN_ID=<app login ID from list-logins>
+```
+
+Re-encrypt with agenix, redeploy infra (comin), then set the same relay ID for OpenTofu:
+
+```bash
+export TF_VAR_matrix_slack_relay_login_id="$SLACK_RELAY_LOGIN_ID"
+# or MATRIX_SLACK_RELAY_LOGIN_ID for the terraform-provider-synapse
+```
+
+**4. Per-portal relay** — in each `#discord_<channel_id>` portal room:
+
+```text
+!slack set-relay <SLACK_APP_LOGIN_ID>
+!discord set-relay --create mautrix
+```
 
 ### Discord → Slack: spotting ping messages
 
@@ -232,9 +279,9 @@ Relay `message_formats` in `mautrix-slack.nix` prefix messages that have Matrix 
 
 ### Profile pictures (Discord ↔ Slack)
 
-**Discord → Slack** (relay): mautrix-slack posts with per-message username and avatar when `public_media` is enabled and `appservice.public_address` points at the Matrix client domain. Caddy on `matrix.<domain>` proxies `/_mautrix/publicmedia/*` to the slack appservice (port 29335).
+**Discord → Slack** (relay): mautrix-slack posts with per-message username and avatar when relay uses a **Slack app** login, `public_media.enabled` is true, and `appservice.public_address` points at the Matrix client domain. Caddy on `matrix.<domain>` proxies `/_mautrix/publicmedia/*` to the slack appservice (port 29335).
 
-**Slack → Discord**: Matrix Slack ghosts carry avatars; Discord only shows them on webhook relay sends. In each plumbed portal room, someone logged into `@discord` must run:
+**Slack → Discord**: Matrix Slack ghosts carry avatars; Discord only shows them on webhook relay sends. In each plumbed portal room:
 
 ```text
 !discord set-relay --create mautrix
@@ -242,11 +289,31 @@ Relay `message_formats` in `mautrix-slack.nix` prefix messages that have Matrix 
 
 (`enable_webhook_avatars` and `bridge.public_address` must be set — see `mautrix-discord.nix`. Caddy proxies `/mautrix-discord/*` to the discord appservice on port 29334.)
 
-Add stable keys to `secrets/infra-01/double-puppet-env.age` (same file as `DOUBLE_PUPPET_SECRET`), then re-encrypt and redeploy:
+Add stable keys to `secrets/infra-01/double-puppet-env.age` (see [`double-puppet-env.example`](../secrets/infra-01/double-puppet-env.example)), then re-encrypt and redeploy:
 
 ```bash
-PUBLIC_MEDIA_SIGNING_KEY=<random base64, e.g. head -c 32 /dev/urandom | base64>
+PUBLIC_MEDIA_SIGNING_KEY=<random base64>
 AVATAR_PROXY_KEY=<random base64>
+SLACK_RELAY_LOGIN_ID=<app login ID>
 ```
 
 If you change `AVATAR_PROXY_KEY` after Discord was already using signed avatar URLs, restart `mautrix-discord` and re-run `!discord set-relay --create` in plumbed rooms if avatars break.
+
+**Post-deploy verification on infra-01:**
+
+```bash
+./infrastructure/scripts/verify-bridge-avatars.sh
+```
+
+Optional member-state check (Slack ghost must have `avatar_url` for Discord webhook PFP):
+
+```bash
+export MATRIX_ADMIN_TOKEN='syt_...'
+export ROOM='!RnECHhwspQhQkekSAm:doggylabs.org'   # DevOps portal
+export GHOST='@slack_t03evh29w-u09e6eha5r8:doggylabs.org'
+./infrastructure/scripts/verify-bridge-avatars.sh
+```
+
+Do **not** validate avatars from the static Discord **APP profile card** for the webhook bot — only the **message line** avatar matters.
+
+**Thread test:** send a plain Slack message first, then a thread reply. Thread bridging needs the relay-threads patch in the running `mautrix-discord` binary and at least one Discord bridge login in the portal room.
