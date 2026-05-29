@@ -205,8 +205,11 @@ When plumbing Slack into an existing mautrix-discord portal room, `@slack` must 
 Bridge admins can also pass `--ignore-permissions` to skip the pre-check:
 
 ```text
-!slack bridge C08K3Q77ZQF --ignore-permissions
+!slack bridge <SLACK_APP_LOGIN_ID> T03EVH29W-C08K3Q77ZQF --ignore-permissions
+!slack set-relay <SLACK_APP_LOGIN_ID>
 ```
+
+(`synapse_mautrix_slack_link` / OpenTofu Apply runs these automatically when `MATRIX_SLACK_RELAY_LOGIN_ID` is set; team ID comes from `data/org.toml` → `local.matrix_slack_team_id`.)
 
 `synapse_mautrix_slack_link` (terraform-provider-synapse) promotes `@slack` via the Synapse admin API before sending the bridge command; rebuild/redeploy the provider if you hit this during OpenTofu apply.
 
@@ -214,7 +217,7 @@ Bridge admins can also pass `--ignore-permissions` to skip the pre-check:
 
 mautrix-slack only sends a Matrix user's messages to Slack when that user has run `login token` in the `@slack` management room — unless **relay mode** is on. Discord-originated messages appear as `@discord_…:doggylabs.org` puppets, which do not have Slack logins.
 
-ScottyLabs enables relay on infra-01 (`bridges.slack.relay.enable` + `default_relays` from `SLACK_RELAY_LOGIN_ID` in `double-puppet-env.age`). OpenTofu / `synapse_mautrix_slack_link` runs `!slack bridge <relay-login> <team>-<channel>` and `!slack set-relay` when `matrix_slack_relay_login_id` is set.
+ScottyLabs enables relay on infra-01 (`bridges.slack.relay.enable` + `default_relays` from `SLACK_RELAY_LOGIN_ID` in `double-puppet-env.age`). OpenTofu / `synapse_mautrix_slack_link` runs `!slack bridge <relay-login> <team>-<channel>`, `!slack set-relay`, and `!discord set-relay --create mautrix` when `matrix_slack_relay_login_id` is set.
 
 **Immediate fix** in the Discord portal room (DevOps example):
 
@@ -275,11 +278,17 @@ export TF_VAR_matrix_slack_relay_login_id="$SLACK_RELAY_LOGIN_ID"
 
 ### Discord → Slack: spotting ping messages
 
-Relay `message_formats` in `mautrix-slack.nix` prefix messages that have Matrix `m.mentions` (user IDs or `@room`) with `[ping]`, e.g. `[ping] hey @you`. Sender names and avatars use `displayname_format` plus Slack `icon_url` (not the message body).
+Relay `message_formats` in `mautrix-slack.nix` can prefix messages that have Matrix `m.mentions` with `[ping]`, e.g. `[ping] hey @you`. With the ScottyLabs relay patch, **text messages skip `message_formats`** (`PerMessageProfileRelay`) so Discord markdown is preserved as Slack rich text; pings still appear via Matrix `m.mentions` / HTML user links. Sender names and avatars use `displayname_format` plus Slack `icon_url` (not the message body).
+
+### Markdown (Discord ↔ Slack)
+
+**Discord → Slack**: Discord markdown becomes Matrix HTML in the Discord bridge; the ScottyLabs mautrix-slack patch sets `PerMessageProfileRelay` so relay mode does not flatten messages through `message_formats` (which would strip formatting). Outbound relay posts use Slack rich text blocks (bold, italic, strikethrough, inline code, links).
+
+**Slack → Discord**: Slack mrkdwn becomes Matrix HTML in mautrix-slack; mautrix-discord converts HTML back to Discord markdown on webhook relay sends. Rich-text block messages (not just plain mrkdwn) generally format better.
 
 ### Profile pictures (Discord ↔ Slack)
 
-**Discord → Slack** (relay): mautrix-slack posts with per-message username and avatar when relay uses a **Slack app** login, `public_media.enabled` is true, and `appservice.public_address` points at the Matrix client domain. Discord attaches avatars on `com.beeper.per_message_profile` (same as names); ScottyLabs patches mautrix-slack to use that for Slack `icon_url`. Caddy on `matrix.<domain>` must proxy `/_mautrix/publicmedia/*` to the slack appservice (port 29335) with **`handle`** (not `handle_path` — the bridge serves the full path).
+**Discord → Slack** (relay): mautrix-slack posts with per-message username and avatar when relay uses a **Slack app** login, `public_media.enabled` is true, and `appservice.public_address` points at the Matrix client domain. Discord attaches avatars on `com.beeper.per_message_profile` (same as names); ScottyLabs patches mautrix-slack to use that for Slack `icon_url`. GIF/link embeds (Tenor, etc.) are relayed as the original HTTPS URL so Slack can unfurl them — not as opaque “sent an image” text. Caddy on `matrix.<domain>` must proxy `/_mautrix/publicmedia/*` to the slack appservice (port 29335) with **`handle`** (not `handle_path` — the bridge serves the full path).
 
 **Slack → Discord**: Matrix Slack ghosts carry avatars; Discord only shows them on webhook relay sends. In each plumbed portal room:
 

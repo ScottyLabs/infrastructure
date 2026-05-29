@@ -1,0 +1,110 @@
+diff --git a/pkg/connector/capabilities.go b/pkg/connector/capabilities.go
+--- a/pkg/connector/capabilities.go
++++ b/pkg/connector/capabilities.go
+@@ -178,6 +178,8 @@ var roomCaps = &event.RoomFeatures{
+ 	EditMaxAge:      nil,
+ 	Delete:          event.CapLevelFullySupported,
+ 	Reaction:        event.CapLevelFullySupported,
++	// Preserve Matrix HTML when relaying (e.g. Discord markdown → Slack rich text).
++	PerMessageProfileRelay: true,
+ }
+ 
+ var dmCaps *event.RoomFeatures
+diff --git a/pkg/msgconv/from-matrix.go b/pkg/msgconv/from-matrix.go
+--- a/pkg/msgconv/from-matrix.go
++++ b/pkg/msgconv/from-matrix.go
+@@ -21,6 +21,7 @@ import (
+ 	"context"
+ 	"errors"
+ 	"fmt"
++	"html"
+ 	"image"
+ 	"strings"
+ 
+@@ -42,6 +43,39 @@ var (
+ 	ErrMediaOnlyEditCaption = errors.New("only media message caption can be edited")
+ )
+ 
++func appendLinkPreviewURLs(content *event.MessageEventContent, previews []*event.BeeperLinkPreview) {
++	content.EnsureHasHTML()
++	for _, lp := range previews {
++		if lp == nil || lp.MatchedURL == "" {
++			continue
++		}
++		if strings.Contains(content.Body, lp.MatchedURL) || strings.Contains(content.FormattedBody, lp.MatchedURL) {
++			continue
++		}
++		escaped := html.EscapeString(lp.MatchedURL)
++		content.FormattedBody += fmt.Sprintf(`<p><a href="%s">%s</a></p>`, escaped, escaped)
++		if content.Body != "" {
++			content.Body += "\n"
++		}
++		content.Body += lp.MatchedURL
++	}
++}
++
++func relaySlackProfileOptions(mc *MessageConverter, origSender *bridgev2.OrigSender) []slack.MsgOption {
++	options := []slack.MsgOption{slack.MsgOptionUsername(origSender.FormattedName)}
++	urlProvider, ok := mc.Bridge.Matrix.(bridgev2.MatrixConnectorWithPublicMedia)
++	avatarURL := origSender.AvatarURL
++	if origSender.PerMessageProfile.AvatarURL != nil && *origSender.PerMessageProfile.AvatarURL != "" {
++		avatarURL = *origSender.PerMessageProfile.AvatarURL
++	}
++	if ok && avatarURL != "" {
++		if publicAvatarURL := urlProvider.GetPublicMediaAddress(avatarURL); publicAvatarURL != "" {
++			options = append(options, slack.MsgOptionIconURL(publicAvatarURL))
++		}
++	}
++	return options
++}
++
+ func isMediaMsgtype(msgType event.MessageType) bool {
+ 	return msgType == event.MsgImage || msgType == event.MsgAudio || msgType == event.MsgVideo || msgType == event.MsgFile
+ }
+@@ -98,6 +132,9 @@ func (mc *MessageConverter) ToSlack(
+ 
+ 	switch content.MsgType {
+ 	case event.MsgText, event.MsgEmote, event.MsgNotice:
++		if origSender != nil {
++			appendLinkPreviewURLs(content, content.BeeperLinkPreviews)
++		}
+ 		options := make([]slack.MsgOption, 0, 4)
+ 		var block slack.Block
+ 		if content.Format == event.FormatHTML {
+@@ -118,19 +155,28 @@ func (mc *MessageConverter) ToSlack(
+ 			options = append(options, slack.MsgOptionDisableLinkUnfurl(), slack.MsgOptionDisableMediaUnfurl())
+ 		}
+ 		if origSender != nil {
+-			options = append(options, slack.MsgOptionUsername(origSender.FormattedName))
+-			urlProvider, ok := mc.Bridge.Matrix.(bridgev2.MatrixConnectorWithPublicMedia)
+-			if ok && origSender.AvatarURL != "" {
+-				publicAvatarURL := urlProvider.GetPublicMediaAddress(origSender.AvatarURL)
+-				if publicAvatarURL != "" {
+-					options = append(options, slack.MsgOptionIconURL(publicAvatarURL))
+-				}
+-			}
++			options = append(options, relaySlackProfileOptions(mc, origSender)...)
+ 		}
+ 		return &ConvertedSlackMessage{SendReq: slack.MsgOptionCompose(options...)}, nil
+ 	case event.MsgAudio, event.MsgFile, event.MsgImage, event.MsgVideo:
++		if origSender != nil && (strings.HasPrefix(content.Body, "http://") || strings.HasPrefix(content.Body, "https://")) {
++			options := relaySlackProfileOptions(mc, origSender)
++			var block slack.Block
++			if content.Format == event.FormatHTML && content.FormattedBody != "" {
++				block = mc.MatrixHTMLParser.Parse(ctx, content.FormattedBody, content.Mentions, portal)
++			} else {
++				block = mc.MatrixHTMLParser.ParseText(ctx, content.Body, content.Mentions, portal)
++			}
++			options = append(options, slack.MsgOptionBlocks(block))
++			if editTargetID != "" {
++				options = append(options, slack.MsgOptionUpdate(editTargetID))
++			} else if threadRootID != "" {
++				options = append(options, slack.MsgOptionTS(threadRootID))
++			}
++			return &ConvertedSlackMessage{SendReq: slack.MsgOptionCompose(options...)}, nil
++		}
+ 		data, err := mc.Bridge.Bot.DownloadMedia(ctx, content.URL, content.File)
+ 		if err != nil {
+ 			log.Err(err).Msg("Failed to download Matrix attachment")
+ 			return nil, ErrMediaDownloadFailed
+ 		}

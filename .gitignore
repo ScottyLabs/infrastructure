@@ -3,3 +3,4 @@
 # Local scratch copies of upstream bridge source for writing/testing .patch files.
 # Builds use infrastructure/patches/*.patch only — nothing here is deployed.
 .patch-work/
+.patch-verify/

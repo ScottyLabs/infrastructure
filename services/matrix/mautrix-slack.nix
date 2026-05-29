@@ -11,7 +11,7 @@ let
   # synapse_mautrix_slack_link and manual plumbing need `!slack bridge` (added in v26.04).
   slackPackage = pkgs.mautrix-slack.overrideAttrs (old: {
     patches = (old.patches or [ ]) ++ [
-      ../../patches/mautrix-slack-relay-avatar.patch
+      ../../patches/mautrix-slack-relay-outbound.patch
     ];
   });
   bridgePermissions =
@@ -124,18 +124,21 @@ in
                     [ bridge.relayLoginId ]
                   else
                     [ "$SLACK_RELAY_LOGIN_ID" ];
-                # displayname_format + icon_url (needs public_media) show Discord sender on Slack;
-                # message body only carries text and optional [ping] prefix.
+                # displayname_format + icon_url (needs public_media) show Discord sender on Slack.
+                # PerMessageProfileRelay (patched in mautrix-slack) skips relay message_formats for
+                # text so Discord markdown survives as Slack rich text; formats below still apply to
+                # media fallbacks and non-relay paths.
                 displayname_format = relayDisplayName;
                 # Keys must be quoted — unquoted m.text becomes nested YAML { m: { text: ... } }.
                 message_formats = {
                   "m.text" = "${relayMentionPrefix}{{ .Message }}";
                   "m.notice" = "${relayMentionPrefix}{{ .Message }}";
                   "m.emote" = "${relayMentionPrefix}* {{ .Message }}";
+                  # Discord GIF embeds (Tenor, etc.) store the page URL in Body; keep it for Slack unfurl.
                   "m.file" = "sent a file{{ if .Caption }}: {{ .Caption }}{{ end }}";
-                  "m.image" = "sent an image{{ if .Caption }}: {{ .Caption }}{{ end }}";
+                  "m.image" = "{{ .Content.Body }}";
                   "m.audio" = "sent an audio file{{ if .Caption }}: {{ .Caption }}{{ end }}";
-                  "m.video" = "sent a video{{ if .Caption }}: {{ .Caption }}{{ end }}";
+                  "m.video" = "{{ .Content.Body }}";
                   "m.location" = "sent a location{{ if .Caption }}: {{ .Caption }}{{ end }}";
                 };
               };

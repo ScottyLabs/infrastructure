@@ -1,0 +1,14 @@
+diff --git a/portal_convert.go b/portal_convert.go
+--- a/portal_convert.go
++++ b/portal_convert.go
+@@ -748,6 +748,10 @@ func (portal *Portal) convertDiscordTextMessage(ctx context.Context, intent *app
+ 		case EmbedLinkPreview:
+ 			log := with.Str("computed_embed_type", "link preview").Logger()
+ 			previews = append(previews, portal.convertDiscordLinkEmbedToBeeper(log.WithContext(ctx), intent, embed))
++			if embed.URL != "" {
++				escaped := html.EscapeString(embed.URL)
++				htmlParts = append(htmlParts, fmt.Sprintf(`<p><a href="%s">%s</a></p>`, escaped, escaped))
++			}
+ 		case EmbedVideo:
+ 			// Ignore video embeds, they're handled as separate messages
+ 		default:
