@@ -57,3 +57,32 @@ output "scottylabs_assets_writer_secret_access_key" {
   value     = garage_access_key.scottylabs_assets_writer.secret_access_key
   sensitive = true
 }
+
+# Static site bucket for the ScottyLabs documentation hub (CI uploads via
+# documentation/.forgejo/workflows/deploy.yml → nix run .#upload-garage).
+resource "garage_bucket" "scottylabs_docs" {
+  name = "scottylabs-docs"
+}
+
+resource "garage_access_key" "scottylabs_docs_writer" {
+  name          = "scottylabs-docs-writer"
+  never_expires = true
+}
+
+resource "garage_permission" "scottylabs_docs_writer" {
+  access_key_id = garage_access_key.scottylabs_docs_writer.access_key_id
+  bucket_id     = garage_bucket.scottylabs_docs.id
+  read          = true
+  write         = true
+  owner         = true
+}
+
+output "scottylabs_docs_writer_access_key_id" {
+  value     = garage_access_key.scottylabs_docs_writer.access_key_id
+  sensitive = true
+}
+
+output "scottylabs_docs_writer_secret_access_key" {
+  value     = garage_access_key.scottylabs_docs_writer.secret_access_key
+  sensitive = true
+}
