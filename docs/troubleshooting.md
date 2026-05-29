@@ -279,7 +279,7 @@ Relay `message_formats` in `mautrix-slack.nix` prefix messages that have Matrix 
 
 ### Profile pictures (Discord ↔ Slack)
 
-**Discord → Slack** (relay): mautrix-slack posts with per-message username and avatar when relay uses a **Slack app** login, `public_media.enabled` is true, and `appservice.public_address` points at the Matrix client domain. Caddy on `matrix.<domain>` must proxy `/_mautrix/publicmedia/*` to the slack appservice (port 29335) with **`handle`** (not `handle_path` — the bridge serves the full path).
+**Discord → Slack** (relay): mautrix-slack posts with per-message username and avatar when relay uses a **Slack app** login, `public_media.enabled` is true, and `appservice.public_address` points at the Matrix client domain. Discord attaches avatars on `com.beeper.per_message_profile` (same as names); ScottyLabs patches mautrix-slack to use that for Slack `icon_url`. Caddy on `matrix.<domain>` must proxy `/_mautrix/publicmedia/*` to the slack appservice (port 29335) with **`handle`** (not `handle_path` — the bridge serves the full path).
 
 **Slack → Discord**: Matrix Slack ghosts carry avatars; Discord only shows them on webhook relay sends. In each plumbed portal room:
 
