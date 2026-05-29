@@ -279,7 +279,7 @@ Relay `message_formats` in `mautrix-slack.nix` prefix messages that have Matrix 
 
 ### Profile pictures (Discord ↔ Slack)
 
-**Discord → Slack** (relay): mautrix-slack posts with per-message username and avatar when relay uses a **Slack app** login, `public_media.enabled` is true, and `appservice.public_address` points at the Matrix client domain. Caddy on `matrix.<domain>` proxies `/_mautrix/publicmedia/*` to the slack appservice (port 29335).
+**Discord → Slack** (relay): mautrix-slack posts with per-message username and avatar when relay uses a **Slack app** login, `public_media.enabled` is true, and `appservice.public_address` points at the Matrix client domain. Caddy on `matrix.<domain>` must proxy `/_mautrix/publicmedia/*` to the slack appservice (port 29335) with **`handle`** (not `handle_path` — the bridge serves the full path).
 
 **Slack → Discord**: Matrix Slack ghosts carry avatars; Discord only shows them on webhook relay sends. In each plumbed portal room:
 
@@ -287,7 +287,7 @@ Relay `message_formats` in `mautrix-slack.nix` prefix messages that have Matrix 
 !discord set-relay --create mautrix
 ```
 
-(`enable_webhook_avatars` and `bridge.public_address` must be set — see `mautrix-discord.nix`. Caddy proxies `/mautrix-discord/*` to the discord appservice on port 29334.)
+(`enable_webhook_avatars` and `bridge.public_address` must be set — see `mautrix-discord.nix`. Caddy must proxy `/mautrix-discord/*` to the discord appservice on port 29334 with **`handle`**, not `handle_path`.)
 
 Add stable keys to `secrets/infra-01/double-puppet-env.age` (see [`double-puppet-env.example`](../secrets/infra-01/double-puppet-env.example)), then re-encrypt and redeploy:
 

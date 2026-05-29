@@ -12,11 +12,15 @@ let
 in
 {
   config = lib.mkIf (cfg.enable && cfg.bridges.slack.enable && cfg.bridges.discord.enable) {
+    # Use `handle`, not `handle_path`: both bridges register routes on the full
+    # public URL path (mautrix-go: GET /_mautrix/publicmedia/…; mautrix-discord:
+    # /mautrix-discord/avatar/…). Stripping the prefix yields 404/empty bodies
+    # and Slack/Discord show blank profile pictures.
     services.caddy.virtualHosts.${cfg.matrixDomain}.extraConfig = lib.mkBefore ''
-      handle_path /_mautrix/publicmedia/* {
+      handle /_mautrix/publicmedia/* {
         reverse_proxy 127.0.0.1:${toString slackAppservicePort}
       }
-      handle_path /mautrix-discord/* {
+      handle /mautrix-discord/* {
         reverse_proxy 127.0.0.1:${toString discordAppservicePort}
       }
     '';
