@@ -50,4 +50,11 @@
       header_up Host scottylabs-assets
     }
   '';
+
+  # Documentation hub static site (built by Forgejo Actions, uploaded to Garage).
+  services.caddy.virtualHosts."docs.scottylabs.org".extraConfig = ''
+    reverse_proxy localhost:${toString config.scottylabs.garage.webPort} {
+      header_up Host scottylabs-docs
+    }
+  '';
 }
