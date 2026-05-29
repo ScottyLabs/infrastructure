@@ -9,7 +9,11 @@ let
   cfg = config.scottylabs.matrix;
   bridge = cfg.bridges.slack;
   # synapse_mautrix_slack_link and manual plumbing need `!slack bridge` (added in v26.04).
-  slackPackage = pkgs.mautrix-slack;
+  slackPackage = pkgs.mautrix-slack.overrideAttrs (old: {
+    patches = (old.patches or [ ]) ++ [
+      ../../patches/mautrix-slack-relay-avatar.patch
+    ];
+  });
   bridgePermissions =
     {
       "*" = "user";
