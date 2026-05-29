@@ -13,6 +13,7 @@ let
     patches = (old.patches or [ ]) ++ [
       ../../patches/mautrix-discord-relay-threads.patch
       ../../patches/mautrix-discord-embed-link-url.patch
+      ../../patches/mautrix-discord-ping-prefix.patch
     ];
   });
   bridgePermissions =

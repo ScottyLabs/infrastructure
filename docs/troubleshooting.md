@@ -276,15 +276,33 @@ export TF_VAR_matrix_slack_relay_login_id="$SLACK_RELAY_LOGIN_ID"
 !discord set-relay --create mautrix
 ```
 
-### Discord → Slack: spotting ping messages
+### Ping messages (Discord ↔ Slack)
 
-Relay `message_formats` in `mautrix-slack.nix` can prefix messages that have Matrix `m.mentions` with `[ping]`, e.g. `[ping] hey @you`. With the ScottyLabs relay patch, **text messages skip `message_formats`** (`PerMessageProfileRelay`) so Discord markdown is preserved as Slack rich text; pings still appear via Matrix `m.mentions` / HTML user links. Sender names and avatars use `displayname_format` plus Slack `icon_url` (not the message body).
+Bridged pings replace the mention segment in the message text with **`[display name]`** (from Matrix room member / ghost names), not a prefix on the whole message:
+
+| Direction | Mechanism |
+|-----------|-----------|
+| **Discord → Slack** | `mautrix-slack-relay-outbound.patch` replaces Matrix user mention pills in HTML and `@displayname` in plain body with `[Alice]` when relaying; `@room` becomes `[@room]`. |
+| **Slack → Discord** | `mautrix-discord-ping-prefix.patch` replaces Discord `<@id>` pills (and plain display names) with `[Alice]`; `@everyone` / `@here` become `[@room]`, and those users are removed from `allowed_mentions`. |
+
+Example on Discord after a Slack ping to Alice: `hey [Alice] hello` (not `[Alice] hey @alice hello`).
 
 ### Markdown (Discord ↔ Slack)
 
 **Discord → Slack**: Discord markdown becomes Matrix HTML in the Discord bridge; the ScottyLabs mautrix-slack patch sets `PerMessageProfileRelay` so relay mode does not flatten messages through `message_formats` (which would strip formatting). Outbound relay posts use Slack rich text blocks (bold, italic, strikethrough, inline code, links).
 
 **Slack → Discord**: Slack mrkdwn becomes Matrix HTML in mautrix-slack; mautrix-discord converts HTML back to Discord markdown on webhook relay sends. Rich-text block messages (not just plain mrkdwn) generally format better.
+
+### Discord replies vs threads on Slack
+
+Discord **channel replies** (reply to a message, not a thread channel) and **new threads** both show up in Slack as thread replies. The mautrix-slack patch tells them apart via Matrix relations:
+
+| Discord action | Matrix relation | Slack behavior |
+|----------------|-----------------|----------------|
+| Reply to a message | `m.in_reply_to` only | Thread under the parent **and** “also send to channel” (`reply_broadcast`) |
+| Thread message / new thread | `m.thread` | Thread only (no channel broadcast) |
+
+After deploy, test: reply in the main channel should appear in the Slack thread and in the main channel; post inside a Discord thread should stay thread-only on Slack.
 
 ### Profile pictures (Discord ↔ Slack)
 
