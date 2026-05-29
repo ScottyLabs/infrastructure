@@ -28,9 +28,9 @@ let
   # DisambiguatedName — it becomes "Name via other (@discord_…:domain)" when names collide.
   # message_formats use .Sender.*; displayname_format uses the same fields without that prefix.
   relayDisplayName = "{{ or .PerMessageProfile.Displayname .Displayname }}";
-  # Relay templates also receive .Content (see mautrix-go bridgeconfig formatData). Prefix when
-  # Matrix m.mentions is set (@user / @room from Discord pings).
-  relayMentionPrefix = "{{ with .Content.Mentions }}{{ if or .Room .UserIDs }}[ping] {{ end }}{{ end }}";
+  # Relay templates also receive .Content (see mautrix-go bridgeconfig formatData).
+  # Mention labels ([Name]) for Discord→Slack are added in mautrix-slack-relay-outbound.patch.
+  relayMentionPrefix = "";
 in
 {
   imports = [ ./nixos-mautrix-slack.nix ];
