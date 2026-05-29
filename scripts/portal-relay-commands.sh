@@ -12,7 +12,8 @@ if [[ ! -f "$TF_JSON" ]]; then
   exit 1
 fi
 
-echo "# In each Discord portal room (#discord_<channel_id>), run:"
+echo "# In each Discord portal room (#discord_<channel_id>), run if relays drift after deploy:"
+echo "# (OpenTofu Apply / synapse_mautrix_slack_link already runs these on create/update.)"
 echo
 
 jq -r '.resource.synapse_mautrix_slack_link | to_entries[] |
