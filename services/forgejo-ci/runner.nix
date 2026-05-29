@@ -78,7 +78,10 @@ in
         labels = runnerLabels;
 
         settings = {
-          runner.capacity = cfg.capacity;
+          runner = {
+            capacity = cfg.capacity;
+            labels = runnerLabels;
+          };
           cache = {
             enabled = true;
             dir = "/var/lib/gitea-runner/cache";

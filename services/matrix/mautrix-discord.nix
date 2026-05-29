@@ -12,6 +12,7 @@ let
   mautrixDiscord = pkgs.mautrix-discord.overrideAttrs (old: {
     patches = (old.patches or [ ]) ++ [
       ../../patches/mautrix-discord-relay-threads.patch
+      ../../patches/mautrix-discord-set-relay-automation.patch
       ../../patches/mautrix-discord-embed-link-url.patch
       ../../patches/mautrix-discord-ping-prefix.patch
     ];

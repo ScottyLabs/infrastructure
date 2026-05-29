@@ -205,7 +205,7 @@ When plumbing Slack into an existing mautrix-discord portal room, `@slack` must 
 Bridge admins can also pass `--ignore-permissions` to skip the pre-check:
 
 ```text
-!slack bridge <SLACK_APP_LOGIN_ID> T03EVH29W-C08K3Q77ZQF --ignore-permissions
+!slack bridge <SLACK_APP_LOGIN_ID> T03EVH29W-C08K3Q77ZQF --ignore-permissions --overwrite
 !slack set-relay <SLACK_APP_LOGIN_ID>
 ```
 
@@ -313,6 +313,12 @@ After deploy, test: reply in the main channel should appear in the Slack thread 
 ```text
 !discord set-relay --create mautrix
 ```
+
+**Matrix → Discord (Slack messages stuck in the portal room):** mautrix-discord only forwards Matrix messages from users without a Discord bridge login when the portal has a **relay webhook** (`RelayWebhookID`). Without it, `handleMatrixMessage` drops the event as “user not logged in”. Symptom: Slack → Matrix and Discord → Slack work, but nothing reaches Discord.
+
+1. Confirm the portal has a relay webhook: in the portal room, `!discord set-relay --create mautrix` should reply with “Saved webhook …”. If it says “requires you to be logged in”, no bridge user has an active Discord session — run `login token` or `login qr` in `@discord` as any account that can manage webhooks in that channel, then re-run set-relay.
+2. OpenTofu / `synapse_mautrix_slack_link` sends the same command automatically; it needs at least one logged-in mautrix-discord user on the server (ScottyLabs patch `mautrix-discord-set-relay-automation.patch` lets `--create` use any logged-in bridge user, not only the command sender).
+3. Check logs: `journalctl -u mautrix-discord -n 100 --no-pager | rg -i 'not logged in|Ignoring|relay'`.
 
 (`enable_webhook_avatars` and `bridge.public_address` must be set — see `mautrix-discord.nix`. Caddy must proxy `/mautrix-discord/*` to the discord appservice on port 29334 with **`handle`**, not `handle_path`.)
 
