@@ -37,8 +37,9 @@ in
     environmentFile = lib.mkOption {
       type = lib.types.path;
       description = ''
-        Path to env file containing DOUBLE_PUPPET_SECRET, ENCRYPTION_PICKLE_KEY, and
-        PUBLIC_MEDIA_SIGNING_KEY (for relay avatar URLs on Slack).
+        Path to env file containing DOUBLE_PUPPET_SECRET, ENCRYPTION_PICKLE_KEY,
+        PUBLIC_MEDIA_SIGNING_KEY, and SLACK_RELAY_LOGIN_ID (see
+        secrets/infra-01/double-puppet-env.example).
       '';
     };
 
@@ -48,14 +49,22 @@ in
       description = "Matrix user IDs granted bridge admin permissions.";
     };
 
+    relay.enable = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = ''
+        Enable mautrix-slack relay so Discord puppets (and other users without Slack login)
+        reach Slack via the relay login. Requires SLACK_RELAY_LOGIN_ID in environmentFile
+        (must be a Slack **app** login from `login app`, not `login token`).
+      '';
+    };
+
     relayLoginId = lib.mkOption {
       type = lib.types.nullOr lib.types.str;
       default = null;
-      example = "T03EVH29W-U0A7HGVMPB6";
       description = ''
-        mautrix-slack login ID for ops+slack (from `list-logins` in the @slack management room).
-        When set, relay mode is enabled so Discord-originated messages in plumbed portal rooms
-        reach Slack without each user running `login token`.
+        Optional override for bridge.relay.default_relays. If null, uses
+        SLACK_RELAY_LOGIN_ID from environmentFile (substituted by envsubst).
       '';
     };
   };
@@ -96,7 +105,7 @@ in
         };
         bridge = {
           relay =
-            if bridge.relayLoginId == null then
+            if !bridge.relay.enable then
               {
                 enabled = false;
                 admin_only = false;
@@ -106,7 +115,11 @@ in
                 enabled = true;
                 admin_only = false;
                 prefer_default = true;
-                default_relays = [ bridge.relayLoginId ];
+                default_relays =
+                  if bridge.relayLoginId != null then
+                    [ bridge.relayLoginId ]
+                  else
+                    [ "$SLACK_RELAY_LOGIN_ID" ];
                 # displayname_format + icon_url (needs public_media) show Discord sender on Slack;
                 # message body only carries text and optional [ping] prefix.
                 displayname_format = relayDisplayName;
