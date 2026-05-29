@@ -7,10 +7,22 @@
 
 let
   cfg = config.scottylabs.forgejoCI.runner;
-in
-let
-  cfg = config.scottylabs.forgejoCI.runner;
   defaultJobImage = "scottylabs/act-runner:24.04";
+  runnerLabels = [ "docker:docker://${cfg.jobImage}" ];
+
+  actRunnerContext = pkgs.writeTextDir "Dockerfile" ''
+    FROM ghcr.io/catthehacker/ubuntu:act-24.04
+    USER root
+    RUN rm -f /var/run && mkdir -p /var/run
+  '';
+
+  buildActRunnerImage = pkgs.writeShellScript "forgejo-act-runner-image" ''
+    set -euo pipefail
+    if ! ${pkgs.docker}/bin/docker image inspect ${cfg.jobImage} >/dev/null 2>&1; then
+      ${pkgs.docker}/bin/docker pull ghcr.io/catthehacker/ubuntu:act-24.04
+      ${pkgs.docker}/bin/docker build -t ${cfg.jobImage} ${actRunnerContext}
+    fi
+  '';
 in
 {
   options.scottylabs.forgejoCI.runner = {
@@ -42,12 +54,6 @@ in
       '';
     };
 
-    labels = lib.mkOption {
-      type = lib.types.listOf lib.types.str;
-      default = [ "docker:docker://${defaultJobImage}" ];
-      description = "Runner labels advertised to Forgejo. Defaults to jobImage when unchanged.";
-    };
-
     capacity = lib.mkOption {
       type = lib.types.ints.positive;
       default = 2;
@@ -69,7 +75,7 @@ in
         enable = true;
         inherit (cfg) name url;
         tokenFile = cfg.tokenFile;
-        labels = cfg.labels;
+        labels = runnerLabels;
 
         settings = {
           runner.capacity = cfg.capacity;
@@ -89,25 +95,20 @@ in
     systemd.services.forgejo-act-runner-image = {
       description = "Build act runner image (/var/run workaround for Docker 29.5.1)";
       wantedBy = [ "multi-user.target" ];
-      before = [ "gitea-runner-default.service" ];
+      requiredBy = [ "gitea-runner-default.service" ];
       after = [ "docker.service" ];
       requires = [ "docker.service" ];
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = true;
+        ExecStart = buildActRunnerImage;
       };
       path = with pkgs; [ docker ];
-      script = ''
-        set -euo pipefail
-        if ! docker image inspect ${cfg.jobImage} >/dev/null 2>&1; then
-          docker pull ghcr.io/catthehacker/ubuntu:act-24.04
-          docker build -t ${cfg.jobImage} -f - <<'DOCKERFILE'
-        FROM ghcr.io/catthehacker/ubuntu:act-24.04
-        USER root
-        RUN rm -f /var/run && mkdir -p /var/run
-        DOCKERFILE
-        fi
-      '';
+    };
+
+    systemd.services.gitea-runner-default = {
+      after = [ "forgejo-act-runner-image.service" ];
+      requires = [ "forgejo-act-runner-image.service" ];
     };
 
     # Create a static user because gitea-actions-runner uses a dynamic one
