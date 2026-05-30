@@ -6,8 +6,8 @@ let
       - id: codeberg.org/ScottyLabs/governance
         apply_requirements: [mergeable, undiverged]
         import_requirements: [mergeable, undiverged]
-        allowed_overrides: [workflow, apply_requirements]
-        allow_custom_workflows: true
+        allowed_overrides: [apply_requirements]
+        allow_custom_workflows: false
 
     metrics:
       prometheus:
@@ -29,6 +29,7 @@ in
       "--gitea-base-url=https://codeberg.org"
       "--gitea-user=scottylabs-bot"
       "--repo-allowlist=codeberg.org/ScottyLabs/governance"
+      "--allow-fork-prs"
       "--default-tf-distribution=opentofu"
       "--write-git-creds"
       "--allow-commands=version,plan,apply,unlock,approve_policies,cancel,import,state"
