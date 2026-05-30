@@ -16,6 +16,13 @@ let
           steps:
             - run: bash ../.forgejo/scripts/install-forgejo-provider.sh
             - env:
+                name: CARGO_TARGET_DIR
+                command: 'echo "$HOME/cargo-target"'
+            - run: cargo build --release --manifest-path=../Cargo.toml -p governance
+            - env:
+                name: PATH
+                command: 'echo "$CARGO_TARGET_DIR/release:$PATH"'
+            - env:
                 name: TF_CLI_CONFIG_FILE
                 command: 'echo "$HOME/.terraform.d/dev_overrides.tfrc"'
             - init
@@ -23,6 +30,13 @@ let
         apply:
           steps:
             - run: bash ../.forgejo/scripts/install-forgejo-provider.sh
+            - env:
+                name: CARGO_TARGET_DIR
+                command: 'echo "$HOME/cargo-target"'
+            - run: cargo build --release --manifest-path=../Cargo.toml -p governance
+            - env:
+                name: PATH
+                command: 'echo "$CARGO_TARGET_DIR/release:$PATH"'
             - env:
                 name: TF_CLI_CONFIG_FILE
                 command: 'echo "$HOME/.terraform.d/dev_overrides.tfrc"'
@@ -43,6 +57,9 @@ in
       pkgs.go
       pkgs.unzip
       pkgs.curl
+      pkgs.cargo
+      pkgs.rustc
+      pkgs.gcc
     ];
     extraArgs = [
       "--gitea-base-url=https://codeberg.org"
