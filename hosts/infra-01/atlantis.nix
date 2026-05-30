@@ -21,8 +21,9 @@ in
     environmentFile = config.age.secrets.atlantis.path;
     extraPackages = [
       pkgs.opentofu
-      pkgs.rustc
-      pkgs.cargo
+      pkgs.go
+      pkgs.unzip
+      pkgs.curl
     ];
     extraArgs = [
       "--gitea-base-url=https://codeberg.org"
