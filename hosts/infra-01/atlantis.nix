@@ -8,6 +8,25 @@ let
         import_requirements: [mergeable, undiverged]
         allowed_overrides: [apply_requirements]
         allow_custom_workflows: false
+        workflow: governance
+
+    workflows:
+      governance:
+        plan:
+          steps:
+            - run: bash ../.forgejo/scripts/install-forgejo-provider.sh
+            - env:
+                name: TF_CLI_CONFIG_FILE
+                command: 'echo "$HOME/.terraform.d/dev_overrides.tfrc"'
+            - init
+            - plan
+        apply:
+          steps:
+            - run: bash ../.forgejo/scripts/install-forgejo-provider.sh
+            - env:
+                name: TF_CLI_CONFIG_FILE
+                command: 'echo "$HOME/.terraform.d/dev_overrides.tfrc"'
+            - apply
 
     metrics:
       prometheus:
