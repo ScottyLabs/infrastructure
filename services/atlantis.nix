@@ -56,6 +56,7 @@ in
 
       path = [
         pkgs.git
+        pkgs.bash
       ]
       ++ cfg.extraPackages;
 
