@@ -70,7 +70,8 @@
   programs.nh = {
     enable = true;
     clean.enable = true;
-    clean.extraArgs = "--keep-since 7d --keep 3";
+    clean.dates = "daily";
+    clean.extraArgs = "--keep-since 7d --keep 1";
     flake = "/etc/nixos";
   };
 
@@ -88,5 +89,10 @@
       "nix-command"
       "flakes"
     ];
+  };
+
+  nix.optimise = {
+    automatic = true;
+    dates = [ "weekly" ];
   };
 }
