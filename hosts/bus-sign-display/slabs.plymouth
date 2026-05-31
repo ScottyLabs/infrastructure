@@ -1,0 +1,23 @@
+Window.SetBackgroundTopColor(0, 0, 0);
+Window.SetBackgroundBottomColor(0, 0, 0);
+
+raw_image = Image("splash.png");
+sprite = Sprite();
+
+
+fun refresh_callback() {
+  if (Window.GetWidth() > 0 && Window.GetHeight() > 0) {
+
+    target_width = Window.GetWidth() * 0.70;
+    scale_factor = target_width / raw_image.GetWidth();
+    target_height = raw_image.GetHeight() * scale_factor;
+    
+    my_image = raw_image.Scale(target_width, target_height);
+    sprite.SetImage(my_image);
+    
+    sprite.SetX((Window.GetWidth() / 2) - (my_image.GetWidth() / 2));
+    sprite.SetY((Window.GetHeight() / 2) - (my_image.GetHeight() / 2));
+  }
+}
+
+Plymouth.SetRefreshFunction(refresh_callback);

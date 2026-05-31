@@ -27,6 +27,6 @@
   };
 
   # Auto-reboot if the system hangs
-  systemd.watchdog.runtimeTime = "30s";
-  systemd.watchdog.rebootTime = "60s";
+  systemd.settings.Manager.RuntimeWatchdogSec = "30s";
+  systemd.settings.Manager.RebootWatchdogSec = "60s";
 }

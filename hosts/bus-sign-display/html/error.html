@@ -1,0 +1,79 @@
+<!-- This is a placeholder error page that we should change -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Networking Error</title>
+    <style>
+        body {
+            background: #111;
+            color: #fff;
+            font-family: sans-serif;
+            text-align: center;
+            padding-top: 15%;
+            display: none;
+        }
+
+        body.show-error {
+            display: block;
+        }
+
+        button {
+            margin-top: 1rem;
+            padding: 0.75rem 1.5rem;
+            border: 0;
+            border-radius: 0.5rem;
+            background: #fff;
+            color: #111;
+            font: inherit;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        h1 {
+            font-size: 3rem;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Networking Error</h1>
+    <p>We are experiencing a temporary connection issue. This screen will refresh automatically.</p>
+    <button id="proceed-button" type="button">Proceed anyways</button>
+</body>
+
+<script>
+    //Url to redirect to
+    const url = "@kioskUrl@";
+
+    let firstCheck = true;
+
+    //check if url is up
+    async function checkUrl() {
+        try {
+            const response = await fetch(url, { method: 'HEAD' });
+            if (response.ok) {
+                window.location.href = url;
+            } else {
+                setTimeout(checkUrl, 5000); // Retry after 5 seconds
+            }
+        } catch (error) {
+            // Show error page after first failed check
+            if (firstCheck) {
+                document.body.classList.add('show-error');
+                firstCheck = false;
+            }
+            setTimeout(checkUrl, 5000); // Retry after 5 seconds
+        }
+    }
+
+    document.getElementById('proceed-button').addEventListener('click', () => {
+        window.location.href = url;
+    });
+
+    // Start checking the URL immediately
+    checkUrl();
+</script>
+
+</html>
