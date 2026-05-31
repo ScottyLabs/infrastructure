@@ -88,6 +88,9 @@ in
             host = "172.17.0.1";
             port = cfg.cachePort;
           };
+          container = {
+            network = "bridge";
+          };
         };
       };
     };
