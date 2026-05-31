@@ -94,6 +94,8 @@ in
 
     virtualisation.docker.enable = true;
 
+    networking.firewall.trustedInterfaces = [ "docker0" ];
+
     systemd.services.forgejo-act-runner-image = {
       description = "Build act runner image (/var/run workaround for Docker 29.5.1)";
       wantedBy = [ "multi-user.target" ];
