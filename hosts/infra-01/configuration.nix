@@ -11,7 +11,7 @@
     ./tailnet.nix
     ./matrix.nix
     ./garage.nix
-    ./atlantis.nix
+    ./atlantis
     ./ai-gateway.nix
     ./observability.nix
     ./uptime.nix
