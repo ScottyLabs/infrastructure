@@ -87,7 +87,6 @@ in
             dir = "/var/lib/gitea-runner/cache";
             host = "0.0.0.0";
             port = cfg.cachePort;
-            external_server = "http://host.docker.internal:${toString cfg.cachePort}";
           };
         };
       };
