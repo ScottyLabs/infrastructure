@@ -1,0 +1,40 @@
+diff --git a/pkg/connector/chatinfo.go b/pkg/connector/chatinfo.go
+--- a/pkg/connector/chatinfo.go
++++ b/pkg/connector/chatinfo.go
+@@ -232,9 +232,8 @@ func (s *SlackClient) wrapChatInfo(ctx context.Context, info *slack.Channel, is
+ 	if roomType != database.RoomTypeDM || len(members.MemberMap) == 1 {
+ 		name = ptr.Ptr(s.formatChannelName(info))
+ 	}
+-	return &bridgev2.ChatInfo{
++	chatInfo := &bridgev2.ChatInfo{
+ 		Name:         name,
+-		Topic:        ptr.Ptr(info.Topic.Value),
+ 		Avatar:       avatar,
+ 		Members:      &members,
+ 		Type:         &roomType,
+@@ -242,7 +241,11 @@ func (s *SlackClient) wrapChatInfo(ctx context.Context, info *slack.Channel, is
+ 		ExtraUpdates: extraUpdates,
+ 		UserLocal:    userLocal,
+ 		CanBackfill:  true,
+-	}, nil
++	}
++	if info.Topic.Value != "" {
++		chatInfo.Topic = ptr.Ptr(info.Topic.Value)
++	}
++	return chatInfo, nil
+ }
+ 
+ func (s *SlackClient) formatChannelName(info *slack.Channel) string {
+diff --git a/pkg/connector/handlematrix.go b/pkg/connector/handlematrix.go
+--- a/pkg/connector/handlematrix.go
++++ b/pkg/connector/handlematrix.go
+@@ -254,6 +254,9 @@ func (s *SlackClient) HandleMatrixRoomName(ctx context.Context, msg *bridgev2.Ma
+ }
+ 
+ func (s *SlackClient) HandleMatrixRoomTopic(ctx context.Context, msg *bridgev2.MatrixRoomTopic) (bool, error) {
++	if msg.Content.Topic == "" {
++		return false, nil
++	}
+ 	_, channelID := slackid.ParsePortalID(msg.Portal.ID)
+ 	if channelID == "" {
+ 		return false, errors.New("invalid channel ID")

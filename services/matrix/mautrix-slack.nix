@@ -12,6 +12,7 @@ let
   slackPackage = pkgs.mautrix-slack.overrideAttrs (old: {
     patches = (old.patches or [ ]) ++ [
       ../../patches/mautrix-slack-relay-outbound.patch
+      ../../patches/mautrix-slack-preserve-topic.patch
     ];
   });
   bridgePermissions =

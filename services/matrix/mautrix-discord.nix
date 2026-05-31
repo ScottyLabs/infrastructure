@@ -15,6 +15,7 @@ let
       ../../patches/mautrix-discord-set-relay-automation.patch
       ../../patches/mautrix-discord-embed-link-url.patch
       ../../patches/mautrix-discord-ping-prefix.patch
+      ../../patches/mautrix-discord-preserve-topic.patch
     ];
   });
   bridgePermissions =

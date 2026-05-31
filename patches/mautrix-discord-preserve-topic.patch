@@ -1,0 +1,13 @@
+diff --git a/portal.go b/portal.go
+--- a/portal.go
++++ b/portal.go
+@@ -2389,6 +2389,9 @@ func (portal *Portal) updateRoomAvatar() {
+ }
+ 
+ func (portal *Portal) UpdateTopic(topic string) bool {
++	if topic == "" && portal.Topic != "" {
++		return false
++	}
+ 	if portal.Topic == topic && (portal.TopicSet || portal.MXID == "") {
+ 		return false
+ 	}
