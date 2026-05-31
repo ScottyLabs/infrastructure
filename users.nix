@@ -41,4 +41,11 @@
     };
     sshPublicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHrIsBlUeyAUNdk5qWQvd/aTWksrFPr4z8zdExiDajES sunfishtk@gmail.com";
   };
+  spola2 = {
+    git = {
+      name = "Sushrut";
+      email = "xboxbedrock@gmail.com";
+    };
+    sshPublicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIqEHdyOWQcOb4wzmKqydHUM90KGkJoLwNFDqHff+sAh xboxbedrock@gmail.com";
+  };
 }

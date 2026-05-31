@@ -135,7 +135,7 @@
         infra-01 = "x86_64-linux";
         deploy-01 = "x86_64-linux";
         snoopy = "x86_64-linux";
-        bus-sign-display = "aarch64-linux";
+        bus-sign-display = "x86_64-linux";
       };
     in
     {

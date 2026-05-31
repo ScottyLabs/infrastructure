@@ -2,6 +2,10 @@
 
 let
   kioskUrl = "https://signage.andrew.cmu.edu/frontend/63";
+
+  errorPage = pkgs.replaceVars ./html/error.html {
+    kioskUrl = kioskUrl; # Automatically replaces @kioskUrl@ in the file
+  };
 in
 {
   # Minimal Wayland compositor that runs a single app fullscreen
@@ -10,31 +14,40 @@ in
     user = "kiosk";
     program = toString (
       pkgs.writeShellScript "kiosk-browser" ''
-        # Wait for the signage server to be reachable before launching,
-        # otherwise we boot into an error page
-        for i in $(seq 1 30); do
-          ${pkgs.curl}/bin/curl -sf --max-time 5 "${kioskUrl}" > /dev/null && break
-          sleep 2
-        done
+        # Error page will redirect to kioskUrl instantly if it is online.
 
-        exec ${pkgs.surf}/bin/surf -F "${kioskUrl}"
+        exec ${pkgs.firefox}/bin/firefox --kiosk="file://${errorPage}"
       ''
     );
 
-    extraArguments = [ "-s" ];
+    environment = {
+      WLR_NO_HARDWARE_CURSORS = "1";
+      XDG_SEAT = "seat0";
+    };
+
+    extraArguments = [ ];
   };
 
   # Dedicated unprivileged user for the kiosk session
   users.users.kiosk = {
-    isSystemUser = true;
+    isNormalUser = true;
     group = "kiosk";
+    extraGroups = [
+      "video"
+      "input"
+      "tty"
+      "seat"
+      "render"
+    ];
+    home = "/home/kiosk";
+    createHome = true;
   };
   users.groups.kiosk = { };
 
   # Don't blank the screen or suspend on lid/idle
-  services.logind.lidSwitch = "ignore";
+  services.logind.settings.Login.HandleLidSwitch = "ignore";
 
-  # cage expects at least one input device, tell wlroots not to care
+  # Cage expects at least one input device, tell wlroots not to care
   systemd.services.cage-tty1.environment = {
     WLR_LIBINPUT_NO_DEVICES = "1";
   };
