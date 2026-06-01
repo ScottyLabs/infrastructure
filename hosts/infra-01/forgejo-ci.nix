@@ -22,6 +22,7 @@
       enable = true;
       name = "infra-01";
       tokenFile = config.age.secrets.forgejo-runner-token.path;
+      capacity = 4;
     };
   };
 }
