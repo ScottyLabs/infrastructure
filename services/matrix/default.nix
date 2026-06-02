@@ -12,6 +12,7 @@ in
     ./synapse.nix
     ./mautrix-discord.nix
     ./mautrix-slack.nix
+    ./matrix-bridge-identity.nix
     ./bridge-media-proxy.nix
     ./well-known.nix
   ];
