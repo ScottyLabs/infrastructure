@@ -30,7 +30,7 @@ diff --git a/pkg/connector/capabilities.go b/pkg/connector/capabilities.go
  
  	"go.mau.fi/mautrix-slack/pkg/slackid"
  )
-@@ -41,6 +44,165 @@
+@@ -41,6 +44,169 @@
  	ErrMediaConvertFailed   = errors.New("failed to re-encode media")
  	ErrMediaOnlyEditCaption = errors.New("only media message caption can be edited")
  )
@@ -103,22 +103,26 @@ diff --git a/pkg/connector/capabilities.go b/pkg/connector/capabilities.go
 +	return options
 +}
 +
-+func relaySlackPublicMediaURL(mc *MessageConverter, content *event.MessageEventContent) string {
-+	if content.URL == "" {
-+		return ""
-+	}
++func relaySlackPublicMediaURL(ctx context.Context, mc *MessageConverter, content *event.MessageEventContent) string {
 +	urlProvider, ok := mc.Bridge.Matrix.(bridgev2.MatrixConnectorWithPublicMedia)
 +	if !ok {
 +		return ""
 +	}
-+	return urlProvider.GetPublicMediaAddress(content.URL)
++	publicURL, err := urlProvider.GetPublicMediaAddressForEvent(ctx, content)
++	if err == nil && publicURL != "" {
++		return publicURL
++	}
++	if content.URL != "" {
++		return urlProvider.GetPublicMediaAddress(content.URL)
++	}
++	return ""
 +}
 +
-+func relaySlackMediaPostURL(mc *MessageConverter, content *event.MessageEventContent) string {
++func relaySlackMediaPostURL(ctx context.Context, mc *MessageConverter, content *event.MessageEventContent) string {
 +	if strings.HasPrefix(content.Body, "http://") || strings.HasPrefix(content.Body, "https://") {
 +		return content.Body
 +	}
-+	publicURL := relaySlackPublicMediaURL(mc, content)
++	publicURL := relaySlackPublicMediaURL(ctx, mc, content)
 +	if publicURL == "" {
 +		return ""
 +	}
@@ -140,13 +144,13 @@ diff --git a/pkg/connector/capabilities.go b/pkg/connector/capabilities.go
 +	origSender *bridgev2.OrigSender,
 +	editTargetID, threadRootID string,
 +) (*ConvertedSlackMessage, bool) {
-+	postURL := relaySlackMediaPostURL(mc, content)
++	postURL := relaySlackMediaPostURL(ctx, mc, content)
 +	if postURL == "" {
 +		return nil, false
 +	}
 +	relayContent := *content
 +	relayContent.Body = postURL
-+	if publicURL := relaySlackPublicMediaURL(mc, content); publicURL != "" && strings.Contains(postURL, publicURL) {
++	if publicURL := relaySlackPublicMediaURL(ctx, mc, content); publicURL != "" && strings.Contains(postURL, publicURL) {
 +		relayContent.Format = event.FormatHTML
 +		escaped := html.EscapeString(publicURL)
 +		htmlBody := fmt.Sprintf(`<p><a href="%s">%s</a></p>`, escaped, escaped)
@@ -196,7 +200,7 @@ diff --git a/pkg/connector/capabilities.go b/pkg/connector/capabilities.go
  
  func isMediaMsgtype(msgType event.MessageType) bool {
  	return msgType == event.MsgImage || msgType == event.MsgAudio || msgType == event.MsgVideo || msgType == event.MsgFile
-@@ -98,6 +260,10 @@
+@@ -98,6 +264,10 @@
  
  	switch content.MsgType {
  	case event.MsgText, event.MsgEmote, event.MsgNotice:
@@ -207,7 +211,7 @@ diff --git a/pkg/connector/capabilities.go b/pkg/connector/capabilities.go
  		options := make([]slack.MsgOption, 0, 4)
  		var block slack.Block
  		if content.Format == event.FormatHTML {
-@@ -108,8 +274,8 @@
+@@ -108,8 +278,8 @@
  		options = append(options, slack.MsgOptionBlocks(block))
  		if editTargetID != "" {
  			options = append(options, slack.MsgOptionUpdate(editTargetID))
@@ -218,7 +222,7 @@ diff --git a/pkg/connector/capabilities.go b/pkg/connector/capabilities.go
  		}
  		if content.MsgType == event.MsgEmote {
  			options = append(options, slack.MsgOptionMeMessage())
-@@ -118,17 +284,15 @@
+@@ -118,17 +288,15 @@
  			options = append(options, slack.MsgOptionDisableLinkUnfurl(), slack.MsgOptionDisableMediaUnfurl())
  		}
  		if origSender != nil {

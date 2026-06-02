@@ -107,6 +107,8 @@ in
         public_media = {
           enabled = true;
           signing_key = "$PUBLIC_MEDIA_SIGNING_KEY";
+          # Required for relaying Discord attachments from encrypted rooms (content.file, not url).
+          use_database = true;
         };
         bridge = {
           relay =
