@@ -1,0 +1,30 @@
+diff --git a/portal_convert.go b/portal_convert.go
+--- a/portal_convert.go
++++ b/portal_convert.go
+@@ -325,12 +325,7 @@
+ 			parts = append(parts, part)
+ 		}
+ 	}
+-	if len(parts) == 0 && msg.Thread != nil {
+-		parts = append(parts, &ConvertedMessage{Type: event.EventMessage, Content: &event.MessageEventContent{
+-			MsgType: event.MsgText,
+-			Body:    fmt.Sprintf("Created a thread: %s", msg.Thread.Name),
+-		}})
+-	}
++	// Skip thread-only Discord messages (no content); they mirror badly to Slack.
+ 	for _, part := range parts {
+ 		puppet.addWebhookMeta(part, msg)
+ 		puppet.addMemberMeta(part, msg)
+--- a/thread.go
++++ b/thread.go
+@@ -82,9 +82,7 @@
+ 	thread := br.GetThreadByID(id, rootMessage)
+ 	log := zerolog.Ctx(ctx)
+ 	log.Debug().Msg("Marked message as thread root")
+-	if thread.CreationNoticeMXID == "" {
+-		thread.Parent.sendThreadCreationNotice(ctx, thread)
+-	}
++	// Do not bridge thread creation notices to Matrix (bad Slack relay attribution).
+ 	// TODO member_ids_preview is probably not guaranteed to contain the source user
+ 	if source != nil && metadata != nil && slices.Contains(metadata.MemberIDsPreview, source.DiscordID) && !source.IsInPortal(thread.ID) {
+ 		source.MarkInPortal(database.UserPortal{

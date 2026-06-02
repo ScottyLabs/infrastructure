@@ -16,6 +16,7 @@ let
       ../../patches/mautrix-discord-embed-link-url.patch
       ../../patches/mautrix-discord-ping-prefix.patch
       ../../patches/mautrix-discord-preserve-topic.patch
+      ../../patches/mautrix-discord-skip-thread-creation-msgs.patch
     ];
   });
   bridgePermissions =
