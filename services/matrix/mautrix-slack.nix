@@ -13,6 +13,7 @@ let
     patches = (old.patches or [ ]) ++ [
       ../../patches/mautrix-slack-relay-outbound.patch
       ../../patches/mautrix-slack-preserve-topic.patch
+      ../../patches/mautrix-slack-bridge-identity-pings.patch
     ];
   });
   bridgePermissions =
@@ -30,7 +31,7 @@ let
   # message_formats use .Sender.*; displayname_format uses the same fields without that prefix.
   relayDisplayName = "{{ or .PerMessageProfile.Displayname .Displayname }}";
   # Relay templates also receive .Content (see mautrix-go bridgeconfig formatData).
-  # Mention labels ([Name]) for Discord→Slack are added in mautrix-slack-relay-outbound.patch.
+  # Unlinked mentions become [Name] labels; Keycloak-linked users get real Slack pings (bridge-identity-map.json).
   relayMentionPrefix = "";
 in
 {

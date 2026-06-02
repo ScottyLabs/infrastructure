@@ -316,14 +316,21 @@ export TF_VAR_matrix_slack_relay_login_id="$SLACK_RELAY_LOGIN_ID"
 
 ### Ping messages (Discord ↔ Slack)
 
-Bridged pings replace the mention segment in the message text with **`[display name]`** (from Matrix room member / ghost names), not a prefix on the whole message:
+Members with **both Slack and Discord linked in Keycloak** get real cross-platform @mentions when `bridge-identity-map.json` is deployed (`/etc/mautrix-bridge/identity-map.json`). Everyone else still gets **`[display name]`** labels so random Matrix ghosts do not ping wrong accounts.
 
-| Direction | Mechanism |
-|-----------|-----------|
-| **Discord → Slack** | `mautrix-slack-relay-outbound.patch` replaces Matrix user mention pills in HTML and `@displayname` in plain body with `[Alice]` when relaying; `@room` becomes `[@room]`. |
-| **Slack → Discord** | `mautrix-discord-ping-prefix.patch` replaces Discord `<@id>` pills (and plain display names) with `[Alice]`; `@everyone` / `@here` become `[@room]`, and those users are removed from `allowed_mentions`. |
+Regenerate the map after IdP link changes (requires `KEYCLOAK_CLIENT_ID` / `KEYCLOAK_CLIENT_SECRET`):
 
-Example on Discord after a Slack ping to Alice: `hey [Alice] hello` (not `[Alice] hey @alice hello`).
+```bash
+cd governance
+governance --data-dir data generate-bridge-identity-map
+```
+
+| Direction | Linked in Keycloak | Not linked |
+|-----------|-------------------|------------|
+| **Discord → Slack** | Matrix `@discord_…` mention → Slack `<@U…>` via `mautrix-slack-bridge-identity-pings.patch` | `[Alice]` label (`mautrix-slack-relay-outbound.patch`) |
+| **Slack → Discord** | Matrix `@slack_…` mention → Discord `<@id>` + `allowed_mentions` | `[Alice]` label (`mautrix-discord-ping-prefix.patch`) |
+
+`@room` / `@everyone` / `@here` still become `[@room]` on the other side.
 
 ### Markdown (Discord ↔ Slack)
 
