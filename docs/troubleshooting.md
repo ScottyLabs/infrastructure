@@ -1,5 +1,43 @@
 # Troubleshooting
 
+## CMU-SECURE cannot reach infra-01 (Docker route steals 172.26.0.0/16)
+
+Forgejo Actions on infra-01 creates ephemeral `WORKFLOW-*` Docker bridge networks. Docker's default subnet allocator can assign `172.26.0.0/16`, which is the same range CMU uses for CMU-SECURE clients. Linux then installs a more-specific route:
+
+```text
+172.26.0.0/16 dev br-... src 172.26.0.1
+```
+
+Return traffic to `172.26.x.x` (SYN-ACK, ICMP, etc.) goes to a dead bridge instead of `ens192`, so services on `128.2.25.63` look unreachable from campus wireless even when inbound packets arrive. deploy-01 is unaffected unless it also has a `172.26.0.0/16` route.
+
+**Symptoms**
+
+- From CMU-SECURE: TCP/HTTPS to infra-01 hosts fails; traceroute may stop before the VM.
+- On infra-01: `ip route get 172.26.31.227` shows a `br-*` device, not `ens192`.
+- `ping 172.26.31.227` returns `From 172.26.0.1 Destination Host Unreachable`.
+- `ping 128.2.25.68` on the same campus subnet still works.
+
+**Immediate fix (on infra-01)**
+
+```bash
+ip route get 172.26.31.227
+docker network ls
+docker network inspect WORKFLOW-f75d842fe5fb8d524901549b15d4342f  # example; use the network that owns 172.26.0.0/16
+
+# Remove stale workflow networks (safe when no Actions job is running)
+docker network prune -f
+
+# If the route remains:
+ip route show 172.26.0.0/16
+sudo ip route del 172.26.0.0/16 dev br-<id>  # dev name from `ip route get`
+```
+
+Re-test from CMU-SECURE and with `ping -c 3 172.26.31.227` from infra-01 (expect failure until the route is gone).
+
+**Durable fix**
+
+`virtualisation.docker.daemon.settings.default-address-pools` in `services/forgejo-ci/runner.nix` pins new networks to `10.89.0.0/16`. Deploy via comin, restart Docker (`sudo systemctl restart docker`), prune old `WORKFLOW-*` networks, and confirm no `172.26.0.0/16` route remains.
+
 ## comin not deploying after a force push
 
 If someone force pushes to the repository, comin's cached repo and state can get out of sync with the remote. Symptoms include comin fetching successfully but never triggering a build.

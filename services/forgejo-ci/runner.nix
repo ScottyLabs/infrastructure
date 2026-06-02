@@ -95,7 +95,20 @@ in
       };
     };
 
-    virtualisation.docker.enable = true;
+    # Forgejo act-runner creates per-job WORKFLOW-* bridge networks from Docker's
+    # default pool (172.17+). That overlaps CMU-SECURE client space (172.26.0.0/16)
+    # and steals host routes, breaking return traffic to wireless clients.
+    virtualisation.docker = {
+      enable = true;
+      daemon.settings = {
+        default-address-pools = [
+          {
+            base = "10.89.0.0/16";
+            size = 24;
+          }
+        ];
+      };
+    };
 
     networking.firewall.trustedInterfaces = [ "docker0" ];
 
