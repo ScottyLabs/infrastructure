@@ -1,3 +1,18 @@
+diff --git a/portal.go b/portal.go
+--- a/portal.go
++++ b/portal.go
+@@ -619,8 +619,9 @@
+ 
+ func (portal *Portal) handleDiscordMessageCreate(user *User, msg *discordgo.Message, thread *Thread) {
+ 	switch msg.Type {
+-	case discordgo.MessageTypeChannelNameChange, discordgo.MessageTypeChannelIconChange, discordgo.MessageTypeChannelPinnedMessage:
+-		// These are handled via channel updates
++	case discordgo.MessageTypeChannelNameChange, discordgo.MessageTypeChannelIconChange, discordgo.MessageTypeChannelPinnedMessage,
++		discordgo.MessageTypeThreadStarterMessage:
++		// Channel updates and "started a thread" system messages must not reach Matrix/Slack.
+ 		return
+ 	}
+ 
 diff --git a/portal_convert.go b/portal_convert.go
 --- a/portal_convert.go
 +++ b/portal_convert.go
@@ -15,6 +30,17 @@ diff --git a/portal_convert.go b/portal_convert.go
  	for _, part := range parts {
  		puppet.addWebhookMeta(part, msg)
  		puppet.addMemberMeta(part, msg)
+@@ -694,6 +689,9 @@
+ 			MsgType: event.MsgEmote,
+ 			Body:    "joined the server",
+ 		}}
++	} else if msg.Type == discordgo.MessageTypeThreadStarterMessage {
++		// Discord's native "X started a thread: …" must not mirror to Slack as a user message.
++		return nil
+ 	}
+ 	var htmlParts []string
+ 	if msg.Interaction != nil {
+diff --git a/thread.go b/thread.go
 --- a/thread.go
 +++ b/thread.go
 @@ -82,9 +82,7 @@

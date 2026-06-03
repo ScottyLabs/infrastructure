@@ -1,14 +1,14 @@
 diff --git a/pkg/connector/capabilities.go b/pkg/connector/capabilities.go
 --- a/pkg/connector/capabilities.go
 +++ b/pkg/connector/capabilities.go
-@@ -178,6 +178,8 @@
+@@ -180,6 +180,8 @@
  	EditMaxAge:      nil,
  	Delete:          event.CapLevelFullySupported,
  	Reaction:        event.CapLevelFullySupported,
 +	// Preserve Matrix HTML when relaying (e.g. Discord markdown → Slack rich text).
 +	PerMessageProfileRelay: true,
  }
-
+ 
  var dmCaps *event.RoomFeatures
 diff --git a/pkg/msgconv/from-matrix.go b/pkg/msgconv/from-matrix.go
 --- a/pkg/msgconv/from-matrix.go
@@ -23,23 +23,18 @@ diff --git a/pkg/msgconv/from-matrix.go b/pkg/msgconv/from-matrix.go
  	"strings"
  
  	"github.com/rs/zerolog"
-@@ -30,6 +32,8 @@
+@@ -30,6 +32,7 @@
  	"maunium.net/go/mautrix/bridgev2"
  	"maunium.net/go/mautrix/bridgev2/database"
  	"maunium.net/go/mautrix/event"
 +	"maunium.net/go/mautrix/id"
-+
+ 
  	"go.mau.fi/mautrix-slack/pkg/slackid"
  )
- 
-@@ -40,4 +44,291 @@
- 	ErrMediaConvertFailed   = errors.New("failed to re-encode media")
+@@ -42,6 +45,105 @@
  	ErrMediaOnlyEditCaption = errors.New("only media message caption can be edited")
  )
--func isMediaMsgtype
-\ No newline at end of file
-+
-+
+ 
 +func appendLinkPreviewURLs(content *event.MessageEventContent, previews []*event.BeeperLinkPreview) {
 +	content.EnsureHasHTML()
 +	for _, lp := range previews {
@@ -139,190 +134,55 @@ diff --git a/pkg/msgconv/from-matrix.go b/pkg/msgconv/from-matrix.go
 +	return options
 +}
 +
-+func isMediaMsgtype(msgType event.MessageType) bool {
-+	return msgType == event.MsgImage || msgType == event.MsgAudio || msgType == event.MsgVideo || msgType == event.MsgFile
-+}
-+
-+type ConvertedSlackMessage struct {
-+	SendReq    slack.MsgOption
-+	FileUpload *slack.UploadFileV2Parameters
-+	FileShare  *slack.ShareFileParams
-+}
-+
-+func (mc *MessageConverter) ToSlack(
-+	ctx context.Context,
-+	client *slack.Client,
-+	portal *bridgev2.Portal,
-+	content *event.MessageEventContent,
-+	evt *event.Event,
-+	threadRoot *database.Message,
-+	editTarget *database.Message,
-+	origSender *bridgev2.OrigSender,
-+	isRealUser bool,
-+) (conv *ConvertedSlackMessage, err error) {
-+	log := zerolog.Ctx(ctx)
-+
-+	if evt.Type == event.EventSticker {
-+		// Slack doesn't have stickers, just bridge stickers as images
-+		content.MsgType = event.MsgImage
-+	}
-+
-+	var editTargetID, threadRootID string
-+	if editTarget != nil {
-+		if isMediaMsgtype(content.MsgType) {
-+			content.MsgType = event.MsgText
-+			if content.FileName == "" || content.FileName == content.Body {
-+				return nil, ErrMediaOnlyEditCaption
-+			}
-+		}
-+		var ok bool
-+		_, _, editTargetID, ok = slackid.ParseMessageID(editTarget.ID)
-+		if !ok {
-+			return nil, fmt.Errorf("failed to parse edit target ID")
-+		}
-+	}
-+	if threadRoot != nil {
-+		threadRootMessageID := threadRoot.ID
-+		if threadRoot.ThreadRoot != "" {
-+			threadRootMessageID = threadRoot.ThreadRoot
-+		}
-+		var ok bool
-+		_, _, threadRootID, ok = slackid.ParseMessageID(threadRootMessageID)
-+		if !ok {
-+			return nil, fmt.Errorf("failed to parse thread root ID")
-+		}
-+	}
-+
-+	switch content.MsgType {
-+	case event.MsgText, event.MsgEmote, event.MsgNotice:
+ func isMediaMsgtype(msgType event.MessageType) bool {
+ 	return msgType == event.MsgImage || msgType == event.MsgAudio || msgType == event.MsgVideo || msgType == event.MsgFile
+ }
+@@ -98,6 +200,10 @@
+ 
+ 	switch content.MsgType {
+ 	case event.MsgText, event.MsgEmote, event.MsgNotice:
 +		if origSender != nil {
 +			appendLinkPreviewURLs(content, content.BeeperLinkPreviews)
 +			mc.replaceMatrixMentionsWithLabels(ctx, portal, content)
 +		}
-+		options := make([]slack.MsgOption, 0, 4)
-+		var block slack.Block
-+		if content.Format == event.FormatHTML {
-+			block = mc.MatrixHTMLParser.Parse(ctx, content.FormattedBody, content.Mentions, portal)
-+		} else {
-+			block = mc.MatrixHTMLParser.ParseText(ctx, content.Body, content.Mentions, portal)
-+		}
-+		options = append(options, slack.MsgOptionBlocks(block))
-+		if editTargetID != "" {
-+			options = append(options, slack.MsgOptionUpdate(editTargetID))
+ 		options := make([]slack.MsgOption, 0, 4)
+ 		var block slack.Block
+ 		if content.Format == event.FormatHTML {
+@@ -108,8 +214,8 @@
+ 		options = append(options, slack.MsgOptionBlocks(block))
+ 		if editTargetID != "" {
+ 			options = append(options, slack.MsgOptionUpdate(editTargetID))
+-		} else if threadRootID != "" {
+-			options = append(options, slack.MsgOptionTS(threadRootID))
 +		} else {
 +			options = appendSlackThreadOptions(options, threadRootID, content)
-+		}
-+		if content.MsgType == event.MsgEmote {
-+			options = append(options, slack.MsgOptionMeMessage())
-+		}
-+		if content.BeeperLinkPreviews != nil && len(content.BeeperLinkPreviews) == 0 {
-+			options = append(options, slack.MsgOptionDisableLinkUnfurl(), slack.MsgOptionDisableMediaUnfurl())
-+		}
-+		if origSender != nil {
+ 		}
+ 		if content.MsgType == event.MsgEmote {
+ 			options = append(options, slack.MsgOptionMeMessage())
+@@ -118,14 +224,7 @@
+ 			options = append(options, slack.MsgOptionDisableLinkUnfurl(), slack.MsgOptionDisableMediaUnfurl())
+ 		}
+ 		if origSender != nil {
+-			options = append(options, slack.MsgOptionUsername(origSender.FormattedName))
+-			urlProvider, ok := mc.Bridge.Matrix.(bridgev2.MatrixConnectorWithPublicMedia)
+-			if ok && origSender.AvatarURL != "" {
+-				publicAvatarURL := urlProvider.GetPublicMediaAddress(origSender.AvatarURL)
+-				if publicAvatarURL != "" {
+-					options = append(options, slack.MsgOptionIconURL(publicAvatarURL))
+-				}
+-			}
 +			options = append(options, relaySlackProfileOptions(mc, origSender)...)
-+		}
-+		return &ConvertedSlackMessage{SendReq: slack.MsgOptionCompose(options...)}, nil
-+	case event.MsgAudio, event.MsgFile, event.MsgImage, event.MsgVideo:
-+		data, err := mc.Bridge.Bot.DownloadMedia(ctx, content.URL, content.File)
-+		if err != nil {
-+			log.Err(err).Msg("Failed to download Matrix attachment")
-+			return nil, ErrMediaDownloadFailed
-+		}
-+
-+		var filename, caption, captionHTML, subtype string
-+		if content.FileName == "" || content.FileName == content.Body {
-+			filename = content.Body
-+		} else {
-+			filename = content.FileName
-+			caption = content.Body
-+			captionHTML = content.FormattedBody
-+		}
-+		if content.MSC3245Voice != nil && content.Info.MimeType != "audio/webm; codecs=opus" && ffmpeg.Supported() {
-+			data, err = ffmpeg.ConvertBytes(ctx, data, ".webm", []string{}, []string{"-c:a", "copy"}, content.Info.MimeType)
-+			if err != nil {
-+				log.Err(err).Msg("Failed to convert voice message")
-+				return nil, ErrMediaConvertFailed
-+			}
-+			// Slack web will upload a webm/opus audio file with a .m4a extension.
-+			// Slack servers appear to then convert it to m4a with aac.
-+			filename += ".m4a"
-+			content.Info.MimeType = "audio/webm; codecs=opus"
-+			subtype = "slack_audio"
-+		} else if content.MSC3245Voice != nil && (content.Info.MimeType == "audio/webm; codecs=opus" || content.Info.MimeType == "audio/mp4") {
-+			subtype = "slack_audio"
-+			if !strings.HasSuffix(filename, ".m4a") {
-+				filename += ".m4a"
-+			}
-+		}
-+		_, channelID := slackid.ParsePortalID(portal.ID)
-+		if !isRealUser {
-+			fileUpload := &slack.UploadFileV2Parameters{
-+				Filename:        filename,
-+				Reader:          bytes.NewReader(data),
-+				FileSize:        len(data),
-+				Channel:         channelID,
-+				ThreadTimestamp: threadRootID,
-+			}
+ 		}
+ 		return &ConvertedSlackMessage{SendReq: slack.MsgOptionCompose(options...)}, nil
+ 	case event.MsgAudio, event.MsgFile, event.MsgImage, event.MsgVideo:
+@@ -169,8 +268,8 @@
+ 				Channel:         channelID,
+ 				ThreadTimestamp: threadRootID,
+ 			}
+-			if caption != "" {
+-				fileUpload.InitialComment = caption
 +			if comment := relaySlackUploadInitialComment(origSender, caption); comment != "" {
 +				fileUpload.InitialComment = comment
-+			}
-+			return &ConvertedSlackMessage{FileUpload: fileUpload}, nil
-+		} else {
-+			resp, err := client.GetFileUploadURL(ctx, slack.GetFileUploadURLParameters{
-+				Filename: filename,
-+				Length:   len(data),
-+				SubType:  subtype,
-+			})
-+			if err != nil {
-+				log.Err(err).Msg("Failed to get file upload URL")
-+				return nil, ErrMediaUploadFailed
-+			}
-+			err = client.UploadToURLB(ctx, resp, content.Info.MimeType, data)
-+			if err != nil {
-+				log.Err(err).Msg("Failed to upload file")
-+				return nil, ErrMediaUploadFailed
-+			}
-+			err = client.CompleteFileUpload(ctx, resp)
-+			if err != nil {
-+				log.Err(err).Msg("Failed to complete file upload")
-+				return nil, ErrMediaUploadFailed
-+			}
-+			var block slack.Block
-+			if captionHTML != "" {
-+				block = mc.MatrixHTMLParser.Parse(ctx, content.FormattedBody, content.Mentions, portal)
-+			} else if caption != "" {
-+				block = slack.NewRichTextBlock("", slack.NewRichTextSection(slack.NewRichTextSectionTextElement(caption, nil)))
-+			}
-+			fileShare := &slack.ShareFileParams{
-+				Files:    []string{resp.File},
-+				Channel:  channelID,
-+				ThreadTS: threadRootID,
-+			}
-+			if block != nil {
-+				fileShare.Blocks = []slack.Block{block}
-+			}
-+			return &ConvertedSlackMessage{FileShare: fileShare}, nil
-+		}
-+	default:
-+		return nil, ErrUnknownMsgType
-+	}
-+}
-+
-+func (mc *MessageConverter) uploadMedia(ctx context.Context, portal *bridgev2.Portal, intent bridgev2.MatrixAPI, data []byte, content *event.MessageEventContent) error {
-+	content.Info.Size = len(data)
-+	if content.Info.Width == 0 && content.Info.Height == 0 && strings.HasPrefix(content.Info.MimeType, "image/") {
-+		cfg, _, _ := image.DecodeConfig(bytes.NewReader(data))
-+		content.Info.Width, content.Info.Height = cfg.Width, cfg.Height
-+	}
-+
-+	mxc, file, err := intent.UploadMedia(ctx, portal.MXID, data, "", content.Info.MimeType)
-+	if err != nil {
-+		return err
-+	}
-+	if file != nil {
-+		content.File = file
-+	} else {
-+		content.URL = mxc
-+	}
-+	return nil
-+}
+ 			}
+ 			return &ConvertedSlackMessage{FileUpload: fileUpload}, nil
+ 		} else {

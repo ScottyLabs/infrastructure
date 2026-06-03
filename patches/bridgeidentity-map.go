@@ -91,6 +91,50 @@ func (m *Map) HasDiscord(discordID string) bool {
 	return m.SlackUserIDForDiscord(discordID) != ""
 }
 
+func (m *Map) HasSlack(slackUserID string) bool {
+	return m.DiscordIDForSlack(slackUserID) != ""
+}
+
+// IsDiscordBridgeBot is true for the mautrix-discord appservice bot (@discord:domain).
+func IsDiscordBridgeBot(mxid id.UserID) bool {
+	localpart, _, err := mxid.Parse()
+	return err == nil && localpart == "discord"
+}
+
+// IsSlackBridgeBot is true for the mautrix-slack appservice bot (@slack:domain).
+func IsSlackBridgeBot(mxid id.UserID) bool {
+	localpart, _, err := mxid.Parse()
+	return err == nil && localpart == "slack"
+}
+
+// DiscordIDForMXID returns a Discord user snowflake when mxid is a linked discord or slack ghost.
+func DiscordIDForMXID(mxid id.UserID) string {
+	if discordID := ParseDiscordGhostMXID(mxid); discordID != "" {
+		if Get().HasDiscord(discordID) {
+			return discordID
+		}
+		return ""
+	}
+	if slackUID := ParseSlackGhostUserID(mxid); slackUID != "" {
+		return Get().DiscordIDForSlack(slackUID)
+	}
+	return ""
+}
+
+// SlackUserIDForMXID returns a Slack user ID when mxid is a linked slack or discord ghost.
+func SlackUserIDForMXID(mxid id.UserID) string {
+	if slackUID := ParseSlackGhostUserID(mxid); slackUID != "" {
+		if Get().HasSlack(slackUID) {
+			return slackUID
+		}
+		return ""
+	}
+	if discordID := ParseDiscordGhostMXID(mxid); discordID != "" {
+		return Get().SlackUserIDForDiscord(discordID)
+	}
+	return ""
+}
+
 // ParseDiscordGhostMXID extracts a Discord snowflake from a discord bridge puppet MXID.
 func ParseDiscordGhostMXID(mxid id.UserID) string {
 	match := discordGhostRegex.FindStringSubmatch(string(mxid))
