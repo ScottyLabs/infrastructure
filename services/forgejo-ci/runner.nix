@@ -7,8 +7,10 @@
 
 let
   cfg = config.scottylabs.forgejoCI.runner;
+  dockerFw = import ../../lib/docker-firewall.nix { inherit lib; };
   defaultJobImage = "scottylabs/act-runner:24.04";
   runnerLabels = [ "docker:docker://${cfg.jobImage}" ];
+  cacheProxyPort = cfg.cachePort;
 
   actRunnerContext = pkgs.writeTextDir "Dockerfile" ''
     FROM ghcr.io/catthehacker/ubuntu:act-24.04
@@ -85,8 +87,12 @@ in
           cache = {
             enabled = true;
             dir = "/var/lib/gitea-runner/cache";
+            # IP/hostname job containers use for ACTIONS_CACHE_URL (docker bridge gateway).
             host = "172.17.0.1";
-            port = cfg.cachePort;
+            # Internal cache server; 0 = random port on loopback (proxy connects locally).
+            port = 0;
+            # Fixed port for the cache proxy workflows connect to (must match firewall rules).
+            proxy_port = cacheProxyPort;
           };
           container = {
             network = "bridge";
@@ -98,19 +104,13 @@ in
     # Forgejo act-runner creates per-job WORKFLOW-* bridge networks from Docker's
     # default pool (172.17+). That overlaps CMU-SECURE client space (172.26.0.0/16)
     # and steals host routes, breaking return traffic to wireless clients.
-    virtualisation.docker = {
-      enable = true;
-      daemon.settings = {
-        default-address-pools = [
-          {
-            base = "10.89.0.0/16";
-            size = 24;
-          }
-        ];
-      };
-    };
+    virtualisation.docker = dockerFw.mkDockerDaemonConfig { };
 
     networking.firewall.trustedInterfaces = [ "docker0" ];
+
+    networking.firewall.extraCommands = dockerFw.mkAllowTcpFromWorkflowClients {
+      ports = [ cacheProxyPort ];
+    };
 
     systemd.services.forgejo-act-runner-image = {
       description = "Build act runner image (/var/run workaround for Docker 29.5.1)";
