@@ -38,6 +38,33 @@ Re-test from CMU-SECURE and with `ping -c 3 172.26.31.227` from infra-01 (expect
 
 `virtualisation.docker.daemon.settings.default-address-pools` in `services/forgejo-ci/runner.nix` pins new networks to `10.89.0.0/16`. Deploy via comin, restart Docker (`sudo systemctl restart docker`), prune old `WORKFLOW-*` networks, and confirm no `172.26.0.0/16` route remains.
 
+## Forgejo Actions cache hangs on "Restoring cache..."
+
+The infra-01 runner exposes the act cache proxy at `172.17.0.1:8088` (`cache.host` + `cache.proxy_port` in `services/forgejo-ci/runner.nix`). Workflow job containers run on ephemeral `WORKFLOW-*` bridge networks (now `10.89.0.0/16`), not `docker0`. The host firewall only trusted `docker0`, so `actions/cache` and `Swatinem/rust-cache` connect to the cache URL but TCP to the proxy port is dropped — the step sits on "Restoring cache..." until the job timeout (~4–5 minutes).
+
+On newer Forgejo runners, `cache.port` is only the internal server (often random on loopback); workflows must reach `cache.proxy_port`. If `proxy_port` is `0`, the proxy binds a random port and cache restore fails even when port 8088 is open in the firewall.
+
+This often shows up right after the Docker `default-address-pools` change; the cache config did not move, but job subnets did.
+
+**Verify on infra-01** (while no job is running, simulate a workflow bridge client):
+
+```bash
+docker run --rm --network bridge curlimages/curl -sS -o /dev/null -w '%{http_code}\n' --connect-timeout 3 http://172.17.0.1:8088/ || echo FAIL
+```
+
+Expect a quick HTTP response (often `404`); `FAIL` or hang means the firewall or cache service is still wrong.
+
+**Check cache service**
+
+```bash
+systemctl status gitea-runner-default
+ss -ltnp | grep 8088
+```
+
+**Durable fix**
+
+`infrastructure/lib/docker-firewall.nix` defines the workflow subnet allowlist; `services/forgejo-ci/runner.nix` applies it for `cache.proxy_port` (default 8088). Deploy via comin and re-run a workflow that uses `actions/cache` or `rust-cache`.
+
 ## comin not deploying after a force push
 
 If someone force pushes to the repository, comin's cached repo and state can get out of sync with the remote. Symptoms include comin fetching successfully but never triggering a build.
@@ -322,8 +349,11 @@ Regenerate the map after IdP link changes (requires `KEYCLOAK_CLIENT_ID` / `KEYC
 
 ```bash
 cd governance
-governance --data-dir data generate-bridge-identity-map
+cargo build -p governance
+./target/debug/governance --data-dir data generate-bridge-identity-map
 ```
+
+Requires `KEYCLOAK_CLIENT_ID` and `KEYCLOAK_CLIENT_SECRET` in the environment (same credentials used for OpenTofu `resolve-identity`).
 
 | Direction | Linked in Keycloak | Not linked |
 |-----------|-------------------|------------|
