@@ -2,8 +2,12 @@
 * @anish @thesuperRL
 /dashboards/infra/ @anish @thesuperRL
 /alerts/infra/ @anish @thesuperRL
-/dashboards/bus-sign/ @tentype @anish
-/alerts/bus-sign/ @tentype @anish
+/dashboards/bus-sign/ @tentype @maybe-yiyi @anish
+/alerts/bus-sign/ @tentype @maybe-yiyi @anish
+/dashboards/dalmatian/ @tentype @maybe-yiyi @anish
+/alerts/dalmatian/ @tentype @maybe-yiyi @anish
+/dashboards/discord-verify/ @tentype @maybe-yiyi @anish
+/alerts/discord-verify/ @tentype @maybe-yiyi @anish
 /dashboards/courses/ @anish
 /alerts/courses/ @anish
 /dashboards/kennel/ @anish @thesuperRL
