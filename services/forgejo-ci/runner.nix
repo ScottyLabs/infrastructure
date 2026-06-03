@@ -87,15 +87,16 @@ in
           cache = {
             enabled = true;
             dir = "/var/lib/gitea-runner/cache";
-            # IP/hostname job containers use for ACTIONS_CACHE_URL (docker bridge gateway).
-            host = "172.17.0.1";
             # Internal cache server; 0 = random port on loopback (proxy connects locally).
             port = 0;
             # Fixed port for the cache proxy workflows connect to (must match firewall rules).
             proxy_port = cacheProxyPort;
+            # 172.17.0.1 only works on docker0; WORKFLOW-* nets on 10.89.x need host-gateway.
+            actions_cache_url_override = "http://host.docker.internal:${toString cacheProxyPort}";
           };
           container = {
-            network = "bridge";
+            # Resolve host.docker.internal to the bridge gateway for this job's network.
+            options = "--add-host=host.docker.internal:host-gateway";
           };
         };
       };
@@ -105,8 +106,6 @@ in
     # default pool (172.17+). That overlaps CMU-SECURE client space (172.26.0.0/16)
     # and steals host routes, breaking return traffic to wireless clients.
     virtualisation.docker = dockerFw.mkDockerDaemonConfig { };
-
-    networking.firewall.trustedInterfaces = [ "docker0" ];
 
     networking.firewall.extraCommands = dockerFw.mkAllowTcpFromWorkflowClients {
       ports = [ cacheProxyPort ];

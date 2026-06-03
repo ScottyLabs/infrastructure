@@ -1,8 +1,8 @@
 # Helpers for NixOS hosts that run Docker workflow/job containers behind a strict firewall.
 #
 # Job containers use ephemeral WORKFLOW-* bridge networks (see defaultAddressPools).
-# They are not on docker0, so networking.firewall.trustedInterfaces = [ "docker0" ]
-# alone does not allow them to reach host listeners (act-runner cache proxy, etc.).
+# The host firewall must allow their subnets to reach host listeners (act-runner cache
+# proxy, etc.). Job containers reach the host via host.docker.internal (host-gateway).
 { lib }:
 
 let
@@ -29,11 +29,13 @@ in
       subnets ? defaultWorkflowClientSubnets,
     }:
     lib.mkAfter (
-      lib.concatMapStringsSep "\n" (subnet:
-        lib.concatMapStringsSep "\n" (port:
+      lib.concatMapStringsSep "\n" (port:
+        "iptables -I nixos-fw -i docker0 -p tcp --dport ${toString port} -j nixos-fw-accept"
+        + "\n"
+        + lib.concatMapStringsSep "\n" (subnet:
           "iptables -I nixos-fw -p tcp --dport ${toString port} -s ${subnet} -j nixos-fw-accept"
-        ) ports
-      ) subnets
+        ) subnets
+      ) ports
     );
 
   mkDockerDaemonConfig =
