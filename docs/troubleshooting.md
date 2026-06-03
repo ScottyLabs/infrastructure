@@ -1,5 +1,63 @@
 # Troubleshooting
 
+## deploy-01 apps stuck on an old git commit (dalmatian, discord-verify, …)
+
+Deploy services are **not** updated when someone pushes to the app repo and restarts a systemd unit. They only change after a full NixOS switch on deploy-01 that includes a newer `flake.lock` pin.
+
+**Pipeline**
+
+1. Push to the app repo (Codeberg and/or GitHub, depending on the project).
+2. Repo webhook → `webhooks.scottylabs.org` → Forgejo workflow `update-flake.yml` on `ScottyLabs/infrastructure` (updates the matching flake input and commits `flake.lock`).
+3. comin on deploy-01 polls `infrastructure` `main` (~15s) and runs `nixos-rebuild switch` for `nixosConfigurations.<hostname>`.
+
+Restarting `dalmatian`, `discord-verify`, or `bao-agent` only reloads the **current** generation; it does not fetch new app commits.
+
+**Symptoms**
+
+- Health or build metadata shows an old commit (e.g. dalmatian `76af9c7`, discord-verify `2577fb1`) while `main` on Codeberg already has `chore: update dalmatian` / `chore: update discord-verify` commits.
+- `systemctl restart …` was run but the commit did not change.
+
+**Diagnose on deploy-01**
+
+```bash
+hostname                    # expect deploy-01 (see hostname mismatch below)
+comin status
+journalctl -u comin -n 80 --no-pager
+
+# Locked input revs in the tree comin deploys (compare to codeberg.org/ScottyLabs/infrastructure flake.lock)
+grep -A2 '"dalmatian":' /etc/nixos/flake.lock | head -6
+grep -A4 '"discord-verify":' /etc/nixos/flake.lock | head -8
+
+# Generation actually running (should match a recent infrastructure commit)
+readlink /nix/var/nix/profiles/system-profile
+```
+
+**Common causes**
+
+| Cause | What to do |
+|-------|------------|
+| comin not switching (failed build, activation rollback, stale state) | Fix errors in `journalctl -u comin`; see [comin not deploying after a force push](#comin-not-deploying-after-a-force-push). Ensure enough store space (`nix-store --query --gc --print-dead` / `nix-collect-garbage -d` if needed; `nix.gc` for comin sub-profiles is on `main` since 2026-05-31). |
+| `networking.hostName` still `prod-01` after the rename to `deploy-01` | comin looks up `nixosConfigurations.prod-01`, which no longer exists, so nothing deploys. `main` includes a `prod-01` → `deploy-01` alias; after one successful comin deploy (or manual switch below), hostname becomes `deploy-01`. |
+| `flake.lock` never updated | On Codeberg: Actions → **Update flake inputs** → run with input `dalmatian`, `discord-verify`, or `all`. Confirm a new `chore: update …` commit on `main`. Ensure the app repo has a push webhook to `https://webhooks.scottylabs.org/hooks/flake-update` (Codeberg). GitHub-only projects need a GitHub webhook or must trigger the workflow manually. |
+| Flake update workflow failed | Check the latest **Update flake inputs** run on infrastructure (transient Codeberg git fetch failures are retried in the workflow since 2026-05). |
+
+**Recovery (one-shot)**
+
+```bash
+cd /etc/nixos
+sudo nh os switch .#deploy-01
+```
+
+If `hostname` is still `prod-01`, use `.#prod-01` once (alias to the same configuration), then confirm `hostname` is `deploy-01` after switch.
+
+Verify services picked up new packages (paths under `/nix/store/…` change) and app-reported commits match `flake.lock`.
+
+## Root filesystem / disk usage alerts
+
+Grafana rule `infra-disk-full` lives in the [observability](https://codeberg.org/ScottyLabs/observability) repo (`alerts/rules/infra/disk-full.yaml`). It fires when Prometheus reports root (`mountpoint="/"`) **above the configured threshold for 5 minutes** (currently **75%** used — change the `0.75` in the expr and push `observability` `main` so `infrastructure` flake.lock updates).
+
+To grow a Campus Cloud disk (e.g. deploy-01 to **120 GB** to match infra-01), resize the VMDK in vSphere, then extend the partition and btrfs on the host. See [Expanding a VM disk](./setup/05-expanding-vm-disk.md).
+
 ## comin not deploying after a force push
 
 If someone force pushes to the repository, comin's cached repo and state can get out of sync with the remote. Symptoms include comin fetching successfully but never triggering a build.
@@ -316,7 +374,7 @@ After deploy, test: reply in the main channel should appear in the Slack thread 
 
 ### Profile pictures (Discord ↔ Slack)
 
-**Discord → Slack** (relay): mautrix-slack posts with per-message username and avatar when relay uses a **Slack app** login, `public_media.enabled` is true, `public_media.use_database` is true (required for encrypted portal attachments), and `appservice.public_address` points at the Matrix client domain. Discord attaches avatars on `com.beeper.per_message_profile` (same as names); ScottyLabs patches mautrix-slack to use that for Slack `icon_url`. Uploaded Discord images are relayed via signed public media URLs + `chat.postMessage` (not Slack file upload, which cannot set per-message profile). GIF/link embeds (Tenor, etc.) are relayed as the original HTTPS URL so Slack can unfurl them. Caddy on `matrix.<domain>` must proxy `/_mautrix/publicmedia/*` to the slack appservice (port 29335) with **`handle`** (not `handle_path` — the bridge serves the full path).
+**Discord → Slack** (relay): **Text** uses per-message username and avatar (`chat.postMessage` + `public_media` for `icon_url`). **Images and other attachments** are downloaded from Matrix and uploaded to Slack with `files.uploadV2` (native file, not a link embed), so you can prune Matrix/`public_media` storage without breaking Slack history. Relay uploads show as the **relay bot**; the bridge sets `InitialComment` to the Discord sender name (and caption when present). `public_media` is still required for text-message avatars and encrypted downloads via `use_database`. GIF/link embeds in **text** messages may still append Tenor/page URLs for Slack unfurl. Caddy on `matrix.<domain>` must proxy `/_mautrix/publicmedia/*` to the slack appservice (port 29335) with **`handle`** (not `handle_path`).
 
 **Slack → Discord**: Matrix Slack ghosts carry avatars; Discord only shows them on webhook relay sends. In each plumbed portal room:
 
