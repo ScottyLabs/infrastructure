@@ -353,6 +353,8 @@ Requires `KEYCLOAK_CLIENT_ID` and `KEYCLOAK_CLIENT_SECRET` in the environment (s
 | **Discord → Slack** | Matrix `@discord_…` mention → Slack `<@U…>` via `mautrix-slack-bridge-identity-pings.patch` | `[Alice]` label (`mautrix-slack-relay-outbound.patch`) |
 | **Slack → Discord** | Matrix `@slack_…` mention → Discord `<@id>` + `allowed_mentions` | `[Alice]` label (`mautrix-discord-ping-prefix.patch`) |
 
+**Replies to relayed messages** (e.g. Slack reply to a Discord-mirrored post from the relay app): `mautrix-slack-bridge-identity-relay-mentions.patch` and `mautrix-discord-bridge-identity-replies.patch` resolve the parent sender via the bridge DB and identity map, so Discord gets `<@user>` instead of pinging the webhook/app (`RepliedUser`), and Slack→Matrix mentions of the relay bot become the human’s ghost.
+
 `@room` / `@everyone` / `@here` still become `[@room]` on the other side.
 
 ### Markdown (Discord ↔ Slack)
@@ -371,6 +373,8 @@ Discord **channel replies** (reply to a message, not a thread channel) and **new
 | Thread message / new thread | `m.thread` | Thread only (no channel broadcast) |
 
 After deploy, test: reply in the main channel should appear in the Slack thread and in the main channel; post inside a Discord thread should stay thread-only on Slack.
+
+**Thread creation noise on Slack:** Discord sends `MessageTypeThreadStarterMessage` (“(user) started a thread: …”) and the bridge used to synthesize “Created a thread: …” for empty thread roots. `mautrix-discord-skip-thread-creation-msgs.patch` drops all of these before Matrix (and disables Matrix “Thread created…” notices). Redeploy `mautrix-discord` after updating the patch.
 
 ### Profile pictures (Discord ↔ Slack)
 

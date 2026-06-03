@@ -1,7 +1,7 @@
 diff --git a/pkg/bridgeidentity/map.go b/pkg/bridgeidentity/map.go
 --- a/pkg/bridgeidentity/map.go
 +++ b/pkg/bridgeidentity/map.go
-@@ -0,0 +1,125 @@
+@@ -0,0 +1,169 @@
 +// Shared source for mautrix-slack and mautrix-discord patches (copied to pkg/bridgeidentity/map.go).
 +package bridgeidentity
 +
@@ -95,6 +95,50 @@ diff --git a/pkg/bridgeidentity/map.go b/pkg/bridgeidentity/map.go
 +	return m.SlackUserIDForDiscord(discordID) != ""
 +}
 +
++func (m *Map) HasSlack(slackUserID string) bool {
++	return m.DiscordIDForSlack(slackUserID) != ""
++}
++
++// IsDiscordBridgeBot is true for the mautrix-discord appservice bot (@discord:domain).
++func IsDiscordBridgeBot(mxid id.UserID) bool {
++	localpart, _, err := mxid.Parse()
++	return err == nil && localpart == "discord"
++}
++
++// IsSlackBridgeBot is true for the mautrix-slack appservice bot (@slack:domain).
++func IsSlackBridgeBot(mxid id.UserID) bool {
++	localpart, _, err := mxid.Parse()
++	return err == nil && localpart == "slack"
++}
++
++// DiscordIDForMXID returns a Discord user snowflake when mxid is a linked discord or slack ghost.
++func DiscordIDForMXID(mxid id.UserID) string {
++	if discordID := ParseDiscordGhostMXID(mxid); discordID != "" {
++		if Get().HasDiscord(discordID) {
++			return discordID
++		}
++		return ""
++	}
++	if slackUID := ParseSlackGhostUserID(mxid); slackUID != "" {
++		return Get().DiscordIDForSlack(slackUID)
++	}
++	return ""
++}
++
++// SlackUserIDForMXID returns a Slack user ID when mxid is a linked slack or discord ghost.
++func SlackUserIDForMXID(mxid id.UserID) string {
++	if slackUID := ParseSlackGhostUserID(mxid); slackUID != "" {
++		if Get().HasSlack(slackUID) {
++			return slackUID
++		}
++		return ""
++	}
++	if discordID := ParseDiscordGhostMXID(mxid); discordID != "" {
++		return Get().SlackUserIDForDiscord(discordID)
++	}
++	return ""
++}
++
 +// ParseDiscordGhostMXID extracts a Discord snowflake from a discord bridge puppet MXID.
 +func ParseDiscordGhostMXID(mxid id.UserID) string {
 +	match := discordGhostRegex.FindStringSubmatch(string(mxid))
@@ -127,29 +171,6 @@ diff --git a/pkg/bridgeidentity/map.go b/pkg/bridgeidentity/map.go
 +	}
 +	return ""
 +}
-diff --git a/pkg/msgconv/matrixfmt/blocks.go b/pkg/msgconv/matrixfmt/blocks.go
---- a/pkg/msgconv/matrixfmt/blocks.go
-+++ b/pkg/msgconv/matrixfmt/blocks.go
-@@ -33,6 +33,7 @@
- 	"maunium.net/go/mautrix/format"
- 	"maunium.net/go/mautrix/id"
- 
-+	"go.mau.fi/mautrix-slack/pkg/bridgeidentity"
- 	"go.mau.fi/mautrix-slack/pkg/connector/slackdb"
- 	"go.mau.fi/mautrix-slack/pkg/slackid"
- )
-@@ -101,6 +102,11 @@
- }
- 
- func (parser *HTMLParser) GetMentionedUserID(mxid id.UserID, ctx Context) string {
-+	if discordID := bridgeidentity.ParseDiscordGhostMXID(mxid); discordID != "" {
-+		if slackUserID := bridgeidentity.Get().SlackUserIDForDiscord(discordID); slackUserID != "" {
-+			return slackUserID
-+		}
-+	}
- 	if ctx.Mentions != nil && !slices.Contains(ctx.Mentions.UserIDs, mxid) {
- 		// If `m.mentions` is set and doesn't contain this user, don't convert the mention
- 		// TODO does slack have some way to do silent mentions?
 diff --git a/pkg/msgconv/from-matrix.go b/pkg/msgconv/from-matrix.go
 --- a/pkg/msgconv/from-matrix.go
 +++ b/pkg/msgconv/from-matrix.go
@@ -161,15 +182,34 @@ diff --git a/pkg/msgconv/from-matrix.go b/pkg/msgconv/from-matrix.go
  	"go.mau.fi/mautrix-slack/pkg/slackid"
  )
  
-@@ -88,6 +89,11 @@
+@@ -87,6 +88,9 @@
  		content.Body = strings.ReplaceAll(content.Body, "@room", "[@room]")
  	}
  	for _, userID := range content.Mentions.UserIDs {
-+		if discordID := bridgeidentity.ParseDiscordGhostMXID(userID); discordID != "" {
-+			if bridgeidentity.Get().SlackUserIDForDiscord(discordID) != "" {
-+				continue
-+			}
++		if bridgeidentity.SlackUserIDForMXID(userID) != "" || bridgeidentity.DiscordIDForMXID(userID) != "" {
++			continue
 +		}
  		name := mc.matrixUserDisplayName(ctx, portal, userID)
  		if name == "" {
  			continue
+diff --git a/pkg/msgconv/matrixfmt/blocks.go b/pkg/msgconv/matrixfmt/blocks.go
+--- a/pkg/msgconv/matrixfmt/blocks.go
++++ b/pkg/msgconv/matrixfmt/blocks.go
+@@ -33,6 +33,7 @@
+ 	"maunium.net/go/mautrix/format"
+ 	"maunium.net/go/mautrix/id"
+ 
++	"go.mau.fi/mautrix-slack/pkg/bridgeidentity"
+ 	"go.mau.fi/mautrix-slack/pkg/connector/slackdb"
+ 	"go.mau.fi/mautrix-slack/pkg/slackid"
+ )
+@@ -101,6 +102,9 @@
+ }
+ 
+ func (parser *HTMLParser) GetMentionedUserID(mxid id.UserID, ctx Context) string {
++	if slackUserID := bridgeidentity.SlackUserIDForMXID(mxid); slackUserID != "" {
++		return slackUserID
++	}
+ 	if ctx.Mentions != nil && !slices.Contains(ctx.Mentions.UserIDs, mxid) {
+ 		// If `m.mentions` is set and doesn't contain this user, don't convert the mention
+ 		// TODO does slack have some way to do silent mentions?
