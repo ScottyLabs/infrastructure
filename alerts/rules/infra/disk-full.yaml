@@ -6,13 +6,13 @@ groups:
     interval: 1m
     rules:
       - uid: infra-disk-full
-        title: Root filesystem >90% full
+        title: Root filesystem >75% full
         condition: A
         for: 5m
         noDataState: OK
         execErrState: Alerting
         annotations:
-          summary: "{{ $labels.instance }} root filesystem is {{ $values.A.Value | humanizePercentage }} full"
+          summary: "{{ $labels.instance }} root filesystem is {{ $values.A.Value | humanizePercentage }} full (threshold 75%)"
         labels:
           severity: critical
         data:
@@ -25,7 +25,7 @@ groups:
               datasource:
                 type: prometheus
                 uid: prometheus
-              expr: (1 - (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"})) > 0.9
+              expr: (1 - (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"})) > 0.75
               instant: true
               intervalMs: 60000
               refId: A
