@@ -137,13 +137,21 @@
         snoopy = "x86_64-linux";
         bus-sign-display = "x86_64-linux";
       };
+
+      nixosConfigurations = builtins.mapAttrs mkSystem hosts;
+
+      # prod-01 was renamed to deploy-01; keep an alias so comin on hosts that have not
+      # yet switched (networking.hostName still prod-01) can evaluate and deploy again.
+      nixosConfigurations' = nixosConfigurations // {
+        prod-01 = nixosConfigurations.deploy-01;
+      };
     in
     {
       formatter = nixpkgs.lib.genAttrs [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" ] (
         system: nixpkgs.legacyPackages.${system}.nixfmt-tree
       );
 
-      nixosConfigurations = builtins.mapAttrs mkSystem hosts;
+      nixosConfigurations = nixosConfigurations';
 
       # Host-to-project mapping for OpenBao AppRole policies
       packages.x86_64-linux.host-projects =
