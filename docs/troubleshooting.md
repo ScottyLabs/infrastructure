@@ -1,70 +1,9 @@
-# Troubleshooting
-
-## CMU-SECURE cannot reach infra-01 (Docker route steals 172.26.0.0/16)
-
-Forgejo Actions on infra-01 creates ephemeral `WORKFLOW-*` Docker bridge networks. Docker's default subnet allocator can assign `172.26.0.0/16`, which is the same range CMU uses for CMU-SECURE clients. Linux then installs a more-specific route:
-
-```text
-172.26.0.0/16 dev br-... src 172.26.0.1
-```
-
-Return traffic to `172.26.x.x` (SYN-ACK, ICMP, etc.) goes to a dead bridge instead of `ens192`, so services on `128.2.25.63` look unreachable from campus wireless even when inbound packets arrive. deploy-01 is unaffected unless it also has a `172.26.0.0/16` route.
-
-**Symptoms**
-
-- From CMU-SECURE: TCP/HTTPS to infra-01 hosts fails; traceroute may stop before the VM.
-- On infra-01: `ip route get 172.26.31.227` shows a `br-*` device, not `ens192`.
-- `ping 172.26.31.227` returns `From 172.26.0.1 Destination Host Unreachable`.
-- `ping 128.2.25.68` on the same campus subnet still works.
-
-**Immediate fix (on infra-01)**
-
-```bash
-ip route get 172.26.31.227
-docker network ls
-docker network inspect WORKFLOW-f75d842fe5fb8d524901549b15d4342f  # example; use the network that owns 172.26.0.0/16
-
-# Remove stale workflow networks (safe when no Actions job is running)
-docker network prune -f
-
-# If the route remains:
-ip route show 172.26.0.0/16
-sudo ip route del 172.26.0.0/16 dev br-<id>  # dev name from `ip route get`
-```
-
-Re-test from CMU-SECURE and with `ping -c 3 172.26.31.227` from infra-01 (expect failure until the route is gone).
-
-**Durable fix**
-
-`virtualisation.docker.daemon.settings.default-address-pools` in `services/forgejo-ci/runner.nix` pins new networks to `10.89.0.0/16`. Deploy via comin, restart Docker (`sudo systemctl restart docker`), prune old `WORKFLOW-*` networks, and confirm no `172.26.0.0/16` route remains.
-
-## Forgejo Actions cache hangs on "Restoring cache..."
-
-The infra-01 runner exposes the act cache proxy at `172.17.0.1:8088` (`cache.host` + `cache.proxy_port` in `services/forgejo-ci/runner.nix`). Workflow job containers run on ephemeral `WORKFLOW-*` bridge networks (now `10.89.0.0/16`), not `docker0`. The host firewall only trusted `docker0`, so `actions/cache` and `Swatinem/rust-cache` connect to the cache URL but TCP to the proxy port is dropped — the step sits on "Restoring cache..." until the job timeout (~4–5 minutes).
-
-On newer Forgejo runners, `cache.port` is only the internal server (often random on loopback); workflows must reach `cache.proxy_port`. If `proxy_port` is `0`, the proxy binds a random port and cache restore fails even when port 8088 is open in the firewall.
-
-This often shows up right after the Docker `default-address-pools` change; the cache config did not move, but job subnets did.
-
-**Verify on infra-01** (while no job is running, simulate a workflow bridge client):
-
-```bash
-docker run --rm --network bridge curlimages/curl -sS -o /dev/null -w '%{http_code}\n' --connect-timeout 3 http://172.17.0.1:8088/ || echo FAIL
-```
-
-Expect a quick HTTP response (often `404`); `FAIL` or hang means the firewall or cache service is still wrong.
-
-**Check cache service**
-
-```bash
-systemctl status gitea-runner-default
-ss -ltnp | grep 8088
-```
-
-**Durable fix**
-
-`infrastructure/lib/docker-firewall.nix` defines the workflow subnet allowlist; `services/forgejo-ci/runner.nix` applies it for `cache.proxy_port` (default 8088). Deploy via comin and re-run a workflow that uses `actions/cache` or `rust-cache`.
-
+---
+title: "Troubleshooting"
+project: "infrastructure"
+projectType: "starlight"
+repo: "https://codeberg.org/scottylabs/infrastructure"
+---
 ## comin not deploying after a force push
 
 If someone force pushes to the repository, comin's cached repo and state can get out of sync with the remote. Symptoms include comin fetching successfully but never triggering a build.
@@ -158,6 +97,18 @@ curl -fsSL -X POST \
 
 The setting persists across garage restarts. Recreating the bucket through terraform would clear it; in that case, re-run this command.
 
+For **`scottylabs-docs`**, also set a custom error document so missing pages return the Starlight 404 page instead of raw S3 XML:
+
+```bash
+curl -fsSL -X POST \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  --data '{"websiteAccess":{"enabled":true,"indexDocument":"index.html","errorDocument":"404.html"}}' \
+  "http://127.0.0.1:3903/v2/UpdateBucket?id=$BUCKET_ID"
+```
+
+Nested doc URLs like `/tartan-vote/contributing/` require **Caddy rewrites** on `docs.scottylabs.org` (see `hosts/infra-01/garage.nix`) because Garage's web endpoint does not always resolve directory paths to `index.html`. After changing that vhost, reload caddy on infra-01.
+
 ## `tofu-cloudflare` fails with Cloudflare 81054 (CNAME already exists)
 
 OpenTofu manages **A** records in `tofu/cloudflare/records.tf`. Cloudflare returns error `81054` when an **A** record is created for a hostname that already has a **CNAME** (or another conflicting record).
@@ -232,7 +183,7 @@ sudo yq '.encryption.pickle_key' /var/lib/mautrix-slack/config.yaml
 head -c 32 /dev/urandom | base64
 ```
 
-Add to `secrets/infra-01/double-puppet-env.age` (same file as `DOUBLE_PUPPET_SECRET`; see [`double-puppet-env.example`](../secrets/infra-01/double-puppet-env.example)):
+Add to `secrets/infra-01/double-puppet-env.age` (same file as `DOUBLE_PUPPET_SECRET`; see [`double-puppet-env.example`](https://codeberg.org/scottylabs/infrastructure/src/branch/main/secrets/infra-01/double-puppet-env.example)):
 
 ```bash
 ENCRYPTION_PICKLE_KEY=<paste key here>
@@ -306,7 +257,7 @@ Per-message Slack avatars require a **Slack app** relay (`login app`), not a use
 
 **1. Create the Slack app** (Slack workspace admin, one-time):
 
-- Manifest: [`infrastructure/services/matrix/slack-app-manifest.yaml`](../services/matrix/slack-app-manifest.yaml) (includes `chat:write.customize`).
+- Manifest: [`infrastructure/services/matrix/slack-app-manifest.yaml`](https://codeberg.org/scottylabs/infrastructure/src/branch/main/services/matrix/slack-app-manifest.yaml) (includes `chat:write.customize`).
 - Create app → install to workspace `scottylabs` → note **bot token** (`xoxb-`) and **app token** (`xapp-`, socket mode).
 - **Invite the app bot** to every bridged Slack channel (DevOps `C08K3Q77ZQF`, hub `C096TM8EMS8`, quest, cmu-courses, etc.).
 
@@ -319,7 +270,7 @@ list-logins
 
 Copy the new app login ID. Optionally `logout <old-user-login-id>` after cutover.
 
-**3. Store secrets** — edit `secrets/infra-01/double-puppet-env.age` (template: [`double-puppet-env.example`](../secrets/infra-01/double-puppet-env.example)):
+**3. Store secrets** — edit `secrets/infra-01/double-puppet-env.age` (template: [`double-puppet-env.example`](https://codeberg.org/scottylabs/infrastructure/src/branch/main/secrets/infra-01/double-puppet-env.example)):
 
 ```bash
 PUBLIC_MEDIA_SIGNING_KEY=<head -c 32 /dev/urandom | base64>
@@ -381,7 +332,7 @@ After deploy, test: reply in the main channel should appear in the Slack thread 
 
 ### Profile pictures (Discord ↔ Slack)
 
-**Discord → Slack** (relay): mautrix-slack posts with per-message username and avatar when relay uses a **Slack app** login, `public_media.enabled` is true, `public_media.use_database` is true (required for encrypted portal attachments), and `appservice.public_address` points at the Matrix client domain. Discord attaches avatars on `com.beeper.per_message_profile` (same as names); ScottyLabs patches mautrix-slack to use that for Slack `icon_url`. Uploaded Discord images are relayed via signed public media URLs + `chat.postMessage` (not Slack file upload, which cannot set per-message profile). GIF/link embeds (Tenor, etc.) are relayed as the original HTTPS URL so Slack can unfurl them. Caddy on `matrix.<domain>` must proxy `/_mautrix/publicmedia/*` to the slack appservice (port 29335) with **`handle`** (not `handle_path` — the bridge serves the full path).
+**Discord → Slack** (relay): mautrix-slack posts with per-message username and avatar when relay uses a **Slack app** login, `public_media.enabled` is true, and `appservice.public_address` points at the Matrix client domain. Discord attaches avatars on `com.beeper.per_message_profile` (same as names); ScottyLabs patches mautrix-slack to use that for Slack `icon_url`. GIF/link embeds (Tenor, etc.) are relayed as the original HTTPS URL so Slack can unfurl them — not as opaque “sent an image” text. Caddy on `matrix.<domain>` must proxy `/_mautrix/publicmedia/*` to the slack appservice (port 29335) with **`handle`** (not `handle_path` — the bridge serves the full path).
 
 **Slack → Discord**: Matrix Slack ghosts carry avatars; Discord only shows them on webhook relay sends. In each plumbed portal room:
 
@@ -397,7 +348,7 @@ After deploy, test: reply in the main channel should appear in the Slack thread 
 
 (`enable_webhook_avatars` and `bridge.public_address` must be set — see `mautrix-discord.nix`. Caddy must proxy `/mautrix-discord/*` to the discord appservice on port 29334 with **`handle`**, not `handle_path`.)
 
-Add stable keys to `secrets/infra-01/double-puppet-env.age` (see [`double-puppet-env.example`](../secrets/infra-01/double-puppet-env.example)), then re-encrypt and redeploy:
+Add stable keys to `secrets/infra-01/double-puppet-env.age` (see [`double-puppet-env.example`](https://codeberg.org/scottylabs/infrastructure/src/branch/main/secrets/infra-01/double-puppet-env.example)), then re-encrypt and redeploy:
 
 ```bash
 PUBLIC_MEDIA_SIGNING_KEY=<random base64>
