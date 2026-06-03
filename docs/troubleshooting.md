@@ -1,63 +1,5 @@
 # Troubleshooting
 
-## deploy-01 apps stuck on an old git commit (dalmatian, discord-verify, …)
-
-Deploy services are **not** updated when someone pushes to the app repo and restarts a systemd unit. They only change after a full NixOS switch on deploy-01 that includes a newer `flake.lock` pin.
-
-**Pipeline**
-
-1. Push to the app repo (Codeberg and/or GitHub, depending on the project).
-2. Repo webhook → `webhooks.scottylabs.org` → Forgejo workflow `update-flake.yml` on `ScottyLabs/infrastructure` (updates the matching flake input and commits `flake.lock`).
-3. comin on deploy-01 polls `infrastructure` `main` (~15s) and runs `nixos-rebuild switch` for `nixosConfigurations.<hostname>`.
-
-Restarting `dalmatian`, `discord-verify`, or `bao-agent` only reloads the **current** generation; it does not fetch new app commits.
-
-**Symptoms**
-
-- Health or build metadata shows an old commit (e.g. dalmatian `76af9c7`, discord-verify `2577fb1`) while `main` on Codeberg already has `chore: update dalmatian` / `chore: update discord-verify` commits.
-- `systemctl restart …` was run but the commit did not change.
-
-**Diagnose on deploy-01**
-
-```bash
-hostname                    # expect deploy-01 (see hostname mismatch below)
-comin status
-journalctl -u comin -n 80 --no-pager
-
-# Locked input revs in the tree comin deploys (compare to codeberg.org/ScottyLabs/infrastructure flake.lock)
-grep -A2 '"dalmatian":' /etc/nixos/flake.lock | head -6
-grep -A4 '"discord-verify":' /etc/nixos/flake.lock | head -8
-
-# Generation actually running (should match a recent infrastructure commit)
-readlink /nix/var/nix/profiles/system-profile
-```
-
-**Common causes**
-
-| Cause | What to do |
-|-------|------------|
-| comin not switching (failed build, activation rollback, stale state) | Fix errors in `journalctl -u comin`; see [comin not deploying after a force push](#comin-not-deploying-after-a-force-push). Ensure enough store space (`nix-store --query --gc --print-dead` / `nix-collect-garbage -d` if needed; `nix.gc` for comin sub-profiles is on `main` since 2026-05-31). |
-| `networking.hostName` still `prod-01` after the rename to `deploy-01` | comin looks up `nixosConfigurations.prod-01`, which no longer exists, so nothing deploys. `main` includes a `prod-01` → `deploy-01` alias; after one successful comin deploy (or manual switch below), hostname becomes `deploy-01`. |
-| `flake.lock` never updated | On Codeberg: Actions → **Update flake inputs** → run with input `dalmatian`, `discord-verify`, or `all`. Confirm a new `chore: update …` commit on `main`. Ensure the app repo has a push webhook to `https://webhooks.scottylabs.org/hooks/flake-update` (Codeberg). GitHub-only projects need a GitHub webhook or must trigger the workflow manually. |
-| Flake update workflow failed | Check the latest **Update flake inputs** run on infrastructure (transient Codeberg git fetch failures are retried in the workflow since 2026-05). |
-
-**Recovery (one-shot)**
-
-```bash
-cd /etc/nixos
-sudo nh os switch .#deploy-01
-```
-
-If `hostname` is still `prod-01`, use `.#prod-01` once (alias to the same configuration), then confirm `hostname` is `deploy-01` after switch.
-
-Verify services picked up new packages (paths under `/nix/store/…` change) and app-reported commits match `flake.lock`.
-
-## Root filesystem / disk usage alerts
-
-Grafana rule `infra-disk-full` lives in the [observability](https://codeberg.org/ScottyLabs/observability) repo (`alerts/rules/infra/disk-full.yaml`). It fires when Prometheus reports root (`mountpoint="/"`) **above the configured threshold for 5 minutes** (currently **75%** used — change the `0.75` in the expr and push `observability` `main` so `infrastructure` flake.lock updates).
-
-To grow a Campus Cloud disk (e.g. deploy-01 to **120 GB** to match infra-01), resize the VMDK in vSphere, then extend the partition and btrfs on the host. See [Expanding a VM disk](./setup/05-expanding-vm-disk.md).
-
 ## comin not deploying after a force push
 
 If someone force pushes to the repository, comin's cached repo and state can get out of sync with the remote. Symptoms include comin fetching successfully but never triggering a build.
@@ -263,7 +205,7 @@ When plumbing Slack into an existing mautrix-discord portal room, `@slack` must 
 Bridge admins can also pass `--ignore-permissions` to skip the pre-check:
 
 ```text
-!slack bridge <SLACK_APP_LOGIN_ID> T03EVH29W-C08K3Q77ZQF --ignore-permissions --overwrite
+!slack bridge <SLACK_APP_LOGIN_ID> T03EVH29W-C08K3Q77ZQF --ignore-permissions
 !slack set-relay <SLACK_APP_LOGIN_ID>
 ```
 
@@ -334,28 +276,9 @@ export TF_VAR_matrix_slack_relay_login_id="$SLACK_RELAY_LOGIN_ID"
 !discord set-relay --create mautrix
 ```
 
-### Ping messages (Discord ↔ Slack)
+### Discord → Slack: spotting ping messages
 
-Members with **both Slack and Discord linked in Keycloak** get real cross-platform @mentions when `bridge-identity-map.json` is deployed (`/etc/mautrix-bridge/identity-map.json`). Everyone else still gets **`[display name]`** labels so random Matrix ghosts do not ping wrong accounts.
-
-Regenerate the map after IdP link changes (requires `KEYCLOAK_CLIENT_ID` / `KEYCLOAK_CLIENT_SECRET`):
-
-```bash
-cd governance
-cargo build -p governance
-./target/debug/governance --data-dir data generate-bridge-identity-map
-```
-
-Requires `KEYCLOAK_CLIENT_ID` and `KEYCLOAK_CLIENT_SECRET` in the environment (same credentials used for OpenTofu `resolve-identity`).
-
-| Direction | Linked in Keycloak | Not linked |
-|-----------|-------------------|------------|
-| **Discord → Slack** | Matrix `@discord_…` mention → Slack `<@U…>` via `mautrix-slack-bridge-identity-pings.patch` | `[Alice]` label (`mautrix-slack-relay-outbound.patch`) |
-| **Slack → Discord** | Matrix `@slack_…` mention → Discord `<@id>` + `allowed_mentions` | `[Alice]` label (`mautrix-discord-ping-prefix.patch`) |
-
-**Replies to relayed messages** (e.g. Slack reply to a Discord-mirrored post from the relay app): `mautrix-slack-bridge-identity-relay-mentions.patch` and `mautrix-discord-bridge-identity-replies.patch` resolve the parent sender via the bridge DB and identity map, so Discord gets `<@user>` instead of pinging the webhook/app (`RepliedUser`), and Slack→Matrix mentions of the relay bot become the human’s ghost.
-
-`@room` / `@everyone` / `@here` still become `[@room]` on the other side.
+Relay `message_formats` in `mautrix-slack.nix` can prefix messages that have Matrix `m.mentions` with `[ping]`, e.g. `[ping] hey @you`. With the ScottyLabs relay patch, **text messages skip `message_formats`** (`PerMessageProfileRelay`) so Discord markdown is preserved as Slack rich text; pings still appear via Matrix `m.mentions` / HTML user links. Sender names and avatars use `displayname_format` plus Slack `icon_url` (not the message body).
 
 ### Markdown (Discord ↔ Slack)
 
@@ -363,34 +286,15 @@ Requires `KEYCLOAK_CLIENT_ID` and `KEYCLOAK_CLIENT_SECRET` in the environment (s
 
 **Slack → Discord**: Slack mrkdwn becomes Matrix HTML in mautrix-slack; mautrix-discord converts HTML back to Discord markdown on webhook relay sends. Rich-text block messages (not just plain mrkdwn) generally format better.
 
-### Discord replies vs threads on Slack
-
-Discord **channel replies** (reply to a message, not a thread channel) and **new threads** both show up in Slack as thread replies. The mautrix-slack patch tells them apart via Matrix relations:
-
-| Discord action | Matrix relation | Slack behavior |
-|----------------|-----------------|----------------|
-| Reply to a message | `m.in_reply_to` only | Thread under the parent **and** “also send to channel” (`reply_broadcast`) |
-| Thread message / new thread | `m.thread` | Thread only (no channel broadcast) |
-
-After deploy, test: reply in the main channel should appear in the Slack thread and in the main channel; post inside a Discord thread should stay thread-only on Slack.
-
-**Thread creation noise on Slack:** Discord sends `MessageTypeThreadStarterMessage` (“(user) started a thread: …”) and the bridge used to synthesize “Created a thread: …” for empty thread roots. `mautrix-discord-skip-thread-creation-msgs.patch` drops all of these before Matrix (and disables Matrix “Thread created…” notices). Redeploy `mautrix-discord` after updating the patch.
-
 ### Profile pictures (Discord ↔ Slack)
 
-**Discord → Slack** (relay): **Text** uses per-message username and avatar (`chat.postMessage` + `public_media` for `icon_url`). **Images and other attachments** are downloaded from Matrix and uploaded to Slack with `files.uploadV2` (native file, not a link embed), so you can prune Matrix/`public_media` storage without breaking Slack history. Relay uploads show as the **relay bot**; the bridge sets `InitialComment` to the Discord sender name (and caption when present). `public_media` is still required for text-message avatars and encrypted downloads via `use_database`. GIF/link embeds in **text** messages may still append Tenor/page URLs for Slack unfurl. Caddy on `matrix.<domain>` must proxy `/_mautrix/publicmedia/*` to the slack appservice (port 29335) with **`handle`** (not `handle_path`).
+**Discord → Slack** (relay): mautrix-slack posts with per-message username and avatar when relay uses a **Slack app** login, `public_media.enabled` is true, and `appservice.public_address` points at the Matrix client domain. Discord attaches avatars on `com.beeper.per_message_profile` (same as names); ScottyLabs patches mautrix-slack to use that for Slack `icon_url`. GIF/link embeds (Tenor, etc.) are relayed as the original HTTPS URL so Slack can unfurl them — not as opaque “sent an image” text. Caddy on `matrix.<domain>` must proxy `/_mautrix/publicmedia/*` to the slack appservice (port 29335) with **`handle`** (not `handle_path` — the bridge serves the full path).
 
 **Slack → Discord**: Matrix Slack ghosts carry avatars; Discord only shows them on webhook relay sends. In each plumbed portal room:
 
 ```text
 !discord set-relay --create mautrix
 ```
-
-**Matrix → Discord (Slack messages stuck in the portal room):** mautrix-discord only forwards Matrix messages from users without a Discord bridge login when the portal has a **relay webhook** (`RelayWebhookID`). Without it, `handleMatrixMessage` drops the event as “user not logged in”. Symptom: Slack → Matrix and Discord → Slack work, but nothing reaches Discord.
-
-1. Confirm the portal has a relay webhook: in the portal room, `!discord set-relay --create mautrix` should reply with “Saved webhook …”. If it says “requires you to be logged in”, no bridge user has an active Discord session — run `login token` or `login qr` in `@discord` as any account that can manage webhooks in that channel, then re-run set-relay.
-2. OpenTofu / `synapse_mautrix_slack_link` sends the same command automatically; it needs at least one logged-in mautrix-discord user on the server (ScottyLabs patch `mautrix-discord-set-relay-automation.patch` lets `--create` use any logged-in bridge user, not only the command sender).
-3. Check logs: `journalctl -u mautrix-discord -n 100 --no-pager | rg -i 'not logged in|Ignoring|relay'`.
 
 (`enable_webhook_avatars` and `bridge.public_address` must be set — see `mautrix-discord.nix`. Caddy must proxy `/mautrix-discord/*` to the discord appservice on port 29334 with **`handle`**, not `handle_path`.)
 
