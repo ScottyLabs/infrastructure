@@ -7,10 +7,8 @@
 
 let
   cfg = config.scottylabs.forgejoCI.runner;
-  dockerFw = import ../../lib/docker-firewall.nix { inherit lib; };
   defaultJobImage = "scottylabs/act-runner:24.04";
   runnerLabels = [ "docker:docker://${cfg.jobImage}" ];
-  cacheProxyPort = cfg.cachePort;
 
   actRunnerContext = pkgs.writeTextDir "Dockerfile" ''
     FROM ghcr.io/catthehacker/ubuntu:act-24.04
@@ -87,29 +85,34 @@ in
           cache = {
             enabled = true;
             dir = "/var/lib/gitea-runner/cache";
-            # Internal cache server; 0 = random port on loopback (proxy connects locally).
-            port = 0;
-            # Fixed port for the cache proxy workflows connect to (must match firewall rules).
-            proxy_port = cacheProxyPort;
-            # 172.17.0.1 only works on docker0; WORKFLOW-* nets on 10.89.x need host-gateway.
-            actions_cache_url_override = "http://host.docker.internal:${toString cacheProxyPort}";
+            # docker0 gateway; jobs run on docker0 (container.network = "bridge").
+            host = "172.17.0.1";
+            port = cfg.cachePort;
           };
           container = {
-            # Resolve host.docker.internal to the bridge gateway for this job's network.
-            options = "--add-host=host.docker.internal:host-gateway";
+            network = "bridge";
           };
         };
       };
     };
 
-    # Forgejo act-runner creates per-job WORKFLOW-* bridge networks from Docker's
-    # default pool (172.17+). That overlaps CMU-SECURE client space (172.26.0.0/16)
-    # and steals host routes, breaking return traffic to wireless clients.
-    virtualisation.docker = dockerFw.mkDockerDaemonConfig { };
-
-    networking.firewall.extraCommands = dockerFw.mkAllowTcpFromWorkflowClients {
-      ports = [ cacheProxyPort ];
+    # Pin docker0 to a known subnet so it can't drift onto default-address-pools,
+    # and push auto-created per-job (WORKFLOW-*) networks to 10.89 so they don't
+    # overlap CMU-SECURE client space (172.26.0.0/16) and steal host routes.
+    virtualisation.docker = {
+      enable = true;
+      daemon.settings = {
+        bip = "172.17.0.1/16";
+        default-address-pools = [
+          {
+            base = "10.89.0.0/16";
+            size = 24;
+          }
+        ];
+      };
     };
+
+    networking.firewall.trustedInterfaces = [ "docker0" ];
 
     systemd.services.forgejo-act-runner-image = {
       description = "Build act runner image (/var/run workaround for Docker 29.5.1)";
