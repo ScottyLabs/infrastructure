@@ -14,7 +14,7 @@
   };
 
   services.dalmatian = {
-    enable = true;
+    enable = false;
     environmentFile = "/run/secrets/dalmatian.env";
   };
 
