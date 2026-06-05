@@ -1,8 +1,6 @@
-{ discord-verify, ... }:
+{ ... }:
 
 {
-  imports = [ discord-verify.nixosModules.default ];
-
   scottylabs.bao-agent = {
     enable = true;
     secrets.discord-verify = {
@@ -11,10 +9,11 @@
     };
   };
 
-  services.discord-verify = {
-    enable = false;
-    environmentFile = "/run/secrets/discord-verify.env";
+  users.users.discord-verify = {
+    isSystemUser = true;
+    group = "discord-verify";
   };
+  users.groups.discord-verify = { };
 
   scottylabs.valkey.servers = [ "discord-verify" "kennel" ];
 }
