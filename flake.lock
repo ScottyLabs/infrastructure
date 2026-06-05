@@ -429,11 +429,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1780634177,
-        "narHash": "sha256-1hPKR2JIVVgSw4VGqB+VFsCPO8IVPANQPToKIDVsIKA=",
+        "lastModified": 1780636787,
+        "narHash": "sha256-RJN0CoenvIVL2EqY787H8LlLIhEeNodKVMKLQgTDaXQ=",
         "ref": "refs/heads/main",
-        "rev": "c6f95a1fc86cf758c0439b87be615b5f76d3d31e",
-        "revCount": 77,
+        "rev": "2a97d4b974edd8314f4217a8c3ce3a5cc750b99d",
+        "revCount": 78,
         "type": "git",
         "url": "https://codeberg.org/ScottyLabs/discord-verify"
       },
