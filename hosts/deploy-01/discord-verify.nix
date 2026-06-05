@@ -12,18 +12,9 @@
   };
 
   services.discord-verify = {
-    enable = true;
+    enable = false;
     environmentFile = "/run/secrets/discord-verify.env";
   };
-
-  systemd.services.discord-verify = {
-    after = [ "bao-agent.service" ];
-    wants = [ "bao-agent.service" ];
-  };
-
-  services.caddy.virtualHosts."verify.scottylabs.org".extraConfig = ''
-    reverse_proxy localhost:3000
-  '';
 
   scottylabs.valkey.servers = [ "discord-verify" "kennel" ];
 }
