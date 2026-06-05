@@ -55,6 +55,11 @@
       socketDir = "/run/postgresql";
     };
 
+    resources.valkey = {
+      enable = true;
+      socketPath = "/run/redis-kennel/redis.sock";
+    };
+
     secrets = {
       enable = true;
       vaultEndpoint = "vault://secrets2.scottylabs.org/secret?auth=approle";
