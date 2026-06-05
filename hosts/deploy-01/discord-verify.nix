@@ -25,5 +25,5 @@
     reverse_proxy localhost:3000
   '';
 
-  scottylabs.valkey.servers = [ "discord-verify" ];
+  scottylabs.valkey.servers = [ "discord-verify" "kennel" ];
 }
