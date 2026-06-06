@@ -264,6 +264,21 @@
         "type": "github"
       }
     },
+    "crane": {
+      "locked": {
+        "lastModified": 1780532242,
+        "narHash": "sha256-D+BsdpxmtUwtqGoY0IXPhHgTlmqgcZKCEo1oMyn7ep0=",
+        "owner": "ipetkov",
+        "repo": "crane",
+        "rev": "59a82a1222dd3b2080b5cc52a1a2e8d5f1b77f37",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ipetkov",
+        "repo": "crane",
+        "type": "github"
+      }
+    },
     "crate2nix": {
       "flake": false,
       "locked": {
@@ -1053,17 +1068,18 @@
     },
     "kennel": {
       "inputs": {
+        "crane": "crane",
         "devenv": "devenv_2",
         "nixpkgs": [
           "nixpkgs"
         ]
       },
       "locked": {
-        "lastModified": 1780632749,
-        "narHash": "sha256-Kbf0EKWQNtDOdGbvLwkneV5Qwktb01LyKaxstwER3PQ=",
+        "lastModified": 1780710112,
+        "narHash": "sha256-gL+NR7aWYJlzsT6xy3+FxWZn3FDa7Y4mtZmgpy9N4VI=",
         "ref": "refs/heads/main",
-        "rev": "85e413f4d32b09aad11aef3d8f274eab2869d864",
-        "revCount": 142,
+        "rev": "3a567003f9d5b4dd4f4685a9b19785bb59ea3e46",
+        "revCount": 144,
         "type": "git",
         "url": "https://codeberg.org/ScottyLabs/kennel"
       },
