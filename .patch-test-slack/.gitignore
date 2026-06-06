@@ -1,7 +1,0 @@
-/mautrix-slack
-logs/
-*.db*
-*.yaml
-!example-config.yaml
-!.pre-commit-config.yaml
-/start
