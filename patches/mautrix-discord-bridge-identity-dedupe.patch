@@ -1,7 +1,7 @@
 diff --git a/pkg/bridgeidentity/map.go b/pkg/bridgeidentity/map.go
 --- a/pkg/bridgeidentity/map.go	2026-06-05 21:56:25
 +++ b/pkg/bridgeidentity/map.go	2026-06-05 21:56:00
-@@ -95,6 +95,39 @@
+@@ -115,6 +115,39 @@
  	return m.DiscordIDForSlack(slackUserID) != ""
  }
  
