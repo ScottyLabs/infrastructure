@@ -32,6 +32,7 @@ in
   "secrets/infra-01/bao-role-id.age".publicKeys = admins ++ [ infra-01 ];
   "secrets/infra-01/bao-secret-id.age".publicKeys = admins ++ [ infra-01 ];
   "secrets/infra-01/cli-proxy-api.age".publicKeys = admins ++ [ infra-01 ];
+  "secrets/infra-01/bridge-identity-sync.age".publicKeys = admins ++ [ infra-01 ];
 
   # deploy-01
   "secrets/deploy-01/bao-role-id.age".publicKeys = admins ++ [ deploy-01 ];
