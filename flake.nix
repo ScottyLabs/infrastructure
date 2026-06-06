@@ -72,6 +72,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     observability.url = "git+https://codeberg.org/ScottyLabs/observability";
+
+    governance = {
+      url = "git+https://codeberg.org/ScottyLabs/governance";
+      flake = false;
+    };
   };
 
   outputs =
@@ -93,6 +98,7 @@
       terrier,
       kennel,
       observability,
+      governance,
       ...
     }:
     let
@@ -118,6 +124,7 @@
               terrier
               kennel
               observability
+              governance
               ;
           };
           modules = [

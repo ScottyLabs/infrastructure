@@ -25,6 +25,11 @@
     mode = "0400";
   };
 
+  age.secrets.bridge-identity-sync = {
+    file = ../../secrets/infra-01/bridge-identity-sync.age;
+    mode = "0400";
+  };
+
   scottylabs.matrix = {
     enable = true;
     domain = "doggylabs.org";
@@ -42,6 +47,11 @@
         "@reconciler:doggylabs.org"
         "@thesuperrl:matrix.org"
       ];
+    };
+
+    bridgeIdentitySync = {
+      enable = true;
+      environmentFile = config.age.secrets.bridge-identity-sync.path;
     };
 
     bridges.slack = {

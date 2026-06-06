@@ -17,6 +17,7 @@ let
       ../../patches/mautrix-slack-bridge-identity-relay-mentions.patch
       ../../patches/mautrix-slack-bridge-identity-dedupe.patch
       ../../patches/mautrix-slack-skip-thread-creation-relay.patch
+      ../../patches/mautrix-bridge-identity-reload.patch
     ];
   });
   bridgePermissions =
@@ -34,7 +35,7 @@ let
   # message_formats use .Sender.*; displayname_format uses the same fields without that prefix.
   relayDisplayName = "{{ or .PerMessageProfile.Displayname .Displayname }}";
   # Relay templates also receive .Content (see mautrix-go bridgeconfig formatData).
-  # Unlinked mentions become [Name] labels; Keycloak-linked users get real Slack pings (bridge-identity-map.json).
+  # Unlinked mentions become [Name] labels; Keycloak-linked users get real cross-platform pings (synced from Keycloak).
   relayMentionPrefix = "";
 in
 {

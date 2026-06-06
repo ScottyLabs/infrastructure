@@ -943,6 +943,22 @@
         "type": "github"
       }
     },
+    "governance": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1780548964,
+        "narHash": "sha256-75yENgErqzZlp1vV2EACcmNMuJHhGeWOSjN1mNFsIuo=",
+        "ref": "refs/heads/main",
+        "rev": "cb9462d2326078bdaed298d2db946319c4e0d458",
+        "revCount": 107,
+        "type": "git",
+        "url": "https://codeberg.org/ScottyLabs/governance"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://codeberg.org/ScottyLabs/governance"
+      }
+    },
     "groupme-mirror": {
       "inputs": {
         "flake-utils": "flake-utils",
@@ -1576,6 +1592,7 @@
         "dalmatian": "dalmatian",
         "discord-verify": "discord-verify",
         "disko": "disko",
+        "governance": "governance",
         "groupme-mirror": "groupme-mirror",
         "headplane": "headplane",
         "home-manager": "home-manager_2",
