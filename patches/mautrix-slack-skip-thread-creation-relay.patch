@@ -1,0 +1,44 @@
+diff --git a/pkg/connector/handlematrix.go b/pkg/connector/handlematrix.go
+--- a/pkg/connector/handlematrix.go
++++ b/pkg/connector/handlematrix.go
+@@ -26,6 +26,7 @@
+ 	"github.com/slack-go/slack"
+ 	"maunium.net/go/mautrix/bridgev2"
+ 	"maunium.net/go/mautrix/bridgev2/database"
+ 	"maunium.net/go/mautrix/bridgev2/networkid"
++	"maunium.net/go/mautrix/event"
+ 
+ 	"go.mau.fi/mautrix-slack/pkg/connector/slackdb"
+ 	"go.mau.fi/mautrix-slack/pkg/emoji"
+@@ -44,6 +45,22 @@
+ 	_ bridgev2.RoomTopicHandlingNetworkAPI   = (*SlackClient)(nil)
+ )
+ 
++func shouldSkipThreadCreationRelay(msg *bridgev2.MatrixMessage) bool {
++	if msg.OrigSender == nil || msg.Content == nil {
++		return false
++	}
++	body := strings.TrimSpace(msg.Content.Body)
++	if strings.HasPrefix(body, "Created a thread:") {
++		return true
++	}
++	if msg.Content.MsgType == event.MsgNotice && strings.HasPrefix(body, "Thread created.") {
++		return true
++	}
++	return false
++}
++
+ func (s *SlackClient) HandleMatrixMessage(ctx context.Context, msg *bridgev2.MatrixMessage) (*bridgev2.MatrixMessageResponse, error) {
+ 	if s.Client == nil {
+ 		return nil, bridgev2.ErrNotLoggedIn
+@@ -52,6 +69,10 @@
+ 	if channelID == "" {
+ 		return nil, errors.New("invalid channel ID")
+ 	}
++	if shouldSkipThreadCreationRelay(msg) {
++		zerolog.Ctx(ctx).Debug().Str("body", msg.Content.Body).Msg("Skipping thread creation notice relay to Slack")
++		return &bridgev2.MatrixMessageResponse{}, nil
++	}
+ 	conv, err := s.Main.MsgConv.ToSlack(ctx, s.Client, msg.Portal, msg.Content, msg.Event, msg.ThreadRoot, nil, msg.OrigSender, s.IsRealUser)
+ 	if err != nil {
+ 		return nil, err

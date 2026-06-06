@@ -15,6 +15,7 @@ let
       ../../patches/mautrix-slack-preserve-topic.patch
       ../../patches/mautrix-slack-bridge-identity-pings.patch
       ../../patches/mautrix-slack-bridge-identity-relay-mentions.patch
+      ../../patches/mautrix-slack-skip-thread-creation-relay.patch
     ];
   });
   bridgePermissions =
