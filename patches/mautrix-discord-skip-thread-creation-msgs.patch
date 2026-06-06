@@ -8,8 +8,8 @@ diff --git a/portal.go b/portal.go
 -	case discordgo.MessageTypeChannelNameChange, discordgo.MessageTypeChannelIconChange, discordgo.MessageTypeChannelPinnedMessage:
 -		// These are handled via channel updates
 +	case discordgo.MessageTypeChannelNameChange, discordgo.MessageTypeChannelIconChange, discordgo.MessageTypeChannelPinnedMessage,
-+		discordgo.MessageTypeThreadStarterMessage:
-+		// Channel updates and "started a thread" system messages must not reach Matrix/Slack.
++		discordgo.MessageTypeThreadCreated, discordgo.MessageTypeThreadStarterMessage:
++		// Channel updates and thread creation system messages must not reach Matrix/Slack.
  		return
  	}
  
@@ -34,8 +34,8 @@ diff --git a/portal_convert.go b/portal_convert.go
  			MsgType: event.MsgEmote,
  			Body:    "joined the server",
  		}}
-+	} else if msg.Type == discordgo.MessageTypeThreadStarterMessage {
-+		// Discord's native "X started a thread: …" must not mirror to Slack as a user message.
++	} else if msg.Type == discordgo.MessageTypeThreadCreated || msg.Type == discordgo.MessageTypeThreadStarterMessage {
++		// Discord thread creation system messages (name / starter) must not mirror to Slack.
 +		return nil
  	}
  	var htmlParts []string
