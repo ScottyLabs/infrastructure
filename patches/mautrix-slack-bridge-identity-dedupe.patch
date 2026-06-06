@@ -1,10 +1,11 @@
 diff --git a/pkg/bridgeidentity/map.go b/pkg/bridgeidentity/map.go
---- a/pkg/bridgeidentity/map.go	2026-06-05 21:56:22
-+++ b/pkg/bridgeidentity/map.go	2026-06-05 21:56:00
-@@ -95,6 +95,39 @@
+--- a/pkg/bridgeidentity/map.go	2026-06-05 22:16:33
++++ b/pkg/bridgeidentity/map.go	2026-06-05 22:16:33
+@@ -95,6 +95,40 @@
  	return m.DiscordIDForSlack(slackUserID) != ""
  }
  
++
 +// LinkedIdentityKey returns a stable dedup key for the same person across Discord/Slack puppets.
 +func LinkedIdentityKey(mxid id.UserID) string {
 +	if discordID := ParseDiscordGhostMXID(mxid); discordID != "" {
@@ -43,9 +44,9 @@ diff --git a/pkg/bridgeidentity/map.go b/pkg/bridgeidentity/map.go
  	localpart, _, err := mxid.Parse()
 
 diff --git a/pkg/msgconv/identity_relay_mentions.go b/pkg/msgconv/identity_relay_mentions.go
---- a/pkg/msgconv/identity_relay_mentions.go	2026-06-05 21:56:22
-+++ b/pkg/msgconv/identity_relay_mentions.go	2026-06-05 21:56:00
-@@ -5,15 +5,40 @@
+--- a/pkg/msgconv/identity_relay_mentions.go	2026-06-05 22:16:33
++++ b/pkg/msgconv/identity_relay_mentions.go	2026-06-05 22:16:33
+@@ -5,12 +5,33 @@
  	"context"
  
  	"maunium.net/go/mautrix/bridgev2"
@@ -56,6 +57,7 @@ diff --git a/pkg/msgconv/identity_relay_mentions.go b/pkg/msgconv/identity_relay
  	"go.mau.fi/mautrix-slack/pkg/slackid"
  )
  
++
 +func (mc *MessageConverter) matrixReplyToUser(ctx context.Context, content *event.MessageEventContent) id.UserID {
 +	if content == nil {
 +		return ""
@@ -78,18 +80,10 @@ diff --git a/pkg/msgconv/identity_relay_mentions.go b/pkg/msgconv/identity_relay
  func (mc *MessageConverter) ctxWithSlackReplyParent(ctx context.Context, portal *bridgev2.Portal, msg *slack.Msg) context.Context {
  	parentTS := msg.ThreadTimestamp
  	if parentTS == "" || parentTS == msg.Timestamp {
-+		if msg.ReplyTo != nil && msg.ReplyTo.TS != "" && msg.ReplyTo.TS != msg.Timestamp {
-+			parentTS = msg.ReplyTo.TS
-+		}
-+	}
-+	if parentTS == "" || parentTS == msg.Timestamp {
- 		return ctx
- 	}
- 	return context.WithValue(ctx, contextKeySlackParentTS, parentTS)
 
 diff --git a/pkg/msgconv/from-matrix.go b/pkg/msgconv/from-matrix.go
---- a/pkg/msgconv/from-matrix.go	2026-06-05 21:56:22
-+++ b/pkg/msgconv/from-matrix.go	2026-06-05 21:56:13
+--- a/pkg/msgconv/from-matrix.go	2026-06-05 22:16:33
++++ b/pkg/msgconv/from-matrix.go	2026-06-05 22:16:33
 @@ -93,9 +93,7 @@
  	}
  	var replyToUser id.UserID
@@ -133,8 +127,8 @@ diff --git a/pkg/msgconv/from-matrix.go b/pkg/msgconv/from-matrix.go
  			}
 
 diff --git a/pkg/msgconv/matrixfmt/blocks.go b/pkg/msgconv/matrixfmt/blocks.go
---- a/pkg/msgconv/matrixfmt/blocks.go	2026-06-05 21:56:22
-+++ b/pkg/msgconv/matrixfmt/blocks.go	2026-06-05 21:56:09
+--- a/pkg/msgconv/matrixfmt/blocks.go	2026-06-05 22:16:33
++++ b/pkg/msgconv/matrixfmt/blocks.go	2026-06-05 22:16:45
 @@ -46,9 +46,25 @@
  	Style    slack.RichTextSectionTextStyle
  	Link     string
@@ -188,15 +182,6 @@ diff --git a/pkg/msgconv/matrixfmt/blocks.go b/pkg/msgconv/matrixfmt/blocks.go
  	}
  	user, err := parser.br.GetExistingUserByMXID(ctx.Ctx, mxid)
  	if err != nil {
-@@ -123,7 +147,7 @@
- 		for _, userLoginID := range user.GetUserLoginIDs() {
- 			userTeamID, userID := slackid.ParseUserLoginID(userLoginID)
- 			if userTeamID == portalTeamID {
--				return userID
-+				return ctx.trackSlackMention(userID)
- 			}
- 		}
- 	}
 @@ -456,25 +480,27 @@
  	return slack.NewRichTextBlock("", elems...)
  }
