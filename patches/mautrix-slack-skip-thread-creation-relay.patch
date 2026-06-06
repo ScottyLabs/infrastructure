@@ -1,8 +1,7 @@
 diff --git a/pkg/connector/handlematrix.go b/pkg/connector/handlematrix.go
 --- a/pkg/connector/handlematrix.go
 +++ b/pkg/connector/handlematrix.go
-@@ -26,6 +26,7 @@
- 	"github.com/slack-go/slack"
+@@ -27,6 +27,7 @@
  	"maunium.net/go/mautrix/bridgev2"
  	"maunium.net/go/mautrix/bridgev2/database"
  	"maunium.net/go/mautrix/bridgev2/networkid"
@@ -10,10 +9,12 @@ diff --git a/pkg/connector/handlematrix.go b/pkg/connector/handlematrix.go
  
  	"go.mau.fi/mautrix-slack/pkg/connector/slackdb"
  	"go.mau.fi/mautrix-slack/pkg/emoji"
-@@ -44,6 +45,22 @@
+@@ -43,6 +44,21 @@
+ 	_ bridgev2.RoomNameHandlingNetworkAPI    = (*SlackClient)(nil)
  	_ bridgev2.RoomTopicHandlingNetworkAPI   = (*SlackClient)(nil)
  )
- 
++
++
 +func shouldSkipThreadCreationRelay(msg *bridgev2.MatrixMessage) bool {
 +	if msg.OrigSender == nil || msg.Content == nil {
 +		return false
@@ -27,11 +28,10 @@ diff --git a/pkg/connector/handlematrix.go b/pkg/connector/handlematrix.go
 +	}
 +	return false
 +}
-+
+ 
  func (s *SlackClient) HandleMatrixMessage(ctx context.Context, msg *bridgev2.MatrixMessage) (*bridgev2.MatrixMessageResponse, error) {
  	if s.Client == nil {
- 		return nil, bridgev2.ErrNotLoggedIn
-@@ -52,6 +69,10 @@
+@@ -52,6 +68,10 @@
  	if channelID == "" {
  		return nil, errors.New("invalid channel ID")
  	}

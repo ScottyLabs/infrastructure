@@ -19,6 +19,7 @@ let
       ../../patches/mautrix-discord-skip-thread-creation-msgs.patch
       ../../patches/mautrix-discord-bridge-identity-pings.patch
       ../../patches/mautrix-discord-bridge-identity-replies.patch
+      ../../patches/mautrix-discord-bridge-identity-dedupe.patch
     ];
   });
   bridgePermissions =

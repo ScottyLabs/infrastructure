@@ -18,6 +18,10 @@ func (portal *Portal) applyIdentityReplyMentions(
 		return
 	}
 
+	if content.Mentions != nil {
+		content.Mentions.UserIDs = bridgeidentity.DedupeLinkedMentions(content.Mentions.UserIDs)
+	}
+
 	if replyToUser != "" {
 		if discordID := bridgeidentity.DiscordIDForMXID(replyToUser); discordID != "" {
 			allowed.Users = appendIfNotContains(allowed.Users, discordID)

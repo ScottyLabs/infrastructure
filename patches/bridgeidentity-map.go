@@ -95,6 +95,39 @@ func (m *Map) HasSlack(slackUserID string) bool {
 	return m.DiscordIDForSlack(slackUserID) != ""
 }
 
+// LinkedIdentityKey returns a stable dedup key for the same person across Discord/Slack puppets.
+func LinkedIdentityKey(mxid id.UserID) string {
+	if discordID := ParseDiscordGhostMXID(mxid); discordID != "" {
+		if Get().HasDiscord(discordID) {
+			return "link:" + discordID
+		}
+	}
+	if slackUID := ParseSlackGhostUserID(mxid); slackUID != "" {
+		if discordID := Get().DiscordIDForSlack(slackUID); discordID != "" {
+			return "link:" + discordID
+		}
+	}
+	return string(mxid)
+}
+
+// DedupeLinkedMentions removes duplicate m.mentions entries for the same linked identity.
+func DedupeLinkedMentions(userIDs []id.UserID) []id.UserID {
+	if len(userIDs) < 2 {
+		return userIDs
+	}
+	seen := make(map[string]struct{}, len(userIDs))
+	out := make([]id.UserID, 0, len(userIDs))
+	for _, uid := range userIDs {
+		key := LinkedIdentityKey(uid)
+		if _, ok := seen[key]; ok {
+			continue
+		}
+		seen[key] = struct{}{}
+		out = append(out, uid)
+	}
+	return out
+}
+
 // IsDiscordBridgeBot is true for the mautrix-discord appservice bot (@discord:domain).
 func IsDiscordBridgeBot(mxid id.UserID) bool {
 	localpart, _, err := mxid.Parse()
