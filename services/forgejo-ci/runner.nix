@@ -7,22 +7,8 @@
 
 let
   cfg = config.scottylabs.forgejoCI.runner;
-  defaultJobImage = "scottylabs/act-runner:24.04";
+  defaultJobImage = "ghcr.io/catthehacker/ubuntu:act-24.04";
   runnerLabels = [ "docker:docker://${cfg.jobImage}" ];
-
-  actRunnerContext = pkgs.writeTextDir "Dockerfile" ''
-    FROM ghcr.io/catthehacker/ubuntu:act-24.04
-    USER root
-    RUN rm -f /var/run && mkdir -p /var/run
-  '';
-
-  buildActRunnerImage = pkgs.writeShellScript "forgejo-act-runner-image" ''
-    set -euo pipefail
-    if ! ${pkgs.docker}/bin/docker image inspect ${cfg.jobImage} >/dev/null 2>&1; then
-      ${pkgs.docker}/bin/docker pull ghcr.io/catthehacker/ubuntu:act-24.04
-      ${pkgs.docker}/bin/docker build -t ${cfg.jobImage} ${actRunnerContext}
-    fi
-  '';
 in
 {
   options.scottylabs.forgejoCI.runner = {
@@ -48,9 +34,9 @@ in
       type = lib.types.str;
       default = defaultJobImage;
       description = ''
-        Local Docker image for `runs-on: docker` jobs. Built from
-        ghcr.io/catthehacker/ubuntu:act-24.04 with a /var/run workaround for
-        Docker 29.5.1 copyContent failures in act (moby#52655; fixed in 29.5.2).
+        Docker image used for `runs-on: docker` jobs. Pulled automatically by
+        the runner; the upstream catthehacker image provides a GitHub
+        Actions-compatible environment.
       '';
     };
 
@@ -113,25 +99,6 @@ in
     };
 
     networking.firewall.trustedInterfaces = [ "docker0" ];
-
-    systemd.services.forgejo-act-runner-image = {
-      description = "Build act runner image (/var/run workaround for Docker 29.5.1)";
-      wantedBy = [ "multi-user.target" ];
-      requiredBy = [ "gitea-runner-default.service" ];
-      after = [ "docker.service" ];
-      requires = [ "docker.service" ];
-      serviceConfig = {
-        Type = "oneshot";
-        RemainAfterExit = true;
-        ExecStart = buildActRunnerImage;
-      };
-      path = with pkgs; [ docker ];
-    };
-
-    systemd.services.gitea-runner-default = {
-      after = [ "forgejo-act-runner-image.service" ];
-      requires = [ "forgejo-act-runner-image.service" ];
-    };
 
     # Create a static user because gitea-actions-runner uses a dynamic one
     users.users.gitea-runner = {
