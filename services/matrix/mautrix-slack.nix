@@ -19,6 +19,7 @@ let
       ../../patches/mautrix-slack-skip-thread-creation-relay.patch
       ../../patches/mautrix-slack-room-ping.patch
       ../../patches/mautrix-bridge-identity-matrix-mxid.patch
+      ../../patches/mautrix-bridge-identity-keycloak.patch
     ];
   });
   bridgePermissions =
