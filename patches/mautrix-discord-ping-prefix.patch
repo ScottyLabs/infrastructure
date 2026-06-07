@@ -1,12 +1,12 @@
 diff --git a/formatter.go b/formatter.go
 --- a/formatter.go
 +++ b/formatter.go	2026-05-29 15:11:27
-@@ -237,14 +237,75 @@
+@@ -237,6 +237,73 @@
  			return fmt.Sprintf("[%s](%s)", escapeDiscordMarkdown(text), href)
  		}
  	},
- }
- 
++}
++
 +
 +func (portal *Portal) matrixUserDisplayName(mxid id.UserID) string {
 +	if puppet := portal.bridge.GetPuppetByMXID(mxid); puppet != nil && puppet.Name != "" {
@@ -45,6 +45,13 @@ diff --git a/formatter.go b/formatter.go
 +		for _, kw := range []string{"@room", "[@room]", "@\u2063ro\u2063om"} {
 +			text = strings.ReplaceAll(text, kw, "@here")
 +		}
++		if !strings.Contains(text, "@here") && !strings.Contains(text, "@everyone") {
++			if text == "" {
++				text = "@here"
++			} else {
++				text = "@here " + text
++			}
++		}
 +		allowedMentions.Parse = appendAllowedMentionParse(allowedMentions.Parse, discordgo.AllowedMentionTypeEveryone)
 +	}
 +	for _, userID := range content.Mentions.UserIDs {
@@ -65,11 +72,10 @@ diff --git a/formatter.go b/formatter.go
 +		text = strings.ReplaceAll(text, name, label)
 +	}
 +	return text
-+}
-+
+ }
+ 
  func (portal *Portal) parseMatrixHTML(content *event.MessageEventContent, allowedLinkPreviews []string) (string, *discordgo.MessageAllowedMentions) {
- 	allowedMentions := &discordgo.MessageAllowedMentions{
- 		Parse:       []discordgo.AllowedMentionType{},
+@@ -245,6 +312,7 @@
  		Users:       []string{},
  		RepliedUser: true,
  	}
@@ -77,7 +83,7 @@ diff --git a/formatter.go b/formatter.go
  	if content.Format == event.FormatHTML && len(content.FormattedBody) > 0 {
  		ctx := format.NewContext()
  		ctx.ReturnData[formatterContextInputAllowedLinkPreviewsKey] = allowedLinkPreviews
-@@ -253,8 +314,10 @@
+@@ -253,8 +321,10 @@
  		if content.Mentions != nil {
  			ctx.ReturnData[formatterContextInputAllowedMentionsKey] = content.Mentions.UserIDs
  		}

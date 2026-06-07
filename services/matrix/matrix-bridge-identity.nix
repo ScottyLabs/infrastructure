@@ -18,6 +18,8 @@ let
   keycloakUrl = org.org.keycloak.url;
   keycloakRealm = org.org.keycloak.realm;
   slackTeamId = org.org.communication.slack_team_id;
+  matrixDomain =
+    org.org.communication.matrix_domain or cfg.domain;
 
   syncScript = pkgs.writeShellScript "matrix-bridge-identity-sync" ''
     set -euo pipefail
@@ -29,6 +31,7 @@ let
     keycloak_url=${lib.escapeShellArg keycloakUrl}
     keycloak_realm=${lib.escapeShellArg keycloakRealm}
     slack_team_id=${lib.escapeShellArg slackTeamId}
+    matrix_domain=${lib.escapeShellArg matrixDomain}
 
     token=$(${pkgs.curlMinimal}/bin/curl -sf -X POST "''${keycloak_url}/realms/''${keycloak_realm}/protocol/openid-connect/token" \
       --data-urlencode "grant_type=client_credentials" \
@@ -53,17 +56,29 @@ let
         break
       fi
 
-      while IFS= read -r user_id; do
-        [ -z "$user_id" ] && continue
+      while IFS= read -r user; do
+        user_id=$(echo "$user" | ${pkgs.jq}/bin/jq -r '.id')
+        [ -z "$user_id" ] || [ "$user_id" = "null" ] && continue
+        keycloak_username=$(echo "$user" | ${pkgs.jq}/bin/jq -r '.username // empty')
         fed=$(${pkgs.curlMinimal}/bin/curl -sf \
           -H "Authorization: Bearer ''${token}" \
           "''${keycloak_url}/admin/realms/''${keycloak_realm}/users/''${user_id}/federated-identity" 2>/dev/null || echo '[]')
-        discord_id=$(echo "$fed" | ${pkgs.jq}/bin/jq -r '[.[] | select(.identityProvider == "discord") | (.userId // .userName)] | first // empty')
-        slack_id=$(echo "$fed" | ${pkgs.jq}/bin/jq -r '[.[] | select(.identityProvider == "slack") | (.userId // .userName)] | first // empty')
-        if [ -n "$discord_id" ] && [ -n "$slack_id" ]; then
-          links_json=$(echo "$links_json" | ${pkgs.jq}/bin/jq --arg d "$discord_id" --arg s "$slack_id" '. + [{discord_id: $d, slack_user_id: $s}]')
+        discord_id=$(echo "$fed" | ${pkgs.jq}/bin/jq -r '[.[] | select(.identityProvider == "discord") | (.userId // .userName) | select(length > 0)] | first // empty')
+        slack_id=$(echo "$fed" | ${pkgs.jq}/bin/jq -r '[.[] | select(.identityProvider == "slack") | (.userId // .userName) | select(test("^[UW@]")) | sub("^@"; "")] | first // empty' | tr '[:lower:]' '[:upper:]')
+        codeberg_username=$(echo "$fed" | ${pkgs.jq}/bin/jq -r '[.[] | select(.identityProvider == "codeberg") | .userName | select(length > 0)] | first // empty')
+        if [ -n "$codeberg_username" ]; then
+          matrix_localpart="$codeberg_username"
+        else
+          matrix_localpart="$keycloak_username"
         fi
-      done < <(echo "$users" | ${pkgs.jq}/bin/jq -r '.[].id')
+        if [ -n "$discord_id" ] && [ -n "$slack_id" ] && [ -n "$matrix_localpart" ]; then
+          links_json=$(echo "$links_json" | ${pkgs.jq}/bin/jq \
+            --arg d "$discord_id" \
+            --arg s "$slack_id" \
+            --arg m "$matrix_localpart" \
+            '. + [{discord_id: $d, slack_user_id: $s, matrix_localpart: $m}]')
+        fi
+      done < <(echo "$users" | ${pkgs.jq}/bin/jq -c '.[]')
 
       if [ "$count" -lt "$max" ]; then
         break
@@ -71,8 +86,11 @@ let
       first=$((first + max))
     done
 
-    ${pkgs.jq}/bin/jq -n --arg team "$slack_team_id" --argjson links "$links_json" \
-      '{slack_team_id: $team, links: ($links | sort_by(.discord_id))}' > "$tmp"
+    ${pkgs.jq}/bin/jq -n \
+      --arg team "$slack_team_id" \
+      --arg domain "$matrix_domain" \
+      --argjson links "$links_json" \
+      '{matrix_domain: $domain, slack_team_id: $team, links: ($links | sort_by(.discord_id))}' > "$tmp"
 
     if [ ! -f ${mapPath} ] || ! cmp -s "$tmp" ${mapPath}; then
       mv "$tmp" ${mapPath}
