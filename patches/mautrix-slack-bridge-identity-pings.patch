@@ -202,9 +202,8 @@ diff --git a/pkg/msgconv/from-matrix.go b/pkg/msgconv/from-matrix.go
  	"go.mau.fi/mautrix-slack/pkg/slackid"
  )
  
-@@ -87,6 +88,9 @@
- 		content.Body = strings.ReplaceAll(content.Body, "@room", "[@room]")
- 	}
+@@ -85,7 +86,10 @@
+ 	content.EnsureHasHTML()
  	for _, userID := range content.Mentions.UserIDs {
 +		if bridgeidentity.SlackUserIDForMXID(userID) != "" || bridgeidentity.DiscordIDForMXID(userID) != "" {
 +			continue
@@ -212,6 +211,8 @@ diff --git a/pkg/msgconv/from-matrix.go b/pkg/msgconv/from-matrix.go
  		name := mc.matrixUserDisplayName(ctx, portal, userID)
  		if name == "" {
  			continue
+ 		}
+ 		label := "[" + name + "]"
 diff --git a/pkg/msgconv/matrixfmt/blocks.go b/pkg/msgconv/matrixfmt/blocks.go
 --- a/pkg/msgconv/matrixfmt/blocks.go
 +++ b/pkg/msgconv/matrixfmt/blocks.go

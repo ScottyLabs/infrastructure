@@ -1,10 +1,8 @@
 diff --git a/pkg/msgconv/from-matrix.go b/pkg/msgconv/from-matrix.go
 --- a/pkg/msgconv/from-matrix.go
 +++ b/pkg/msgconv/from-matrix.go
-@@ -87,9 +87,24 @@
- 		content.FormattedBody = strings.ReplaceAll(content.FormattedBody, "@room", "[@room]")
- 		content.Body = strings.ReplaceAll(content.Body, "@room", "[@room]")
- 	}
+@@ -85,7 +85,22 @@
+ 	content.EnsureHasHTML()
 +	var replyToMXID id.EventID
 +	if rel := content.GetRelatesTo(); rel != nil {
 +		replyToMXID = rel.GetNonFallbackReplyTo()

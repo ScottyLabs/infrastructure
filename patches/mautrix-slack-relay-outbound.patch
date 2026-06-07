@@ -31,7 +31,7 @@ diff --git a/pkg/msgconv/from-matrix.go b/pkg/msgconv/from-matrix.go
  
  	"go.mau.fi/mautrix-slack/pkg/slackid"
  )
-@@ -42,6 +45,105 @@
+@@ -42,6 +45,101 @@
  	ErrMediaOnlyEditCaption = errors.New("only media message caption can be edited")
  )
  
@@ -72,10 +72,6 @@ diff --git a/pkg/msgconv/from-matrix.go b/pkg/msgconv/from-matrix.go
 +		return
 +	}
 +	content.EnsureHasHTML()
-+	if content.Mentions.Room {
-+		content.FormattedBody = strings.ReplaceAll(content.FormattedBody, "@room", "[@room]")
-+		content.Body = strings.ReplaceAll(content.Body, "@room", "[@room]")
-+	}
 +	for _, userID := range content.Mentions.UserIDs {
 +		name := mc.matrixUserDisplayName(ctx, portal, userID)
 +		if name == "" {
