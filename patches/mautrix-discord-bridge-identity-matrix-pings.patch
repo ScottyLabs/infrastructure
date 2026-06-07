@@ -1,0 +1,31 @@
+diff --git a/formatter.go b/formatter.go
+--- a/formatter.go
++++ b/formatter.go
+@@ -351,6 +351,27 @@
+ 				continue
+ 			}
+ 		}
++		if discordID := bridgeidentity.DiscordIDForMXID(userID); discordID != "" {
++			if _, ok := portal.bridge.ParsePuppetMXID(userID); ok {
++				continue
++			}
++			if bridgeidentity.ParseSlackGhostUserID(userID) != "" {
++				continue
++			}
++			name := portal.matrixUserDisplayName(userID)
++			if name != "" {
++				ping := fmt.Sprintf("<@%s>", discordID)
++				if !strings.Contains(text, ping) {
++					text = strings.ReplaceAll(text, name, ping)
++					escaped := escapeDiscordMarkdown(name)
++					if escaped != name {
++						text = strings.ReplaceAll(text, escaped, ping)
++					}
++				}
++				allowedMentions.Users = appendIfNotContains(allowedMentions.Users, discordID)
++			}
++			continue
++		}
+ 		name := portal.matrixUserDisplayName(userID)
+ 		if name == "" {
+ 			continue

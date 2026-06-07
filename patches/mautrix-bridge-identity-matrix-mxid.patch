@@ -1,0 +1,118 @@
+diff --git a/pkg/bridgeidentity/map.go b/pkg/bridgeidentity/map.go
+--- a/pkg/bridgeidentity/map.go
++++ b/pkg/bridgeidentity/map.go
+@@ -13,20 +13,25 @@
+ )
+ 
+ type link struct {
+-	DiscordID   string `json:"discord_id"`
+-	SlackUserID string `json:"slack_user_id"`
++	DiscordID       string `json:"discord_id"`
++	SlackUserID     string `json:"slack_user_id"`
++	MatrixLocalpart string `json:"matrix_localpart"`
+ }
+ 
+ type file struct {
+-	SlackTeamID string `json:"slack_team_id"`
+-	Links       []link `json:"links"`
++	MatrixDomain string `json:"matrix_domain"`
++	SlackTeamID  string `json:"slack_team_id"`
++	Links        []link `json:"links"`
+ }
+ 
+ // Map holds Keycloak-linked Discord ↔ Slack user IDs for cross-platform mentions.
+ type Map struct {
+-	slackTeamID    string
+-	discordToSlack map[string]string
+-	slackToDiscord map[string]string
++	matrixDomain           string
++	slackTeamID            string
++	discordToSlack         map[string]string
++	slackToDiscord         map[string]string
++	matrixLocalpartDiscord map[string]string
++	matrixLocalpartSlack   map[string]string
+ }
+ 
+ var (
+@@ -71,8 +76,10 @@
+ 
+ func load(path string) *Map {
+ 	m := &Map{
+-		discordToSlack: make(map[string]string),
+-		slackToDiscord: make(map[string]string),
++		discordToSlack:         make(map[string]string),
++		slackToDiscord:         make(map[string]string),
++		matrixLocalpartDiscord: make(map[string]string),
++		matrixLocalpartSlack:   make(map[string]string),
+ 	}
+ 	raw, err := os.ReadFile(path)
+ 	if err != nil {
+@@ -82,13 +89,19 @@
+ 	if err := json.Unmarshal(raw, &f); err != nil {
+ 		return m
+ 	}
++	m.matrixDomain = f.MatrixDomain
+ 	m.slackTeamID = strings.ToUpper(f.SlackTeamID)
+ 	for _, l := range f.Links {
+ 		if l.DiscordID == "" || l.SlackUserID == "" {
+ 			continue
+ 		}
+-		m.discordToSlack[l.DiscordID] = strings.ToUpper(l.SlackUserID)
+-		m.slackToDiscord[strings.ToUpper(l.SlackUserID)] = l.DiscordID
++		slackUserID := strings.ToUpper(l.SlackUserID)
++		m.discordToSlack[l.DiscordID] = slackUserID
++		m.slackToDiscord[slackUserID] = l.DiscordID
++		if l.MatrixLocalpart != "" {
++			m.matrixLocalpartDiscord[l.MatrixLocalpart] = l.DiscordID
++			m.matrixLocalpartSlack[l.MatrixLocalpart] = slackUserID
++		}
+ 	}
+ 	return m
+ }
+@@ -161,6 +174,26 @@
+ 	return err == nil && localpart == "slack"
+ }
+ 
++func (m *Map) discordIDForMatrixLocalpart(localpart string, domain string) string {
++	if m == nil || localpart == "" {
++		return ""
++	}
++	if m.matrixDomain != "" && domain != m.matrixDomain {
++		return ""
++	}
++	return m.matrixLocalpartDiscord[localpart]
++}
++
++func (m *Map) slackUserIDForMatrixLocalpart(localpart string, domain string) string {
++	if m == nil || localpart == "" {
++		return ""
++	}
++	if m.matrixDomain != "" && domain != m.matrixDomain {
++		return ""
++	}
++	return m.matrixLocalpartSlack[localpart]
++}
++
+ // DiscordIDForMXID returns a Discord user snowflake when mxid is a linked discord or slack ghost.
+ func DiscordIDForMXID(mxid id.UserID) string {
+ 	if discordID := ParseDiscordGhostMXID(mxid); discordID != "" {
+@@ -172,6 +205,9 @@
+ 	if slackUID := ParseSlackGhostUserID(mxid); slackUID != "" {
+ 		return Get().DiscordIDForSlack(slackUID)
+ 	}
++	if localpart, domain, err := mxid.Parse(); err == nil {
++		return Get().discordIDForMatrixLocalpart(localpart, domain)
++	}
+ 	return ""
+ }
+ 
+@@ -186,6 +222,9 @@
+ 	if discordID := ParseDiscordGhostMXID(mxid); discordID != "" {
+ 		return Get().SlackUserIDForDiscord(discordID)
+ 	}
++	if localpart, domain, err := mxid.Parse(); err == nil {
++		return Get().slackUserIDForMatrixLocalpart(localpart, domain)
++	}
+ 	return ""
+ }
+ 
