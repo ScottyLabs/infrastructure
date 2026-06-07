@@ -21,6 +21,7 @@ let
       ../../patches/mautrix-discord-bridge-identity-replies.patch
       ../../patches/mautrix-discord-bridge-identity-dedupe.patch
       ../../patches/mautrix-bridge-identity-matrix-mxid.patch
+      ../../patches/mautrix-bridge-identity-keycloak.patch
       ../../patches/mautrix-discord-bridge-identity-matrix-pings.patch
     ];
   });

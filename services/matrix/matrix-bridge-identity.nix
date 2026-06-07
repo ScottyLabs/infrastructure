@@ -1,184 +1,73 @@
-# Sync Discord ↔ Slack identity links from Keycloak for cross-platform @mentions on mautrix bridges.
+# Keycloak-backed bridge identity lookups for cross-platform @mentions (no static JSON file).
 {
   config,
   lib,
-  pkgs,
   governance,
   ...
 }:
 
 let
   cfg = config.scottylabs.matrix;
-  syncCfg = cfg.bridgeIdentitySync;
-
-  stateDir = "/var/lib/mautrix-bridge";
-  mapPath = "${stateDir}/identity-map.json";
+  identityCfg = cfg.bridgeIdentity;
 
   org = builtins.fromTOML (builtins.readFile "${governance}/data/org.toml");
   keycloakUrl = org.org.keycloak.url;
   keycloakRealm = org.org.keycloak.realm;
-  slackTeamId = org.org.communication.slack_team_id;
   matrixDomain =
     org.org.communication.matrix_domain or cfg.domain;
-
-  syncScript = pkgs.writeShellScript "matrix-bridge-identity-sync" ''
-    set -euo pipefail
-
-    : "''${KEYCLOAK_CLIENT_ID:?KEYCLOAK_CLIENT_ID not set}"
-    : "''${KEYCLOAK_CLIENT_SECRET:?KEYCLOAK_CLIENT_SECRET not set}"
-
-    tmp="${stateDir}/identity-map.json.tmp"
-    keycloak_url=${lib.escapeShellArg keycloakUrl}
-    keycloak_realm=${lib.escapeShellArg keycloakRealm}
-    slack_team_id=${lib.escapeShellArg slackTeamId}
-    matrix_domain=${lib.escapeShellArg matrixDomain}
-
-    token=$(${pkgs.curlMinimal}/bin/curl -sf -X POST "''${keycloak_url}/realms/''${keycloak_realm}/protocol/openid-connect/token" \
-      --data-urlencode "grant_type=client_credentials" \
-      --data-urlencode "client_id=''${KEYCLOAK_CLIENT_ID}" \
-      --data-urlencode "client_secret=''${KEYCLOAK_CLIENT_SECRET}" \
-      | ${pkgs.jq}/bin/jq -r .access_token)
-
-    if [ -z "$token" ] || [ "$token" = "null" ]; then
-      echo "failed to obtain keycloak access token" >&2
-      exit 1
-    fi
-
-    links_json='[]'
-    first=0
-    max=100
-    while true; do
-      users=$(${pkgs.curlMinimal}/bin/curl -sf \
-        -H "Authorization: Bearer ''${token}" \
-        "''${keycloak_url}/admin/realms/''${keycloak_realm}/users?first=''${first}&max=''${max}")
-      count=$(echo "$users" | ${pkgs.jq}/bin/jq 'length')
-      if [ "$count" -eq 0 ]; then
-        break
-      fi
-
-      while IFS= read -r user; do
-        user_id=$(echo "$user" | ${pkgs.jq}/bin/jq -r '.id')
-        [ -z "$user_id" ] || [ "$user_id" = "null" ] && continue
-        keycloak_username=$(echo "$user" | ${pkgs.jq}/bin/jq -r '.username // empty')
-        fed=$(${pkgs.curlMinimal}/bin/curl -sf \
-          -H "Authorization: Bearer ''${token}" \
-          "''${keycloak_url}/admin/realms/''${keycloak_realm}/users/''${user_id}/federated-identity" 2>/dev/null || echo '[]')
-        discord_id=$(echo "$fed" | ${pkgs.jq}/bin/jq -r '[.[] | select(.identityProvider == "discord") | (.userId // .userName) | select(length > 0)] | first // empty')
-        slack_id=$(echo "$fed" | ${pkgs.jq}/bin/jq -r '[.[] | select(.identityProvider == "slack") | (.userId // .userName) | select(test("^[UW@]")) | sub("^@"; "")] | first // empty' | tr '[:lower:]' '[:upper:]')
-        codeberg_username=$(echo "$fed" | ${pkgs.jq}/bin/jq -r '[.[] | select(.identityProvider == "codeberg") | .userName | select(length > 0)] | first // empty')
-        if [ -n "$codeberg_username" ]; then
-          matrix_localpart="$codeberg_username"
-        else
-          matrix_localpart="$keycloak_username"
-        fi
-        if [ -n "$discord_id" ] && [ -n "$slack_id" ] && [ -n "$matrix_localpart" ]; then
-          links_json=$(echo "$links_json" | ${pkgs.jq}/bin/jq \
-            --arg d "$discord_id" \
-            --arg s "$slack_id" \
-            --arg m "$matrix_localpart" \
-            '. + [{discord_id: $d, slack_user_id: $s, matrix_localpart: $m}]')
-        fi
-      done < <(echo "$users" | ${pkgs.jq}/bin/jq -c '.[]')
-
-      if [ "$count" -lt "$max" ]; then
-        break
-      fi
-      first=$((first + max))
-    done
-
-    ${pkgs.jq}/bin/jq -n \
-      --arg team "$slack_team_id" \
-      --arg domain "$matrix_domain" \
-      --argjson links "$links_json" \
-      '{matrix_domain: $domain, slack_team_id: $team, links: ($links | sort_by(.discord_id))}' > "$tmp"
-
-    if [ ! -f ${mapPath} ] || ! cmp -s "$tmp" ${mapPath}; then
-      mv "$tmp" ${mapPath}
-      chmod 644 ${mapPath}
-      link_count=$(echo "$links_json" | ${pkgs.jq}/bin/jq 'length')
-      echo "bridge identity map updated (''${link_count} links)"
-      systemctl try-restart mautrix-discord.service mautrix-slack.service || true
-    else
-      rm -f "$tmp"
-      echo "bridge identity map unchanged"
-    fi
-  '';
 in
 {
-  options.scottylabs.matrix.bridgeIdentitySync = {
+  options.scottylabs.matrix.bridgeIdentity = {
     enable = lib.mkEnableOption ''
-      Periodically sync Discord/Slack IdP links from Keycloak into a runtime identity map.
-      Any Keycloak user with both Discord and Slack linked is included automatically.
+      Resolve Discord ↔ Slack identity links from Keycloak at runtime for mautrix bridge mentions.
+      Bridges query Keycloak directly with an auto-refreshed in-memory cache (no identity map file).
     '';
 
     environmentFile = lib.mkOption {
       type = lib.types.nullOr lib.types.path;
       default = null;
       description = ''
-        Environment file with KEYCLOAK_CLIENT_ID and KEYCLOAK_CLIENT_SECRET (governance CI service account).
+        Environment file with KEYCLOAK_CLIENT_ID and KEYCLOAK_CLIENT_SECRET (governance service account).
       '';
     };
 
-    interval = lib.mkOption {
+    refreshInterval = lib.mkOption {
       type = lib.types.str;
-      default = "5min";
-      description = "How often to refresh the identity map from Keycloak.";
+      default = "60s";
+      description = "How long bridge identity lookups are cached before re-fetching from Keycloak.";
     };
   };
 
-  config = lib.mkIf (cfg.enable && syncCfg.enable) {
+  config = lib.mkIf (cfg.enable && identityCfg.enable) {
     assertions = [
       {
-        assertion = syncCfg.environmentFile != null;
-        message = "scottylabs.matrix.bridgeIdentitySync.environmentFile must be set when sync is enabled.";
+        assertion = identityCfg.environmentFile != null;
+        message = "scottylabs.matrix.bridgeIdentity.environmentFile must be set when bridge identity is enabled.";
       }
       {
         assertion = org.org.keycloak ? url && org.org.keycloak ? realm;
         message = "governance org.toml must define org.keycloak.url and org.keycloak.realm.";
       }
-      {
-        assertion = org.org.communication ? slack_team_id;
-        message = "governance org.toml must define org.communication.slack_team_id.";
-      }
     ];
 
-    systemd.tmpfiles.rules = [
-      "d ${stateDir} 0755 root root -"
+    systemd.services.mautrix-slack.serviceConfig.EnvironmentFile = lib.mkAfter [
+      identityCfg.environmentFile
     ];
-
-    systemd.services.matrix-bridge-identity-sync = {
-      description = "Sync mautrix bridge identity map from Keycloak";
-      after = [
-        "network-online.target"
-        "keycloak.service"
-      ];
-      wants = [
-        "network-online.target"
-        "keycloak.service"
-      ];
-      serviceConfig = {
-        Type = "oneshot";
-        EnvironmentFile = syncCfg.environmentFile;
-        ExecStart = syncScript;
-      };
-    };
-
-    systemd.timers.matrix-bridge-identity-sync = {
-      description = "Refresh mautrix bridge identity map from Keycloak";
-      wantedBy = [ "timers.target" ];
-      timerConfig = {
-        OnBootSec = "2min";
-        OnUnitActiveSec = syncCfg.interval;
-        Unit = "matrix-bridge-identity-sync.service";
-      };
-    };
-
     systemd.services.mautrix-slack.serviceConfig.Environment = lib.mkAfter [
-      "BRIDGE_IDENTITY_MAP_PATH=${mapPath}"
+      "KEYCLOAK_URL=${keycloakUrl}"
+      "KEYCLOAK_REALM=${keycloakRealm}"
+      "MATRIX_DOMAIN=${matrixDomain}"
+      "BRIDGE_IDENTITY_REFRESH_INTERVAL=${identityCfg.refreshInterval}"
     ];
 
+    systemd.services.mautrix-discord.serviceConfig.EnvironmentFile = lib.mkAfter [
+      identityCfg.environmentFile
+    ];
     systemd.services.mautrix-discord.serviceConfig.Environment = lib.mkAfter [
-      "BRIDGE_IDENTITY_MAP_PATH=${mapPath}"
+      "KEYCLOAK_URL=${keycloakUrl}"
+      "KEYCLOAK_REALM=${keycloakRealm}"
+      "MATRIX_DOMAIN=${matrixDomain}"
+      "BRIDGE_IDENTITY_REFRESH_INTERVAL=${identityCfg.refreshInterval}"
     ];
   };
 }

@@ -1,0 +1,320 @@
+diff --git a/pkg/bridgeidentity/map.go b/pkg/bridgeidentity/map.go
+--- a/pkg/bridgeidentity/map.go
++++ b/pkg/bridgeidentity/map.go
+@@ -3,6 +3,10 @@
+ 
+ import (
+ 	"encoding/json"
++	"fmt"
++	"io"
++	"net/http"
++	"net/url"
+ 	"os"
+ 	"regexp"
+ 	"strings"
+@@ -12,100 +16,243 @@
+ 	"maunium.net/go/mautrix/id"
+ )
+ 
+-type link struct {
+-	DiscordID       string `json:"discord_id"`
+-	SlackUserID     string `json:"slack_user_id"`
+-	MatrixLocalpart string `json:"matrix_localpart"`
+-}
++const defaultRefreshInterval = 60 * time.Second
+ 
+-type file struct {
+-	MatrixDomain string `json:"matrix_domain"`
+-	SlackTeamID  string `json:"slack_team_id"`
+-	Links        []link `json:"links"`
+-}
+-
+ // Map holds Keycloak-linked Discord ↔ Slack user IDs for cross-platform mentions.
+ type Map struct {
+ 	matrixDomain           string
+-	slackTeamID            string
+ 	discordToSlack         map[string]string
+ 	slackToDiscord         map[string]string
+ 	matrixLocalpartDiscord map[string]string
+ 	matrixLocalpartSlack   map[string]string
+ }
+ 
++type keycloakFedLink struct {
++	IdentityProvider string `json:"identityProvider"`
++	UserID           string `json:"userId"`
++	UserName         string `json:"userName"`
++}
++
++type keycloakUser struct {
++	ID       string `json:"id"`
++	Username string `json:"username"`
++}
++
+ var (
+ 	mapMu             sync.RWMutex
+ 	globalMap         *Map
+-	loadedPath        string
+-	loadedMod         time.Time
++	loadedAt          time.Time
+ 	discordGhostRegex = regexp.MustCompile(`^@discord_([0-9]+):`)
++	httpClient        = &http.Client{Timeout: 30 * time.Second}
+ )
+ 
+-func DefaultPath() string {
+-	if p := os.Getenv("BRIDGE_IDENTITY_MAP_PATH"); p != "" {
+-		return p
++func refreshInterval() time.Duration {
++	if s := os.Getenv("BRIDGE_IDENTITY_REFRESH_INTERVAL"); s != "" {
++		if d, err := time.ParseDuration(s); err == nil && d > 0 {
++			return d
++		}
+ 	}
+-	return "/etc/mautrix-bridge/identity-map.json"
++	return defaultRefreshInterval
+ }
+ 
+-// Get returns the loaded identity map (empty if missing or invalid).
++// Get returns identity links from Keycloak (in-memory cache, auto-refreshed).
+ func Get() *Map {
+-	path := DefaultPath()
++	interval := refreshInterval()
+ 	mapMu.RLock()
+-	if globalMap != nil && loadedPath == path {
+-		if info, err := os.Stat(path); err == nil && !info.ModTime().After(loadedMod) {
+-			m := globalMap
+-			mapMu.RUnlock()
+-			return m
+-		}
++	if globalMap != nil && time.Since(loadedAt) < interval {
++		m := globalMap
++		mapMu.RUnlock()
++		return m
+ 	}
+ 	mapMu.RUnlock()
+ 
+ 	mapMu.Lock()
+ 	defer mapMu.Unlock()
+-	globalMap = load(path)
+-	loadedPath = path
+-	if info, err := os.Stat(path); err == nil {
+-		loadedMod = info.ModTime()
+-	} else {
+-		loadedMod = time.Time{}
++	if globalMap != nil && time.Since(loadedAt) < interval {
++		return globalMap
+ 	}
++	if m, err := loadFromKeycloak(); err == nil {
++		globalMap = m
++		loadedAt = time.Now()
++	} else if globalMap == nil {
++		globalMap = emptyMap()
++		loadedAt = time.Now()
++	}
+ 	return globalMap
+ }
+ 
+-func load(path string) *Map {
+-	m := &Map{
++func emptyMap() *Map {
++	return &Map{
+ 		discordToSlack:         make(map[string]string),
+ 		slackToDiscord:         make(map[string]string),
+ 		matrixLocalpartDiscord: make(map[string]string),
+ 		matrixLocalpartSlack:   make(map[string]string),
+ 	}
+-	raw, err := os.ReadFile(path)
++}
++
++func loadFromKeycloak() (*Map, error) {
++	baseURL := strings.TrimRight(os.Getenv("KEYCLOAK_URL"), "/")
++	realm := os.Getenv("KEYCLOAK_REALM")
++	clientID := os.Getenv("KEYCLOAK_CLIENT_ID")
++	clientSecret := os.Getenv("KEYCLOAK_CLIENT_SECRET")
++	if baseURL == "" || realm == "" || clientID == "" || clientSecret == "" {
++		return emptyMap(), fmt.Errorf("keycloak env not configured")
++	}
++
++	token, err := keycloakToken(baseURL, realm, clientID, clientSecret)
+ 	if err != nil {
+-		return m
++		return nil, err
+ 	}
+-	var f file
+-	if err := json.Unmarshal(raw, &f); err != nil {
+-		return m
++
++	m := emptyMap()
++	m.matrixDomain = os.Getenv("MATRIX_DOMAIN")
++
++	first := 0
++	const pageSize = 100
++	for {
++		usersURL := fmt.Sprintf("%s/admin/realms/%s/users?first=%d&max=%d", baseURL, url.PathEscape(realm), first, pageSize)
++		var users []keycloakUser
++		if err := keycloakGetJSON(usersURL, token, &users); err != nil {
++			return nil, err
++		}
++		if len(users) == 0 {
++			break
++		}
++
++		for _, user := range users {
++			if user.ID == "" {
++				continue
++			}
++			fedURL := fmt.Sprintf("%s/admin/realms/%s/users/%s/federated-identity", baseURL, url.PathEscape(realm), url.PathEscape(user.ID))
++			var fed []keycloakFedLink
++			if err := keycloakGetJSON(fedURL, token, &fed); err != nil {
++				continue
++			}
++			discordID := federatedDiscordID(fed)
++			slackID := federatedSlackUserID(fed)
++			matrixLocalpart := federatedMatrixLocalpart(fed, user.Username)
++			if discordID == "" || slackID == "" || matrixLocalpart == "" {
++				continue
++			}
++			m.discordToSlack[discordID] = slackID
++			m.slackToDiscord[slackID] = discordID
++			m.matrixLocalpartDiscord[matrixLocalpart] = discordID
++			m.matrixLocalpartSlack[matrixLocalpart] = slackID
++		}
++
++		if len(users) < pageSize {
++			break
++		}
++		first += pageSize
+ 	}
+-	m.matrixDomain = f.MatrixDomain
+-	m.slackTeamID = strings.ToUpper(f.SlackTeamID)
+-	for _, l := range f.Links {
+-		if l.DiscordID == "" || l.SlackUserID == "" {
++
++	return m, nil
++}
++
++func keycloakToken(baseURL, realm, clientID, clientSecret string) (string, error) {
++	tokenURL := fmt.Sprintf("%s/realms/%s/protocol/openid-connect/token", baseURL, url.PathEscape(realm))
++	form := url.Values{
++		"grant_type":    {"client_credentials"},
++		"client_id":     {clientID},
++		"client_secret": {clientSecret},
++	}
++	resp, err := httpClient.PostForm(tokenURL, form)
++	if err != nil {
++		return "", err
++	}
++	defer resp.Body.Close()
++	body, err := io.ReadAll(resp.Body)
++	if err != nil {
++		return "", err
++	}
++	if resp.StatusCode != http.StatusOK {
++		return "", fmt.Errorf("keycloak token: HTTP %d", resp.StatusCode)
++	}
++	var parsed struct {
++		AccessToken string `json:"access_token"`
++	}
++	if err := json.Unmarshal(body, &parsed); err != nil {
++		return "", err
++	}
++	if parsed.AccessToken == "" {
++		return "", fmt.Errorf("keycloak token: empty access_token")
++	}
++	return parsed.AccessToken, nil
++}
++
++func keycloakGetJSON(reqURL, token string, out any) error {
++	req, err := http.NewRequest(http.MethodGet, reqURL, nil)
++	if err != nil {
++		return err
++	}
++	req.Header.Set("Authorization", "Bearer "+token)
++	resp, err := httpClient.Do(req)
++	if err != nil {
++		return err
++	}
++	defer resp.Body.Close()
++	body, err := io.ReadAll(resp.Body)
++	if err != nil {
++		return err
++	}
++	if resp.StatusCode != http.StatusOK {
++		return fmt.Errorf("keycloak GET %s: HTTP %d", reqURL, resp.StatusCode)
++	}
++	return json.Unmarshal(body, out)
++}
++
++func federatedDiscordID(links []keycloakFedLink) string {
++	for _, link := range links {
++		if link.IdentityProvider != "discord" {
+ 			continue
+ 		}
+-		slackUserID := strings.ToUpper(l.SlackUserID)
+-		m.discordToSlack[l.DiscordID] = slackUserID
+-		m.slackToDiscord[slackUserID] = l.DiscordID
+-		if l.MatrixLocalpart != "" {
+-			m.matrixLocalpartDiscord[l.MatrixLocalpart] = l.DiscordID
+-			m.matrixLocalpartSlack[l.MatrixLocalpart] = slackUserID
++		if id := firstNonEmpty(link.UserID, link.UserName); id != "" {
++			return id
+ 		}
+ 	}
+-	return m
++	return ""
+ }
+ 
++func federatedSlackUserID(links []keycloakFedLink) string {
++	for _, link := range links {
++		if link.IdentityProvider != "slack" {
++			continue
++		}
++		for _, candidate := range []string{link.UserID, link.UserName} {
++			if isSlackMemberID(candidate) {
++				return normalizeSlackUserID(candidate)
++			}
++		}
++	}
++	return ""
++}
++
++func federatedMatrixLocalpart(links []keycloakFedLink, keycloakUsername string) string {
++	for _, link := range links {
++		if link.IdentityProvider == "codeberg" && link.UserName != "" {
++			return link.UserName
++		}
++	}
++	return keycloakUsername
++}
++
++func firstNonEmpty(values ...string) string {
++	for _, v := range values {
++		if v != "" {
++			return v
++		}
++	}
++	return ""
++}
++
++func isSlackMemberID(id string) bool {
++	return strings.HasPrefix(id, "U") || strings.HasPrefix(id, "W") || strings.HasPrefix(id, "@U") || strings.HasPrefix(id, "@W")
++}
++
++func normalizeSlackUserID(id string) string {
++	return strings.ToUpper(strings.TrimPrefix(id, "@"))
++}
++
+ func (m *Map) SlackUserIDForDiscord(discordID string) string {
+ 	if m == nil {
+ 		return ""
+@@ -140,6 +287,11 @@
+ 			return "link:" + discordID
+ 		}
+ 	}
++	if localpart, domain, err := mxid.Parse(); err == nil {
++		if discordID := Get().discordIDForMatrixLocalpart(localpart, domain); discordID != "" {
++			return "link:" + discordID
++		}
++	}
+ 	return string(mxid)
+ }
+ 

@@ -25,7 +25,7 @@
     mode = "0400";
   };
 
-  age.secrets.bridge-identity-sync = {
+  age.secrets.bridge-identity = {
     file = ../../secrets/infra-01/bridge-identity-sync.age;
     mode = "0400";
   };
@@ -49,9 +49,9 @@
       ];
     };
 
-    bridgeIdentitySync = {
+    bridgeIdentity = {
       enable = true;
-      environmentFile = config.age.secrets.bridge-identity-sync.path;
+      environmentFile = config.age.secrets.bridge-identity.path;
     };
 
     bridges.slack = {
