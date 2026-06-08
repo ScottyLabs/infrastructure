@@ -152,7 +152,7 @@ new file mode 100644
 index 0000000..4dc5b3c
 --- /dev/null
 +++ b/pkg/reactionmirror/aggregate.go
-@@ -0,0 +1,240 @@
+@@ -0,0 +1,268 @@
 +package reactionmirror
 +
 +import (
@@ -354,7 +354,35 @@ index 0000000..4dc5b3c
 +	return bridgeidentity.ParseDiscordGhostMXID(mxid) != ""
 +}
 +
-+func FirstCrossBridgeReaction(otherBridgeGhost func(id.UserID) bool, events []*event.Event) (emoji string, ok bool) {
++func reactionHasBridgeSource(evt *event.Event, key string) bool {
++	if evt == nil || evt.Content.Raw == nil {
++		return false
++	}
++	_, ok := evt.Content.Raw[key].(map[string]any)
++	return ok
++}
++
++func IsSlackSourcedReaction(evt *event.Event) bool {
++	if evt == nil {
++		return false
++	}
++	if IsSlackBridgeGhost(evt.Sender) {
++		return true
++	}
++	return reactionHasBridgeSource(evt, "fi.mau.slack.reaction")
++}
++
++func IsDiscordSourcedReaction(evt *event.Event) bool {
++	if evt == nil {
++		return false
++	}
++	if IsDiscordBridgeGhost(evt.Sender) {
++		return true
++	}
++	return reactionHasBridgeSource(evt, "fi.mau.discord.reaction")
++}
++
++func FirstCrossBridgeReaction(isCrossBridge func(*event.Event) bool, events []*event.Event) (emoji string, ok bool) {
 +	sort.Slice(events, func(i, j int) bool {
 +		return events[i].Timestamp < events[j].Timestamp
 +	})
@@ -362,7 +390,7 @@ index 0000000..4dc5b3c
 +		if evt.Unsigned.RedactedBecause != nil {
 +			continue
 +		}
-+		if !otherBridgeGhost(evt.Sender) {
++		if !isCrossBridge(evt) {
 +			continue
 +		}
 +		emoji = EmojiDisplayKey(evt)
@@ -571,7 +599,7 @@ new file mode 100644
 index 0000000..18071b1
 --- /dev/null
 +++ b/reaction_mirror.go
-@@ -0,0 +1,209 @@
+@@ -0,0 +1,217 @@
 +package main
 +
 +import (
@@ -657,12 +685,17 @@ index 0000000..18071b1
 +func (portal *Portal) refreshReactionMirror(msg *database.Message) {
 +	botUser := portal.reactionMirrorBotUser()
 +	if botUser == nil || botUser.Session == nil {
++		portal.log.Warn().Str("message_id", msg.DiscordID).Msg("Skipping reaction mirror refresh: no logged-in Discord session")
 +		return
 +	}
 +	ctx := context.Background()
 +	client := portal.MainIntent().Client
 +	if client == nil && portal.bridge.Bot != nil {
 +		client = portal.bridge.Bot.Client
++	}
++	if client == nil {
++		portal.log.Warn().Str("message_id", msg.DiscordID).Msg("Skipping reaction mirror refresh: no Matrix client")
++		return
 +	}
 +	lookup := func(ctx context.Context, roomID id.RoomID, userID id.UserID) string {
 +		return portal.matrixMemberDisplayName(ctx, userID)
@@ -688,9 +721,9 @@ index 0000000..18071b1
 +	}
 +
 +	if state.MirroredEmoji == "" {
-+		if _, ok := reactionmirror.FirstCrossBridgeReaction(reactionmirror.IsSlackBridgeGhost, events); ok {
++		if _, ok := reactionmirror.FirstCrossBridgeReaction(reactionmirror.IsSlackSourcedReaction, events); ok {
 +			for _, evt := range events {
-+				if evt.Unsigned.RedactedBecause != nil || !reactionmirror.IsSlackBridgeGhost(evt.Sender) {
++				if evt.Unsigned.RedactedBecause != nil || !reactionmirror.IsSlackSourcedReaction(evt) {
 +					continue
 +				}
 +				if discordEmoji := matrixEmojiToDiscordID(portal, evt); discordEmoji != "" {
@@ -779,5 +812,8 @@ index 0000000..18071b1
 +}
 +
 +func (portal *Portal) isMatrixReactionCrossBridge(evt *event.Event) bool {
-+	return reactionmirror.IsSlackBridgeGhost(evt.Sender) || reactionmirror.IsDiscordBridgeGhost(evt.Sender)
++	if reactionmirror.IsSlackSourcedReaction(evt) {
++		return true
++	}
++	return reactionmirror.IsDiscordBridgeGhost(evt.Sender)
 +}
