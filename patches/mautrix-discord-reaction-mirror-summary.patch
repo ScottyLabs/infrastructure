@@ -1,0 +1,781 @@
+diff --git a/database/database.go b/database/database.go
+index a12bab6..52e6fce 100644
+--- a/database/database.go
++++ b/database/database.go
+@@ -23,6 +23,7 @@ type Database struct {
+ 	Guild    *GuildQuery
+ 	Role     *RoleQuery
+ 	File     *FileQuery
++	ReactionMirror *ReactionMirrorQuery
+ }
+ 
+ func New(baseDB *dbutil.Database, log maulogger.Logger) *Database {
+@@ -64,6 +65,10 @@ func New(baseDB *dbutil.Database, log maulogger.Logger) *Database {
+ 		db:  db,
+ 		log: log.Sub("File"),
+ 	}
++	db.ReactionMirror = &ReactionMirrorQuery{
++		db:  db,
++		log: log.Sub("ReactionMirror"),
++	}
+ 	return db
+ }
+ 
+diff --git a/database/reactionmirror.go b/database/reactionmirror.go
+new file mode 100644
+index 0000000..2bfd474
+--- /dev/null
++++ b/database/reactionmirror.go
+@@ -0,0 +1,82 @@
++package database
++
++import (
++	"database/sql"
++	"errors"
++
++	"go.mau.fi/util/dbutil"
++	log "maunium.net/go/maulogger/v2"
++	"maunium.net/go/mautrix/id"
++)
++
++type ReactionMirrorQuery struct {
++	db  *Database
++	log log.Logger
++}
++
++const reactionMirrorSelect = `SELECT dc_chan_id, dc_chan_receiver, dc_msg_id, target_mxid, mirrored_emoji, summary_thread_id, summary_message_id FROM reaction_mirror_state`
++
++func (q *ReactionMirrorQuery) GetByMessage(key PortalKey, messageID string) *ReactionMirrorState {
++	row := q.db.QueryRow(reactionMirrorSelect+` WHERE dc_chan_id=$1 AND dc_chan_receiver=$2 AND dc_msg_id=$3`, key.ChannelID, key.Receiver, messageID)
++	if row == nil {
++		return nil
++	}
++	return q.New().Scan(row)
++}
++
++func (q *ReactionMirrorQuery) IsMirrorThread(key PortalKey, threadID string) bool {
++	if threadID == "" {
++		return false
++	}
++	row := q.db.QueryRow(`SELECT 1 FROM reaction_mirror_state WHERE dc_chan_id=$1 AND dc_chan_receiver=$2 AND summary_thread_id=$3 LIMIT 1`, key.ChannelID, key.Receiver, threadID)
++	var one int
++	if err := row.Scan(&one); err != nil {
++		return false
++	}
++	return one == 1
++}
++
++func (q *ReactionMirrorQuery) New() *ReactionMirrorState {
++	return &ReactionMirrorState{
++		db:  q.db,
++		log: q.log,
++	}
++}
++
++type ReactionMirrorState struct {
++	db  *Database
++	log log.Logger
++
++	Channel          PortalKey
++	MessageID        string
++	TargetMXID       id.EventID
++	MirroredEmoji    string
++	SummaryThreadID  string
++	SummaryMessageID string
++}
++
++func (s *ReactionMirrorState) Scan(row dbutil.Scannable) *ReactionMirrorState {
++	err := row.Scan(&s.Channel.ChannelID, &s.Channel.Receiver, &s.MessageID, &s.TargetMXID, &s.MirroredEmoji, &s.SummaryThreadID, &s.SummaryMessageID)
++	if errors.Is(err, sql.ErrNoRows) {
++		return nil
++	} else if err != nil {
++		s.log.Errorfln("Failed to scan reaction mirror row: %v", err)
++		return nil
++	}
++	return s
++}
++
++func (s *ReactionMirrorState) Upsert() {
++	_, err := s.db.Exec(`
++		INSERT INTO reaction_mirror_state (dc_chan_id, dc_chan_receiver, dc_msg_id, target_mxid, mirrored_emoji, summary_thread_id, summary_message_id)
++		VALUES ($1, $2, $3, $4, $5, $6, $7)
++		ON CONFLICT (dc_chan_id, dc_chan_receiver, dc_msg_id) DO UPDATE SET
++			target_mxid=excluded.target_mxid,
++			mirrored_emoji=excluded.mirrored_emoji,
++			summary_thread_id=excluded.summary_thread_id,
++			summary_message_id=excluded.summary_message_id
++	`, s.Channel.ChannelID, s.Channel.Receiver, s.MessageID, s.TargetMXID, s.MirroredEmoji, s.SummaryThreadID, s.SummaryMessageID)
++	if err != nil {
++		s.log.Errorfln("Failed to upsert reaction mirror state: %v", err)
++	}
++}
+diff --git a/database/upgrades/25-reaction-mirror-state.sql b/database/upgrades/25-reaction-mirror-state.sql
+new file mode 100644
+index 0000000..d925e44
+--- /dev/null
++++ b/database/upgrades/25-reaction-mirror-state.sql
+@@ -0,0 +1,12 @@
++-- v25 (compatible with v19+): reaction mirror summary state
++CREATE TABLE reaction_mirror_state (
++    dc_chan_id          TEXT NOT NULL,
++    dc_chan_receiver    TEXT NOT NULL,
++    dc_msg_id           TEXT NOT NULL,
++    target_mxid         TEXT NOT NULL,
++    mirrored_emoji      TEXT NOT NULL DEFAULT '',
++    summary_thread_id   TEXT NOT NULL DEFAULT '',
++    summary_message_id  TEXT NOT NULL DEFAULT '',
++    PRIMARY KEY (dc_chan_id, dc_chan_receiver, dc_msg_id),
++    CONSTRAINT reaction_mirror_portal_fkey FOREIGN KEY (dc_chan_id, dc_chan_receiver) REFERENCES portal (dcid, receiver) ON DELETE CASCADE
++);
+diff --git a/main.go b/main.go
+index 44f9f39..7eae2e4 100644
+--- a/main.go
++++ b/main.go
+@@ -173,6 +173,15 @@ func (br *DiscordBridge) CreatePrivatePortal(id id.RoomID, user bridge.User, gho
+ 	//TODO implement
+ }
+ 
++// GetLoggedInUserForPortal returns any logged-in Discord user for cross-bridge Matrix reactions.
++func (br *DiscordBridge) GetLoggedInUserForPortal(roomID id.RoomID) bridge.User {
++	portal := br.GetPortalByMXID(roomID)
++	if portal == nil {
++		return nil
++	}
++	return portal.reactionSessionUser(nil)
++}
++
+ func main() {
+ 	br := &DiscordBridge{
+ 		usersByMXID: make(map[id.UserID]*User),
+diff --git a/pkg/reactionmirror/aggregate.go b/pkg/reactionmirror/aggregate.go
+new file mode 100644
+index 0000000..4dc5b3c
+--- /dev/null
++++ b/pkg/reactionmirror/aggregate.go
+@@ -0,0 +1,240 @@
++package reactionmirror
++
++import (
++	"context"
++	"fmt"
++	"net/url"
++	"sort"
++	"strings"
++
++	"maunium.net/go/mautrix"
++	"maunium.net/go/mautrix/event"
++	"maunium.net/go/mautrix/id"
++
++	"go.mau.fi/mautrix-discord/pkg/bridgeidentity"
++)
++
++const SummaryMarkerKey = "fi.mau.reaction_mirror_summary"
++
++type MatrixMemberLookup func(ctx context.Context, roomID id.RoomID, userID id.UserID) string
++
++type AggregatedReactions map[string][]string
++
++type relationsPage struct {
++	Chunk     []*event.Event `json:"chunk"`
++	NextBatch string         `json:"next_batch,omitempty"`
++}
++
++type relationsClient interface {
++	MakeFullRequest(params mautrix.FullRequest) ([]byte, error)
++}
++
++func FetchAnnotationRelations(ctx context.Context, client relationsClient, roomID id.RoomID, eventID id.EventID) ([]*event.Event, error) {
++	if client == nil {
++		return nil, fmt.Errorf("matrix client is nil")
++	}
++	var all []*event.Event
++	from := ""
++	for page := 0; page < 32; page++ {
++		path := fmt.Sprintf(
++			"/_matrix/client/v1/rooms/%s/relations/%s?rel_type=%s",
++			url.PathEscape(string(roomID)),
++			url.PathEscape(string(eventID)),
++			url.QueryEscape(string(event.RelAnnotation)),
++		)
++		if from != "" {
++			path += "&from=" + url.QueryEscape(from)
++		}
++		var resp relationsPage
++		_, err := client.MakeFullRequest(mautrix.FullRequest{
++			Method:       "GET",
++			URL:          path,
++			ResponseJSON: &resp,
++		})
++		if err != nil {
++			return nil, err
++		}
++		for _, evt := range resp.Chunk {
++			if evt.Type == event.EventReaction {
++				_ = evt.Content.ParseRaw(evt.Type)
++				all = append(all, evt)
++			}
++		}
++		if resp.NextBatch == "" {
++			break
++		}
++		from = resp.NextBatch
++	}
++	return all, nil
++}
++
++func EmojiDisplayKey(evt *event.Event) string {
++	content, ok := evt.Content.Parsed.(*event.ReactionEventContent)
++	if !ok || content == nil {
++		return ""
++	}
++	key := content.RelatesTo.Key
++	if key == "" {
++		return ""
++	}
++	if strings.HasPrefix(key, "mxc://") {
++		if sc, ok := evt.Content.Raw["com.beeper.reaction.shortcode"].(string); ok && sc != "" {
++			return sc
++		}
++		if slackRx, ok := evt.Content.Raw["fi.mau.slack.reaction"].(map[string]any); ok {
++			if name, ok := slackRx["name"].(string); ok && name != "" {
++				return ":" + name + ":"
++			}
++		}
++		if discordRx, ok := evt.Content.Raw["fi.mau.discord.reaction"].(map[string]any); ok {
++			if name, ok := discordRx["name"].(string); ok && name != "" {
++				return ":" + name + ":"
++			}
++		}
++		return ":emoji:"
++	}
++	return key
++}
++
++func shouldSkipSender(sender id.UserID, excludeMXIDs []id.UserID, excludeNetworkNames func(id.UserID) bool) bool {
++	if bridgeidentity.IsDiscordBridgeBot(sender) || bridgeidentity.IsSlackBridgeBot(sender) {
++		return true
++	}
++	for _, excluded := range excludeMXIDs {
++		if excluded == sender {
++			return true
++		}
++	}
++	if excludeNetworkNames != nil && excludeNetworkNames(sender) {
++		return true
++	}
++	return false
++}
++
++func AggregateReactions(
++	ctx context.Context,
++	client relationsClient,
++	roomID id.RoomID,
++	targetMXID id.EventID,
++	lookup MatrixMemberLookup,
++	excludeMXIDs []id.UserID,
++	excludeNetworkNames func(id.UserID) bool,
++) (AggregatedReactions, error) {
++	events, err := FetchAnnotationRelations(ctx, client, roomID, targetMXID)
++	if err != nil {
++		return nil, err
++	}
++	type emojiBucket struct {
++		order []string
++		names map[string]string
++	}
++	buckets := make(map[string]*emojiBucket)
++	for _, evt := range events {
++		if evt.Unsigned.RedactedBecause != nil {
++			continue
++		}
++		if shouldSkipSender(evt.Sender, excludeMXIDs, excludeNetworkNames) {
++			continue
++		}
++		emoji := EmojiDisplayKey(evt)
++		if emoji == "" {
++			continue
++		}
++		bucket := buckets[emoji]
++		if bucket == nil {
++			bucket = &emojiBucket{names: make(map[string]string)}
++			buckets[emoji] = bucket
++		}
++		identityKey := bridgeidentity.LinkedIdentityKey(evt.Sender)
++		if _, exists := bucket.names[identityKey]; exists {
++			continue
++		}
++		name := lookup(ctx, roomID, evt.Sender)
++		if name == "" {
++			name = string(evt.Sender)
++		}
++		bucket.names[identityKey] = name
++		bucket.order = append(bucket.order, identityKey)
++	}
++	out := make(AggregatedReactions, len(buckets))
++	for emoji, bucket := range buckets {
++		names := make([]string, 0, len(bucket.order))
++		for _, key := range bucket.order {
++			names = append(names, bucket.names[key])
++		}
++		out[emoji] = names
++	}
++	return out, nil
++}
++
++func FormatSummary(reactions AggregatedReactions) string {
++	if len(reactions) == 0 {
++		return "Reactions\n(none)"
++	}
++	emojis := make([]string, 0, len(reactions))
++	for emoji := range reactions {
++		emojis = append(emojis, emoji)
++	}
++	sort.Strings(emojis)
++	var b strings.Builder
++	b.WriteString("Reactions\n")
++	for _, emoji := range emojis {
++		names := reactions[emoji]
++		b.WriteString(emoji)
++		b.WriteString(" — ")
++		b.WriteString(strings.Join(names, ", "))
++		if len(names) > 1 {
++			fmt.Fprintf(&b, " (%d)", len(names))
++		}
++		b.WriteByte('\n')
++	}
++	return strings.TrimRight(b.String(), "\n")
++}
++
++func IsSlackBridgeGhost(mxid id.UserID) bool {
++	return bridgeidentity.ParseSlackGhostUserID(mxid) != ""
++}
++
++func IsDiscordBridgeGhost(mxid id.UserID) bool {
++	return bridgeidentity.ParseDiscordGhostMXID(mxid) != ""
++}
++
++func FirstCrossBridgeReaction(otherBridgeGhost func(id.UserID) bool, events []*event.Event) (emoji string, ok bool) {
++	sort.Slice(events, func(i, j int) bool {
++		return events[i].Timestamp < events[j].Timestamp
++	})
++	for _, evt := range events {
++		if evt.Unsigned.RedactedBecause != nil {
++			continue
++		}
++		if !otherBridgeGhost(evt.Sender) {
++			continue
++		}
++		emoji = EmojiDisplayKey(evt)
++		if emoji != "" {
++			return emoji, true
++		}
++	}
++	return "", false
++}
++
++func IsSummaryMessage(content map[string]any) bool {
++	if content == nil {
++		return false
++	}
++	marker, ok := content[SummaryMarkerKey].(bool)
++	return ok && marker
++}
++
++func SummaryMessageContent(body string) *event.MessageEventContent {
++	return &event.MessageEventContent{
++		MsgType: event.MsgNotice,
++		Body:    body,
++	}
++}
++
++func SummaryMessageRaw() map[string]any {
++	return map[string]any{
++		SummaryMarkerKey: true,
++	}
++}
+diff --git a/pkg/reactionmirror/debounce.go b/pkg/reactionmirror/debounce.go
+new file mode 100644
+index 0000000..cf561b3
+--- /dev/null
++++ b/pkg/reactionmirror/debounce.go
+@@ -0,0 +1,46 @@
++package reactionmirror
++
++import (
++	"sync"
++	"time"
++)
++
++type Debouncer struct {
++	delay time.Duration
++	mu    sync.Mutex
++	tasks map[string]*debounceTask
++}
++
++type debounceTask struct {
++	timer *time.Timer
++	fn    func()
++}
++
++func NewDebouncer(delay time.Duration) *Debouncer {
++	return &Debouncer{
++		delay: delay,
++		tasks: make(map[string]*debounceTask),
++	}
++}
++
++func (d *Debouncer) Schedule(key string, fn func()) {
++	d.mu.Lock()
++	defer d.mu.Unlock()
++	if task, ok := d.tasks[key]; ok {
++		task.timer.Stop()
++		task.fn = fn
++		task.timer.Reset(d.delay)
++		return
++	}
++	task := &debounceTask{fn: fn}
++	task.timer = time.AfterFunc(d.delay, func() {
++		d.mu.Lock()
++		current := d.tasks[key]
++		delete(d.tasks, key)
++		d.mu.Unlock()
++		if current != nil && current.fn != nil {
++			current.fn()
++		}
++	})
++	d.tasks[key] = task
++}
+diff --git a/portal.go b/portal.go
+index 3653a90..83af711 100644
+--- a/portal.go
++++ b/portal.go
+@@ -640,6 +640,10 @@ func (portal *Portal) handleDiscordMessageCreate(user *User, msg *discordgo.Mess
+ 		log.Debug().Msg("Dropping duplicate message")
+ 		return
+ 	}
++	if portal.shouldSkipReactionMirrorMessage(msg) {
++		log.Debug().Msg("Skipping reaction mirror summary message")
++		return
++	}
+ 
+ 	handlingStartTime := time.Now()
+ 	puppet := portal.bridge.GetPuppetByID(msg.Author.ID)
+@@ -1936,11 +1940,12 @@ func (portal *Portal) getMatrixUsers() ([]id.UserID, error) {
+ }
+ 
+ func (portal *Portal) handleMatrixReaction(sender *User, evt *event.Event) {
+-	if !sender.IsLoggedIn() {
++	botUser := portal.reactionSessionUser(nil)
++	if botUser == nil {
+ 		go portal.sendMessageMetrics(evt, errUserNotLoggedIn, "Ignoring")
+ 		return
+ 	}
+-	if portal.IsPrivateChat() && sender.DiscordID != portal.Key.Receiver {
++	if portal.IsPrivateChat() && botUser.DiscordID != portal.Key.Receiver {
+ 		go portal.sendMessageMetrics(evt, errUserNotReceiver, "Ignoring")
+ 		return
+ 	}
+@@ -1967,13 +1972,17 @@ func (portal *Portal) handleMatrixReaction(sender *User, evt *event.Event) {
+ 		return
+ 	}
+ 
++	if portal.isMatrixReactionCrossBridge(evt) {
++		portal.scheduleReactionMirrorRefresh(msg)
++		go portal.sendMessageMetrics(evt, nil, "")
++		return
++	}
++
+ 	firstMsg := msg
+ 	if msg.AttachmentID != "" {
+ 		firstMsg = portal.bridge.DB.Message.GetFirstByDiscordID(portal.Key, msg.DiscordID)
+-		// TODO should the emoji be rerouted to the first message if it's different?
+ 	}
+ 
+-	// Figure out if this is a custom emoji or not.
+ 	emojiID := reaction.RelatesTo.Key
+ 	if strings.HasPrefix(emojiID, "mxc://") {
+ 		uri, _ := id.ParseContentURI(emojiID)
+@@ -1990,7 +1999,7 @@ func (portal *Portal) handleMatrixReaction(sender *User, evt *event.Event) {
+ 		emojiID = variationselector.FullyQualify(emojiID)
+ 	}
+ 
+-	existing := portal.bridge.DB.Reaction.GetByDiscordID(portal.Key, msg.DiscordID, sender.DiscordID, emojiID)
++	existing := portal.bridge.DB.Reaction.GetByDiscordID(portal.Key, msg.DiscordID, botUser.DiscordID, emojiID)
+ 	if existing != nil {
+ 		portal.log.Debug().
+ 			Str("event_id", evt.ID.String()).
+@@ -2000,19 +2009,20 @@ func (portal *Portal) handleMatrixReaction(sender *User, evt *event.Event) {
+ 		return
+ 	}
+ 
+-	err := sender.Session.MessageReactionAddUser(portal.GuildID, msg.DiscordProtoChannelID(), msg.DiscordID, emojiID)
++	err := botUser.Session.MessageReactionAddUser(portal.GuildID, msg.DiscordProtoChannelID(), msg.DiscordID, emojiID)
+ 	go portal.sendMessageMetrics(evt, err, "Error sending")
+ 	if err == nil {
+ 		dbReaction := portal.bridge.DB.Reaction.New()
+ 		dbReaction.Channel = portal.Key
+ 		dbReaction.MessageID = msg.DiscordID
+ 		dbReaction.FirstAttachmentID = firstMsg.AttachmentID
+-		dbReaction.Sender = sender.DiscordID
++		dbReaction.Sender = botUser.DiscordID
+ 		dbReaction.EmojiName = emojiID
+ 		dbReaction.ThreadID = msg.ThreadID
+ 		dbReaction.MXID = evt.ID
+ 		dbReaction.Insert()
+ 	}
++	portal.scheduleReactionMirrorRefresh(msg)
+ }
+ 
+ func (portal *Portal) handleDiscordReaction(user *User, reaction *discordgo.MessageReaction, add bool, thread *Thread, member *discordgo.Member) {
+@@ -2067,6 +2077,7 @@ func (portal *Portal) handleDiscordReaction(user *User, reaction *discordgo.Mess
+ 		}
+ 
+ 		existing.Delete()
++		portal.scheduleReactionMirrorRefresh(message[0])
+ 		return
+ 	} else if existing != nil {
+ 		log.Debug().Msg("Ignoring duplicate reaction")
+@@ -2117,6 +2128,7 @@ func (portal *Portal) handleDiscordReaction(user *User, reaction *discordgo.Mess
+ 		dbReaction.Insert()
+ 		portal.sendDeliveryReceipt(dbReaction.MXID)
+ 	}
++	portal.scheduleReactionMirrorRefresh(message[0])
+ }
+ 
+ func (portal *Portal) handleMatrixRedaction(sender *User, evt *event.Event) {
+@@ -2157,10 +2169,21 @@ func (portal *Portal) handleMatrixRedaction(sender *User, evt *event.Event) {
+ 	if sess != nil {
+ 		reaction := portal.bridge.DB.Reaction.GetByMXID(evt.Redacts)
+ 		if reaction != nil && reaction.Channel == portal.Key {
++			redactedEvt, err := portal.MainIntent().GetEvent(portal.MXID, evt.Redacts)
++			if err == nil && redactedEvt != nil && portal.isMatrixReactionCrossBridge(redactedEvt) {
++				if msg := portal.bridge.DB.Message.GetFirstByDiscordID(portal.Key, reaction.MessageID); msg != nil {
++					portal.scheduleReactionMirrorRefresh(msg)
++				}
++				go portal.sendMessageMetrics(evt, nil, "")
++				return
++			}
+ 			err := sess.MessageReactionRemoveUser(portal.GuildID, reaction.DiscordProtoChannelID(), reaction.MessageID, reaction.EmojiName, reaction.Sender)
+ 			go portal.sendMessageMetrics(evt, err, "Error sending")
+ 			if err == nil {
+ 				reaction.Delete()
++				if msg := portal.bridge.DB.Message.GetFirstByDiscordID(portal.Key, reaction.MessageID); msg != nil {
++					portal.scheduleReactionMirrorRefresh(msg)
++				}
+ 			}
+ 			return
+ 		}
+diff --git a/reaction_mirror.go b/reaction_mirror.go
+new file mode 100644
+index 0000000..18071b1
+--- /dev/null
++++ b/reaction_mirror.go
+@@ -0,0 +1,206 @@
++package main
++
++import (
++	"context"
++	"fmt"
++	"strings"
++
++	"github.com/bwmarrin/discordgo"
++	"maunium.net/go/mautrix/event"
++	"maunium.net/go/mautrix/id"
++	"go.mau.fi/util/variationselector"
++
++	"go.mau.fi/mautrix-discord/database"
++	"go.mau.fi/mautrix-discord/pkg/reactionmirror"
++)
++
++var discordReactionMirrorDebouncer = reactionmirror.NewDebouncer(300 * time.Millisecond)
++
++func (portal *Portal) reactionMirrorBotUser() *User {
++	return portal.reactionSessionUser(nil)
++}
++
++func (portal *Portal) scheduleReactionMirrorRefresh(msg *database.Message) {
++	if msg == nil {
++		return
++	}
++	key := portal.Key.ChannelID + "/" + msg.DiscordID
++	discordReactionMirrorDebouncer.Schedule(key, func() {
++		portal.refreshReactionMirror(msg)
++	})
++}
++
++func (portal *Portal) matrixMemberDisplayName(_ context.Context, userID id.UserID) string {
++	if puppet := portal.bridge.GetPuppetByMXID(userID); puppet != nil && puppet.Name != "" {
++		return puppet.Name
++	}
++	if member := portal.bridge.StateStore.GetMember(portal.MXID, userID); member != nil && member.Displayname != "" {
++		return member.Displayname
++	}
++	return ""
++}
++
++func matrixEmojiToDiscordID(portal *Portal, evt *event.Event) string {
++	content, ok := evt.Content.Parsed.(*event.ReactionEventContent)
++	if !ok || content == nil {
++		return ""
++	}
++	key := content.RelatesTo.Key
++	if strings.HasPrefix(key, "mxc://") {
++		uri, _ := id.ParseContentURI(key)
++		if emojiInfo := portal.bridge.DMA.GetEmojiInfo(uri); emojiInfo != nil {
++			return fmt.Sprintf("%s:%d", emojiInfo.Name, emojiInfo.EmojiID)
++		}
++		if emojiFile := portal.bridge.DB.File.GetEmojiByMXC(uri); emojiFile != nil && emojiFile.ID != "" && emojiFile.EmojiName != "" {
++			return fmt.Sprintf("%s:%s", emojiFile.EmojiName, emojiFile.ID)
++		}
++		return ""
++	}
++	return variationselector.FullyQualify(key)
++}
++
++func mirroredEmojiReactorCount(aggregated reactionmirror.AggregatedReactions, discordEmoji string) int {
++	for emoji, names := range aggregated {
++		if emojiMatchesMirror(emoji, discordEmoji) {
++			return len(names)
++		}
++	}
++	return 0
++}
++
++func emojiMatchesMirror(displayKey, discordEmoji string) bool {
++	if displayKey == discordEmoji {
++		return true
++	}
++	if strings.HasPrefix(displayKey, ":") {
++		name := strings.Trim(displayKey, ":")
++		return strings.HasPrefix(discordEmoji, name+":")
++	}
++	return variationselector.FullyQualify(displayKey) == discordEmoji
++}
++
++func (portal *Portal) refreshReactionMirror(msg *database.Message) {
++	botUser := portal.reactionMirrorBotUser()
++	if botUser == nil || botUser.Session == nil {
++		return
++	}
++	ctx := context.Background()
++	client := portal.MainIntent().Client
++	if client == nil {
++		client = portal.bridge.Bot
++	}
++	lookup := func(ctx context.Context, roomID id.RoomID, userID id.UserID) string {
++		return portal.matrixMemberDisplayName(ctx, userID)
++	}
++	aggregated, err := reactionmirror.AggregateReactions(ctx, client, portal.MXID, msg.MXID, lookup, nil, nil)
++	if err != nil {
++		portal.log.Err(err).Str("message_id", msg.DiscordID).Msg("Failed to aggregate reactions for mirror summary")
++		return
++	}
++
++	state := portal.bridge.DB.ReactionMirror.GetByMessage(portal.Key, msg.DiscordID)
++	if state == nil {
++		state = portal.bridge.DB.ReactionMirror.New()
++		state.Channel = portal.Key
++		state.MessageID = msg.DiscordID
++		state.TargetMXID = msg.MXID
++	}
++
++	events, err := reactionmirror.FetchAnnotationRelations(ctx, client, portal.MXID, msg.MXID)
++	if err != nil {
++		portal.log.Err(err).Msg("Failed to fetch reaction relations")
++		return
++	}
++
++	if state.MirroredEmoji == "" {
++		if _, ok := reactionmirror.FirstCrossBridgeReaction(reactionmirror.IsSlackBridgeGhost, events); ok {
++			for _, evt := range events {
++				if evt.Unsigned.RedactedBecause != nil || !reactionmirror.IsSlackBridgeGhost(evt.Sender) {
++					continue
++				}
++				if discordEmoji := matrixEmojiToDiscordID(portal, evt); discordEmoji != "" {
++					state.MirroredEmoji = discordEmoji
++					break
++				}
++			}
++		}
++	}
++
++	if state.MirroredEmoji != "" {
++		count := mirroredEmojiReactorCount(aggregated, state.MirroredEmoji)
++		if count > 0 {
++			_ = botUser.Session.MessageReactionAddUser(portal.GuildID, msg.DiscordProtoChannelID(), msg.DiscordID, state.MirroredEmoji)
++		} else {
++			_ = botUser.Session.MessageReactionRemoveUser(portal.GuildID, msg.DiscordProtoChannelID(), msg.DiscordID, state.MirroredEmoji, botUser.DiscordID)
++		}
++	}
++
++	summaryBody := reactionmirror.FormatSummary(aggregated)
++	threadID, summaryMsgID, err := portal.ensureReactionMirrorThread(botUser, msg, state, summaryBody)
++	if err != nil {
++		portal.log.Err(err).Msg("Failed to update reaction mirror summary thread")
++		return
++	}
++	state.SummaryThreadID = threadID
++	state.SummaryMessageID = summaryMsgID
++	state.TargetMXID = msg.MXID
++	state.Upsert()
++}
++
++func (portal *Portal) ensureReactionMirrorThread(botUser *User, msg *database.Message, state *database.ReactionMirrorState, body string) (threadID, summaryMsgID string, err error) {
++	if state.SummaryThreadID == "" {
++		ch, err := botUser.Session.MessageThreadStartComplex(portal.Key.ChannelID, msg.DiscordID, &discordgo.ThreadStart{
++			Name:                "Reactions",
++			AutoArchiveDuration: 24 * 60,
++			Type:                discordgo.ChannelTypeGuildPublicThread,
++			Location:            "Message",
++		}, portal.RefererOptIfUser(botUser.Session, "")...)
++		if err != nil {
++			return "", "", fmt.Errorf("start reaction thread: %w", err)
++		}
++		state.SummaryThreadID = ch.ID
++	}
++	threadID = state.SummaryThreadID
++	if state.SummaryMessageID == "" {
++		sent, err := botUser.Session.ChannelMessageSendComplex(threadID, &discordgo.MessageSend{
++			Content: body,
++		}, portal.RefererOptIfUser(botUser.Session, threadID)...)
++		if err != nil {
++			return threadID, "", fmt.Errorf("post reaction summary: %w", err)
++		}
++		return threadID, sent.ID, nil
++	}
++	_, err = botUser.Session.ChannelMessageEditComplex(&discordgo.MessageEdit{
++		Channel: threadID,
++		ID:      state.SummaryMessageID,
++		Content: &body,
++	}, portal.RefererOptIfUser(botUser.Session, threadID)...)
++	if err != nil {
++		return threadID, state.SummaryMessageID, fmt.Errorf("edit reaction summary: %w", err)
++	}
++	return threadID, state.SummaryMessageID, nil
++}
++
++func (portal *Portal) shouldSkipReactionMirrorMessage(msg *discordgo.Message) bool {
++	botUser := portal.reactionMirrorBotUser()
++	if botUser == nil || msg.Author == nil || msg.Author.ID != botUser.DiscordID {
++		return false
++	}
++	return portal.bridge.DB.ReactionMirror.IsMirrorThread(portal.Key, msg.ChannelID)
++}
++
++func (portal *Portal) reactionSessionUser(_ *User) *User {
++	lookupID := portal.Key.ChannelID
++	if portal.GuildID != "" {
++		lookupID = portal.GuildID
++	}
++	for _, mxid := range portal.bridge.DB.GetUsersInPortal(lookupID) {
++		u := portal.bridge.GetUserByMXID(mxid)
++		if u != nil && u.IsLoggedIn() && u.Session != nil {
++			return u
++		}
++	}
++	return portal.bridge.getLoggedInUserForPortal()
++}
++
++func (portal *Portal) isMatrixReactionCrossBridge(evt *event.Event) bool {
++	return reactionmirror.IsSlackBridgeGhost(evt.Sender) || reactionmirror.IsDiscordBridgeGhost(evt.Sender)
++}

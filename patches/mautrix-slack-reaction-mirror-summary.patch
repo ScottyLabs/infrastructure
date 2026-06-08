@@ -1,0 +1,596 @@
+diff --git a/pkg/connector/handlematrix.go b/pkg/connector/handlematrix.go
+index fc4530d..973681a 100644
+--- a/pkg/connector/handlematrix.go
++++ b/pkg/connector/handlematrix.go
+@@ -191,6 +191,10 @@ func (s *SlackClient) PreHandleMatrixReaction(ctx context.Context, msg *bridgev2
+ }
+ 
+ func (s *SlackClient) HandleMatrixReaction(ctx context.Context, msg *bridgev2.MatrixReaction) (reaction *database.Reaction, err error) {
++	if msg.Event != nil && s.Main.isMatrixReactionCrossBridge(msg.Event.Sender) {
++		s.Main.ReactionMirrorHook(ctx, msg.Portal, msg.TargetMessage.MXID)
++		return nil, nil
++	}
+ 	if s.Client == nil {
+ 		return nil, bridgev2.ErrNotLoggedIn
+ 	}
+@@ -206,6 +210,14 @@ func (s *SlackClient) HandleMatrixReaction(ctx context.Context, msg *bridgev2.Ma
+ }
+ 
+ func (s *SlackClient) HandleMatrixReactionRemove(ctx context.Context, msg *bridgev2.MatrixReactionRemove) error {
++	if msg.Event != nil && msg.TargetReaction != nil {
++		if targetMsg, err := s.UserLogin.Bridge.DB.Message.GetPartByID(ctx, msg.Portal.Receiver, msg.TargetReaction.MessageID, msg.TargetReaction.MessagePartID); err == nil && targetMsg != nil {
++			if msg.Event != nil && msg.TargetReaction != nil && s.Main.isMatrixReactionCrossBridge(msg.TargetReaction.SenderMXID) {
++				s.Main.ReactionMirrorHook(ctx, msg.Portal, targetMsg.MXID)
++				return nil
++			}
++		}
++	}
+ 	if s.Client == nil {
+ 		return bridgev2.ErrNotLoggedIn
+ 	}
+diff --git a/pkg/connector/handleslack.go b/pkg/connector/handleslack.go
+index cb8eb68..64fbd61 100644
+--- a/pkg/connector/handleslack.go
++++ b/pkg/connector/handleslack.go
+@@ -568,6 +568,9 @@ func (s *SlackMessage) GetType() bridgev2.RemoteEventType {
+ }
+ 
+ func (s *SlackMessage) ConvertMessage(ctx context.Context, portal *bridgev2.Portal, intent bridgev2.MatrixAPI) (*bridgev2.ConvertedMessage, error) {
++	if s.Client.Main.isReactionMirrorSummaryMessage(portal, &s.Data.Msg) {
++		return nil, fmt.Errorf("%w: reaction mirror summary", bridgev2.ErrIgnoringRemoteEvent)
++	}
+ 	return s.Client.Main.MsgConv.ToMatrix(ctx, portal, intent, s.Client.UserLogin, &s.Data.Msg), nil
+ }
+ 
+diff --git a/pkg/connector/reactionmirror.go b/pkg/connector/reactionmirror.go
+new file mode 100644
+index 0000000..7726263
+--- /dev/null
++++ b/pkg/connector/reactionmirror.go
+@@ -0,0 +1,235 @@
++package connector
++
++import (
++	"context"
++	"strings"
++	"time"
++
++	"github.com/rs/zerolog"
++	"github.com/slack-go/slack"
++	"maunium.net/go/mautrix"
++	"maunium.net/go/mautrix/bridgev2"
++	"maunium.net/go/mautrix/bridgev2/database"
++	"maunium.net/go/mautrix/bridgev2/matrix"
++	"maunium.net/go/mautrix/event"
++	"maunium.net/go/mautrix/id"
++
++	"go.mau.fi/mautrix-slack/pkg/emoji"
++	"go.mau.fi/mautrix-slack/pkg/reactionmirror"
++	"go.mau.fi/mautrix-slack/pkg/slackid"
++)
++
++var slackReactionMirrorDebouncer = reactionmirror.NewDebouncer(300 * time.Millisecond)
++
++func (s *SlackConnector) ReactionMirrorHook(ctx context.Context, portal *bridgev2.Portal, targetMXID id.EventID) {
++	if portal == nil || targetMXID == "" {
++		return
++	}
++	key := string(portal.ID) + "/" + string(targetMXID)
++	slackReactionMirrorDebouncer.Schedule(key, func() {
++		s.refreshReactionMirror(context.Background(), portal, targetMXID)
++	})
++}
++
++func (s *SlackConnector) relayClient(portal *bridgev2.Portal) *SlackClient {
++	if portal == nil || portal.Relay == nil {
++		return nil
++	}
++	sc, ok := portal.Relay.Client.(*SlackClient)
++	if !ok || sc == nil || sc.Client == nil {
++		return nil
++	}
++	return sc
++}
++
++func matrixReactionToSlackEmoji(evt *event.Event) string {
++	content, ok := evt.Content.Parsed.(*event.ReactionEventContent)
++	if !ok || content == nil {
++		return ""
++	}
++	key := content.RelatesTo.Key
++	if strings.HasPrefix(key, "mxc://") {
++		if discordRx, ok := evt.Content.Raw["fi.mau.discord.reaction"].(map[string]any); ok {
++			if name, ok := discordRx["name"].(string); ok {
++				return name
++			}
++		}
++		if slackRx, ok := evt.Content.Raw["fi.mau.slack.reaction"].(map[string]any); ok {
++			if name, ok := slackRx["name"].(string); ok {
++				return name
++			}
++		}
++		return ""
++	}
++	if sc := emoji.GetShortcode(key); sc != "" {
++		return sc
++	}
++	return key
++}
++
++func slackEmojiMatchesMirror(displayKey, mirrored string) bool {
++	if displayKey == mirrored {
++		return true
++	}
++	if strings.HasPrefix(displayKey, ":") {
++		return strings.Trim(displayKey, ":") == mirrored
++	}
++	if sc := emoji.GetShortcode(displayKey); sc != "" {
++		return sc == mirrored
++	}
++	return false
++}
++
++func mirroredEmojiReactorCountSlack(aggregated reactionmirror.AggregatedReactions, mirrored string) int {
++	for emoji, names := range aggregated {
++		if slackEmojiMatchesMirror(emoji, mirrored) {
++			return len(names)
++		}
++	}
++	return 0
++}
++
++func (s *SlackConnector) matrixRelationsClient() interface {
++	MakeFullRequest(params mautrix.FullRequest) ([]byte, error)
++} {
++	if as, ok := s.br.Bot.(*matrix.ASIntent); ok && as.Matrix != nil {
++		return as.Matrix
++	}
++	return nil
++}
++
++func (s *SlackConnector) refreshReactionMirror(ctx context.Context, portal *bridgev2.Portal, targetMXID id.EventID) {
++	relay := s.relayClient(portal)
++	if relay == nil {
++		return
++	}
++	targetMsg, err := s.br.DB.Message.GetPartByMXID(ctx, targetMXID)
++	if err != nil || targetMsg == nil {
++		return
++	}
++	_, channelID, parentTS, ok := slackid.ParseMessageID(targetMsg.ID)
++	if !ok {
++		return
++	}
++	meta := messageMetadata(targetMsg)
++	if meta == nil {
++		meta = &slackid.MessageMetadata{}
++	}
++
++	client := s.matrixRelationsClient()
++	if client == nil {
++		return
++	}
++	lookup := func(ctx context.Context, roomID id.RoomID, userID id.UserID) string {
++		if member, err := s.br.Matrix.GetMemberInfo(ctx, portal.MXID, userID); err == nil && member != nil && member.Displayname != "" {
++			return member.Displayname
++		}
++		return ""
++	}
++	aggregated, err := reactionmirror.AggregateReactions(ctx, client, portal.MXID, targetMXID, lookup, nil, func(sender id.UserID) bool {
++		if ghostID, ok := s.br.Matrix.ParseGhostMXID(sender); ok {
++			_, uid := slackid.ParseUserID(ghostID)
++			return uid != "" && strings.EqualFold(uid, relay.UserID)
++		}
++		return false
++	})
++	if err != nil {
++		zerolog.Ctx(ctx).Err(err).Msg("Failed to aggregate reactions for Slack mirror summary")
++		return
++	}
++
++	events, err := reactionmirror.FetchAnnotationRelations(ctx, client, portal.MXID, targetMXID)
++	if err != nil {
++		zerolog.Ctx(ctx).Err(err).Msg("Failed to fetch Matrix reaction relations")
++		return
++	}
++
++	if meta.MirroredEmoji == "" {
++		if _, ok := reactionmirror.FirstCrossBridgeReaction(reactionmirror.IsDiscordBridgeGhost, events); ok {
++			for _, evt := range events {
++				if evt.Unsigned.RedactedBecause != nil || !reactionmirror.IsDiscordBridgeGhost(evt.Sender) {
++					continue
++				}
++				if slackEmoji := matrixReactionToSlackEmoji(evt); slackEmoji != "" {
++					meta.MirroredEmoji = slackEmoji
++					break
++				}
++			}
++		}
++	}
++
++	itemRef := slack.ItemRef{Channel: channelID, Timestamp: parentTS}
++	if meta.MirroredEmoji != "" {
++		count := mirroredEmojiReactorCountSlack(aggregated, meta.MirroredEmoji)
++		if count > 0 {
++			_ = relay.Client.AddReactionContext(ctx, meta.MirroredEmoji, itemRef)
++		} else {
++			_ = relay.Client.RemoveReactionContext(ctx, meta.MirroredEmoji, itemRef)
++		}
++	}
++
++	summaryBody := reactionmirror.FormatSummary(aggregated)
++	threadTS, summaryTS, err := s.ensureSlackReactionMirrorThread(ctx, relay, channelID, parentTS, meta, summaryBody)
++	if err != nil {
++		zerolog.Ctx(ctx).Err(err).Msg("Failed to update Slack reaction mirror summary")
++		return
++	}
++	meta.SummaryThreadTS = threadTS
++	meta.SummaryMessageTS = summaryTS
++	targetMsg.Metadata = meta
++	_ = s.br.DB.Message.Update(ctx, targetMsg)
++}
++
++func messageMetadata(msg *database.Message) *slackid.MessageMetadata {
++	if msg == nil || msg.Metadata == nil {
++		return nil
++	}
++	meta, ok := msg.Metadata.(*slackid.MessageMetadata)
++	if !ok {
++		return nil
++	}
++	return meta
++}
++
++func (s *SlackConnector) ensureSlackReactionMirrorThread(
++	ctx context.Context,
++	relay *SlackClient,
++	channelID, parentTS string,
++	meta *slackid.MessageMetadata,
++	body string,
++) (threadTS, summaryTS string, err error) {
++	threadTS = parentTS
++	if meta.SummaryThreadTS != "" {
++		threadTS = meta.SummaryThreadTS
++	}
++	if meta.SummaryMessageTS == "" {
++		_, ts, err := relay.Client.PostMessageContext(ctx, channelID,
++			slack.MsgOptionText(body, false),
++			slack.MsgOptionTS(threadTS),
++		)
++		if err != nil {
++			return threadTS, "", err
++		}
++		if meta.SummaryThreadTS == "" {
++			meta.SummaryThreadTS = threadTS
++		}
++		return meta.SummaryThreadTS, ts, nil
++	}
++	_, _, _, err = relay.Client.UpdateMessageContext(ctx, channelID, meta.SummaryMessageTS, slack.MsgOptionText(body, false))
++	if err != nil {
++		return threadTS, meta.SummaryMessageTS, err
++	}
++	return threadTS, meta.SummaryMessageTS, nil
++}
++
++func (s *SlackConnector) isReactionMirrorSummaryMessage(portal *bridgev2.Portal, msg *slack.Msg) bool {
++	relay := s.relayClient(portal)
++	if relay == nil || msg == nil || msg.User != relay.UserID {
++		return false
++	}
++	return strings.HasPrefix(msg.Text, "Reactions") && msg.ThreadTimestamp != ""
++}
++
++func (s *SlackConnector) isMatrixReactionCrossBridge(sender id.UserID) bool {
++	return reactionmirror.IsDiscordBridgeGhost(sender) || reactionmirror.IsSlackBridgeGhost(sender)
++}
+diff --git a/pkg/reactionmirror/aggregate.go b/pkg/reactionmirror/aggregate.go
+new file mode 100644
+index 0000000..caad029
+--- /dev/null
++++ b/pkg/reactionmirror/aggregate.go
+@@ -0,0 +1,240 @@
++package reactionmirror
++
++import (
++	"context"
++	"fmt"
++	"net/url"
++	"sort"
++	"strings"
++
++	"maunium.net/go/mautrix"
++	"maunium.net/go/mautrix/event"
++	"maunium.net/go/mautrix/id"
++
++	"go.mau.fi/mautrix-slack/pkg/bridgeidentity"
++)
++
++const SummaryMarkerKey = "fi.mau.reaction_mirror_summary"
++
++type MatrixMemberLookup func(ctx context.Context, roomID id.RoomID, userID id.UserID) string
++
++type AggregatedReactions map[string][]string
++
++type relationsPage struct {
++	Chunk     []*event.Event `json:"chunk"`
++	NextBatch string         `json:"next_batch,omitempty"`
++}
++
++type relationsClient interface {
++	MakeFullRequest(params mautrix.FullRequest) ([]byte, error)
++}
++
++func FetchAnnotationRelations(ctx context.Context, client relationsClient, roomID id.RoomID, eventID id.EventID) ([]*event.Event, error) {
++	if client == nil {
++		return nil, fmt.Errorf("matrix client is nil")
++	}
++	var all []*event.Event
++	from := ""
++	for page := 0; page < 32; page++ {
++		path := fmt.Sprintf(
++			"/_matrix/client/v1/rooms/%s/relations/%s?rel_type=%s",
++			url.PathEscape(string(roomID)),
++			url.PathEscape(string(eventID)),
++			url.QueryEscape(string(event.RelAnnotation)),
++		)
++		if from != "" {
++			path += "&from=" + url.QueryEscape(from)
++		}
++		var resp relationsPage
++		_, err := client.MakeFullRequest(mautrix.FullRequest{
++			Method:       "GET",
++			URL:          path,
++			ResponseJSON: &resp,
++		})
++		if err != nil {
++			return nil, err
++		}
++		for _, evt := range resp.Chunk {
++			if evt.Type == event.EventReaction {
++				_ = evt.Content.ParseRaw(evt.Type)
++				all = append(all, evt)
++			}
++		}
++		if resp.NextBatch == "" {
++			break
++		}
++		from = resp.NextBatch
++	}
++	return all, nil
++}
++
++func EmojiDisplayKey(evt *event.Event) string {
++	content, ok := evt.Content.Parsed.(*event.ReactionEventContent)
++	if !ok || content == nil {
++		return ""
++	}
++	key := content.RelatesTo.Key
++	if key == "" {
++		return ""
++	}
++	if strings.HasPrefix(key, "mxc://") {
++		if sc, ok := evt.Content.Raw["com.beeper.reaction.shortcode"].(string); ok && sc != "" {
++			return sc
++		}
++		if slackRx, ok := evt.Content.Raw["fi.mau.slack.reaction"].(map[string]any); ok {
++			if name, ok := slackRx["name"].(string); ok && name != "" {
++				return ":" + name + ":"
++			}
++		}
++		if discordRx, ok := evt.Content.Raw["fi.mau.discord.reaction"].(map[string]any); ok {
++			if name, ok := discordRx["name"].(string); ok && name != "" {
++				return ":" + name + ":"
++			}
++		}
++		return ":emoji:"
++	}
++	return key
++}
++
++func shouldSkipSender(sender id.UserID, excludeMXIDs []id.UserID, excludeNetworkNames func(id.UserID) bool) bool {
++	if bridgeidentity.IsDiscordBridgeBot(sender) || bridgeidentity.IsSlackBridgeBot(sender) {
++		return true
++	}
++	for _, excluded := range excludeMXIDs {
++		if excluded == sender {
++			return true
++		}
++	}
++	if excludeNetworkNames != nil && excludeNetworkNames(sender) {
++		return true
++	}
++	return false
++}
++
++func AggregateReactions(
++	ctx context.Context,
++	client relationsClient,
++	roomID id.RoomID,
++	targetMXID id.EventID,
++	lookup MatrixMemberLookup,
++	excludeMXIDs []id.UserID,
++	excludeNetworkNames func(id.UserID) bool,
++) (AggregatedReactions, error) {
++	events, err := FetchAnnotationRelations(ctx, client, roomID, targetMXID)
++	if err != nil {
++		return nil, err
++	}
++	type emojiBucket struct {
++		order []string
++		names map[string]string
++	}
++	buckets := make(map[string]*emojiBucket)
++	for _, evt := range events {
++		if evt.Unsigned.RedactedBecause != nil {
++			continue
++		}
++		if shouldSkipSender(evt.Sender, excludeMXIDs, excludeNetworkNames) {
++			continue
++		}
++		emoji := EmojiDisplayKey(evt)
++		if emoji == "" {
++			continue
++		}
++		bucket := buckets[emoji]
++		if bucket == nil {
++			bucket = &emojiBucket{names: make(map[string]string)}
++			buckets[emoji] = bucket
++		}
++		identityKey := bridgeidentity.LinkedIdentityKey(evt.Sender)
++		if _, exists := bucket.names[identityKey]; exists {
++			continue
++		}
++		name := lookup(ctx, roomID, evt.Sender)
++		if name == "" {
++			name = string(evt.Sender)
++		}
++		bucket.names[identityKey] = name
++		bucket.order = append(bucket.order, identityKey)
++	}
++	out := make(AggregatedReactions, len(buckets))
++	for emoji, bucket := range buckets {
++		names := make([]string, 0, len(bucket.order))
++		for _, key := range bucket.order {
++			names = append(names, bucket.names[key])
++		}
++		out[emoji] = names
++	}
++	return out, nil
++}
++
++func FormatSummary(reactions AggregatedReactions) string {
++	if len(reactions) == 0 {
++		return "Reactions\n(none)"
++	}
++	emojis := make([]string, 0, len(reactions))
++	for emoji := range reactions {
++		emojis = append(emojis, emoji)
++	}
++	sort.Strings(emojis)
++	var b strings.Builder
++	b.WriteString("Reactions\n")
++	for _, emoji := range emojis {
++		names := reactions[emoji]
++		b.WriteString(emoji)
++		b.WriteString(" — ")
++		b.WriteString(strings.Join(names, ", "))
++		if len(names) > 1 {
++			fmt.Fprintf(&b, " (%d)", len(names))
++		}
++		b.WriteByte('\n')
++	}
++	return strings.TrimRight(b.String(), "\n")
++}
++
++func IsSlackBridgeGhost(mxid id.UserID) bool {
++	return bridgeidentity.ParseSlackGhostUserID(mxid) != ""
++}
++
++func IsDiscordBridgeGhost(mxid id.UserID) bool {
++	return bridgeidentity.ParseDiscordGhostMXID(mxid) != ""
++}
++
++func FirstCrossBridgeReaction(otherBridgeGhost func(id.UserID) bool, events []*event.Event) (emoji string, ok bool) {
++	sort.Slice(events, func(i, j int) bool {
++		return events[i].Timestamp < events[j].Timestamp
++	})
++	for _, evt := range events {
++		if evt.Unsigned.RedactedBecause != nil {
++			continue
++		}
++		if !otherBridgeGhost(evt.Sender) {
++			continue
++		}
++		emoji = EmojiDisplayKey(evt)
++		if emoji != "" {
++			return emoji, true
++		}
++	}
++	return "", false
++}
++
++func IsSummaryMessage(content map[string]any) bool {
++	if content == nil {
++		return false
++	}
++	marker, ok := content[SummaryMarkerKey].(bool)
++	return ok && marker
++}
++
++func SummaryMessageContent(body string) *event.MessageEventContent {
++	return &event.MessageEventContent{
++		MsgType: event.MsgNotice,
++		Body:    body,
++	}
++}
++
++func SummaryMessageRaw() map[string]any {
++	return map[string]any{
++		SummaryMarkerKey: true,
++	}
++}
+diff --git a/pkg/reactionmirror/debounce.go b/pkg/reactionmirror/debounce.go
+new file mode 100644
+index 0000000..cf561b3
+--- /dev/null
++++ b/pkg/reactionmirror/debounce.go
+@@ -0,0 +1,46 @@
++package reactionmirror
++
++import (
++	"sync"
++	"time"
++)
++
++type Debouncer struct {
++	delay time.Duration
++	mu    sync.Mutex
++	tasks map[string]*debounceTask
++}
++
++type debounceTask struct {
++	timer *time.Timer
++	fn    func()
++}
++
++func NewDebouncer(delay time.Duration) *Debouncer {
++	return &Debouncer{
++		delay: delay,
++		tasks: make(map[string]*debounceTask),
++	}
++}
++
++func (d *Debouncer) Schedule(key string, fn func()) {
++	d.mu.Lock()
++	defer d.mu.Unlock()
++	if task, ok := d.tasks[key]; ok {
++		task.timer.Stop()
++		task.fn = fn
++		task.timer.Reset(d.delay)
++		return
++	}
++	task := &debounceTask{fn: fn}
++	task.timer = time.AfterFunc(d.delay, func() {
++		d.mu.Lock()
++		current := d.tasks[key]
++		delete(d.tasks, key)
++		d.mu.Unlock()
++		if current != nil && current.fn != nil {
++			current.fn()
++		}
++	})
++	d.tasks[key] = task
++}
+diff --git a/pkg/slackid/dbmeta.go b/pkg/slackid/dbmeta.go
+index 6372777..5ccb809 100644
+--- a/pkg/slackid/dbmeta.go
++++ b/pkg/slackid/dbmeta.go
+@@ -42,4 +42,8 @@ type UserLoginMetadata struct {
+ type MessageMetadata struct {
+ 	CaptionMerged bool   `json:"caption_merged"`
+ 	LastEditTS    string `json:"last_edit_ts"`
++
++	MirroredEmoji       string `json:"mirrored_emoji,omitempty"`
++	SummaryThreadTS     string `json:"summary_thread_ts,omitempty"`
++	SummaryMessageTS    string `json:"summary_message_ts,omitempty"`
+ }
