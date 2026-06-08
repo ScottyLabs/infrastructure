@@ -1,10 +1,10 @@
 diff --git a/bridgev2/portal.go b/bridgev2/portal.go
 --- a/bridgev2/portal.go
 +++ b/bridgev2/portal.go
-@@ -1708,6 +1708,16 @@ func (portal *Portal) handleMatrixReaction(ctx context.Context, sender *UserLogi
- 	err = portal.Bridge.DB.Reaction.Upsert(ctx, dbReaction)
- 	if err != nil {
- 		log.Err(err).Msg("Failed to save reaction to database")
+@@ -1580,6 +1580,16 @@ func (portal *Portal) handleMatrixReaction(ctx context.Context, sender *UserLogi
+ 	} else if reactionTarget == nil {
+ 		log.Warn().Msg("Reaction target message not found in database")
+ 		return EventHandlingResultFailed.WithMSSError(fmt.Errorf("reaction %w", ErrTargetMessageNotFound))
  	}
 +	if hook, ok := portal.Bridge.Network.(interface {
 +		ReactionMirrorHook(ctx context.Context, portal *Portal, targetMXID id.EventID)
@@ -15,10 +15,10 @@ diff --git a/bridgev2/portal.go b/bridgev2/portal.go
 +			hook.ReactionMirrorHook(ctx, portal, reactionTarget.MXID)
 +		}
 +	}
- 	return EventHandlingResultSuccess.WithEventID(deterministicID)
- }
- 
-@@ -2538,6 +2543,15 @@ func (portal *Portal) handleMatrixRedaction(
+ 	caps := sender.Client.GetCapabilities(ctx, portal)
+ 	err = portal.autoAcceptMessageRequest(ctx, evt, sender, nil, caps)
+ 	if err != nil {
+@@ -2538,6 +2548,15 @@ func (portal *Portal) handleMatrixRedaction(
  	if err != nil {
  		log.Err(err).Msg("Failed to delete redacted event from database")
  	}
