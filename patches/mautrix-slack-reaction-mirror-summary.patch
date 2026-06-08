@@ -13,7 +13,18 @@ index fc4530d..973681a 100644
  	"go.mau.fi/mautrix-slack/pkg/slackid"
  )
  
-@@ -193,6 +194,10 @@ func (s *SlackClient) HandleMatrixReaction(ctx context.Context, msg *bridgev2.Ma
+@@ -168,6 +169,14 @@ func (s *SlackClient) PreHandleMatrixReaction(ctx context.Context, msg *bridgev2
+ func (s *SlackClient) PreHandleMatrixReaction(ctx context.Context, msg *bridgev2.MatrixReaction) (resp bridgev2.MatrixReactionPreResponse, err error) {
++	if msg.Event != nil && (reactionmirror.IsSlackBridgeGhost(msg.Event.Sender) || reactionmirror.IsDiscordBridgeGhost(msg.Event.Sender)) {
++		return bridgev2.MatrixReactionPreResponse{
++			SenderID: slackid.MakeUserID(s.TeamID, s.UserID),
++			Emoji:    msg.Content.RelatesTo.Key,
++		}, nil
++	}
+ 	key := msg.Content.RelatesTo.Key
+ 	var emojiID string
+ 	if strings.ContainsRune(key, ':') {
+@@ -190,6 +198,10 @@ func (s *SlackClient) HandleMatrixReaction(ctx context.Context, msg *bridgev2.Ma
  }
  
  func (s *SlackClient) HandleMatrixReaction(ctx context.Context, msg *bridgev2.MatrixReaction) (reaction *database.Reaction, err error) {
@@ -42,7 +53,7 @@ new file mode 100644
 index 0000000..7726263
 --- /dev/null
 +++ b/pkg/connector/reactionmirror.go
-@@ -0,0 +1,420 @@
+@@ -0,0 +1,520 @@
 +package connector
 +
 +import (
@@ -58,6 +69,7 @@ index 0000000..7726263
 +	"maunium.net/go/mautrix/bridgev2"
 +	"maunium.net/go/mautrix/bridgev2/database"
 +	"maunium.net/go/mautrix/bridgev2/matrix"
++	"maunium.net/go/mautrix/bridgev2/networkid"
 +	"maunium.net/go/mautrix/event"
 +	"maunium.net/go/mautrix/id"
 +
@@ -66,13 +78,13 @@ index 0000000..7726263
 +	"go.mau.fi/mautrix-slack/pkg/slackid"
 +)
 +
-+var slackReactionMirrorDebouncer = reactionmirror.NewDebouncer(300 * time.Millisecond)
++var slackReactionMirrorDebouncer = reactionmirror.NewDebouncer(800 * time.Millisecond)
 +var slackReactionMirrorErrorDebouncer = reactionmirror.NewDebouncer(2 * time.Minute)
 +var slackReactionMirrorLocks sync.Map
 +var slackReactionMirrorRefreshing sync.Map
 +
 +func (s *SlackConnector) reactionMirrorLockKey(ctx context.Context, portal *bridgev2.Portal, targetMXID id.EventID) string {
-+	_, _, channelID, parentTS, ok := s.loadReactionMirrorTarget(ctx, targetMXID)
++	_, _, channelID, parentTS, ok := s.resolveReactionMirrorTarget(ctx, portal, targetMXID)
 +	if ok && channelID != "" && parentTS != "" {
 +		return string(portal.ID) + "/" + channelID + "/" + parentTS
 +	}
@@ -226,7 +238,7 @@ index 0000000..7726263
 +}
 +
 +func (s *SlackConnector) refreshReactionMirror(ctx context.Context, portal *bridgev2.Portal, targetMXID id.EventID) {
-+	targetMsg, meta, channelID, parentTS, ok := s.loadReactionMirrorTarget(ctx, targetMXID)
++	targetMsg, meta, channelID, parentTS, ok := s.resolveReactionMirrorTarget(ctx, portal, targetMXID)
 +	if !ok {
 +		s.notifyReactionMirrorError(ctx, portal, "", "", "", "could not load bridged message")
 +		return
@@ -239,7 +251,7 @@ index 0000000..7726263
 +	lock.(*sync.Mutex).Lock()
 +	defer lock.(*sync.Mutex).Unlock()
 +
-+	targetMsg, meta, channelID, parentTS, ok = s.loadReactionMirrorTarget(ctx, targetMXID)
++	targetMsg, meta, channelID, parentTS, ok = s.resolveReactionMirrorTarget(ctx, portal, targetMXID)
 +	if !ok {
 +		s.notifyReactionMirrorError(ctx, portal, "", "", "", "could not load bridged message")
 +		return
@@ -261,19 +273,10 @@ index 0000000..7726263
 +		}
 +		return ""
 +	}
-+	aggregated, err := reactionmirror.AggregateReactions(ctx, client, portal.MXID, targetMXID, lookup, nil, func(sender id.UserID) bool {
-+		return isRelaySlackGhostMXID(s.br, relay, sender)
-+	})
++	aggregated, events, err := s.aggregateMirrorReactions(ctx, client, portal, targetMXID, lookup, relay)
 +	if err != nil {
 +		zerolog.Ctx(ctx).Err(err).Msg("Failed to aggregate reactions for Slack mirror summary")
 +		s.notifyReactionMirrorError(ctx, portal, channelID, parentTS, meta.SummaryThreadTS, fmt.Sprintf("aggregate reactions: %v", err))
-+		return
-+	}
-+
-+	events, err := reactionmirror.FetchAnnotationRelations(ctx, client, portal.MXID, targetMXID)
-+	if err != nil {
-+		zerolog.Ctx(ctx).Err(err).Msg("Failed to fetch Matrix reaction relations")
-+		s.notifyReactionMirrorError(ctx, portal, channelID, parentTS, meta.SummaryThreadTS, fmt.Sprintf("fetch reaction relations: %v", err))
 +		return
 +	}
 +
@@ -302,8 +305,7 @@ index 0000000..7726263
 +	}
 +	meta.SummaryThreadTS = threadTS
 +	meta.SummaryMessageTS = summaryTS
-+	targetMsg.Metadata = meta
-+	if err := s.br.DB.Message.Update(ctx, targetMsg); err != nil {
++	if err := s.persistReactionMirrorMetadata(ctx, portal, targetMsg.ID, meta); err != nil {
 +		zerolog.Ctx(ctx).Err(err).Msg("Failed to persist Slack reaction mirror metadata")
 +		return
 +	}
@@ -318,6 +320,41 @@ index 0000000..7726263
 +	}
 +}
 +
++func (s *SlackConnector) aggregateMirrorReactions(
++	ctx context.Context,
++	client reactionmirror.RelationsClient,
++	portal *bridgev2.Portal,
++	targetMXID id.EventID,
++	lookup reactionmirror.MatrixMemberLookup,
++	relay *SlackClient,
++) (reactionmirror.AggregatedReactions, []*event.Event, error) {
++	var aggregated reactionmirror.AggregatedReactions
++	var events []*event.Event
++	var err error
++	for attempt := 0; attempt < 6; attempt++ {
++		if attempt > 0 {
++			time.Sleep(time.Duration(attempt) * 200 * time.Millisecond)
++		}
++		events, err = reactionmirror.FetchAnnotationRelations(ctx, client, portal.MXID, targetMXID)
++		if err != nil {
++			return nil, nil, err
++		}
++		aggregated, err = reactionmirror.AggregateReactions(ctx, client, portal.MXID, targetMXID, lookup, nil, func(sender id.UserID) bool {
++			return isRelaySlackGhostMXID(s.br, relay, sender)
++		})
++		if err != nil {
++			return nil, nil, err
++		}
++		if len(events) == 0 {
++			continue
++		}
++		if len(aggregated) > 0 || attempt == 5 {
++			break
++		}
++	}
++	return aggregated, events, nil
++}
++
 +func messageMetadata(msg *database.Message) *slackid.MessageMetadata {
 +	if msg == nil || msg.Metadata == nil {
 +		return nil
@@ -329,7 +366,7 @@ index 0000000..7726263
 +	return meta
 +}
 +
-+func (s *SlackConnector) loadReactionMirrorTarget(ctx context.Context, targetMXID id.EventID) (*database.Message, *slackid.MessageMetadata, string, string, bool) {
++func (s *SlackConnector) resolveReactionMirrorTarget(ctx context.Context, portal *bridgev2.Portal, targetMXID id.EventID) (*database.Message, *slackid.MessageMetadata, string, string, bool) {
 +	targetMsg, err := s.br.DB.Message.GetPartByMXID(ctx, targetMXID)
 +	if err != nil || targetMsg == nil {
 +		return nil, nil, "", "", false
@@ -338,12 +375,63 @@ index 0000000..7726263
 +	if !ok {
 +		return nil, nil, "", "", false
 +	}
-+	meta := messageMetadata(targetMsg)
++	meta := s.mergeReactionMirrorMetadata(ctx, portal, targetMsg.ID, targetMsg)
 +	if meta == nil {
 +		meta = &slackid.MessageMetadata{}
 +		targetMsg.Metadata = meta
 +	}
 +	return targetMsg, meta, channelID, parentTS, true
++}
++
++func (s *SlackConnector) mergeReactionMirrorMetadata(ctx context.Context, portal *bridgev2.Portal, messageID networkid.MessageID, primary *database.Message) *slackid.MessageMetadata {
++	merged := messageMetadata(primary)
++	if merged == nil {
++		merged = &slackid.MessageMetadata{}
++	} else {
++		copy := *merged
++		merged = &copy
++	}
++	parts, err := s.br.DB.Message.GetAllPartsByID(ctx, portal.Receiver, messageID)
++	if err != nil {
++		return merged
++	}
++	for _, part := range parts {
++		pm := messageMetadata(part)
++		if pm == nil {
++			continue
++		}
++		if pm.SummaryMessageTS != "" {
++			merged.SummaryMessageTS = pm.SummaryMessageTS
++		}
++		if pm.SummaryThreadTS != "" {
++			merged.SummaryThreadTS = pm.SummaryThreadTS
++		}
++		if pm.MirroredEmoji != "" {
++			merged.MirroredEmoji = pm.MirroredEmoji
++		}
++	}
++	return merged
++}
++
++func (s *SlackConnector) persistReactionMirrorMetadata(ctx context.Context, portal *bridgev2.Portal, messageID networkid.MessageID, meta *slackid.MessageMetadata) error {
++	parts, err := s.br.DB.Message.GetAllPartsByID(ctx, portal.Receiver, messageID)
++	if err != nil {
++		return err
++	}
++	for _, part := range parts {
++		pm := messageMetadata(part)
++		if pm == nil {
++			pm = &slackid.MessageMetadata{}
++			part.Metadata = pm
++		}
++		pm.SummaryMessageTS = meta.SummaryMessageTS
++		pm.SummaryThreadTS = meta.SummaryThreadTS
++		pm.MirroredEmoji = meta.MirroredEmoji
++		if err := s.br.DB.Message.Update(ctx, part); err != nil {
++			return err
++		}
++	}
++	return nil
 +}
 +
 +func isReactionSummaryText(text string) bool {
