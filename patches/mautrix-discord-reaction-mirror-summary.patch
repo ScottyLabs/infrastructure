@@ -595,11 +595,12 @@ new file mode 100644
 index 0000000..18071b1
 --- /dev/null
 +++ b/reaction_mirror.go
-@@ -0,0 +1,310 @@
+@@ -0,0 +1,383 @@
 +package main
 +
 +import (
 +	"context"
++	"errors"
 +	"fmt"
 +	"strings"
 +	"time"
@@ -811,7 +812,8 @@ index 0000000..18071b1
 +}
 +
 +func (portal *Portal) ensureReactionMirrorThread(botUser *User, msg *database.Message, state *database.ReactionMirrorState, body string) (threadID, summaryMsgID string, err error) {
-+	if state.SummaryThreadID == "" {
++	threadID = portal.resolveReactionMirrorThreadID(botUser, msg, state)
++	if threadID == "" {
 +		ch, err := botUser.Session.MessageThreadStartComplex(portal.Key.ChannelID, msg.DiscordID, &discordgo.ThreadStart{
 +			Name:                "Reactions",
 +			AutoArchiveDuration: 24 * 60,
@@ -819,12 +821,22 @@ index 0000000..18071b1
 +			Location:            "Message",
 +		}, portal.RefererOptIfUser(botUser.Session, "")...)
 +		if err != nil {
-+			return "", "", fmt.Errorf("start reaction thread: %w", err)
++			if recovered := portal.recoverReactionMirrorThreadID(botUser, msg, err); recovered != "" {
++				threadID = recovered
++			} else {
++				return "", "", fmt.Errorf("start reaction thread: %w", err)
++			}
++		} else {
++			threadID = ch.ID
 +		}
-+		state.SummaryThreadID = ch.ID
 +	}
-+	threadID = state.SummaryThreadID
-+	if state.SummaryMessageID == "" {
++	state.SummaryThreadID = threadID
++
++	summaryMsgID = state.SummaryMessageID
++	if summaryMsgID == "" {
++		summaryMsgID = portal.findReactionSummaryMessage(botUser, threadID)
++	}
++	if summaryMsgID == "" {
 +		sent, err := botUser.Session.ChannelMessageSendComplex(threadID, &discordgo.MessageSend{
 +			Content: body,
 +		}, portal.RefererOptIfUser(botUser.Session, threadID)...)
@@ -835,13 +847,74 @@ index 0000000..18071b1
 +	}
 +	_, err = botUser.Session.ChannelMessageEditComplex(&discordgo.MessageEdit{
 +		Channel: threadID,
-+		ID:      state.SummaryMessageID,
++		ID:      summaryMsgID,
 +		Content: &body,
 +	}, portal.RefererOptIfUser(botUser.Session, threadID)...)
 +	if err != nil {
-+		return threadID, state.SummaryMessageID, fmt.Errorf("edit reaction summary: %w", err)
++		if found := portal.findReactionSummaryMessage(botUser, threadID); found != "" && found != summaryMsgID {
++			summaryMsgID = found
++			_, err = botUser.Session.ChannelMessageEditComplex(&discordgo.MessageEdit{
++				Channel: threadID,
++				ID:      summaryMsgID,
++				Content: &body,
++			}, portal.RefererOptIfUser(botUser.Session, threadID)...)
++		}
 +	}
-+	return threadID, state.SummaryMessageID, nil
++	if err != nil {
++		sent, sendErr := botUser.Session.ChannelMessageSendComplex(threadID, &discordgo.MessageSend{
++			Content: body,
++		}, portal.RefererOptIfUser(botUser.Session, threadID)...)
++		if sendErr != nil {
++			return threadID, summaryMsgID, fmt.Errorf("edit reaction summary: %w", err)
++		}
++		return threadID, sent.ID, nil
++	}
++	return threadID, summaryMsgID, nil
++}
++
++func (portal *Portal) resolveReactionMirrorThreadID(botUser *User, msg *database.Message, state *database.ReactionMirrorState) string {
++	if state.SummaryThreadID != "" {
++		return state.SummaryThreadID
++	}
++	if msg.ThreadID != "" {
++		return msg.ThreadID
++	}
++	if dbThread := portal.bridge.DB.Thread.GetByMatrixRootMsg(msg.MXID); dbThread != nil {
++		return dbThread.ID
++	}
++	return portal.fetchReactionMirrorThreadFromMessage(botUser, msg)
++}
++
++func (portal *Portal) recoverReactionMirrorThreadID(botUser *User, msg *database.Message, startErr error) string {
++	var restErr *discordgo.RESTError
++	if !errors.As(startErr, &restErr) || restErr.Message == nil || restErr.Message.Code != discordgo.ErrCodeThreadAlreadyCreatedForThisMessage {
++		return ""
++	}
++	return portal.fetchReactionMirrorThreadFromMessage(botUser, msg)
++}
++
++func (portal *Portal) fetchReactionMirrorThreadFromMessage(botUser *User, msg *database.Message) string {
++	dmsg, err := botUser.Session.ChannelMessage(portal.Key.ChannelID, msg.DiscordID, portal.RefererOptIfUser(botUser.Session, "")...)
++	if err != nil || dmsg == nil || dmsg.Thread == nil {
++		return ""
++	}
++	return dmsg.Thread.ID
++}
++
++func (portal *Portal) findReactionSummaryMessage(botUser *User, threadID string) string {
++	messages, err := botUser.Session.ChannelMessages(threadID, 50, "", "", "", portal.RefererOptIfUser(botUser.Session, threadID)...)
++	if err != nil {
++		return ""
++	}
++	for _, message := range messages {
++		if message == nil {
++			continue
++		}
++		if strings.HasPrefix(message.Content, "Reactions\n") || strings.HasPrefix(message.Content, "Reaction summary error:") {
++			return message.ID
++		}
++	}
++	return ""
 +}
 +
 +func (portal *Portal) shouldSkipReactionMirrorMessage(msg *discordgo.Message) bool {
