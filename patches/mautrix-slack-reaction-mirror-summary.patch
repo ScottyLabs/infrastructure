@@ -140,7 +140,7 @@ index 0000000..7726263
 +}
 +
 +func (s *SlackConnector) matrixRelationsClient() interface {
-+	MakeFullRequest(params mautrix.FullRequest) ([]byte, error)
++	MakeFullRequest(ctx context.Context, params mautrix.FullRequest) ([]byte, error)
 +} {
 +	if as, ok := s.br.Bot.(*matrix.ASIntent); ok && as.Matrix != nil {
 +		return as.Matrix
@@ -317,7 +317,7 @@ index 0000000..caad029
 +}
 +
 +type relationsClient interface {
-+	MakeFullRequest(params mautrix.FullRequest) ([]byte, error)
++	MakeFullRequest(ctx context.Context, params mautrix.FullRequest) ([]byte, error)
 +}
 +
 +func FetchAnnotationRelations(ctx context.Context, client relationsClient, roomID id.RoomID, eventID id.EventID) ([]*event.Event, error) {
@@ -337,7 +337,7 @@ index 0000000..caad029
 +			path += "&from=" + url.QueryEscape(from)
 +		}
 +		var resp relationsPage
-+		_, err := client.MakeFullRequest(mautrix.FullRequest{
++		_, err := client.MakeFullRequest(ctx, mautrix.FullRequest{
 +			Method:       "GET",
 +			URL:          path,
 +			ResponseJSON: &resp,
