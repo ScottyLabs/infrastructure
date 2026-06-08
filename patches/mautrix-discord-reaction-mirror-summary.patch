@@ -152,7 +152,7 @@ new file mode 100644
 index 0000000..4dc5b3c
 --- /dev/null
 +++ b/pkg/reactionmirror/aggregate.go
-@@ -0,0 +1,264 @@
+@@ -0,0 +1,284 @@
 +package reactionmirror
 +
 +import (
@@ -615,7 +615,7 @@ new file mode 100644
 index 0000000..18071b1
 --- /dev/null
 +++ b/reaction_mirror.go
-@@ -0,0 +1,383 @@
+@@ -0,0 +1,391 @@
 +package main
 +
 +import (

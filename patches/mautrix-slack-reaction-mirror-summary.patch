@@ -2,7 +2,7 @@ diff --git a/pkg/connector/handlematrix.go b/pkg/connector/handlematrix.go
 index fc4530d..973681a 100644
 --- a/pkg/connector/handlematrix.go
 +++ b/pkg/connector/handlematrix.go
-@@ -28,8 +28,9 @@
+@@ -29,8 +30,9 @@
  	"maunium.net/go/mautrix/bridgev2/networkid"
  	"maunium.net/go/mautrix/event"
  
@@ -53,7 +53,7 @@ new file mode 100644
 index 0000000..7726263
 --- /dev/null
 +++ b/pkg/connector/reactionmirror.go
-@@ -0,0 +1,520 @@
+@@ -0,0 +1,518 @@
 +package connector
 +
 +import (
@@ -577,7 +577,7 @@ new file mode 100644
 index 0000000..caad029
 --- /dev/null
 +++ b/pkg/reactionmirror/aggregate.go
-@@ -0,0 +1,264 @@
+@@ -0,0 +1,271 @@
 +package reactionmirror
 +
 +import (
