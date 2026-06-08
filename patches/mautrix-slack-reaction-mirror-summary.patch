@@ -2,10 +2,7 @@ diff --git a/pkg/connector/handlematrix.go b/pkg/connector/handlematrix.go
 index fc4530d..973681a 100644
 --- a/pkg/connector/handlematrix.go
 +++ b/pkg/connector/handlematrix.go
-@@ -29,8 +30,9 @@
- 	"maunium.net/go/mautrix/bridgev2/networkid"
- 	"maunium.net/go/mautrix/event"
- 
+@@ -32,6 +33,7 @@
  	"go.mau.fi/mautrix-slack/pkg/connector/slackdb"
  	"go.mau.fi/mautrix-slack/pkg/emoji"
  	"go.mau.fi/mautrix-slack/pkg/msgconv"
@@ -13,7 +10,9 @@ index fc4530d..973681a 100644
  	"go.mau.fi/mautrix-slack/pkg/slackid"
  )
  
-@@ -168,6 +169,14 @@ func (s *SlackClient) PreHandleMatrixReaction(ctx context.Context, msg *bridgev2
+@@ -166,6 +167,12 @@
+ }
+ 
  func (s *SlackClient) PreHandleMatrixReaction(ctx context.Context, msg *bridgev2.MatrixReaction) (resp bridgev2.MatrixReactionPreResponse, err error) {
 +	if msg.Event != nil && (reactionmirror.IsSlackBridgeGhost(msg.Event.Sender) || reactionmirror.IsDiscordBridgeGhost(msg.Event.Sender)) {
 +		return bridgev2.MatrixReactionPreResponse{
@@ -24,7 +23,7 @@ index fc4530d..973681a 100644
  	key := msg.Content.RelatesTo.Key
  	var emojiID string
  	if strings.ContainsRune(key, ':') {
-@@ -190,6 +198,10 @@ func (s *SlackClient) HandleMatrixReaction(ctx context.Context, msg *bridgev2.Ma
+@@ -191,6 +198,9 @@
  }
  
  func (s *SlackClient) HandleMatrixReaction(ctx context.Context, msg *bridgev2.MatrixReaction) (reaction *database.Reaction, err error) {
