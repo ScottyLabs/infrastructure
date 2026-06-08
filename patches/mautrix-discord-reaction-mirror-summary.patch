@@ -595,7 +595,7 @@ new file mode 100644
 index 0000000..18071b1
 --- /dev/null
 +++ b/reaction_mirror.go
-@@ -0,0 +1,276 @@
+@@ -0,0 +1,310 @@
 +package main
 +
 +import (
@@ -853,17 +853,51 @@ index 0000000..18071b1
 +}
 +
 +func (portal *Portal) reactionSessionUser(_ *User) *User {
-+	lookupID := portal.Key.ChannelID
-+	if portal.GuildID != "" {
-+		lookupID = portal.GuildID
++	if u := portal.pickReactionMirrorUser(portal.bridge.DB.GetUsersInPortal(portal.reactionMirrorLookupID())); u != nil {
++		return u
 +	}
-+	for _, mxid := range portal.bridge.DB.GetUsersInPortal(lookupID) {
-+		u := portal.bridge.GetUserByMXID(mxid)
-+		if u != nil && u.IsLoggedIn() && u.Session != nil {
++	domain := portal.bridge.Config.Homeserver.Domain
++	for _, localpart := range reactionMirrorPreferredLocalparts {
++		if u := portal.bridge.GetUserByMXID(id.NewUserID(localpart, domain)); u != nil && u.IsLoggedIn() && u.Session != nil {
 +			return u
 +		}
 +	}
 +	return portal.bridge.getLoggedInUserForPortal()
++}
++
++var reactionMirrorPreferredLocalparts = []string{"reconciler", "bridge-bot", "thesuperrl"}
++
++func (portal *Portal) reactionMirrorLookupID() string {
++	if portal.GuildID != "" {
++		return portal.GuildID
++	}
++	return portal.Key.ChannelID
++}
++
++func (portal *Portal) pickReactionMirrorUser(candidates []id.UserID) *User {
++	inPortal := make(map[id.UserID]struct{}, len(candidates))
++	for _, mxid := range candidates {
++		inPortal[mxid] = struct{}{}
++	}
++	domain := portal.bridge.Config.Homeserver.Domain
++	for _, localpart := range reactionMirrorPreferredLocalparts {
++		mxid := id.NewUserID(localpart, domain)
++		if _, ok := inPortal[mxid]; !ok {
++			continue
++		}
++		if u := portal.bridge.GetUserByMXID(mxid); u != nil && u.IsLoggedIn() && u.Session != nil {
++			return u
++		}
++	}
++	for _, mxid := range candidates {
++		if mxid.Localpart() == "ap-1" {
++			continue
++		}
++		if u := portal.bridge.GetUserByMXID(mxid); u != nil && u.IsLoggedIn() && u.Session != nil {
++			return u
++		}
++	}
++	return nil
 +}
 +
 +func (portal *Portal) isMatrixReactionCrossBridge(evt *event.Event) bool {
