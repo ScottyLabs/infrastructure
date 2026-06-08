@@ -47,13 +47,14 @@ new file mode 100644
 index 0000000..7726263
 --- /dev/null
 +++ b/pkg/connector/reactionmirror.go
-@@ -0,0 +1,290 @@
+@@ -0,0 +1,339 @@
 +package connector
 +
 +import (
 +	"context"
 +	"fmt"
 +	"strings"
++	"sync"
 +	"time"
 +
 +	"github.com/rs/zerolog"
@@ -71,6 +72,7 @@ index 0000000..7726263
 +
 +var slackReactionMirrorDebouncer = reactionmirror.NewDebouncer(300 * time.Millisecond)
 +var slackReactionMirrorErrorDebouncer = reactionmirror.NewDebouncer(2 * time.Minute)
++var slackReactionMirrorLocks sync.Map
 +
 +func (s *SlackConnector) ReactionMirrorHook(ctx context.Context, portal *bridgev2.Portal, targetMXID id.EventID) {
 +	if portal == nil || targetMXID == "" {
@@ -189,27 +191,22 @@ index 0000000..7726263
 +}
 +
 +func (s *SlackConnector) refreshReactionMirror(ctx context.Context, portal *bridgev2.Portal, targetMXID id.EventID) {
++	lockKey := string(portal.ID) + "/" + string(targetMXID)
++	lock, _ := slackReactionMirrorLocks.LoadOrStore(lockKey, &sync.Mutex{})
++	lock.(*sync.Mutex).Lock()
++	defer lock.(*sync.Mutex).Unlock()
++
 +	relay := s.summarySlackClient(ctx, portal)
 +	if relay == nil {
 +		zerolog.Ctx(ctx).Warn().Str("portal_id", string(portal.ID)).Msg("Skipping Slack reaction mirror refresh: no relay or default relay login")
 +		s.notifyReactionMirrorError(ctx, portal, "", "", "", "no Slack relay login available")
 +		return
 +	}
-+	targetMsg, err := s.br.DB.Message.GetPartByMXID(ctx, targetMXID)
-+	if err != nil || targetMsg == nil {
++	targetMsg, meta, channelID, parentTS, ok := s.loadReactionMirrorTarget(ctx, targetMXID)
++	if !ok {
 +		s.notifyReactionMirrorError(ctx, portal, "", "", "", "could not load bridged message")
 +		return
 +	}
-+	_, channelID, parentTS, ok := slackid.ParseMessageID(targetMsg.ID)
-+	if !ok {
-+		s.notifyReactionMirrorError(ctx, portal, "", "", "", "invalid Slack message ID")
-+		return
-+	}
-+	meta := messageMetadata(targetMsg)
-+	if meta == nil {
-+		meta = &slackid.MessageMetadata{}
-+	}
-+
 +	client := s.matrixRelationsClient()
 +	if client == nil {
 +		s.notifyReactionMirrorError(ctx, portal, channelID, parentTS, meta.SummaryThreadTS, "no Matrix client")
@@ -289,6 +286,23 @@ index 0000000..7726263
 +	return meta
 +}
 +
++func (s *SlackConnector) loadReactionMirrorTarget(ctx context.Context, targetMXID id.EventID) (*database.Message, *slackid.MessageMetadata, string, string, bool) {
++	targetMsg, err := s.br.DB.Message.GetPartByMXID(ctx, targetMXID)
++	if err != nil || targetMsg == nil {
++		return nil, nil, "", "", false
++	}
++	_, channelID, parentTS, ok := slackid.ParseMessageID(targetMsg.ID)
++	if !ok {
++		return nil, nil, "", "", false
++	}
++	meta := messageMetadata(targetMsg)
++	if meta == nil {
++		meta = &slackid.MessageMetadata{}
++		targetMsg.Metadata = meta
++	}
++	return targetMsg, meta, channelID, parentTS, true
++}
++
 +func (s *SlackConnector) ensureSlackReactionMirrorThread(
 +	ctx context.Context,
 +	relay *SlackClient,
@@ -299,6 +313,9 @@ index 0000000..7726263
 +	threadTS = parentTS
 +	if meta.SummaryThreadTS != "" {
 +		threadTS = meta.SummaryThreadTS
++	}
++	if meta.SummaryMessageTS == "" {
++		meta.SummaryMessageTS = s.findSlackReactionSummaryMessage(ctx, relay, channelID, threadTS)
 +	}
 +	if meta.SummaryMessageTS == "" {
 +		_, ts, err := relay.Client.PostMessageContext(ctx, channelID,
@@ -315,9 +332,41 @@ index 0000000..7726263
 +	}
 +	_, _, _, err = relay.Client.UpdateMessageContext(ctx, channelID, meta.SummaryMessageTS, slack.MsgOptionText(body, false))
 +	if err != nil {
++		if found := s.findSlackReactionSummaryMessage(ctx, relay, channelID, threadTS); found != "" && found != meta.SummaryMessageTS {
++			meta.SummaryMessageTS = found
++			_, _, _, err = relay.Client.UpdateMessageContext(ctx, channelID, meta.SummaryMessageTS, slack.MsgOptionText(body, false))
++		}
++	}
++	if err != nil {
 +		return threadTS, meta.SummaryMessageTS, err
 +	}
++	if meta.SummaryThreadTS == "" {
++		meta.SummaryThreadTS = threadTS
++	}
 +	return threadTS, meta.SummaryMessageTS, nil
++}
++
++func (s *SlackConnector) findSlackReactionSummaryMessage(ctx context.Context, relay *SlackClient, channelID, threadTS string) string {
++	if relay == nil || relay.Client == nil || threadTS == "" {
++		return ""
++	}
++	resp, err := relay.Client.GetConversationRepliesContext(ctx, &slack.GetConversationRepliesParameters{
++		ChannelID: channelID,
++		Timestamp: threadTS,
++		Limit:     50,
++	})
++	if err != nil || resp == nil {
++		return ""
++	}
++	for _, msg := range resp.Messages {
++		if msg.User != relay.UserID {
++			continue
++		}
++		if strings.HasPrefix(msg.Text, "Reactions\n") || strings.HasPrefix(msg.Text, "Reaction summary error:") {
++			return msg.Timestamp
++		}
++	}
++	return ""
 +}
 +
 +func (s *SlackConnector) isReactionMirrorSummaryMessage(portal *bridgev2.Portal, msg *slack.Msg) bool {
