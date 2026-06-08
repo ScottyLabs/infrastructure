@@ -251,6 +251,9 @@ index 0000000..4dc5b3c
 +	if bridgeidentity.IsDiscordBridgeBot(sender) || bridgeidentity.IsSlackBridgeBot(sender) {
 +		return true
 +	}
++	if IsReactionMirrorOperator(sender) {
++		return true
++	}
 +	for _, excluded := range excludeMXIDs {
 +		if excluded == sender {
 +			return true
@@ -340,6 +343,18 @@ index 0000000..4dc5b3c
 +		b.WriteByte('\n')
 +	}
 +	return strings.TrimRight(b.String(), "\n")
++}
++
++func IsReactionMirrorOperator(mxid id.UserID) bool {
++	localpart, _, err := mxid.Parse()
++	if err != nil {
++		return false
++	}
++	switch strings.ToLower(localpart) {
++	case "reconciler", "bridge-bot", "ap-1":
++		return true
++	}
++	return false
 +}
 +
 +func IsSlackBridgeGhost(mxid id.UserID) bool {
