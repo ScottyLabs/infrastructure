@@ -376,6 +376,7 @@ index 0000000..caad029
 +
 +type relationsClient interface {
 +	MakeFullRequest(ctx context.Context, params mautrix.FullRequest) ([]byte, error)
++	BuildClientURL(urlPath ...any) string
 +}
 +
 +func FetchAnnotationRelations(ctx context.Context, client relationsClient, roomID id.RoomID, eventID id.EventID) ([]*event.Event, error) {
@@ -385,14 +386,9 @@ index 0000000..caad029
 +	var all []*event.Event
 +	from := ""
 +	for page := 0; page < 32; page++ {
-+		path := fmt.Sprintf(
-+			"/_matrix/client/v1/rooms/%s/relations/%s?rel_type=%s",
-+			url.PathEscape(string(roomID)),
-+			url.PathEscape(string(eventID)),
-+			url.QueryEscape(string(event.RelAnnotation)),
-+		)
++		path := client.BuildClientURL("v1", "rooms", roomID, "relations", eventID, event.RelAnnotation)
 +		if from != "" {
-+			path += "&from=" + url.QueryEscape(from)
++			path += "?from=" + url.QueryEscape(from)
 +		}
 +		var resp relationsPage
 +		_, err := client.MakeFullRequest(ctx, mautrix.FullRequest{
