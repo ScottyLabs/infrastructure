@@ -503,9 +503,11 @@ index 0000000..7726263
 +		return nil
 +	}
 +	resp, err := relay.Client.GetConversationRepliesContext(ctx, &slack.GetConversationRepliesParameters{
-+		ChannelID: channelID,
++		GetConversationHistoryParameters: slack.GetConversationHistoryParameters{
++			ChannelID: channelID,
++			Limit:     50,
++		},
 +		Timestamp: threadTS,
-+		Limit:     50,
 +	})
 +	if err != nil || resp == nil {
 +		return nil
@@ -541,7 +543,7 @@ index 0000000..7726263
 +		if ts == keep {
 +			continue
 +		}
-+		_, _, _, _ = relay.Client.DeleteMessageContext(ctx, channelID, ts)
++		_, _, _ = relay.Client.DeleteMessageContext(ctx, channelID, ts)
 +	}
 +	return keep
 +}
