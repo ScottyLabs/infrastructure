@@ -20,6 +20,7 @@ let
       ../../patches/mautrix-slack-room-ping.patch
       ../../patches/mautrix-bridge-identity-matrix-mxid.patch
       ../../patches/mautrix-bridge-identity-keycloak.patch
+      ../../patches/mautrix-slack-reaction-mirror-summary.patch
     ];
     postConfigure = (old.postConfigure or "") + ''
       mautrix_dir="vendor/maunium.net/go/mautrix"
@@ -28,6 +29,7 @@ let
       fi
       chmod -R u+w "$mautrix_dir"
       patch -p1 -d "$mautrix_dir" < ${../../patches/mautrix-bridgev2-relay-reactions.patch}
+      patch -p1 -d "$mautrix_dir" < ${../../patches/mautrix-bridgev2-reaction-mirror-hook.patch}
     '';
   });
   bridgePermissions =

@@ -23,7 +23,7 @@ let
       ../../patches/mautrix-bridge-identity-matrix-mxid.patch
       ../../patches/mautrix-bridge-identity-keycloak.patch
       ../../patches/mautrix-discord-bridge-identity-matrix-pings.patch
-      ../../patches/mautrix-discord-cross-bridge-reactions.patch
+      ../../patches/mautrix-discord-reaction-mirror-summary.patch
     ];
     postConfigure = (old.postConfigure or "") + ''
       mautrix_dir="vendor/maunium.net/go/mautrix"
