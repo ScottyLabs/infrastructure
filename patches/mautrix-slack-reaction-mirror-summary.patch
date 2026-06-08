@@ -47,11 +47,12 @@ new file mode 100644
 index 0000000..7726263
 --- /dev/null
 +++ b/pkg/connector/reactionmirror.go
-@@ -0,0 +1,259 @@
+@@ -0,0 +1,293 @@
 +package connector
 +
 +import (
 +	"context"
++	"fmt"
 +	"strings"
 +	"time"
 +
@@ -70,6 +71,7 @@ index 0000000..7726263
 +)
 +
 +var slackReactionMirrorDebouncer = reactionmirror.NewDebouncer(300 * time.Millisecond)
++var slackReactionMirrorErrorDebouncer = reactionmirror.NewDebouncer(2 * time.Minute)
 +
 +func (s *SlackConnector) ReactionMirrorHook(ctx context.Context, portal *bridgev2.Portal, targetMXID id.EventID) {
 +	if portal == nil || targetMXID == "" {
@@ -164,18 +166,46 @@ index 0000000..7726263
 +	return nil
 +}
 +
++func (s *SlackConnector) notifyReactionMirrorError(ctx context.Context, portal *bridgev2.Portal, channelID, parentTS, threadTS, summary string) {
++	if portal == nil || summary == "" {
++		return
++	}
++	key := string(portal.ID) + "/" + channelID + "/" + parentTS + "/error"
++	slackReactionMirrorErrorDebouncer.Schedule(key, func() {
++		relay := s.summarySlackClient(context.Background(), portal)
++		if relay == nil {
++			zerolog.Ctx(ctx).Warn().Str("summary", summary).Msg("Cannot post reaction mirror error to Slack: no relay login")
++			return
++		}
++		body := "Reaction summary error: " + summary
++		ts := threadTS
++		if ts == "" {
++			ts = parentTS
++		}
++		if _, _, err := relay.Client.PostMessageContext(context.Background(), channelID,
++			slack.MsgOptionText(body, false),
++			slack.MsgOptionTS(ts),
++		); err != nil {
++			zerolog.Ctx(ctx).Err(err).Str("summary", summary).Msg("Failed to post reaction mirror error to Slack")
++		}
++	})
++}
++
 +func (s *SlackConnector) refreshReactionMirror(ctx context.Context, portal *bridgev2.Portal, targetMXID id.EventID) {
 +	relay := s.summarySlackClient(ctx, portal)
 +	if relay == nil {
 +		zerolog.Ctx(ctx).Warn().Str("portal_id", string(portal.ID)).Msg("Skipping Slack reaction mirror refresh: no relay or default relay login")
++		s.notifyReactionMirrorError(ctx, portal, "", "", "", "no Slack relay login available")
 +		return
 +	}
 +	targetMsg, err := s.br.DB.Message.GetPartByMXID(ctx, targetMXID)
 +	if err != nil || targetMsg == nil {
++		s.notifyReactionMirrorError(ctx, portal, "", "", "", "could not load bridged message")
 +		return
 +	}
 +	_, channelID, parentTS, ok := slackid.ParseMessageID(targetMsg.ID)
 +	if !ok {
++		s.notifyReactionMirrorError(ctx, portal, "", "", "", "invalid Slack message ID")
 +		return
 +	}
 +	meta := messageMetadata(targetMsg)
@@ -185,6 +215,7 @@ index 0000000..7726263
 +
 +	client := s.matrixRelationsClient()
 +	if client == nil {
++		s.notifyReactionMirrorError(ctx, portal, channelID, parentTS, meta.SummaryThreadTS, "no Matrix client")
 +		return
 +	}
 +	lookup := func(ctx context.Context, roomID id.RoomID, userID id.UserID) string {
@@ -202,12 +233,14 @@ index 0000000..7726263
 +	})
 +	if err != nil {
 +		zerolog.Ctx(ctx).Err(err).Msg("Failed to aggregate reactions for Slack mirror summary")
++		s.notifyReactionMirrorError(ctx, portal, channelID, parentTS, meta.SummaryThreadTS, fmt.Sprintf("aggregate reactions: %v", err))
 +		return
 +	}
 +
 +	events, err := reactionmirror.FetchAnnotationRelations(ctx, client, portal.MXID, targetMXID)
 +	if err != nil {
 +		zerolog.Ctx(ctx).Err(err).Msg("Failed to fetch Matrix reaction relations")
++		s.notifyReactionMirrorError(ctx, portal, channelID, parentTS, meta.SummaryThreadTS, fmt.Sprintf("fetch reaction relations: %v", err))
 +		return
 +	}
 +
@@ -239,6 +272,7 @@ index 0000000..7726263
 +	threadTS, summaryTS, err := s.ensureSlackReactionMirrorThread(ctx, relay, channelID, parentTS, meta, summaryBody)
 +	if err != nil {
 +		zerolog.Ctx(ctx).Err(err).Msg("Failed to update Slack reaction mirror summary")
++		s.notifyReactionMirrorError(ctx, portal, channelID, parentTS, meta.SummaryThreadTS, fmt.Sprintf("update summary thread: %v", err))
 +		return
 +	}
 +	meta.SummaryThreadTS = threadTS
@@ -294,7 +328,7 @@ index 0000000..7726263
 +	if relay == nil || msg == nil || msg.User != relay.UserID {
 +		return false
 +	}
-+	return strings.HasPrefix(msg.Text, "Reactions") && msg.ThreadTimestamp != ""
++	return (strings.HasPrefix(msg.Text, "Reactions") || strings.HasPrefix(msg.Text, "Reaction summary error:")) && msg.ThreadTimestamp != ""
 +}
 +
 +func (s *SlackConnector) isMatrixReactionCrossBridge(evt *event.Event) bool {

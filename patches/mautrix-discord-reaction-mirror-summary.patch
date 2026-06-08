@@ -599,7 +599,7 @@ new file mode 100644
 index 0000000..18071b1
 --- /dev/null
 +++ b/reaction_mirror.go
-@@ -0,0 +1,217 @@
+@@ -0,0 +1,276 @@
 +package main
 +
 +import (
@@ -618,6 +618,7 @@ index 0000000..18071b1
 +)
 +
 +var discordReactionMirrorDebouncer = reactionmirror.NewDebouncer(300 * time.Millisecond)
++var discordReactionMirrorErrorDebouncer = reactionmirror.NewDebouncer(2 * time.Minute)
 +
 +func (portal *Portal) reactionMirrorBotUser() *User {
 +	return portal.reactionSessionUser(nil)
@@ -682,10 +683,65 @@ index 0000000..18071b1
 +	return variationselector.FullyQualify(displayKey) == discordEmoji
 +}
 +
++func (portal *Portal) notifyReactionMirrorError(msg *database.Message, state *database.ReactionMirrorState, summary string) {
++	if msg == nil || summary == "" {
++		return
++	}
++	key := portal.Key.ChannelID + "/" + msg.DiscordID + "/error"
++	discordReactionMirrorErrorDebouncer.Schedule(key, func() {
++		portal.postReactionMirrorError(msg, state, summary)
++	})
++}
++
++func (portal *Portal) postReactionMirrorError(msg *database.Message, state *database.ReactionMirrorState, summary string) {
++	body := fmt.Sprintf("Reaction summary error: %s", summary)
++	threadID := msg.ThreadID
++	if state != nil && state.SummaryThreadID != "" {
++		threadID = state.SummaryThreadID
++	}
++	channelID := msg.DiscordProtoChannelID()
++
++	botUser := portal.reactionMirrorBotUser()
++	if botUser != nil && botUser.Session != nil {
++		targetChannel := threadID
++		if targetChannel == "" {
++			targetChannel = channelID
++		}
++		send := &discordgo.MessageSend{Content: body}
++		if threadID == "" {
++			send.Reference = &discordgo.MessageReference{
++				MessageID: msg.DiscordID,
++				ChannelID: channelID,
++				GuildID:   portal.GuildID,
++			}
++		}
++		if _, err := botUser.Session.ChannelMessageSendComplex(targetChannel, send, portal.RefererOptIfUser(botUser.Session, threadID)...); err != nil {
++			portal.log.Err(err).Str("message_id", msg.DiscordID).Msg("Failed to post reaction mirror error to Discord")
++		}
++		return
++	}
++
++	if portal.RelayWebhookID == "" {
++		portal.log.Warn().Str("message_id", msg.DiscordID).Str("summary", summary).Msg("Cannot post reaction mirror error to Discord: no session or relay webhook")
++		return
++	}
++	params := &discordgo.WebhookParams{Content: body, Username: "Bridge"}
++	var err error
++	if threadID != "" {
++		_, err = relayClient.WebhookThreadExecute(portal.RelayWebhookID, portal.RelayWebhookSecret, true, threadID, params)
++	} else {
++		_, err = relayClient.WebhookExecute(portal.RelayWebhookID, portal.RelayWebhookSecret, true, params)
++	}
++	if err != nil {
++		portal.log.Err(err).Str("message_id", msg.DiscordID).Msg("Failed to post reaction mirror error via Discord relay webhook")
++	}
++}
++
 +func (portal *Portal) refreshReactionMirror(msg *database.Message) {
 +	botUser := portal.reactionMirrorBotUser()
 +	if botUser == nil || botUser.Session == nil {
 +		portal.log.Warn().Str("message_id", msg.DiscordID).Msg("Skipping reaction mirror refresh: no logged-in Discord session")
++		portal.notifyReactionMirrorError(msg, nil, "no logged-in Discord session")
 +		return
 +	}
 +	ctx := context.Background()
@@ -695,17 +751,12 @@ index 0000000..18071b1
 +	}
 +	if client == nil {
 +		portal.log.Warn().Str("message_id", msg.DiscordID).Msg("Skipping reaction mirror refresh: no Matrix client")
++		portal.notifyReactionMirrorError(msg, nil, "no Matrix client")
 +		return
 +	}
 +	lookup := func(ctx context.Context, roomID id.RoomID, userID id.UserID) string {
 +		return portal.matrixMemberDisplayName(ctx, userID)
 +	}
-+	aggregated, err := reactionmirror.AggregateReactions(ctx, client, portal.MXID, msg.MXID, lookup, nil, nil)
-+	if err != nil {
-+		portal.log.Err(err).Str("message_id", msg.DiscordID).Msg("Failed to aggregate reactions for mirror summary")
-+		return
-+	}
-+
 +	state := portal.bridge.DB.ReactionMirror.GetByMessage(portal.Key, msg.DiscordID)
 +	if state == nil {
 +		state = portal.bridge.DB.ReactionMirror.New()
@@ -713,10 +764,17 @@ index 0000000..18071b1
 +		state.MessageID = msg.DiscordID
 +		state.TargetMXID = msg.MXID
 +	}
++	aggregated, err := reactionmirror.AggregateReactions(ctx, client, portal.MXID, msg.MXID, lookup, nil, nil)
++	if err != nil {
++		portal.log.Err(err).Str("message_id", msg.DiscordID).Msg("Failed to aggregate reactions for mirror summary")
++		portal.notifyReactionMirrorError(msg, state, fmt.Sprintf("aggregate reactions: %v", err))
++		return
++	}
 +
 +	events, err := reactionmirror.FetchAnnotationRelations(ctx, client, portal.MXID, msg.MXID)
 +	if err != nil {
 +		portal.log.Err(err).Msg("Failed to fetch reaction relations")
++		portal.notifyReactionMirrorError(msg, state, fmt.Sprintf("fetch reaction relations: %v", err))
 +		return
 +	}
 +
@@ -747,6 +805,7 @@ index 0000000..18071b1
 +	threadID, summaryMsgID, err := portal.ensureReactionMirrorThread(botUser, msg, state, summaryBody)
 +	if err != nil {
 +		portal.log.Err(err).Msg("Failed to update reaction mirror summary thread")
++		portal.notifyReactionMirrorError(msg, state, fmt.Sprintf("update summary thread: %v", err))
 +		return
 +	}
 +	state.SummaryThreadID = threadID
