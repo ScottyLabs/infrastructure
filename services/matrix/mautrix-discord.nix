@@ -23,7 +23,16 @@ let
       ../../patches/mautrix-bridge-identity-matrix-mxid.patch
       ../../patches/mautrix-bridge-identity-keycloak.patch
       ../../patches/mautrix-discord-bridge-identity-matrix-pings.patch
+      ../../patches/mautrix-discord-cross-bridge-reactions.patch
     ];
+    postConfigure = (old.postConfigure or "") + ''
+      mautrix_dir="vendor/maunium.net/go/mautrix"
+      if [ ! -d "$mautrix_dir" ]; then
+        mautrix_dir="$(go list -m -f '{{.Dir}}' maunium.net/go/mautrix)"
+      fi
+      chmod -R u+w "$mautrix_dir"
+      patch -p1 -d "$mautrix_dir" < ${../../patches/mautrix-bridge-handle-reaction-ghosts.patch}
+    '';
   });
   bridgePermissions =
     {
