@@ -52,7 +52,7 @@ new file mode 100644
 index 0000000..7726263
 --- /dev/null
 +++ b/pkg/connector/reactionmirror.go
-@@ -0,0 +1,518 @@
+@@ -0,0 +1,520 @@
 +package connector
 +
 +import (
