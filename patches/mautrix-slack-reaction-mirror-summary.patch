@@ -47,7 +47,7 @@ new file mode 100644
 index 0000000..7726263
 --- /dev/null
 +++ b/pkg/connector/reactionmirror.go
-@@ -0,0 +1,293 @@
+@@ -0,0 +1,291 @@
 +package connector
 +
 +import (
@@ -157,11 +157,9 @@ index 0000000..7726263
 +	return 0
 +}
 +
-+func (s *SlackConnector) matrixRelationsClient() interface {
-+	MakeFullRequest(ctx context.Context, params mautrix.FullRequest) ([]byte, error)
-+} {
-+	if as, ok := s.br.Bot.(*matrix.ASIntent); ok && as.Matrix != nil {
-+		return as.Matrix
++func (s *SlackConnector) matrixRelationsClient() reactionmirror.RelationsClient {
++	if as, ok := s.br.Bot.(*matrix.ASIntent); ok && as.Matrix != nil && as.Matrix.Client != nil {
++		return as.Matrix.Client
 +	}
 +	return nil
 +}
@@ -346,13 +344,12 @@ new file mode 100644
 index 0000000..caad029
 --- /dev/null
 +++ b/pkg/reactionmirror/aggregate.go
-@@ -0,0 +1,268 @@
+@@ -0,0 +1,251 @@
 +package reactionmirror
 +
 +import (
 +	"context"
 +	"fmt"
-+	"net/url"
 +	"sort"
 +	"strings"
 +
@@ -369,32 +366,20 @@ index 0000000..caad029
 +
 +type AggregatedReactions map[string][]string
 +
-+type relationsPage struct {
-+	Chunk     []*event.Event `json:"chunk"`
-+	NextBatch string         `json:"next_batch,omitempty"`
++type RelationsClient interface {
++	GetRelations(ctx context.Context, roomID id.RoomID, eventID id.EventID, req *mautrix.ReqGetRelations) (*mautrix.RespGetRelations, error)
 +}
 +
-+type relationsClient interface {
-+	MakeFullRequest(ctx context.Context, params mautrix.FullRequest) ([]byte, error)
-+	BuildClientURL(urlPath ...any) string
-+}
-+
-+func FetchAnnotationRelations(ctx context.Context, client relationsClient, roomID id.RoomID, eventID id.EventID) ([]*event.Event, error) {
++func FetchAnnotationRelations(ctx context.Context, client RelationsClient, roomID id.RoomID, eventID id.EventID) ([]*event.Event, error) {
 +	if client == nil {
 +		return nil, fmt.Errorf("matrix client is nil")
 +	}
 +	var all []*event.Event
 +	from := ""
 +	for page := 0; page < 32; page++ {
-+		path := client.BuildClientURL("v1", "rooms", roomID, "relations", eventID, event.RelAnnotation)
-+		if from != "" {
-+			path += "?from=" + url.QueryEscape(from)
-+		}
-+		var resp relationsPage
-+		_, err := client.MakeFullRequest(ctx, mautrix.FullRequest{
-+			Method:       "GET",
-+			URL:          path,
-+			ResponseJSON: &resp,
++		resp, err := client.GetRelations(ctx, roomID, eventID, &mautrix.ReqGetRelations{
++			RelationType: event.RelAnnotation,
++			From:         from,
 +		})
 +		if err != nil {
 +			return nil, err
@@ -458,7 +443,7 @@ index 0000000..caad029
 +
 +func AggregateReactions(
 +	ctx context.Context,
-+	client relationsClient,
++	client RelationsClient,
 +	roomID id.RoomID,
 +	targetMXID id.EventID,
 +	lookup MatrixMemberLookup,
