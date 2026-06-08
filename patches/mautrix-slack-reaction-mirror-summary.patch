@@ -237,10 +237,27 @@ index 0000000..7726263
 +	})
 +}
 +
++func (s *SlackConnector) targetMessageHasMirrorReactionTrigger(ctx context.Context, portal *bridgev2.Portal, targetMXID id.EventID) bool {
++	as, ok := s.br.Bot.(*matrix.ASIntent)
++	if !ok || as.Matrix == nil || as.Matrix.Client == nil {
++		return false
++	}
++	evt, err := as.Matrix.Client.GetEvent(ctx, portal.MXID, targetMXID)
++	if err != nil || evt == nil {
++		return false
++	}
++	_ = evt.Content.ParseRaw(evt.Type)
++	content, ok := evt.Content.Parsed.(*event.MessageEventContent)
++	return ok && reactionmirror.MessageHasMirrorReactionTrigger(content.Body)
++}
++
 +func (s *SlackConnector) refreshReactionMirror(ctx context.Context, portal *bridgev2.Portal, targetMXID id.EventID) {
 +	targetMsg, meta, channelID, parentTS, ok := s.resolveReactionMirrorTarget(ctx, portal, targetMXID)
 +	if !ok {
 +		s.notifyReactionMirrorError(ctx, portal, "", "", "", "could not load bridged message")
++		return
++	}
++	if !s.targetMessageHasMirrorReactionTrigger(ctx, portal, targetMXID) {
 +		return
 +	}
 +	lockKey := string(portal.ID) + "/" + channelID + "/" + parentTS
@@ -577,6 +594,11 @@ index 0000000..caad029
 +)
 +
 +const SummaryMarkerKey = "fi.mau.reaction_mirror_summary"
++const MirrorReactionTrigger = "!mirror-reaction"
++
++func MessageHasMirrorReactionTrigger(text string) bool {
++	return strings.Contains(text, MirrorReactionTrigger)
++}
 +
 +type MatrixMemberLookup func(ctx context.Context, roomID id.RoomID, userID id.UserID) string
 +

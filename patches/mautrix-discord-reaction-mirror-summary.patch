@@ -170,6 +170,11 @@ index 0000000..4dc5b3c
 +)
 +
 +const SummaryMarkerKey = "fi.mau.reaction_mirror_summary"
++const MirrorReactionTrigger = "!mirror-reaction"
++
++func MessageHasMirrorReactionTrigger(text string) bool {
++	return strings.Contains(text, MirrorReactionTrigger)
++}
 +
 +type MatrixMemberLookup func(ctx context.Context, roomID id.RoomID, userID id.UserID) string
 +
@@ -764,6 +769,14 @@ index 0000000..18071b1
 +	if client == nil {
 +		portal.log.Warn().Str("message_id", msg.DiscordID).Msg("Skipping reaction mirror refresh: no Matrix client")
 +		portal.notifyReactionMirrorError(msg, nil, "no Matrix client")
++		return
++	}
++	targetEvt, err := client.GetEvent(portal.MXID, msg.MXID)
++	if err != nil {
++		return
++	}
++	_ = targetEvt.Content.ParseRaw(targetEvt.Type)
++	if content, ok := targetEvt.Content.Parsed.(*event.MessageEventContent); !ok || !reactionmirror.MessageHasMirrorReactionTrigger(content.Body) {
 +		return
 +	}
 +	lookup := func(ctx context.Context, roomID id.RoomID, userID id.UserID) string {
