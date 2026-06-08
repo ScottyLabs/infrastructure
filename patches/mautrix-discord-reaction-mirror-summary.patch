@@ -152,7 +152,7 @@ new file mode 100644
 index 0000000..4dc5b3c
 --- /dev/null
 +++ b/pkg/reactionmirror/aggregate.go
-@@ -0,0 +1,268 @@
+@@ -0,0 +1,264 @@
 +package reactionmirror
 +
 +import (
@@ -180,12 +180,12 @@ index 0000000..4dc5b3c
 +	NextBatch string         `json:"next_batch,omitempty"`
 +}
 +
-+type relationsClient interface {
++type RelationsClient interface {
 +	MakeFullRequest(params mautrix.FullRequest) ([]byte, error)
 +	BuildClientURL(urlPath ...any) string
 +}
 +
-+func FetchAnnotationRelations(ctx context.Context, client relationsClient, roomID id.RoomID, eventID id.EventID) ([]*event.Event, error) {
++func FetchAnnotationRelations(ctx context.Context, client RelationsClient, roomID id.RoomID, eventID id.EventID) ([]*event.Event, error) {
 +	if client == nil {
 +		return nil, fmt.Errorf("matrix client is nil")
 +	}
@@ -264,7 +264,7 @@ index 0000000..4dc5b3c
 +
 +func AggregateReactions(
 +	ctx context.Context,
-+	client relationsClient,
++	client RelationsClient,
 +	roomID id.RoomID,
 +	targetMXID id.EventID,
 +	lookup MatrixMemberLookup,
