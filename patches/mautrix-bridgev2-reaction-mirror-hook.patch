@@ -1,14 +1,19 @@
 diff --git a/bridgev2/portal.go b/bridgev2/portal.go
 --- a/bridgev2/portal.go
 +++ b/bridgev2/portal.go
-@@ -1708,6 +1708,11 @@ func (portal *Portal) handleMatrixReaction(ctx context.Context, sender *UserLogi
+@@ -1708,6 +1708,16 @@ func (portal *Portal) handleMatrixReaction(ctx context.Context, sender *UserLogi
+ 	err = portal.Bridge.DB.Reaction.Upsert(ctx, dbReaction)
  	if err != nil {
  		log.Err(err).Msg("Failed to save reaction to database")
  	}
 +	if hook, ok := portal.Bridge.Network.(interface {
 +		ReactionMirrorHook(ctx context.Context, portal *Portal, targetMXID id.EventID)
 +	}); ok {
-+		hook.ReactionMirrorHook(ctx, portal, reactionTarget.MXID)
++		if skipHook, ok := portal.Bridge.Network.(interface {
++			ShouldSkipReactionMirrorHook(ctx context.Context, portal *Portal, evt *event.Event) bool
++		}); !ok || !skipHook.ShouldSkipReactionMirrorHook(ctx, portal, evt) {
++			hook.ReactionMirrorHook(ctx, portal, reactionTarget.MXID)
++		}
 +	}
  	return EventHandlingResultSuccess.WithEventID(deterministicID)
  }
@@ -27,16 +32,4 @@ diff --git a/bridgev2/portal.go b/bridgev2/portal.go
 +		}
 +	}
  	return EventHandlingResultSuccess.WithMSS()
- }
- 
-@@ -3513,6 +3527,11 @@ func (portal *Portal) sendConvertedReaction(
- 		logContext(log.Err(err)).Msg("Failed to save reaction to database")
- 		return EventHandlingResultFailed.WithError(err)
- 	}
-+	if hook, ok := portal.Bridge.Network.(interface {
-+		ReactionMirrorHook(ctx context.Context, portal *Portal, targetMXID id.EventID)
-+	}); ok {
-+		hook.ReactionMirrorHook(ctx, portal, targetMessage.MXID)
-+	}
- 	return EventHandlingResultSuccess
  }

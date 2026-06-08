@@ -2,31 +2,26 @@ diff --git a/pkg/connector/handlematrix.go b/pkg/connector/handlematrix.go
 index fc4530d..973681a 100644
 --- a/pkg/connector/handlematrix.go
 +++ b/pkg/connector/handlematrix.go
-@@ -191,6 +191,10 @@ func (s *SlackClient) PreHandleMatrixReaction(ctx context.Context, msg *bridgev2
+@@ -28,8 +28,9 @@
+ 	"maunium.net/go/mautrix/bridgev2/networkid"
+ 	"maunium.net/go/mautrix/event"
+ 
+ 	"go.mau.fi/mautrix-slack/pkg/connector/slackdb"
+ 	"go.mau.fi/mautrix-slack/pkg/emoji"
+ 	"go.mau.fi/mautrix-slack/pkg/msgconv"
++	"go.mau.fi/mautrix-slack/pkg/reactionmirror"
+ 	"go.mau.fi/mautrix-slack/pkg/slackid"
+ )
+ 
+@@ -193,6 +194,10 @@ func (s *SlackClient) HandleMatrixReaction(ctx context.Context, msg *bridgev2.Ma
  }
  
  func (s *SlackClient) HandleMatrixReaction(ctx context.Context, msg *bridgev2.MatrixReaction) (reaction *database.Reaction, err error) {
-+	if msg.Event != nil && s.Main.isMatrixReactionCrossBridge(msg.Event) {
-+		s.Main.ReactionMirrorHook(ctx, msg.Portal, msg.TargetMessage.MXID)
++	if msg.Event != nil && (reactionmirror.IsSlackBridgeGhost(msg.Event.Sender) || reactionmirror.IsDiscordBridgeGhost(msg.Event.Sender)) {
 +		return nil, nil
 +	}
  	if s.Client == nil {
  		return nil, bridgev2.ErrNotLoggedIn
- 	}
-@@ -206,6 +210,14 @@ func (s *SlackClient) HandleMatrixReaction(ctx context.Context, msg *bridgev2.Ma
- }
- 
- func (s *SlackClient) HandleMatrixReactionRemove(ctx context.Context, msg *bridgev2.MatrixReactionRemove) error {
-+	if msg.Event != nil && msg.TargetReaction != nil {
-+		if targetMsg, err := s.UserLogin.Bridge.DB.Message.GetPartByID(ctx, msg.Portal.Receiver, msg.TargetReaction.MessageID, msg.TargetReaction.MessagePartID); err == nil && targetMsg != nil {
-+			if msg.Event != nil && msg.TargetReaction != nil && s.Main.isMatrixReactionCrossBridgeSender(msg.TargetReaction.SenderMXID) {
-+				s.Main.ReactionMirrorHook(ctx, msg.Portal, targetMsg.MXID)
-+				return nil
-+			}
-+		}
-+	}
- 	if s.Client == nil {
- 		return bridgev2.ErrNotLoggedIn
  	}
 diff --git a/pkg/connector/handleslack.go b/pkg/connector/handleslack.go
 index cb8eb68..64fbd61 100644
@@ -47,12 +42,13 @@ new file mode 100644
 index 0000000..7726263
 --- /dev/null
 +++ b/pkg/connector/reactionmirror.go
-@@ -0,0 +1,339 @@
+@@ -0,0 +1,420 @@
 +package connector
 +
 +import (
 +	"context"
 +	"fmt"
++	"sort"
 +	"strings"
 +	"sync"
 +	"time"
@@ -73,13 +69,52 @@ index 0000000..7726263
 +var slackReactionMirrorDebouncer = reactionmirror.NewDebouncer(300 * time.Millisecond)
 +var slackReactionMirrorErrorDebouncer = reactionmirror.NewDebouncer(2 * time.Minute)
 +var slackReactionMirrorLocks sync.Map
++var slackReactionMirrorRefreshing sync.Map
++
++func (s *SlackConnector) reactionMirrorLockKey(ctx context.Context, portal *bridgev2.Portal, targetMXID id.EventID) string {
++	_, _, channelID, parentTS, ok := s.loadReactionMirrorTarget(ctx, targetMXID)
++	if ok && channelID != "" && parentTS != "" {
++		return string(portal.ID) + "/" + channelID + "/" + parentTS
++	}
++	return string(portal.ID) + "/" + string(targetMXID)
++}
++
++func (s *SlackConnector) ShouldSkipReactionMirrorHook(ctx context.Context, portal *bridgev2.Portal, evt *event.Event) bool {
++	if evt == nil {
++		return false
++	}
++	if reactionmirror.IsReactionMirrorOperator(evt.Sender) {
++		return true
++	}
++	if relay := s.relayClient(portal); relay != nil && isRelaySlackGhostMXID(s.br, relay, evt.Sender) {
++		return true
++	}
++	return false
++}
++
++func isRelaySlackGhostMXID(br *bridgev2.Bridge, relay *SlackClient, sender id.UserID) bool {
++	if br == nil || relay == nil {
++		return false
++	}
++	if ghostID, ok := br.Matrix.ParseGhostMXID(sender); ok {
++		_, uid := slackid.ParseUserID(ghostID)
++		return uid != "" && strings.EqualFold(uid, relay.UserID)
++	}
++	return false
++}
 +
 +func (s *SlackConnector) ReactionMirrorHook(ctx context.Context, portal *bridgev2.Portal, targetMXID id.EventID) {
 +	if portal == nil || targetMXID == "" {
 +		return
 +	}
-+	key := string(portal.ID) + "/" + string(targetMXID)
++	key := s.reactionMirrorLockKey(ctx, portal, targetMXID)
++	if _, refreshing := slackReactionMirrorRefreshing.Load(key); refreshing {
++		return
++	}
 +	slackReactionMirrorDebouncer.Schedule(key, func() {
++		if _, refreshing := slackReactionMirrorRefreshing.Load(key); refreshing {
++			return
++		}
 +		s.refreshReactionMirror(context.Background(), portal, targetMXID)
 +	})
 +}
@@ -191,20 +226,28 @@ index 0000000..7726263
 +}
 +
 +func (s *SlackConnector) refreshReactionMirror(ctx context.Context, portal *bridgev2.Portal, targetMXID id.EventID) {
-+	lockKey := string(portal.ID) + "/" + string(targetMXID)
++	targetMsg, meta, channelID, parentTS, ok := s.loadReactionMirrorTarget(ctx, targetMXID)
++	if !ok {
++		s.notifyReactionMirrorError(ctx, portal, "", "", "", "could not load bridged message")
++		return
++	}
++	lockKey := string(portal.ID) + "/" + channelID + "/" + parentTS
++	slackReactionMirrorRefreshing.Store(lockKey, true)
++	defer slackReactionMirrorRefreshing.Delete(lockKey)
++
 +	lock, _ := slackReactionMirrorLocks.LoadOrStore(lockKey, &sync.Mutex{})
 +	lock.(*sync.Mutex).Lock()
 +	defer lock.(*sync.Mutex).Unlock()
 +
++	targetMsg, meta, channelID, parentTS, ok = s.loadReactionMirrorTarget(ctx, targetMXID)
++	if !ok {
++		s.notifyReactionMirrorError(ctx, portal, "", "", "", "could not load bridged message")
++		return
++	}
 +	relay := s.summarySlackClient(ctx, portal)
 +	if relay == nil {
 +		zerolog.Ctx(ctx).Warn().Str("portal_id", string(portal.ID)).Msg("Skipping Slack reaction mirror refresh: no relay or default relay login")
-+		s.notifyReactionMirrorError(ctx, portal, "", "", "", "no Slack relay login available")
-+		return
-+	}
-+	targetMsg, meta, channelID, parentTS, ok := s.loadReactionMirrorTarget(ctx, targetMXID)
-+	if !ok {
-+		s.notifyReactionMirrorError(ctx, portal, "", "", "", "could not load bridged message")
++		s.notifyReactionMirrorError(ctx, portal, channelID, parentTS, meta.SummaryThreadTS, "no Slack relay login available")
 +		return
 +	}
 +	client := s.matrixRelationsClient()
@@ -219,11 +262,7 @@ index 0000000..7726263
 +		return ""
 +	}
 +	aggregated, err := reactionmirror.AggregateReactions(ctx, client, portal.MXID, targetMXID, lookup, nil, func(sender id.UserID) bool {
-+		if ghostID, ok := s.br.Matrix.ParseGhostMXID(sender); ok {
-+			_, uid := slackid.ParseUserID(ghostID)
-+			return uid != "" && strings.EqualFold(uid, relay.UserID)
-+		}
-+		return false
++		return isRelaySlackGhostMXID(s.br, relay, sender)
 +	})
 +	if err != nil {
 +		zerolog.Ctx(ctx).Err(err).Msg("Failed to aggregate reactions for Slack mirror summary")
@@ -253,14 +292,6 @@ index 0000000..7726263
 +	}
 +
 +	itemRef := slack.ItemRef{Channel: channelID, Timestamp: parentTS}
-+	if meta.MirroredEmoji != "" {
-+		count := mirroredEmojiReactorCountSlack(aggregated, meta.MirroredEmoji)
-+		if count > 0 {
-+			_ = relay.Client.AddReactionContext(ctx, meta.MirroredEmoji, itemRef)
-+		} else {
-+			_ = relay.Client.RemoveReactionContext(ctx, meta.MirroredEmoji, itemRef)
-+		}
-+	}
 +
 +	summaryBody := reactionmirror.FormatSummary(aggregated)
 +	threadTS, summaryTS, err := s.ensureSlackReactionMirrorThread(ctx, relay, channelID, parentTS, meta, summaryBody)
@@ -272,7 +303,19 @@ index 0000000..7726263
 +	meta.SummaryThreadTS = threadTS
 +	meta.SummaryMessageTS = summaryTS
 +	targetMsg.Metadata = meta
-+	_ = s.br.DB.Message.Update(ctx, targetMsg)
++	if err := s.br.DB.Message.Update(ctx, targetMsg); err != nil {
++		zerolog.Ctx(ctx).Err(err).Msg("Failed to persist Slack reaction mirror metadata")
++		return
++	}
++
++	if meta.MirroredEmoji != "" {
++		count := mirroredEmojiReactorCountSlack(aggregated, meta.MirroredEmoji)
++		if count > 0 {
++			_ = relay.Client.AddReactionContext(ctx, meta.MirroredEmoji, itemRef)
++		} else {
++			_ = relay.Client.RemoveReactionContext(ctx, meta.MirroredEmoji, itemRef)
++		}
++	}
 +}
 +
 +func messageMetadata(msg *database.Message) *slackid.MessageMetadata {
@@ -303,6 +346,11 @@ index 0000000..7726263
 +	return targetMsg, meta, channelID, parentTS, true
 +}
 +
++func isReactionSummaryText(text string) bool {
++	text = strings.TrimSpace(text)
++	return strings.HasPrefix(text, "Reactions") || strings.HasPrefix(text, "Reaction summary error:")
++}
++
 +func (s *SlackConnector) ensureSlackReactionMirrorThread(
 +	ctx context.Context,
 +	relay *SlackClient,
@@ -314,10 +362,9 @@ index 0000000..7726263
 +	if meta.SummaryThreadTS != "" {
 +		threadTS = meta.SummaryThreadTS
 +	}
-+	if meta.SummaryMessageTS == "" {
-+		meta.SummaryMessageTS = s.findSlackReactionSummaryMessage(ctx, relay, channelID, threadTS)
-+	}
-+	if meta.SummaryMessageTS == "" {
++	summaryTS = s.dedupeSlackReactionSummaryMessages(ctx, relay, channelID, threadTS, meta.SummaryMessageTS)
++	meta.SummaryMessageTS = summaryTS
++	if summaryTS == "" {
 +		_, ts, err := relay.Client.PostMessageContext(ctx, channelID,
 +			slack.MsgOptionText(body, false),
 +			slack.MsgOptionTS(threadTS),
@@ -330,25 +377,26 @@ index 0000000..7726263
 +		}
 +		return meta.SummaryThreadTS, ts, nil
 +	}
-+	_, _, _, err = relay.Client.UpdateMessageContext(ctx, channelID, meta.SummaryMessageTS, slack.MsgOptionText(body, false))
++	_, _, _, err = relay.Client.UpdateMessageContext(ctx, channelID, summaryTS, slack.MsgOptionText(body, false))
 +	if err != nil {
-+		if found := s.findSlackReactionSummaryMessage(ctx, relay, channelID, threadTS); found != "" && found != meta.SummaryMessageTS {
-+			meta.SummaryMessageTS = found
-+			_, _, _, err = relay.Client.UpdateMessageContext(ctx, channelID, meta.SummaryMessageTS, slack.MsgOptionText(body, false))
++		if found := s.dedupeSlackReactionSummaryMessages(ctx, relay, channelID, threadTS, ""); found != "" && found != summaryTS {
++			summaryTS = found
++			meta.SummaryMessageTS = summaryTS
++			_, _, _, err = relay.Client.UpdateMessageContext(ctx, channelID, summaryTS, slack.MsgOptionText(body, false))
 +		}
 +	}
 +	if err != nil {
-+		return threadTS, meta.SummaryMessageTS, err
++		return threadTS, summaryTS, err
 +	}
 +	if meta.SummaryThreadTS == "" {
 +		meta.SummaryThreadTS = threadTS
 +	}
-+	return threadTS, meta.SummaryMessageTS, nil
++	return threadTS, summaryTS, nil
 +}
 +
-+func (s *SlackConnector) findSlackReactionSummaryMessage(ctx context.Context, relay *SlackClient, channelID, threadTS string) string {
++func (s *SlackConnector) findAllSlackReactionSummaryMessages(ctx context.Context, relay *SlackClient, channelID, threadTS string) []string {
 +	if relay == nil || relay.Client == nil || threadTS == "" {
-+		return ""
++		return nil
 +	}
 +	resp, err := relay.Client.GetConversationRepliesContext(ctx, &slack.GetConversationRepliesParameters{
 +		ChannelID: channelID,
@@ -356,25 +404,57 @@ index 0000000..7726263
 +		Limit:     50,
 +	})
 +	if err != nil || resp == nil {
-+		return ""
++		return nil
 +	}
++	var out []string
 +	for _, msg := range resp.Messages {
-+		if msg.User != relay.UserID {
++		if msg.Timestamp == threadTS {
 +			continue
 +		}
-+		if strings.HasPrefix(msg.Text, "Reactions\n") || strings.HasPrefix(msg.Text, "Reaction summary error:") {
-+			return msg.Timestamp
++		if isReactionSummaryText(msg.Text) {
++			out = append(out, msg.Timestamp)
 +		}
 +	}
-+	return ""
++	sort.Strings(out)
++	return out
++}
++
++func (s *SlackConnector) dedupeSlackReactionSummaryMessages(ctx context.Context, relay *SlackClient, channelID, threadTS, preferredTS string) string {
++	all := s.findAllSlackReactionSummaryMessages(ctx, relay, channelID, threadTS)
++	if len(all) == 0 {
++		return preferredTS
++	}
++	keep := all[0]
++	if preferredTS != "" {
++		for _, ts := range all {
++			if ts == preferredTS {
++				keep = ts
++				break
++			}
++		}
++	}
++	for _, ts := range all {
++		if ts == keep {
++			continue
++		}
++		_, _, _, _ = relay.Client.DeleteMessageContext(ctx, channelID, ts)
++	}
++	return keep
++}
++
++func (s *SlackConnector) findSlackReactionSummaryMessage(ctx context.Context, relay *SlackClient, channelID, threadTS string) string {
++	all := s.findAllSlackReactionSummaryMessages(ctx, relay, channelID, threadTS)
++	if len(all) == 0 {
++		return ""
++	}
++	return all[0]
 +}
 +
 +func (s *SlackConnector) isReactionMirrorSummaryMessage(portal *bridgev2.Portal, msg *slack.Msg) bool {
-+	relay := s.relayClient(portal)
-+	if relay == nil || msg == nil || msg.User != relay.UserID {
++	if msg == nil || msg.ThreadTimestamp == "" {
 +		return false
 +	}
-+	return (strings.HasPrefix(msg.Text, "Reactions") || strings.HasPrefix(msg.Text, "Reaction summary error:")) && msg.ThreadTimestamp != ""
++	return isReactionSummaryText(msg.Text)
 +}
 +
 +func (s *SlackConnector) isMatrixReactionCrossBridge(evt *event.Event) bool {
@@ -392,7 +472,7 @@ new file mode 100644
 index 0000000..caad029
 --- /dev/null
 +++ b/pkg/reactionmirror/aggregate.go
-@@ -0,0 +1,251 @@
+@@ -0,0 +1,264 @@
 +package reactionmirror
 +
 +import (
@@ -476,6 +556,9 @@ index 0000000..caad029
 +
 +func shouldSkipSender(sender id.UserID, excludeMXIDs []id.UserID, excludeNetworkNames func(id.UserID) bool) bool {
 +	if bridgeidentity.IsDiscordBridgeBot(sender) || bridgeidentity.IsSlackBridgeBot(sender) {
++		return true
++	}
++	if IsReactionMirrorOperator(sender) {
 +		return true
 +	}
 +	for _, excluded := range excludeMXIDs {
@@ -567,6 +650,18 @@ index 0000000..caad029
 +		b.WriteByte('\n')
 +	}
 +	return strings.TrimRight(b.String(), "\n")
++}
++
++func IsReactionMirrorOperator(mxid id.UserID) bool {
++	localpart, _, err := mxid.Parse()
++	if err != nil {
++		return false
++	}
++	switch strings.ToLower(localpart) {
++	case "reconciler", "bridge-bot", "ap-1":
++		return true
++	}
++	return false
 +}
 +
 +func IsSlackBridgeGhost(mxid id.UserID) bool {
