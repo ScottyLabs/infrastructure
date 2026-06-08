@@ -6,7 +6,7 @@ index fc4530d..973681a 100644
  }
  
  func (s *SlackClient) HandleMatrixReaction(ctx context.Context, msg *bridgev2.MatrixReaction) (reaction *database.Reaction, err error) {
-+	if msg.Event != nil && s.Main.isMatrixReactionCrossBridge(msg.Event.Sender) {
++	if msg.Event != nil && s.Main.isMatrixReactionCrossBridge(msg.Event) {
 +		s.Main.ReactionMirrorHook(ctx, msg.Portal, msg.TargetMessage.MXID)
 +		return nil, nil
 +	}
@@ -19,7 +19,7 @@ index fc4530d..973681a 100644
  func (s *SlackClient) HandleMatrixReactionRemove(ctx context.Context, msg *bridgev2.MatrixReactionRemove) error {
 +	if msg.Event != nil && msg.TargetReaction != nil {
 +		if targetMsg, err := s.UserLogin.Bridge.DB.Message.GetPartByID(ctx, msg.Portal.Receiver, msg.TargetReaction.MessageID, msg.TargetReaction.MessagePartID); err == nil && targetMsg != nil {
-+			if msg.Event != nil && msg.TargetReaction != nil && s.Main.isMatrixReactionCrossBridge(msg.TargetReaction.SenderMXID) {
++			if msg.Event != nil && msg.TargetReaction != nil && s.Main.isMatrixReactionCrossBridgeSender(msg.TargetReaction.SenderMXID) {
 +				s.Main.ReactionMirrorHook(ctx, msg.Portal, targetMsg.MXID)
 +				return nil
 +			}
@@ -47,7 +47,7 @@ new file mode 100644
 index 0000000..7726263
 --- /dev/null
 +++ b/pkg/connector/reactionmirror.go
-@@ -0,0 +1,235 @@
+@@ -0,0 +1,259 @@
 +package connector
 +
 +import (
@@ -79,6 +79,22 @@ index 0000000..7726263
 +	slackReactionMirrorDebouncer.Schedule(key, func() {
 +		s.refreshReactionMirror(context.Background(), portal, targetMXID)
 +	})
++}
++
++func (s *SlackConnector) summarySlackClient(ctx context.Context, portal *bridgev2.Portal) *SlackClient {
++	if sc := s.relayClient(portal); sc != nil {
++		return sc
++	}
++	for _, relayID := range s.br.Config.Relay.DefaultRelays {
++		login, err := s.br.GetExistingUserLoginByID(ctx, relayID)
++		if err != nil || login == nil || login.Client == nil {
++			continue
++		}
++		if sc, ok := login.Client.(*SlackClient); ok && sc.Client != nil {
++			return sc
++		}
++	}
++	return nil
 +}
 +
 +func (s *SlackConnector) relayClient(portal *bridgev2.Portal) *SlackClient {
@@ -149,8 +165,9 @@ index 0000000..7726263
 +}
 +
 +func (s *SlackConnector) refreshReactionMirror(ctx context.Context, portal *bridgev2.Portal, targetMXID id.EventID) {
-+	relay := s.relayClient(portal)
++	relay := s.summarySlackClient(ctx, portal)
 +	if relay == nil {
++		zerolog.Ctx(ctx).Warn().Str("portal_id", string(portal.ID)).Msg("Skipping Slack reaction mirror refresh: no relay or default relay login")
 +		return
 +	}
 +	targetMsg, err := s.br.DB.Message.GetPartByMXID(ctx, targetMXID)
@@ -195,9 +212,9 @@ index 0000000..7726263
 +	}
 +
 +	if meta.MirroredEmoji == "" {
-+		if _, ok := reactionmirror.FirstCrossBridgeReaction(reactionmirror.IsDiscordBridgeGhost, events); ok {
++		if _, ok := reactionmirror.FirstCrossBridgeReaction(reactionmirror.IsDiscordSourcedReaction, events); ok {
 +			for _, evt := range events {
-+				if evt.Unsigned.RedactedBecause != nil || !reactionmirror.IsDiscordBridgeGhost(evt.Sender) {
++				if evt.Unsigned.RedactedBecause != nil || !reactionmirror.IsDiscordSourcedReaction(evt) {
 +					continue
 +				}
 +				if slackEmoji := matrixReactionToSlackEmoji(evt); slackEmoji != "" {
@@ -280,7 +297,14 @@ index 0000000..7726263
 +	return strings.HasPrefix(msg.Text, "Reactions") && msg.ThreadTimestamp != ""
 +}
 +
-+func (s *SlackConnector) isMatrixReactionCrossBridge(sender id.UserID) bool {
++func (s *SlackConnector) isMatrixReactionCrossBridge(evt *event.Event) bool {
++	if reactionmirror.IsDiscordSourcedReaction(evt) {
++		return true
++	}
++	return reactionmirror.IsSlackBridgeGhost(evt.Sender)
++}
++
++func (s *SlackConnector) isMatrixReactionCrossBridgeSender(sender id.UserID) bool {
 +	return reactionmirror.IsDiscordBridgeGhost(sender) || reactionmirror.IsSlackBridgeGhost(sender)
 +}
 diff --git a/pkg/reactionmirror/aggregate.go b/pkg/reactionmirror/aggregate.go
@@ -288,7 +312,7 @@ new file mode 100644
 index 0000000..caad029
 --- /dev/null
 +++ b/pkg/reactionmirror/aggregate.go
-@@ -0,0 +1,240 @@
+@@ -0,0 +1,268 @@
 +package reactionmirror
 +
 +import (
@@ -490,7 +514,35 @@ index 0000000..caad029
 +	return bridgeidentity.ParseDiscordGhostMXID(mxid) != ""
 +}
 +
-+func FirstCrossBridgeReaction(otherBridgeGhost func(id.UserID) bool, events []*event.Event) (emoji string, ok bool) {
++func reactionHasBridgeSource(evt *event.Event, key string) bool {
++	if evt == nil || evt.Content.Raw == nil {
++		return false
++	}
++	_, ok := evt.Content.Raw[key].(map[string]any)
++	return ok
++}
++
++func IsSlackSourcedReaction(evt *event.Event) bool {
++	if evt == nil {
++		return false
++	}
++	if IsSlackBridgeGhost(evt.Sender) {
++		return true
++	}
++	return reactionHasBridgeSource(evt, "fi.mau.slack.reaction")
++}
++
++func IsDiscordSourcedReaction(evt *event.Event) bool {
++	if evt == nil {
++		return false
++	}
++	if IsDiscordBridgeGhost(evt.Sender) {
++		return true
++	}
++	return reactionHasBridgeSource(evt, "fi.mau.discord.reaction")
++}
++
++func FirstCrossBridgeReaction(isCrossBridge func(*event.Event) bool, events []*event.Event) (emoji string, ok bool) {
 +	sort.Slice(events, func(i, j int) bool {
 +		return events[i].Timestamp < events[j].Timestamp
 +	})
@@ -498,7 +550,7 @@ index 0000000..caad029
 +		if evt.Unsigned.RedactedBecause != nil {
 +			continue
 +		}
-+		if !otherBridgeGhost(evt.Sender) {
++		if !isCrossBridge(evt) {
 +			continue
 +		}
 +		emoji = EmojiDisplayKey(evt)
