@@ -555,7 +555,8 @@ index 3653a90..83af711 100644
 +				go portal.sendMessageMetrics(evt, nil, "")
 +				return
 +			}
- 			err := sess.MessageReactionRemoveUser(portal.GuildID, reaction.DiscordProtoChannelID(), reaction.MessageID, reaction.EmojiName, reaction.Sender)
+-			err := sess.MessageReactionRemoveUser(portal.GuildID, reaction.DiscordProtoChannelID(), reaction.MessageID, reaction.EmojiName, reaction.Sender)
++			err = sess.MessageReactionRemoveUser(portal.GuildID, reaction.DiscordProtoChannelID(), reaction.MessageID, reaction.EmojiName, reaction.Sender)
  			go portal.sendMessageMetrics(evt, err, "Error sending")
  			if err == nil {
  				reaction.Delete()
@@ -660,8 +661,8 @@ index 0000000..18071b1
 +	}
 +	ctx := context.Background()
 +	client := portal.MainIntent().Client
-+	if client == nil {
-+		client = portal.bridge.Bot
++	if client == nil && portal.bridge.Bot != nil {
++		client = portal.bridge.Bot.Client
 +	}
 +	lookup := func(ctx context.Context, roomID id.RoomID, userID id.UserID) string {
 +		return portal.matrixMemberDisplayName(ctx, userID)
