@@ -48,4 +48,11 @@
     };
     sshPublicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIqEHdyOWQcOb4wzmKqydHUM90KGkJoLwNFDqHff+sAh xboxbedrock@gmail.com";
   };
+  gostmeaper = {
+    git = {
+      name = "John Cao";
+      email = "johnchangcao@gmail.com";
+    };
+    sshPublicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAIrryxyAD8Vu1q+PdfVKGGpD2RGmeUtDKHWwgsd67A3 johnchangcao@gmail.com";
+  };
 }
