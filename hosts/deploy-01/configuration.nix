@@ -7,8 +7,8 @@
     ./discord-verify.nix
     ./internet-archive.nix
     ./groupme-mirror.nix
-    ./saml-proxy.nix
-    ./terrier-docs.nix
+    # ./saml-proxy.nix
+    # ./terrier-docs.nix
     ./kennel.nix
   ];
 
