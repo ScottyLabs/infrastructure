@@ -1,7 +1,7 @@
 diff --git a/bridgev2/portal.go b/bridgev2/portal.go
 --- a/bridgev2/portal.go
 +++ b/bridgev2/portal.go
-@@ -1580,6 +1580,16 @@ func (portal *Portal) handleMatrixReaction(ctx context.Context, sender *UserLogi
+@@ -1576,7 +1576,16 @@
  	} else if reactionTarget == nil {
  		log.Warn().Msg("Reaction target message not found in database")
  		return EventHandlingResultFailed.WithMSSError(fmt.Errorf("reaction %w", ErrTargetMessageNotFound))
@@ -18,7 +18,7 @@ diff --git a/bridgev2/portal.go b/bridgev2/portal.go
  	caps := sender.Client.GetCapabilities(ctx, portal)
  	err = portal.autoAcceptMessageRequest(ctx, evt, sender, nil, caps)
  	if err != nil {
-@@ -2538,6 +2548,15 @@ func (portal *Portal) handleMatrixRedaction(
+@@ -2538,6 +2547,15 @@
  	if err != nil {
  		log.Err(err).Msg("Failed to delete redacted event from database")
  	}
@@ -33,3 +33,4 @@ diff --git a/bridgev2/portal.go b/bridgev2/portal.go
 +	}
  	return EventHandlingResultSuccess.WithMSS()
  }
+ 
