@@ -47,20 +47,8 @@
     };
 
     # deploy-01
-    dalmatian = {
-      url = "github:ScottyLabs/dalmatian";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    discord-verify = {
-      url = "git+https://codeberg.org/ScottyLabs/discord-verify";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     internet-archive = {
       url = "git+https://codeberg.org/ScottyLabs/internet-archive";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    groupme-mirror = {
-      url = "git+https://codeberg.org/ScottyLabs/groupme-mirror";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     terrier = {
@@ -91,10 +79,7 @@
       keycloak-theme,
       headplane,
       llm-agents,
-      dalmatian,
-      discord-verify,
       internet-archive,
-      groupme-mirror,
       terrier,
       kennel,
       observability,
@@ -117,10 +102,7 @@
               nixos-hardware
               keycloak-theme
               llm-agents
-              dalmatian
-              discord-verify
               internet-archive
-              groupme-mirror
               terrier
               kennel
               observability

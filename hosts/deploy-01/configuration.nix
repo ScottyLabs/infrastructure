@@ -3,10 +3,10 @@
 {
   imports = [
     ../../platforms/campus-cloud
+    # for dalmatian and discord-verify, ensure data is fully migrated before deleting
     ./dalmatian.nix
     ./discord-verify.nix
     ./internet-archive.nix
-    ./groupme-mirror.nix
     # ./saml-proxy.nix
     # ./terrier-docs.nix
     ./kennel.nix
