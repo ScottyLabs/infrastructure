@@ -1,5 +1,0 @@
-{ ... }:
-
-{
-  scottylabs.postgresql.databases = [ "dalmatian" ];
-}
