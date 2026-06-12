@@ -52,9 +52,41 @@
   '';
 
   # Documentation hub static site (built by Forgejo Actions, uploaded to Garage).
+  # Accept: text/markdown negotiation serves pre-built .md files to AI agents.
+  # Requires this host config on infra-01 — without it, agents get HTML from Garage.
   services.caddy.virtualHosts."docs.scottylabs.org".extraConfig = ''
-    reverse_proxy localhost:${toString config.scottylabs.garage.webPort} {
-      header_up Host scottylabs-docs
+    # Accept Markdown: https://acceptmarkdown.com/recipes/caddy
+    @markdown header Accept *text/markdown*
+
+    handle @markdown {
+      @alreadyMd path_regexp \.md$
+      handle @alreadyMd {
+        reverse_proxy localhost:${toString config.scottylabs.garage.webPort} {
+          header_up Host scottylabs-docs
+        }
+        header >Content-Type "text/markdown; charset=utf-8"
+        header Vary "Accept"
+      }
+
+      @htmlPath path_regexp \.html$
+      handle @htmlPath {
+        rewrite * {path.regexp_replace /\.html$/, `.md`}
+      }
+      handle {
+        rewrite * {path.regexp_replace `/+$`, ``}/index.md
+      }
+      reverse_proxy localhost:${toString config.scottylabs.garage.webPort} {
+        header_up Host scottylabs-docs
+      }
+      header >Content-Type "text/markdown; charset=utf-8"
+      header Vary "Accept"
+    }
+
+    handle {
+      header Vary "Accept"
+      reverse_proxy localhost:${toString config.scottylabs.garage.webPort} {
+        header_up Host scottylabs-docs
+      }
     }
   '';
 }
