@@ -100,6 +100,7 @@ in
         max_upload_size = cfg.synapse.maxUploadSize;
         url_preview_enabled = true;
         enable_registration = true;
+        enable_registration_without_verification = true;
         enable_metrics = true;
         registration_shared_secret_path = cfg.synapse.registrationSecretFile;
 
