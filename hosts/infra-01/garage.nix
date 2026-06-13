@@ -56,26 +56,36 @@
   # Requires this host config on infra-01 — without it, agents get HTML from Garage.
   services.caddy.virtualHosts."docs.scottylabs.org".extraConfig = ''
     # Accept Markdown: https://acceptmarkdown.com/recipes/caddy
+    # No handle blocks — NixOS runs caddy fmt on the generated Caddyfile and
+    # multi-handle site config fails to parse.
     @markdown header Accept *text/markdown*
 
-    handle @markdown {
-      rewrite * {path.regexp_replace /\.html$/, `.md`}
-
-      @needsIndex not path_regexp \.md$
-      rewrite @needsIndex * {path.regexp_replace `/+$`, ``}/index.md
-
-      reverse_proxy localhost:${toString config.scottylabs.garage.webPort} {
-        header_up Host scottylabs-docs
-      }
-      header >Content-Type "text/markdown; charset=utf-8"
-      header Vary "Accept"
+    @markdownHtml {
+      header Accept *text/markdown*
+      path_regexp html ^(?P<stem>.+)\.html$
     }
+    rewrite @markdownHtml /{re.html.stem}.md
 
-    handle {
-      header Vary "Accept"
-      reverse_proxy localhost:${toString config.scottylabs.garage.webPort} {
-        header_up Host scottylabs-docs
-      }
+    @markdownIndex {
+      header Accept *text/markdown*
+      path_regexp /$
+      not path_regexp \.md$
+    }
+    rewrite @markdownIndex {path}index.md
+
+    @markdownNoSlash {
+      header Accept *text/markdown*
+      not path_regexp \.md$
+      not path_regexp \.html$
+      not path_regexp /$
+    }
+    rewrite @markdownNoSlash {path}/index.md
+
+    header @markdown >Content-Type "text/markdown; charset=utf-8"
+    header Vary "Accept"
+
+    reverse_proxy localhost:${toString config.scottylabs.garage.webPort} {
+      header_up Host scottylabs-docs
     }
   '';
 }
