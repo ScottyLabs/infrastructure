@@ -61,11 +61,8 @@
     handle @markdown {
       rewrite * {path.regexp_replace /\.html$/, `.md`}
 
-      @trailingSlash path_regexp /$
-      rewrite @trailingSlash * {path}index.md
-
-      @notMd not path_regexp \.md$
-      rewrite @notMd * {path}/index.md
+      @needsIndex not path_regexp \.md$
+      rewrite @needsIndex * {path.regexp_replace `/+$`, ``}/index.md
 
       reverse_proxy localhost:${toString config.scottylabs.garage.webPort} {
         header_up Host scottylabs-docs
