@@ -99,9 +99,7 @@ in
 
         max_upload_size = cfg.synapse.maxUploadSize;
         url_preview_enabled = true;
-        # Disallow users from registering on this homeserver, while
-        # allowing them to register on other trusted servers
-        enable_registration = false;
+        enable_registration = true;
         enable_metrics = true;
         registration_shared_secret_path = cfg.synapse.registrationSecretFile;
 
