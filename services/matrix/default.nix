@@ -32,4 +32,13 @@ in
       description = "HTTP endpoint hostname for the homeserver (used by clients and federation).";
     };
   };
+
+  config = lib.mkIf cfg.enable {
+    # Both bridge modules set SupplementaryGroups independently; the last import wins
+    # without this, leaving Synapse unable to read the other bridge registration file.
+    systemd.services.matrix-synapse.serviceConfig.SupplementaryGroups = [
+      "mautrix-discord-registration"
+      "mautrix-slack-registration"
+    ];
+  };
 }
