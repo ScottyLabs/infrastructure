@@ -59,22 +59,14 @@
     @markdown header Accept *text/markdown*
 
     handle @markdown {
-      @alreadyMd path_regexp \.md$
-      handle @alreadyMd {
-        reverse_proxy localhost:${toString config.scottylabs.garage.webPort} {
-          header_up Host scottylabs-docs
-        }
-        header >Content-Type "text/markdown; charset=utf-8"
-        header Vary "Accept"
-      }
+      rewrite * {path.regexp_replace /\.html$/, `.md`}
 
-      @htmlPath path_regexp \.html$
-      handle @htmlPath {
-        rewrite * {path.regexp_replace /\.html$/, `.md`}
-      }
-      handle {
-        rewrite * {path.regexp_replace `/+$`, ``}/index.md
-      }
+      @trailingSlash path_regexp /$
+      rewrite @trailingSlash * {path}index.md
+
+      @notMd not path_regexp \.md$
+      rewrite @notMd * {path}/index.md
+
       reverse_proxy localhost:${toString config.scottylabs.garage.webPort} {
         header_up Host scottylabs-docs
       }

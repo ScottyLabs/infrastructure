@@ -19,6 +19,52 @@ let
       "${cfg.apiBase}/repos/${cfg.targetRepo}/actions/workflows/${cfg.workflow}/dispatches" \
       -d "{\"ref\": \"main\", \"inputs\": {\"input_name\": \"$REPO\"}}"
   '';
+
+  pushEventTriggerRule = {
+    or = [
+      {
+        match = {
+          type = "value";
+          value = "push";
+          parameter = {
+            source = "header";
+            name = "X-GitHub-Event";
+          };
+        };
+      }
+      {
+        match = {
+          type = "value";
+          value = "push";
+          parameter = {
+            source = "header";
+            name = "X-Forgejo-Event";
+          };
+        };
+      }
+      {
+        match = {
+          type = "value";
+          value = "push";
+          parameter = {
+            source = "header";
+            name = "X-Gitea-Event";
+          };
+        };
+      }
+    ];
+  };
+
+  triggerDocsDiagramsScript = pkgs.writeShellApplication {
+    name = "trigger-docs-diagrams";
+    runtimeInputs = [ pkgs.bash pkgs.jq pkgs.curl ];
+    text = ''
+      export FORGEJO_TOKEN_FILE=${cfg.tokenFile}
+      export FORGEJO_API_BASE=${cfg.apiBase}
+      export DOCS_TARGET_REPO=${cfg.docsTargetRepo}
+      exec ${pkgs.bash}/bin/bash ${./trigger-docs-diagrams.sh}
+    '';
+  };
 in
 {
   options.scottylabs.forgejoCI.webhook = {
@@ -57,6 +103,12 @@ in
       default = "update-flake.yml";
       description = "Workflow file name to dispatch.";
     };
+
+    docsTargetRepo = lib.mkOption {
+      type = lib.types.str;
+      default = "ScottyLabs/documentation";
+      description = "owner/repo dispatched when Excalidraw diagram files change in a push.";
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -73,40 +125,12 @@ in
               name = "repository.name";
             }
           ];
-          trigger-rule = {
-            or = [
-              {
-                match = {
-                  type = "value";
-                  value = "push";
-                  parameter = {
-                    source = "header";
-                    name = "X-GitHub-Event";
-                  };
-                };
-              }
-              {
-                match = {
-                  type = "value";
-                  value = "push";
-                  parameter = {
-                    source = "header";
-                    name = "X-Forgejo-Event";
-                  };
-                };
-              }
-              {
-                match = {
-                  type = "value";
-                  value = "push";
-                  parameter = {
-                    source = "header";
-                    name = "X-Gitea-Event";
-                  };
-                };
-              }
-            ];
-          };
+          trigger-rule = pushEventTriggerRule;
+        };
+        docs-diagrams = {
+          execute-command = lib.getExe triggerDocsDiagramsScript;
+          command-working-directory = "/tmp";
+          trigger-rule = pushEventTriggerRule;
         };
       };
     };
