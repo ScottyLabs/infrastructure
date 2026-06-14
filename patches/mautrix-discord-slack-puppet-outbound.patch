@@ -1,7 +1,7 @@
 diff --git a/identity_mentions.go b/identity_mentions.go
 --- a/identity_mentions.go
 +++ b/identity_mentions.go
-@@ -48,4 +48,17 @@
+@@ -48,4 +48,18 @@
  		filtered = append(filtered, userID)
  	}
  	content.Mentions.UserIDs = filtered
