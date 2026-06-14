@@ -10,7 +10,7 @@ diff --git a/identity_mentions.go b/identity_mentions.go
  	"github.com/bwmarrin/discordgo"
  	"maunium.net/go/mautrix/event"
  	"maunium.net/go/mautrix/id"
-@@ -49,3 +51,41 @@
+@@ -49,3 +51,53 @@
  	}
  	content.Mentions.UserIDs = filtered
  }
@@ -20,7 +20,10 @@ diff --git a/identity_mentions.go b/identity_mentions.go
 +		return sender, sender.Session
 +	}
 +	if discordID := bridgeidentity.DiscordIDForMXID(senderMXID); discordID != "" {
-+		u := portal.bridge.GetUserByID(discordID)
++		u := portal.bridge.GetCachedUserByID(discordID)
++		if u == nil {
++			u = portal.bridge.GetUserByID(discordID)
++		}
 +		if u != nil && u.Connected() {
 +			return u, u.Session
 +		}
@@ -33,9 +36,18 @@ diff --git a/identity_mentions.go b/identity_mentions.go
 +		return sender, nil
 +	}
 +	if slackUID := bridgeidentity.ParseSlackGhostUserID(senderMXID); slackUID != "" {
-+		if localpart := bridgeidentity.Get().MatrixLocalpartForSlack(slackUID); localpart != "" {
++		localpart := bridgeidentity.Get().MatrixLocalpartForSlack(slackUID)
++		portal.log.Info().
++			Str("sender", senderMXID.String()).
++			Str("slack_uid", slackUID).
++			Str("matrix_localpart", localpart).
++			Msg("Slack ghost outbound puppet lookup")
++		if localpart != "" {
 +			mxid := id.NewUserID(strings.ToLower(localpart), portal.bridge.Config.Homeserver.Domain)
-+			u := portal.bridge.GetUserByMXID(mxid)
++			u := portal.bridge.GetCachedUserByMXID(mxid)
++			if u == nil {
++				u = portal.bridge.GetUserByMXID(mxid)
++			}
 +			if u != nil && u.Connected() {
 +				return u, u.Session
 +			}
@@ -48,7 +60,7 @@ diff --git a/identity_mentions.go b/identity_mentions.go
 +				Msg("Slack ghost linked to Matrix user but no connected Discord session; using relay webhook")
 +			return sender, nil
 +		}
-+		portal.log.Warn().Str("sender", senderMXID.String()).Msg("Slack ghost has no linked identity; using relay webhook")
++		portal.log.Warn().Str("sender", senderMXID.String()).Str("slack_uid", slackUID).Msg("Slack ghost has no linked identity; using relay webhook")
 +	}
 +	return sender, nil
 +}
