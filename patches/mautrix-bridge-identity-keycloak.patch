@@ -171,7 +171,7 @@ diff --git a/pkg/bridgeidentity/map.go b/pkg/bridgeidentity/map.go
 +			}
 +			discordID := federatedDiscordID(fed)
 +			slackID := federatedSlackUserID(fed)
-+			matrixLocalpart := federatedMatrixLocalpart(fed, user.Username)
++			matrixLocalpart := strings.ToLower(federatedMatrixLocalpart(fed, user.Username))
 +			if slackID == "" || matrixLocalpart == "" {
 +				continue
 +			}
