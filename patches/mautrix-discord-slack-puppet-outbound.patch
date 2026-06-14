@@ -1,0 +1,82 @@
+diff --git a/identity_mentions.go b/identity_mentions.go
+--- a/identity_mentions.go
++++ b/identity_mentions.go
+@@ -48,4 +48,16 @@
+ 		filtered = append(filtered, userID)
+ 	}
+ 	content.Mentions.UserIDs = filtered
+ }
++
++func (portal *Portal) discordSessionForMatrixSender(sender *User, senderMXID id.UserID) (*User, *discordgo.Session) {
++	if sender.Session != nil {
++		return sender, sender.Session
++	}
++	if discordID := bridgeidentity.DiscordIDForMXID(senderMXID); discordID != "" {
++		if u := portal.bridge.GetUserByID(discordID); u != nil && u.Session != nil && u.IsLoggedIn() {
++			return u, u.Session
++		}
++	}
++	return sender, nil
++}
+diff --git a/portal.go b/portal.go
+--- a/portal.go
++++ b/portal.go
+@@ -1542,7 +1542,7 @@ func (portal *Portal) handleMatrixMessage(sender *User, evt *event.Event) {
+ 	}
+ 
+ 	channelID := portal.Key.ChannelID
+-	sess := sender.Session
++	outboundSender, sess := portal.discordSessionForMatrixSender(sender, evt.Sender)
+ 	if sess == nil && portal.RelayWebhookID == "" {
+ 		go portal.sendMessageMetrics(evt, errUserNotLoggedIn, "Ignoring")
+ 		return
+@@ -1608,7 +1608,7 @@ func (portal *Portal) handleMatrixMessage(sender *User, evt *event.Event) {
+ 			threadID = existingThread.ID
+ 			existingThread.initialBackfillAttempted = true
+ 		} else {
+-			threadSender := sender
++			threadSender := outboundSender
+ 			if isWebhookSend {
+ 				threadSender = portal.bridge.getLoggedInUserForPortal()
+ 				if threadSender == nil {
+@@ -1693,11 +1693,11 @@ func (portal *Portal) handleMatrixMessage(sender *User, evt *event.Event) {
+ 			}
+ 			sendReq.Attachments = []*discordgo.MessageAttachment{att}
+ 			isClip := false
+-			prep, err := sender.Session.ChannelAttachmentCreate(channelID, &discordgo.ReqPrepareAttachments{
++			prep, err := outboundSender.Session.ChannelAttachmentCreate(channelID, &discordgo.ReqPrepareAttachments{
+ 				Files: []*discordgo.FilePrepare{{
+ 					Size: len(data),
+ 					Name: att.Filename,
+-					ID:   sender.NextDiscordUploadID(),
++					ID:   outboundSender.NextDiscordUploadID(),
+ 
+ 					IsClip:              &isClip,
+ 					OriginalContentType: att.OriginalContentType,
+@@ -1709,7 +1709,7 @@ func (portal *Portal) handleMatrixMessage(sender *User, evt *event.Event) {
+ 			}
+ 			prepared := prep.Attachments[0]
+ 			att.UploadedFilename = prepared.UploadFilename
+-			err = uploadDiscordAttachment(sender.Session.Client, prepared.UploadURL, data)
++			err = uploadDiscordAttachment(outboundSender.Session.Client, prepared.UploadURL, data)
+ 			if err != nil {
+ 				go portal.sendMessageMetrics(evt, err, "Error reuploading media in")
+ 				return
+@@ -1771,7 +1771,7 @@ func (portal *Portal) handleMatrixMessage(sender *User, evt *event.Event) {
+ 			AllowedMentions: sendReq.AllowedMentions,
+ 		})
+ 	}
+-	sender.handlePossible40002(err)
++	outboundSender.handlePossible40002(err)
+ 	go portal.sendMessageMetrics(evt, err, "Error sending")
+ 	if msg != nil {
+ 		dbMsg := portal.bridge.DB.Message.New()
+@@ -1782,7 +1782,7 @@ func (portal *Portal) handleMatrixMessage(sender *User, evt *event.Event) {
+ 		}
+ 		dbMsg.MXID = evt.ID
+ 		if sess != nil {
+-			dbMsg.SenderID = sender.DiscordID
++			dbMsg.SenderID = outboundSender.DiscordID
+ 		} else {
+ 			dbMsg.SenderID = portal.RelayWebhookID
+ 		}

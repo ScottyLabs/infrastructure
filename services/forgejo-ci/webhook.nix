@@ -107,7 +107,7 @@ in
     docsTargetRepo = lib.mkOption {
       type = lib.types.str;
       default = "ScottyLabs/documentation";
-      description = "owner/repo dispatched when Excalidraw diagram files change in a push.";
+      description = "owner/repo dispatched when docs/ or diagram files change in a push.";
     };
   };
 
