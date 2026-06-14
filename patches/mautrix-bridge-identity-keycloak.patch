@@ -12,7 +12,7 @@ diff --git a/pkg/bridgeidentity/map.go b/pkg/bridgeidentity/map.go
  	"os"
  	"regexp"
  	"strings"
-@@ -12,100 +16,243 @@
+@@ -12,100 +16,274 @@
  	"maunium.net/go/mautrix/id"
  )
  
@@ -259,7 +259,7 @@ diff --git a/pkg/bridgeidentity/map.go b/pkg/bridgeidentity/map.go
 +			if isDiscordSnowflake(candidate) {
 +				return candidate
 +			}
-+		}
+ 		}
  	}
 -	return m
 +	return ""
@@ -337,7 +337,7 @@ diff --git a/pkg/bridgeidentity/map.go b/pkg/bridgeidentity/map.go
  func (m *Map) SlackUserIDForDiscord(discordID string) string {
  	if m == nil {
  		return ""
-@@ -140,6 +287,11 @@
+@@ -140,6 +318,11 @@
  			return "link:" + discordID
  		}
  	}
@@ -349,3 +349,38 @@ diff --git a/pkg/bridgeidentity/map.go b/pkg/bridgeidentity/map.go
  	return string(mxid)
  }
  
+@@ -238,24 +421,20 @@
+ 
+ // ParseSlackGhostUserID extracts a Slack user ID from a slack bridge puppet MXID.
+ func ParseSlackGhostUserID(mxid id.UserID) string {
+-	localpart, _, err := mxid.ParseAndDecode()
++	localpart, _, err := mxid.Parse()
+ 	if err != nil {
+ 		return ""
+ 	}
+-	candidates := []string{localpart}
+ 	if strings.HasPrefix(localpart, "slack_") {
+-		candidates = append(candidates, strings.TrimPrefix(localpart, "slack_"))
++		localpart = strings.TrimPrefix(localpart, "slack_")
+ 	}
+-	for _, part := range candidates {
+-		decoded, err := id.DecodeUserLocalpart(part)
+-		if err != nil {
+-			continue
+-		}
+-		parts := strings.Split(string(decoded), "-")
+-		if len(parts) != 2 {
+-			continue
+-		}
+-		return strings.ToUpper(parts[1])
++	decoded, err := id.DecodeUserLocalpart(localpart)
++	if err != nil {
++		return ""
+ 	}
+-	return ""
++	parts := strings.Split(string(decoded), "-")
++	if len(parts) != 2 {
++		return ""
++	}
++	return strings.ToUpper(parts[1])
+ }
