@@ -1,8 +1,16 @@
 diff --git a/identity_mentions.go b/identity_mentions.go
 --- a/identity_mentions.go
 +++ b/identity_mentions.go
-@@ -48,4 +48,28 @@
- 		filtered = append(filtered, userID)
+@@ -2,6 +2,8 @@
+ package main
+ 
+ import (
++	"strings"
++
+ 	"github.com/bwmarrin/discordgo"
+ 	"maunium.net/go/mautrix/event"
+ 	"maunium.net/go/mautrix/id"
+@@ -49,3 +51,41 @@
  	}
  	content.Mentions.UserIDs = filtered
  }
@@ -11,15 +19,11 @@ diff --git a/identity_mentions.go b/identity_mentions.go
 +	if sender.Session != nil {
 +		return sender, sender.Session
 +	}
-+	discordID := bridgeidentity.DiscordIDForMXID(senderMXID)
-+	if discordID == "" {
-+		if bridgeidentity.ParseSlackGhostUserID(senderMXID) != "" {
-+			portal.log.Warn().Str("sender", senderMXID.String()).Msg("Slack ghost has no linked Discord ID; using relay webhook")
++	if discordID := bridgeidentity.DiscordIDForMXID(senderMXID); discordID != "" {
++		u := portal.bridge.GetUserByID(discordID)
++		if u != nil && u.Connected() {
++			return u, u.Session
 +		}
-+		return sender, nil
-+	}
-+	u := portal.bridge.GetUserByID(discordID)
-+	if u == nil || !u.Connected() {
 +		portal.log.Warn().
 +			Str("sender", senderMXID.String()).
 +			Str("discord_id", discordID).
@@ -28,7 +32,25 @@ diff --git a/identity_mentions.go b/identity_mentions.go
 +			Msg("Linked Discord user not connected; using relay webhook")
 +		return sender, nil
 +	}
-+	return u, u.Session
++	if slackUID := bridgeidentity.ParseSlackGhostUserID(senderMXID); slackUID != "" {
++		if localpart := bridgeidentity.Get().MatrixLocalpartForSlack(slackUID); localpart != "" {
++			mxid := id.NewUserID(strings.ToLower(localpart), portal.bridge.Config.Homeserver.Domain)
++			u := portal.bridge.GetUserByMXID(mxid)
++			if u != nil && u.Connected() {
++				return u, u.Session
++			}
++			portal.log.Warn().
++				Str("sender", senderMXID.String()).
++				Str("matrix_localpart", localpart).
++				Str("matrix_mxid", mxid.String()).
++				Bool("user_found", u != nil).
++				Bool("connected", u != nil && u.Connected()).
++				Msg("Slack ghost linked to Matrix user but no connected Discord session; using relay webhook")
++			return sender, nil
++		}
++		portal.log.Warn().Str("sender", senderMXID.String()).Msg("Slack ghost has no linked identity; using relay webhook")
++	}
++	return sender, nil
 +}
 diff --git a/portal.go b/portal.go
 --- a/portal.go

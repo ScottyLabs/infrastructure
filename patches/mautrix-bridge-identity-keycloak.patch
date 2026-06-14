@@ -12,7 +12,7 @@ diff --git a/pkg/bridgeidentity/map.go b/pkg/bridgeidentity/map.go
  	"os"
  	"regexp"
  	"strings"
-@@ -12,100 +16,274 @@
+@@ -12,100 +16,279 @@
  	"maunium.net/go/mautrix/id"
  )
  
@@ -37,6 +37,7 @@ diff --git a/pkg/bridgeidentity/map.go b/pkg/bridgeidentity/map.go
  	slackToDiscord         map[string]string
  	matrixLocalpartDiscord map[string]string
  	matrixLocalpartSlack   map[string]string
++	slackToMatrixLocalpart map[string]string
  }
  
 +type keycloakFedLink struct {
@@ -121,6 +122,7 @@ diff --git a/pkg/bridgeidentity/map.go b/pkg/bridgeidentity/map.go
  		slackToDiscord:         make(map[string]string),
  		matrixLocalpartDiscord: make(map[string]string),
  		matrixLocalpartSlack:   make(map[string]string),
++		slackToMatrixLocalpart: make(map[string]string),
  	}
 -	raw, err := os.ReadFile(path)
 +}
@@ -170,13 +172,16 @@ diff --git a/pkg/bridgeidentity/map.go b/pkg/bridgeidentity/map.go
 +			discordID := federatedDiscordID(fed)
 +			slackID := federatedSlackUserID(fed)
 +			matrixLocalpart := federatedMatrixLocalpart(fed, user.Username)
-+			if discordID == "" || slackID == "" || matrixLocalpart == "" {
++			if slackID == "" || matrixLocalpart == "" {
 +				continue
 +			}
-+			m.discordToSlack[discordID] = slackID
-+			m.slackToDiscord[slackID] = discordID
-+			m.matrixLocalpartDiscord[matrixLocalpart] = discordID
 +			m.matrixLocalpartSlack[matrixLocalpart] = slackID
++			m.slackToMatrixLocalpart[slackID] = matrixLocalpart
++			if discordID != "" {
++				m.discordToSlack[discordID] = slackID
++				m.slackToDiscord[slackID] = discordID
++				m.matrixLocalpartDiscord[matrixLocalpart] = discordID
++			}
 +		}
 +
 +		if len(users) < pageSize {
@@ -337,7 +342,22 @@ diff --git a/pkg/bridgeidentity/map.go b/pkg/bridgeidentity/map.go
  func (m *Map) SlackUserIDForDiscord(discordID string) string {
  	if m == nil {
  		return ""
-@@ -140,6 +318,11 @@
+@@ -120,6 +303,14 @@
+ 	return m.slackToDiscord[strings.ToUpper(slackUserID)]
+ }
+ 
++// MatrixLocalpartForSlack returns the linked Matrix localpart for a Slack member ID.
++func (m *Map) MatrixLocalpartForSlack(slackUserID string) string {
++	if m == nil {
++		return ""
++	}
++	return m.slackToMatrixLocalpart[strings.ToUpper(slackUserID)]
++}
++
+ func (m *Map) HasDiscord(discordID string) bool {
+ 	return m.SlackUserIDForDiscord(discordID) != ""
+ }
+@@ -140,6 +331,11 @@
  			return "link:" + discordID
  		}
  	}
