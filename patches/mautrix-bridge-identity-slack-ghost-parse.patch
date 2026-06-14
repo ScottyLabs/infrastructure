@@ -1,7 +1,7 @@
 diff --git a/pkg/bridgeidentity/map.go b/pkg/bridgeidentity/map.go
 --- a/pkg/bridgeidentity/map.go
 +++ b/pkg/bridgeidentity/map.go
-@@ -434,24 +434,18 @@
+@@ -434,24 +434,21 @@
  
  // ParseSlackGhostUserID extracts a Slack user ID from a slack bridge puppet MXID.
  func ParseSlackGhostUserID(mxid id.UserID) string {
@@ -11,6 +11,9 @@ diff --git a/pkg/bridgeidentity/map.go b/pkg/bridgeidentity/map.go
  		return ""
  	}
 -	candidates := []string{localpart}
++	if localpart == "slack" {
++		return ""
++	}
  	if strings.HasPrefix(localpart, "slack_") {
 -		candidates = append(candidates, strings.TrimPrefix(localpart, "slack_"))
 +		localpart = strings.TrimPrefix(localpart, "slack_")
