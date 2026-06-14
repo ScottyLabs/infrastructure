@@ -20,6 +20,7 @@ let
       ../../patches/mautrix-slack-room-ping.patch
       ../../patches/mautrix-bridge-identity-matrix-mxid.patch
       ../../patches/mautrix-bridge-identity-keycloak.patch
+      ../../patches/mautrix-bridge-identity-slack-ghost-parse.patch
       ../../patches/mautrix-slack-reaction-mirror-summary.patch
     ];
     postConfigure = (old.postConfigure or "") + ''

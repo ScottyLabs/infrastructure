@@ -22,6 +22,7 @@ let
       ../../patches/mautrix-discord-bridge-identity-dedupe.patch
       ../../patches/mautrix-bridge-identity-matrix-mxid.patch
       ../../patches/mautrix-bridge-identity-keycloak.patch
+      ../../patches/mautrix-bridge-identity-slack-ghost-parse.patch
       ../../patches/mautrix-discord-bridge-identity-matrix-pings.patch
       ../../patches/mautrix-discord-reaction-mirror-summary.patch
       ../../patches/mautrix-discord-slack-puppet-outbound.patch

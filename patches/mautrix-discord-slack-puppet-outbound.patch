@@ -1,7 +1,7 @@
 diff --git a/identity_mentions.go b/identity_mentions.go
 --- a/identity_mentions.go
 +++ b/identity_mentions.go
-@@ -48,4 +48,38 @@
+@@ -48,4 +48,17 @@
  		filtered = append(filtered, userID)
  	}
  	content.Mentions.UserIDs = filtered
@@ -15,29 +15,9 @@ diff --git a/identity_mentions.go b/identity_mentions.go
 +	if discordID == "" {
 +		return sender, nil
 +	}
-+	for _, u := range portal.bridge.getAllUsersWithToken() {
-+		if u.DiscordID != discordID {
-+			continue
-+		}
-+		if !u.Connected() {
-+			if err := u.Connect(); err != nil {
-+				portal.log.Warn().Err(err).
-+					Str("matrix_sender", senderMXID.String()).
-+					Str("discord_user_id", discordID).
-+					Msg("Discord puppet connect failed for linked Slack sender; using relay webhook")
-+				return sender, nil
-+			}
-+		}
-+		portal.log.Debug().
-+			Str("matrix_sender", senderMXID.String()).
-+			Str("discord_user_id", discordID).
-+			Msg("Using Discord puppet session for linked Slack sender")
++	if u := portal.bridge.GetUserByID(discordID); u != nil && u.Connected() {
 +		return u, u.Session
 +	}
-+	portal.log.Debug().
-+		Str("matrix_sender", senderMXID.String()).
-+		Str("discord_user_id", discordID).
-+		Msg("No logged-in Discord bridge user for linked sender; using relay webhook")
 +	return sender, nil
 +}
 diff --git a/portal.go b/portal.go
