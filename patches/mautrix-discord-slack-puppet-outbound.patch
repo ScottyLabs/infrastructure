@@ -1,7 +1,7 @@
 diff --git a/identity_mentions.go b/identity_mentions.go
 --- a/identity_mentions.go
 +++ b/identity_mentions.go
-@@ -48,4 +48,18 @@
+@@ -48,4 +48,28 @@
  		filtered = append(filtered, userID)
  	}
  	content.Mentions.UserIDs = filtered
@@ -13,12 +13,22 @@ diff --git a/identity_mentions.go b/identity_mentions.go
 +	}
 +	discordID := bridgeidentity.DiscordIDForMXID(senderMXID)
 +	if discordID == "" {
++		if bridgeidentity.ParseSlackGhostUserID(senderMXID) != "" {
++			portal.log.Warn().Str("sender", senderMXID.String()).Msg("Slack ghost has no linked Discord ID; using relay webhook")
++		}
 +		return sender, nil
 +	}
-+	if u := portal.bridge.GetUserByID(discordID); u != nil && u.Connected() {
-+		return u, u.Session
++	u := portal.bridge.GetUserByID(discordID)
++	if u == nil || !u.Connected() {
++		portal.log.Warn().
++			Str("sender", senderMXID.String()).
++			Str("discord_id", discordID).
++			Bool("user_found", u != nil).
++			Bool("connected", u != nil && u.Connected()).
++			Msg("Linked Discord user not connected; using relay webhook")
++		return sender, nil
 +	}
-+	return sender, nil
++	return u, u.Session
 +}
 diff --git a/portal.go b/portal.go
 --- a/portal.go
