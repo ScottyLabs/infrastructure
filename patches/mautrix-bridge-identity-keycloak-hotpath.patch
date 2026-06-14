@@ -1,0 +1,102 @@
+diff --git a/pkg/bridgeidentity/map.go b/pkg/bridgeidentity/map.go
+--- a/pkg/bridgeidentity/map.go
++++ b/pkg/bridgeidentity/map.go
+@@ -43,6 +43,7 @@
+ 	mapMu             sync.RWMutex
+ 	globalMap         *Map
+ 	loadedAt          time.Time
++	refreshInProgress bool
+ 	discordGhostRegex = regexp.MustCompile(`^@discord_([0-9]+):`)
+ 	httpClient        = &http.Client{Timeout: 30 * time.Second}
+ )
+@@ -56,7 +57,17 @@
+ 	return defaultRefreshInterval
+ }
+ 
+-// Get returns identity links from Keycloak (in-memory cache, auto-refreshed).
++// GetCached returns the in-memory identity map without blocking on Keycloak refresh.
++func GetCached() *Map {
++	mapMu.RLock()
++	defer mapMu.RUnlock()
++	if globalMap != nil {
++		return globalMap
++	}
++	return emptyMap()
++}
++
++// Get returns identity links from Keycloak (stale-while-revalidate; first load is synchronous).
+ func Get() *Map {
+ 	interval := refreshInterval()
+ 	mapMu.RLock()
+@@ -65,21 +76,44 @@
+ 		mapMu.RUnlock()
+ 		return m
+ 	}
++	stale := globalMap
+ 	mapMu.RUnlock()
+ 
+ 	mapMu.Lock()
+-	defer mapMu.Unlock()
+ 	if globalMap != nil && time.Since(loadedAt) < interval {
+-		return globalMap
++		m := globalMap
++		mapMu.Unlock()
++		return m
+ 	}
++	if stale != nil {
++		if !refreshInProgress {
++			refreshInProgress = true
++			go func() {
++				defer func() {
++					mapMu.Lock()
++					refreshInProgress = false
++					mapMu.Unlock()
++				}()
++				if m, err := loadFromKeycloak(); err == nil {
++					mapMu.Lock()
++					globalMap = m
++					loadedAt = time.Now()
++					mapMu.Unlock()
++				}
++			}()
++		}
++		mapMu.Unlock()
++		return stale
++	}
+ 	if m, err := loadFromKeycloak(); err == nil {
+ 		globalMap = m
+-		loadedAt = time.Now()
+-	} else if globalMap == nil {
++	} else {
+ 		globalMap = emptyMap()
+-		loadedAt = time.Now()
+ 	}
+-	return globalMap
++	loadedAt = time.Now()
++	m := globalMap
++	mapMu.Unlock()
++	return m
+ }
+ 
+ func emptyMap() *Map {
+@@ -251,7 +285,7 @@
+ 
+ func federatedMatrixLocalpart(links []keycloakFedLink, keycloakUsername string) string {
+ 	for _, link := range links {
+-		if link.IdentityProvider == "codeberg" && link.UserName != "" {
++		if (link.IdentityProvider == "codeberg" || link.IdentityProvider == "forgejo") && link.UserName != "" {
+ 			return link.UserName
+ 		}
+ 	}
+@@ -311,6 +345,11 @@
+ 	return m.slackToMatrixLocalpart[strings.ToUpper(slackUserID)]
+ }
+ 
++// SlackUserIDForMatrixLocalpart returns the linked Slack member ID for a Matrix localpart.
++func (m *Map) SlackUserIDForMatrixLocalpart(localpart, domain string) string {
++	return m.slackUserIDForMatrixLocalpart(localpart, domain)
++}
++
+ func (m *Map) HasDiscord(discordID string) bool {
+ 	return m.SlackUserIDForDiscord(discordID) != ""
+ }
