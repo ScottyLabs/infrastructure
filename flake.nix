@@ -60,6 +60,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     observability.url = "git+https://codeberg.org/ScottyLabs/observability";
+    ricochet = {
+      url = "git+https://codeberg.org/anish/ricochet";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     governance = {
       url = "git+https://codeberg.org/ScottyLabs/governance";
@@ -83,6 +87,7 @@
       terrier,
       kennel,
       observability,
+      ricochet,
       governance,
       ...
     }:
@@ -106,6 +111,7 @@
               terrier
               kennel
               observability
+              ricochet
               governance
               ;
           };

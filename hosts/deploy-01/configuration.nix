@@ -7,6 +7,7 @@
     # ./saml-proxy.nix
     # ./terrier-docs.nix
     ./kennel.nix
+    ./ricochet.nix
   ];
 
   networking.firewall.allowedTCPPorts = [
