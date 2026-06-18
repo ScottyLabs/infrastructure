@@ -1,6 +1,18 @@
+locals {
+  # Per-project secrets written by the tfgen outputs
+  governance_project_secrets = [
+    "SENTRY_DSN",
+    "OIDC_CLIENT_ID",
+    "OIDC_CLIENT_SECRET",
+    "KEYCLOAK_ADMIN_CLIENT_ID",
+    "KEYCLOAK_ADMIN_CLIENT_SECRET",
+    "LITELLM_API_KEY",
+  ]
+}
+
 # Policy for governance CI to manage project identity resources
 resource "vault_policy" "governance" {
-  name = "governance"
+  name   = "governance"
   policy = <<-EOT
     # Manage vault policies (project dev/prod policies)
     path "sys/policies/acl/*" {
@@ -38,23 +50,15 @@ resource "vault_policy" "governance" {
       capabilities = ["create", "update"]
     }
 
-    # Sentry DSNs written by the sentry tfgen output
-    path "secret/data/secretspec/+/+/SENTRY_DSN" {
+    %{~for secret in local.governance_project_secrets~}
+    path "secret/data/secretspec/+/+/${secret}" {
       capabilities = ["create", "read", "update"]
     }
 
-    path "secret/metadata/secretspec/+/+/SENTRY_DSN" {
+    path "secret/metadata/secretspec/+/+/${secret}" {
       capabilities = ["read"]
     }
-
-    # LiteLLM virtual keys written by the ai_gateway tfgen output
-    path "secret/data/secretspec/+/+/LITELLM_API_KEY" {
-      capabilities = ["create", "read", "update"]
-    }
-
-    path "secret/metadata/secretspec/+/+/LITELLM_API_KEY" {
-      capabilities = ["read"]
-    }
+    %{~endfor~}
 
     # LiteLLM master key for governance to call the management API
     path "secret/data/infra/litellm-master-key" {
@@ -76,4 +80,31 @@ resource "vault_approle_auth_backend_role" "governance" {
 
 output "governance_approle_role_id" {
   value = vault_approle_auth_backend_role.governance.role_id
+}
+
+# Service-account client governance authenticates as to manage OIDC clients
+resource "keycloak_openid_client" "governance_cli" {
+  realm_id  = data.keycloak_realm.scottylabs.id
+  client_id = "governance-cli"
+  name      = "Governance CLI"
+
+  enabled                      = true
+  access_type                  = "CONFIDENTIAL"
+  service_accounts_enabled     = true
+  standard_flow_enabled        = true
+  direct_access_grants_enabled = false
+  frontchannel_logout_enabled  = true
+
+  valid_redirect_uris = ["/*"]
+  web_origins         = ["/*"]
+}
+
+# Realm-management roles for managing OIDC clients and users
+resource "keycloak_openid_client_service_account_role" "governance_cli_realm_management" {
+  for_each = toset(["query-clients", "manage-clients", "view-users", "manage-users"])
+
+  realm_id                = data.keycloak_realm.scottylabs.id
+  service_account_user_id = keycloak_openid_client.governance_cli.service_account_user_id
+  client_id               = data.keycloak_openid_client.realm_management.id
+  role                    = each.value
 }
