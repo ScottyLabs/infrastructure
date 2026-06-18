@@ -89,7 +89,7 @@
           "terrier",
           "nixpkgs"
         ],
-        "systems": "systems_5",
+        "systems": "systems_4",
         "treefmt-nix": "treefmt-nix_5"
       },
       "locked": {
@@ -342,7 +342,7 @@
         "git-hooks": "git-hooks_2",
         "nix": "nix_2",
         "nixd": "nixd_2",
-        "nixpkgs": "nixpkgs_4",
+        "nixpkgs": "nixpkgs_5",
         "rust-overlay": "rust-overlay"
       },
       "locked": {
@@ -367,7 +367,7 @@
         "git-hooks": "git-hooks_3",
         "nix": "nix_3",
         "nixd": "nixd_3",
-        "nixpkgs": "nixpkgs_5"
+        "nixpkgs": "nixpkgs_6"
       },
       "locked": {
         "lastModified": 1770661643,
@@ -380,27 +380,6 @@
       "original": {
         "owner": "cachix",
         "repo": "devenv",
-        "type": "github"
-      }
-    },
-    "devshell": {
-      "inputs": {
-        "nixpkgs": [
-          "headplane",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1768818222,
-        "narHash": "sha256-460jc0+CZfyaO8+w8JNtlClB2n4ui1RbHfPTLkpwhU8=",
-        "owner": "numtide",
-        "repo": "devshell",
-        "rev": "255a2b1725a20d060f566e4755dbf571bbbb5f76",
-        "type": "github"
-      },
-      "original": {
-        "owner": "numtide",
-        "repo": "devshell",
         "type": "github"
       }
     },
@@ -641,24 +620,6 @@
         "type": "github"
       }
     },
-    "flake-utils_2": {
-      "inputs": {
-        "systems": "systems_3"
-      },
-      "locked": {
-        "lastModified": 1731533236,
-        "narHash": "sha256-l0KFg5HjrsfsO/JpG+r7fRrqm12kzFHyUHqHCVpMMbI=",
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "rev": "11707dc2f618dd54ca8739b309ec4fc024de578b",
-        "type": "github"
-      },
-      "original": {
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "type": "github"
-      }
-    },
     "ghostty": {
       "flake": false,
       "locked": {
@@ -844,28 +805,6 @@
         "url": "https://codeberg.org/ScottyLabs/governance"
       }
     },
-    "headplane": {
-      "inputs": {
-        "devshell": "devshell",
-        "flake-utils": "flake-utils",
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1780608584,
-        "narHash": "sha256-obrj9/h0vJWAMcKAHilZNXLVSuED6uD50BGgF3h7KX8=",
-        "owner": "tale",
-        "repo": "headplane",
-        "rev": "d16715dd98bb0f94f2ce5191bcc5e6bea84273c6",
-        "type": "github"
-      },
-      "original": {
-        "owner": "tale",
-        "repo": "headplane",
-        "type": "github"
-      }
-    },
     "home-manager": {
       "inputs": {
         "nixpkgs": [
@@ -924,7 +863,7 @@
     },
     "internet-archive": {
       "inputs": {
-        "flake-utils": "flake-utils_2",
+        "flake-utils": "flake-utils",
         "nixpkgs": [
           "nixpkgs"
         ],
@@ -984,6 +923,24 @@
         "url": "https://codeberg.org/ScottyLabs/keycloak-theme"
       }
     },
+    "litellm-nix": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_3"
+      },
+      "locked": {
+        "lastModified": 1781775925,
+        "narHash": "sha256-wfJOtzaikxzPQlv5Mf0BD7M6Kf/avPfuFRuv9eDPPsM=",
+        "ref": "refs/heads/main",
+        "rev": "1ef51606e503354c030f660243f171dbca38459b",
+        "revCount": 2,
+        "type": "git",
+        "url": "https://codeberg.org/anish/litellm-nix"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://codeberg.org/anish/litellm-nix"
+      }
+    },
     "llm-agents": {
       "inputs": {
         "blueprint": "blueprint",
@@ -992,7 +949,7 @@
         "nixpkgs": [
           "nixpkgs"
         ],
-        "systems": "systems_4",
+        "systems": "systems_3",
         "treefmt-nix": "treefmt-nix_3"
       },
       "locked": {
@@ -1340,6 +1297,22 @@
     },
     "nixpkgs_3": {
       "locked": {
+        "lastModified": 1781577229,
+        "narHash": "sha256-lrp67w8AulE9Ks53n27I45ADSzbOCn4H+CNW1Ck8B+8=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "567a49d1913ce81ac6e9582e3553dd90a955875f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_4": {
+      "locked": {
         "lastModified": 1780749050,
         "narHash": "sha256-3av0pIjlOWQ6rDbNOmpUSvbNnJkGORQKKjb4LtCZsIY=",
         "owner": "NixOS",
@@ -1354,7 +1327,7 @@
         "type": "github"
       }
     },
-    "nixpkgs_4": {
+    "nixpkgs_5": {
       "inputs": {
         "nixpkgs-src": "nixpkgs-src"
       },
@@ -1373,7 +1346,7 @@
         "type": "github"
       }
     },
-    "nixpkgs_5": {
+    "nixpkgs_6": {
       "locked": {
         "lastModified": 1761313199,
         "narHash": "sha256-wCIACXbNtXAlwvQUo1Ed++loFALPjYUA3dpcUJiXO44=",
@@ -1482,14 +1455,14 @@
         "comin": "comin",
         "disko": "disko",
         "governance": "governance",
-        "headplane": "headplane",
         "home-manager": "home-manager_2",
         "internet-archive": "internet-archive",
         "kennel": "kennel",
         "keycloak-theme": "keycloak-theme",
+        "litellm-nix": "litellm-nix",
         "llm-agents": "llm-agents",
         "nixos-hardware": "nixos-hardware",
-        "nixpkgs": "nixpkgs_3",
+        "nixpkgs": "nixpkgs_4",
         "observability": "observability",
         "ricochet": "ricochet",
         "terrier": "terrier"
@@ -1563,21 +1536,6 @@
       }
     },
     "systems_4": {
-      "locked": {
-        "lastModified": 1681028828,
-        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
-        "owner": "nix-systems",
-        "repo": "default",
-        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nix-systems",
-        "repo": "default",
-        "type": "github"
-      }
-    },
-    "systems_5": {
       "locked": {
         "lastModified": 1681028828,
         "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",

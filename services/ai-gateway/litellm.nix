@@ -2,25 +2,14 @@
   config,
   lib,
   pkgs,
+  litellm-nix,
   ...
 }:
 
 let
   cfg = config.scottylabs.ai-gateway.litellm;
-
   keycloakRealmBase = "${cfg.keycloakIssuerBase}/realms/${cfg.keycloakRealm}";
-
-  litellmProxyExtras = pkgs.python3Packages.callPackage ../../packages/litellm-proxy-extras.nix { };
-  prismaEngines5 = pkgs.callPackage ../../packages/prisma-engines-5 { };
-  prismaCliCache5 = pkgs.callPackage ../../packages/prisma-cli-cache-5 { };
-  prismaWithLitellm = pkgs.python3Packages.callPackage ../../packages/python3-prisma-litellm.nix {
-    inherit prismaEngines5 prismaCliCache5 litellmProxyExtras;
-  };
-  litellmPkg = pkgs.callPackage ../../packages/litellm.nix {
-    inherit litellmProxyExtras prismaWithLitellm;
-  };
   databaseUrl = "postgresql://litellm@localhost/litellm?host=/run/postgresql";
-
   composeEnvScript = pkgs.writeShellScript "compose-litellm-env" ''
     set -eu
     umask 0077
@@ -33,6 +22,8 @@ let
   '';
 in
 {
+  imports = [ litellm-nix.nixosModules.default ];
+
   options.scottylabs.ai-gateway.litellm = {
     enable = lib.mkEnableOption "LiteLLM proxy fronting cli-proxy-api";
 
@@ -169,7 +160,6 @@ in
 
     services.litellm = {
       enable = true;
-      package = litellmPkg;
       inherit (cfg) host port;
       environmentFile = cfg.runtimeEnvFile;
 
@@ -180,19 +170,6 @@ in
 
         PROXY_BASE_URL = "https://${cfg.domain}";
         DATABASE_URL = databaseUrl;
-
-        # Engine binaries the Python client resolves at runtime.
-        PRISMA_QUERY_ENGINE_BINARY = "${prismaEngines5}/bin/query-engine";
-        PRISMA_QUERY_ENGINE_LIBRARY = "${lib.getLib prismaEngines5}/lib/libquery_engine.node";
-        PRISMA_SCHEMA_ENGINE_BINARY = "${prismaEngines5}/bin/schema-engine";
-        PRISMA_FMT_BINARY = "${prismaEngines5}/bin/prisma-fmt";
-
-        # Prisma CLI bootstrap: point at the pre-populated cache and the
-        # node binary the wrapper invokes. Without these the CLI tries
-        # `python -m nodeenv` and fails on a closed system.
-        PRISMA_BINARY_CACHE_DIR = "${prismaCliCache5}";
-        PRISMA_USE_GLOBAL_NODE = "true";
-        PRISMA_HIDE_UPDATE_MESSAGE = "true";
 
         GENERIC_CLIENT_ID = "litellm";
         GENERIC_AUTHORIZATION_ENDPOINT = "${keycloakRealmBase}/protocol/openid-connect/auth";
@@ -269,7 +246,6 @@ in
         pkgs.openssl
       ];
     };
-
 
     services.caddy.virtualHosts.${cfg.domain}.extraConfig = ''
       redir / /ui/ permanent
