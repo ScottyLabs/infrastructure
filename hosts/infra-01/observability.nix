@@ -48,6 +48,11 @@ in
       key = "API_KEY";
       user = "prometheus";
     };
+    litellm-metrics-key = {
+      path = "litellm-master-key";
+      key = "MASTER_KEY";
+      user = "prometheus";
+    };
   };
 
   scottylabs.prometheus = {
@@ -157,6 +162,7 @@ in
         job_name = "litellm";
         static_configs = [ { targets = [ "localhost:4000" ]; } ];
         metrics_path = "/metrics";
+        authorization.credentials_file = "/run/secrets/litellm-metrics-key";
       }
       {
         job_name = "atlantis";
