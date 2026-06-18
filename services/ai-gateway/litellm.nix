@@ -236,15 +236,7 @@ in
         Group = "litellm";
         EnvironmentFile = lib.mkForce [ "-${cfg.runtimeEnvFile}" ];
         ExecStartPre = lib.mkBefore [ composeEnvScript ];
-        Restart = "on-failure";
-        RestartSec = 5;
       };
-      path = [
-        pkgs.nodejs
-        # prisma's python client shells out to `openssl version -v` to derive
-        # the binary platform name, even when PRISMA_QUERY_ENGINE_BINARY is set.
-        pkgs.openssl
-      ];
     };
 
     services.caddy.virtualHosts.${cfg.domain}.extraConfig = ''

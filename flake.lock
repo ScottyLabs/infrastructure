@@ -928,11 +928,11 @@
         "nixpkgs": "nixpkgs_3"
       },
       "locked": {
-        "lastModified": 1781775925,
-        "narHash": "sha256-wfJOtzaikxzPQlv5Mf0BD7M6Kf/avPfuFRuv9eDPPsM=",
+        "lastModified": 1781814067,
+        "narHash": "sha256-4W/YeAozqLRq87P0jpnJ9uklmo/fw6gDe1WEGifQySY=",
         "ref": "refs/heads/main",
-        "rev": "1ef51606e503354c030f660243f171dbca38459b",
-        "revCount": 2,
+        "rev": "5fe56ed172ecd82c58f638b79c949c6a5ed2e8d9",
+        "revCount": 3,
         "type": "git",
         "url": "https://codeberg.org/anish/litellm-nix"
       },
