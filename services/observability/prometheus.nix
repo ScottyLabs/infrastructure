@@ -37,6 +37,7 @@ in
   config = lib.mkIf cfg.enable {
     services.prometheus = {
       enable = true;
+      checkConfig = "syntax-only";
       listenAddress = cfg.listenAddress;
       port = cfg.port;
       retentionTime = cfg.retentionTime;
