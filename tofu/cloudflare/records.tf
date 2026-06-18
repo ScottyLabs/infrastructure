@@ -26,8 +26,6 @@ locals {
 
     # hosts/snoopy
     snoopy      = { ip = "128.237.157.156", comment = "Computer Club VM (g:scottylabs:snoopy)" }
-
-    # scottylabs.org apex and www are CNAMEs (Railway) in Cloudflare — do not manage as A records here.
   }
 }
 
