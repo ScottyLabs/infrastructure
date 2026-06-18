@@ -37,14 +37,11 @@
       url = "git+https://codeberg.org/ScottyLabs/keycloak-theme";
       flake = false;
     };
-    headplane = {
-      url = "github:tale/headplane";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     llm-agents = {
       url = "github:numtide/llm-agents.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    litellm-nix.url = "git+https://codeberg.org/anish/litellm-nix";
 
     # deploy-01
     internet-archive = {
@@ -81,8 +78,8 @@
       disko,
       comin,
       keycloak-theme,
-      headplane,
       llm-agents,
+      litellm-nix,
       internet-archive,
       terrier,
       kennel,
@@ -107,6 +104,7 @@
               nixos-hardware
               keycloak-theme
               llm-agents
+              litellm-nix
               internet-archive
               terrier
               kennel
@@ -135,18 +133,13 @@
 
       nixosConfigurations = builtins.mapAttrs mkSystem hosts;
 
-      # prod-01 was renamed to deploy-01; keep an alias so comin on hosts that have not
-      # yet switched (networking.hostName still prod-01) can evaluate and deploy again.
-      nixosConfigurations' = nixosConfigurations // {
-        prod-01 = nixosConfigurations.deploy-01;
-      };
     in
     {
       formatter = nixpkgs.lib.genAttrs [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" ] (
         system: nixpkgs.legacyPackages.${system}.nixfmt-tree
       );
 
-      nixosConfigurations = nixosConfigurations';
+      inherit nixosConfigurations;
 
       # Host-to-project mapping for OpenBao AppRole policies
       packages.x86_64-linux.host-projects =
