@@ -240,7 +240,7 @@ in
     };
 
     services.caddy.virtualHosts.${cfg.domain}.extraConfig = ''
-      redir / /ui/ permanent
+      redir / /ui/
       reverse_proxy ${cfg.host}:${toString cfg.port}
     '';
 
