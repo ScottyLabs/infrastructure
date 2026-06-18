@@ -8,6 +8,5 @@ This repository contains the NixOS configurations for ScottyLabs' VMs.
 - [Preparing for Setup](./docs/setup/02-preparing-for-setup.md)
 - [Installing NixOS](./docs/setup/03-installing-nixos.md)
 - [Post-Installation Setup](./docs/setup/04-post-installation-setup.md)
-- [Expanding a VM disk](./docs/setup/05-expanding-vm-disk.md)
 
 In each of the guides, make sure to replace `hostname` with the desired hostname for your VM, and `andrewid` with your Andrew ID.
