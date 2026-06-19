@@ -1,0 +1,31 @@
+apiVersion: 1
+groups:
+  - orgId: 1
+    name: hosts
+    folder: alerts
+    interval: 1m
+    rules:
+      - uid: infra-btrfs-allocation
+        title: btrfs allocation >95%
+        condition: A
+        for: 5m
+        noDataState: OK
+        execErrState: Alerting
+        annotations:
+          summary: "{{ $labels.instance }} btrfs is {{ $values.A.Value | humanizePercentage }} chunk-allocated (near exhaustion, writes may fail despite free space)"
+        labels:
+          severity: critical
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+              expr: (sum by (instance, uuid) (node_btrfs_size_bytes * node_btrfs_allocation_ratio) / sum by (instance, uuid) (node_btrfs_device_size_bytes)) > 0.95
+              instant: true
+              intervalMs: 60000
+              refId: A
