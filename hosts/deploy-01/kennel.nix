@@ -34,6 +34,9 @@
     environmentFile = config.age.secrets.kennel.path;
     api.port = 3001;
 
+    # Published for ricochet's return_to allowlist (services.ricochet.allowedHostsFile)
+    customDomainsFile = "/run/kennel/custom-domains";
+
     domains = {
       ephemeral = "scottylabs.net";
       cloudflare = {
