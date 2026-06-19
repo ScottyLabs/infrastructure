@@ -44,6 +44,7 @@
         zones = {
           "scottylabs.org" = "ab365d7cec88f972e0b26bf59afd174f";
           "cmu.quest" = "2bf8696c7e2fdc56f9b9e98443f001cc";
+          "cmu.lol" = "dbedf6cff671263c0d6f69b482895ee4";
         };
       };
     };
