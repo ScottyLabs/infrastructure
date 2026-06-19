@@ -59,7 +59,7 @@ resource "vault_policy" "governance" {
     }
 
     path "secret/metadata/secretspec/+/+/${secret}" {
-      capabilities = ["read"]
+      capabilities = ["create", "read", "update"]
     }
     %{~endfor~}
 
