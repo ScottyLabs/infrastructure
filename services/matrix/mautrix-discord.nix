@@ -27,6 +27,7 @@ let
       ../../patches/mautrix-discord-bridge-identity-matrix-pings.patch
       ../../patches/mautrix-discord-reaction-mirror-summary.patch
       ../../patches/mautrix-discord-slack-puppet-outbound.patch
+      ../../patches/mautrix-discord-room-ping-role.patch
     ];
     postConfigure = (old.postConfigure or "") + ''
       mautrix_dir="vendor/maunium.net/go/mautrix"
