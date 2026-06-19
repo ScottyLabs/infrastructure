@@ -18,6 +18,7 @@ resource "vault_jwt_auth_backend" "oidc" {
   # Makes OIDC the default option on the login page
   tune {
     listing_visibility = "unauth"
+    max_lease_ttl      = "8760h" # 1 year
   }
 }
 
@@ -30,6 +31,7 @@ resource "vault_jwt_auth_backend_role" "default" {
   user_claim      = "preferred_username"
   groups_claim    = "groups"
   token_policies  = ["default"]
+  token_period    = 7776000 # 90 days, renews on each shell entry
 
   allowed_redirect_uris = [
     "https://secrets2.scottylabs.org/v1/auth/oidc/callback",
