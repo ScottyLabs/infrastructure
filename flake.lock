@@ -1348,11 +1348,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1781822976,
-        "narHash": "sha256-mO+8sMKCbrKBDs1NHzzcwY5r+RzZ9PmXVifVk+7i6o4=",
+        "lastModified": 1781829341,
+        "narHash": "sha256-LdXUlllR2jPyue1is6aHRWxmM4IH9SQPEZiMJH4jZ1Y=",
         "ref": "refs/heads/main",
-        "rev": "d6e7838d157fa6575b75d96f515e9b1de48a317d",
-        "revCount": 2,
+        "rev": "e8cea319420a09aa5f6e544ad7622b2164c060e6",
+        "revCount": 3,
         "type": "git",
         "url": "https://codeberg.org/anish/ricochet"
       },

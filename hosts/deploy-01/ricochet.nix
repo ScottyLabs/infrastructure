@@ -10,6 +10,8 @@
     package = ricochet.packages.x86_64-linux.ricochet;
     bind = "127.0.0.1:8090";
     allowedHosts = [ "*.scottylabs.net" ];
+    # ricochet allows the prod custom domains kennel publishes as return_to targets
+    allowedHostsFile = "/run/kennel/custom-domains";
   };
 
   services.caddy.virtualHosts."oauth.scottylabs.org".extraConfig = ''
