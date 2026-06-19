@@ -108,8 +108,7 @@ in
 
     cliProxyApiUrl = lib.mkOption {
       type = lib.types.str;
-      default = "http://127.0.0.1:${toString config.scottylabs.cli-proxy-api.port}/v1";
-      defaultText = lib.literalExpression ''"http://127.0.0.1:''${toString config.scottylabs.cli-proxy-api.port}/v1"'';
+      default = "http://127.0.0.1:8317/v1";
       description = "OpenAI-compatible base URL of the cli-proxy-api backend.";
     };
 
