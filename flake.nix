@@ -37,10 +37,7 @@
       url = "git+https://codeberg.org/ScottyLabs/keycloak-theme";
       flake = false;
     };
-    llm-agents = {
-      url = "github:numtide/llm-agents.nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    nixpkgs-cliproxyapi.url = "github:ap-1/nixpkgs/cliproxyapi";
     litellm-nix.url = "git+https://codeberg.org/anish/litellm-nix";
 
     # deploy-01
@@ -78,7 +75,7 @@
       disko,
       comin,
       keycloak-theme,
-      llm-agents,
+      nixpkgs-cliproxyapi,
       litellm-nix,
       internet-archive,
       terrier,
@@ -103,7 +100,7 @@
               comin
               nixos-hardware
               keycloak-theme
-              llm-agents
+              nixpkgs-cliproxyapi
               litellm-nix
               internet-archive
               terrier
