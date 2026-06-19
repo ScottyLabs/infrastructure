@@ -69,6 +69,13 @@
       "targets": [{ "expr": "time() - node_boot_time_seconds", "legendFormat": "{{instance}}" }],
       "options": { "graphMode": "none", "colorMode": "value", "textMode": "value_and_name", "reduceOptions": { "calcs": ["lastNotNull"] } },
       "fieldConfig": { "defaults": { "unit": "s", "color": { "mode": "fixed", "fixedColor": "green" } } }
+    },
+    {
+      "id": 9, "type": "timeseries", "title": "btrfs allocation by host",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 32 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "(sum by (instance) (node_btrfs_size_bytes * node_btrfs_allocation_ratio) / sum by (instance) (node_btrfs_device_size_bytes)) * 100", "legendFormat": "{{instance}}" }],
+      "fieldConfig": { "defaults": { "unit": "percent", "min": 0, "max": 100 } }
     }
   ]
 }
