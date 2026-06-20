@@ -12,6 +12,7 @@
       "wheel"
       "docker"
     ];
+    openssh.authorizedKeys.keys = [ userData.sshPublicKey ];
   }) users;
 
   home-manager.useGlobalPkgs = true;

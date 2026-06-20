@@ -1,8 +1,9 @@
-{ ... }:
+{ srvos, ... }:
 
 {
   imports = [
     ./disk-config.nix
+    srvos.nixosModules.mixins-systemd-boot
   ];
 
   # VMware kernel modules for CampusCloud VMs
@@ -14,8 +15,4 @@
 
   # Enable VMware guest tools
   virtualisation.vmware.guest.enable = true;
-
-  # UEFI boot for CampusCloud
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
 }

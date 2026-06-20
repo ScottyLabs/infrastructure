@@ -25,8 +25,4 @@
     enable = true;
     memoryPercent = 50;
   };
-
-  # Auto-reboot if the system hangs
-  systemd.settings.Manager.RuntimeWatchdogSec = "30s";
-  systemd.settings.Manager.RebootWatchdogSec = "60s";
 }
