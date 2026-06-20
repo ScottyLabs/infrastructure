@@ -123,7 +123,6 @@
             disko.nixosModules.disko
 
             srvos.nixosModules.server
-            srvos.nixosModules.mixins-nix-experimental
             srvos.nixosModules.mixins-terminfo
             srvos.nixosModules.mixins-trusted-nix-caches
             { srvos.flake = self; }
