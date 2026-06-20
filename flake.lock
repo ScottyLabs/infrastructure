@@ -413,7 +413,7 @@
         "git-hooks": "git-hooks_4",
         "nix": "nix_4",
         "nixd": "nixd_4",
-        "nixpkgs": "nixpkgs_7"
+        "nixpkgs": "nixpkgs_8"
       },
       "locked": {
         "lastModified": 1770661643,
@@ -1515,6 +1515,23 @@
         "type": "github"
       }
     },
+    "nixpkgs-src_3": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1778274207,
+        "narHash": "sha256-I4puXmX1iovcCHZlRmztO3vW0mAbbRvq4F8wgIMQ1MM=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "b3da656039dc7a6240f27b2ef8cc6a3ef3bccae7",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixpkgs-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "nixpkgs_2": {
       "locked": {
         "lastModified": 1761313199,
@@ -1602,6 +1619,25 @@
       }
     },
     "nixpkgs_7": {
+      "inputs": {
+        "nixpkgs-src": "nixpkgs-src_3"
+      },
+      "locked": {
+        "lastModified": 1778507786,
+        "narHash": "sha256-HzSQCKMsMr8r55LwM1JuzIOB+8bzk0FEv6sItKvsfoY=",
+        "owner": "cachix",
+        "repo": "devenv-nixpkgs",
+        "rev": "8f24a228a782e24576b155d1e39f0d914b380691",
+        "type": "github"
+      },
+      "original": {
+        "owner": "cachix",
+        "ref": "rolling",
+        "repo": "devenv-nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_8": {
       "locked": {
         "lastModified": 1761313199,
         "narHash": "sha256-wCIACXbNtXAlwvQUo1Ed++loFALPjYUA3dpcUJiXO44=",
@@ -1744,6 +1780,7 @@
         "nixpkgs-cliproxyapi": "nixpkgs-cliproxyapi",
         "observability": "observability",
         "ricochet": "ricochet_2",
+        "srvos": "srvos",
         "terrier": "terrier"
       }
     },
@@ -1814,6 +1851,24 @@
       "original": {
         "type": "git",
         "url": "https://codeberg.org/ScottyLabs/devenv"
+      }
+    },
+    "srvos": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_7"
+      },
+      "locked": {
+        "lastModified": 1781754174,
+        "narHash": "sha256-Q5hp6+DYj23gMAvhLXBYNan9EwY9C+oxyU+M1TJDwgo=",
+        "owner": "nix-community",
+        "repo": "srvos",
+        "rev": "18ae1c654f60fb8dafb40c48fe25eb09f1aaddb2",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "srvos",
+        "type": "github"
       }
     },
     "systems": {

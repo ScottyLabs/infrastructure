@@ -1,23 +1,16 @@
-{ ... }:
+{ srvos, ... }:
 
 {
   imports = [
     ./disk-config.nix
+    srvos.nixosModules.mixins-systemd-boot
   ];
-
-  # UEFI boot
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
 
   # Needed for Wayland/cage compositor
   hardware.graphics.enable = true;
   services.seatd.enable = true;
 
-  # Auto-reboot if the system hangs
-  systemd.settings.Manager.RuntimeWatchdogSec = "30s";
-  systemd.settings.Manager.RebootWatchdogSec = "60s";
-
-  # QEMU whatnot
+  # QEMU
   virtualisation.vmVariant = {
     virtualisation.qemu.options = [
       "-device virtio-vga-gl"

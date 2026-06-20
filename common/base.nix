@@ -1,16 +1,12 @@
 {
+  lib,
   pkgs,
   hostname,
-  users,
   ...
 }:
 
 {
   environment.systemPackages = with pkgs; [
-    git
-    curl
-    ghostty.terminfo
-    foot.terminfo
     ragenix
     opentofu
   ];
@@ -23,48 +19,18 @@
 
   users.defaultUserShell = pkgs.zsh;
 
-  # Editor
-  programs.vim = {
-    enable = true;
-    defaultEditor = true;
-  };
-
   # SSH
-  services.openssh = {
-    enable = true;
-    settings = {
-      PasswordAuthentication = false; # KbdInteractiveAuthentication used instead
-      PermitRootLogin = "no"; # shouldn't SSH directly as root
-      AllowUsers = builtins.attrNames users;
-    };
-  };
+  services.openssh.settings.PermitRootLogin = "no";
+
+  # btrbk needs sudo as a non-wheel user for btrfs snapshot commands
+  security.sudo.execWheelOnly = lib.mkForce false;
 
   # Networking
   networking.hostName = hostname;
-  networking.networkmanager.enable = true;
 
   # Regional
-  time.timeZone = "America/New_York";
   i18n.defaultLocale = "en_US.UTF-8";
   console.keyMap = "us";
-
-  # Kerberos client for CMU
-  security.krb5 = {
-    enable = true;
-    settings = {
-      libdefaults.default_realm = "ANDREW.CMU.EDU";
-      realms."ANDREW.CMU.EDU" = {
-        kdc = "kerberos.andrew.cmu.edu";
-        admin_server = "kerberos.andrew.cmu.edu";
-      };
-    };
-  };
-
-  # PAM Kerberos integration
-  security.pam = {
-    krb5.enable = true;
-    services.sshd.makeHomeDir = true;
-  };
 
   # nh and garbage collection
   programs.nh = {
@@ -83,18 +49,6 @@
 
   # Nix
   nix.package = pkgs.lixPackageSets.stable.lix;
-  nix.settings = {
-    auto-optimise-store = true;
-    experimental-features = [
-      "nix-command"
-      "flakes"
-    ];
-  };
-
-  nix.optimise = {
-    automatic = true;
-    dates = [ "weekly" ];
-  };
 
   # nh doesn't touch comin sub-profiles
   nix.gc = {

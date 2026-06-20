@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ lib, pkgs, ... }:
 
 {
   # Fix grub res
@@ -6,7 +6,7 @@
   boot.loader.grub.gfxpayloadEfi = "keep";
 
   # No more grub menu
-  boot.loader.timeout = 0;
+  boot.loader.timeout = lib.mkForce 0;
   boot.loader.grub.timeoutStyle = "hidden";
   boot.loader.grub.splashImage = null;
 

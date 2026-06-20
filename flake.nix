@@ -31,6 +31,7 @@
       url = "github:nlewo/comin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    srvos.url = "github:nix-community/srvos";
 
     # infra-01
     keycloak-theme = {
@@ -74,6 +75,7 @@
       agenix,
       disko,
       comin,
+      srvos,
       keycloak-theme,
       nixpkgs-cliproxyapi,
       litellm-nix,
@@ -98,6 +100,7 @@
               hostname
               users
               comin
+              srvos
               nixos-hardware
               keycloak-theme
               nixpkgs-cliproxyapi
@@ -118,6 +121,12 @@
             home-manager.nixosModules.home-manager
             agenix.nixosModules.default
             disko.nixosModules.disko
+
+            srvos.nixosModules.server
+            srvos.nixosModules.mixins-nix-experimental
+            srvos.nixosModules.mixins-terminfo
+            srvos.nixosModules.mixins-trusted-nix-caches
+            { srvos.flake = self; }
           ];
         };
 
