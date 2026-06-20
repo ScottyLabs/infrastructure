@@ -46,6 +46,6 @@
       name = "Sushrut";
       email = "xboxbedrock@gmail.com";
     };
-    sshPublicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIqEHdyOWQcOb4wzmKqydHUM90KGkJoLwNFDqHff+sAh xboxbedrock@gmail.com";
+    sshPublicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMNCiqUwmemyjJGA7bK+8myy6urHhPrGnGMKJ59h8185 xboxbedrock@gmail.com";
   };
 }
