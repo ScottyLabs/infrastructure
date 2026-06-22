@@ -7,9 +7,9 @@ groups:
     rules:
       - uid: infra-memory-pressure
         title: Memory usage >85%
-        condition: A
+        condition: B
         for: 10m
-        noDataState: OK
+        noDataState: Alerting
         execErrState: Alerting
         annotations:
           summary: "{{ $labels.instance }} memory usage is {{ $values.A.Value | humanizePercentage }}"
@@ -25,7 +25,21 @@ groups:
               datasource:
                 type: prometheus
                 uid: prometheus
-              expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) > 0.85
+              expr: 1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)
               instant: true
               intervalMs: 60000
               refId: A
+          - refId: B
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: A
+              conditions:
+                - evaluator:
+                    type: gt
+                    params:
+                      - 0.85
+              refId: B

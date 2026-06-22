@@ -7,7 +7,7 @@ groups:
     rules:
       - uid: infra-litellm-upstream-failures
         title: LiteLLM upstream failing
-        condition: A
+        condition: B
         for: 5m
         noDataState: OK
         execErrState: Alerting
@@ -25,7 +25,21 @@ groups:
               datasource:
                 type: prometheus
                 uid: prometheus
-              expr: sum by (model) (rate(litellm_deployment_failure_responses[5m])) > 0.1
+              expr: sum by (model) (rate(litellm_deployment_failure_responses[5m]))
               instant: true
               intervalMs: 60000
               refId: A
+          - refId: B
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: A
+              conditions:
+                - evaluator:
+                    type: gt
+                    params:
+                      - 0.1
+              refId: B

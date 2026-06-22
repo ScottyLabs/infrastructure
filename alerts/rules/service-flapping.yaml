@@ -7,9 +7,9 @@ groups:
     rules:
       - uid: infra-service-flapping
         title: Service flapping (>3 restarts in 1h)
-        condition: A
+        condition: B
         for: 5m
-        noDataState: OK
+        noDataState: Alerting
         execErrState: Alerting
         annotations:
           summary: "{{ $labels.name }} on {{ $labels.instance }} has restarted {{ $values.A.Value }} times in the last hour"
@@ -25,7 +25,21 @@ groups:
               datasource:
                 type: prometheus
                 uid: prometheus
-              expr: increase(systemd_service_restart_total[1h]) > 3
+              expr: increase(systemd_service_restart_total[1h])
               instant: true
               intervalMs: 60000
               refId: A
+          - refId: B
+            relativeTimeRange:
+              from: 3600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: A
+              conditions:
+                - evaluator:
+                    type: gt
+                    params:
+                      - 3
+              refId: B

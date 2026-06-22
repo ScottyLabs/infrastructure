@@ -28,7 +28,7 @@ groups:
               datasource:
                 type: prometheus
                 uid: prometheus
-              expr: comin_deployment_info{status="failed"} == 1
+              expr: comin_deployment_info{status="failed"} == bool 1
               instant: true
               intervalMs: 60000
               refId: A

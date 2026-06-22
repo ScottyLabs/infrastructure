@@ -25,7 +25,7 @@ groups:
               datasource:
                 type: prometheus
                 uid: prometheus
-              expr: up{job=~"node|kennel|prometheus|loki|tempo|grafana"} == 0
+              expr: up{job=~"node|kennel|prometheus|loki|tempo|grafana"} == bool 0
               instant: true
               intervalMs: 60000
               refId: A

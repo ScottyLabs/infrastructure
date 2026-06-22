@@ -7,7 +7,7 @@ groups:
     rules:
       - uid: infra-litellm-high-error-rate
         title: LiteLLM error rate above 10%
-        condition: A
+        condition: B
         for: 5m
         noDataState: OK
         execErrState: Alerting
@@ -25,7 +25,21 @@ groups:
               datasource:
                 type: prometheus
                 uid: prometheus
-              expr: sum(rate(litellm_proxy_failed_requests_metric[5m])) / clamp_min(sum(rate(litellm_proxy_total_requests_metric[5m])), 1) > 0.10
+              expr: sum(rate(litellm_proxy_failed_requests_metric[5m])) / clamp_min(sum(rate(litellm_proxy_total_requests_metric[5m])), 1)
               instant: true
               intervalMs: 60000
               refId: A
+          - refId: B
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: A
+              conditions:
+                - evaluator:
+                    type: gt
+                    params:
+                      - 0.10
+              refId: B

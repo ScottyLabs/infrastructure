@@ -9,7 +9,7 @@ groups:
         title: Kennel deployment failed
         condition: A
         for: 5m
-        noDataState: OK
+        noDataState: Alerting
         execErrState: Alerting
         annotations:
           summary: "{{ $labels.name }} on {{ $labels.instance }} is in failed state"
@@ -25,7 +25,7 @@ groups:
               datasource:
                 type: prometheus
                 uid: prometheus
-              expr: systemd_unit_state{name=~"kennel-.*\\.service",state="failed"} == 1
+              expr: systemd_unit_state{name=~"kennel-.*\\.service",state="failed"} == bool 1
               instant: true
               intervalMs: 60000
               refId: A

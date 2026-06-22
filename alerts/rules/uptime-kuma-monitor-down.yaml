@@ -9,7 +9,7 @@ groups:
         title: Uptime Kuma monitor down
         condition: A
         for: 5m
-        noDataState: OK
+        noDataState: Alerting
         execErrState: Alerting
         annotations:
           summary: '{{ $labels.monitor_name }} appears down'
@@ -29,7 +29,7 @@ groups:
               datasource:
                 type: prometheus
                 uid: prometheus
-              expr: monitor_status == 0
+              expr: monitor_status == bool 0
               instant: true
               intervalMs: 60000
               refId: A

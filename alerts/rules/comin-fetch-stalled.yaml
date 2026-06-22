@@ -9,7 +9,7 @@ groups:
         title: Comin fetch stalled
         condition: A
         for: 5m
-        noDataState: OK
+        noDataState: Alerting
         execErrState: Alerting
         annotations:
           summary: "comin on {{ $labels.instance }} has not polled successfully in the last 10m"
@@ -29,7 +29,7 @@ groups:
               datasource:
                 type: prometheus
                 uid: prometheus
-              expr: rate(comin_fetch_count{status="succeeded"}[10m]) == 0 and on(instance) up{job="comin"} == 1
+              expr: rate(comin_fetch_count{status="succeeded"}[10m]) == bool 0 and on(instance) up{job="comin"} == bool 1
               instant: true
               intervalMs: 60000
               refId: A
