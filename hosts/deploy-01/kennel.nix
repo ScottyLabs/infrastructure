@@ -73,14 +73,15 @@
   };
 
   scottylabs.postgresql.databases = [ "kennel" ];
-
-  # Kennel-managed apps use this Valkey instance (/run/redis-kennel/redis.sock).
   scottylabs.valkey.servers = [ "kennel" ];
 
   services.postgresql.ensureUsers = [
     {
       name = "kennel";
-      ensureClauses.createdb = true;
+      ensureClauses = {
+        createdb = true;
+        createrole = true;
+      };
     }
   ];
 }
