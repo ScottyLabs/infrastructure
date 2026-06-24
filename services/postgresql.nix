@@ -35,11 +35,11 @@ in
       }) cfg.databases;
     };
 
-    # ensureDatabases runs in postgresql-setup; extensions must run after that script, not in postgresql.postStart.
+    # Kennel creates service databases at runtime via createdb, which clones template1, so seed it there.
     systemd.services.postgresql-setup.postStart = lib.mkAfter (
       lib.concatMapStringsSep "\n" (db: ''
         psql --port=${toString config.services.postgresql.settings.port} -d ${db} -c 'CREATE EXTENSION IF NOT EXISTS pg_uuidv7;'
-      '') cfg.databases
+      '') ([ "template1" ] ++ cfg.databases)
     );
 
     services.pgadmin = {
@@ -54,7 +54,7 @@ in
       mode = "0400";
     };
 
-    networking.firewall.interfaces."tailscale0".allowedTCPPorts = [ 5050 ];
+    networking.firewall.interfaces."tailscale0".allowedTCPPorts = [ 5050 ]; # pgadmin
 
     services.prometheus.exporters.postgres = {
       enable = true;
