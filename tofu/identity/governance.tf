@@ -2,6 +2,8 @@ locals {
   # Per-project secrets written by the tfgen outputs
   governance_project_secrets = [
     "SENTRY_DSN",
+    "POSTHOG_KEY",
+    "POSTHOG_HOST",
     "OIDC_CLIENT_ID",
     "OIDC_CLIENT_SECRET",
     "KEYCLOAK_URL",
