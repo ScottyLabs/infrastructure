@@ -51,3 +51,34 @@ discord = "DTEAM"
 		t.Fatalf("org slack channel should not be team-owned")
 	}
 }
+
+func TestLoadTeamReposDoNotOverwriteTeamName(t *testing.T) {
+	dir := t.TempDir()
+	teamsDir := filepath.Join(dir, "teams")
+	if err := os.MkdirAll(teamsDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(teamsDir, "devops.toml"), []byte(`
+[team]
+name = "DevOps"
+slug = "devops"
+
+[[team.repos]]
+name = "infrastructure"
+
+[[team.repos]]
+name = "documentation"
+
+[[team.channels]]
+slack = "CDEVOPS"
+discord = "DDEVOPS"
+`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	d := load(dir)
+	team := d.TeamForDiscordChannel("DDEVOPS")
+	if team == nil || team.TeamName != "DevOps" || team.TeamSlug != "devops" {
+		t.Fatalf("repo names must not overwrite team name: %#v", team)
+	}
+}

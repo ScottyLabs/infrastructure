@@ -179,7 +179,7 @@ func loadTeam(path string, d *Data) error {
 		case "[team]":
 			inTeamHeader = true
 			inChannelTable = false
-		case "[[team.projects]]":
+		case "[[team.projects]]", "[[team.repos]]":
 			inTeamHeader = false
 			inChannelTable = false
 		case "[[team.channels]]", "[[team.projects.channels]]":

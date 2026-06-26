@@ -22,4 +22,8 @@ func TestLoadRealGovernanceData(t *testing.T) {
 	if d.TeamForSlackChannel("C019R0WM1T4") != nil {
 		t.Fatalf("general org channel should not be team-owned")
 	}
+	devops := d.TeamForDiscordChannel("1461933322505818156")
+	if devops == nil || devops.TeamSlug != "devops" || devops.TeamName != "DevOps" {
+		t.Fatalf("expected DevOps team for devops discord channel, got %#v", devops)
+	}
 }
