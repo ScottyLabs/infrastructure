@@ -1035,7 +1035,7 @@
         "lastModified": 1782510815,
         "narHash": "sha256-ATal5/iouyZDdpNS5RDbUZFL6omMwR2C6G3u+ATgHGg=",
         "ref": "refs/heads/main",
-        "rev": "88bcb4c3a7480ac66f9c2e4a47be6d4d6567d70b",
+        "rev": "33c023e9ead36c971d50b47bc768bb40c92946a7",
         "revCount": 183,
         "type": "git",
         "url": "https://codeberg.org/ScottyLabs/kennel"
