@@ -58,6 +58,8 @@ in
       "KEYCLOAK_REALM=${keycloakRealm}"
       "MATRIX_DOMAIN=${matrixDomain}"
       "BRIDGE_IDENTITY_REFRESH_INTERVAL=${identityCfg.refreshInterval}"
+      "GOVERNANCE_DATA_PATH=${governance}/data"
+      "GOVERNANCE_DATA_REFRESH_INTERVAL=${identityCfg.refreshInterval}"
     ];
 
     systemd.services.mautrix-discord.serviceConfig.EnvironmentFile = lib.mkAfter [
@@ -68,6 +70,8 @@ in
       "KEYCLOAK_REALM=${keycloakRealm}"
       "MATRIX_DOMAIN=${matrixDomain}"
       "BRIDGE_IDENTITY_REFRESH_INTERVAL=${identityCfg.refreshInterval}"
+      "GOVERNANCE_DATA_PATH=${governance}/data"
+      "GOVERNANCE_DATA_REFRESH_INTERVAL=${identityCfg.refreshInterval}"
     ];
   };
 }
