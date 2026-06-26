@@ -1,59 +1,29 @@
 --- a/formatter.go
 +++ b/formatter.go
-@@ -286,22 +286,89 @@
+@@ -34,6 +34,7 @@
+ 	"maunium.net/go/mautrix/id"
+ 
+ 	"go.mau.fi/mautrix-discord/pkg/bridgeidentity"
++	"go.mau.fi/mautrix-discord/pkg/governancedata"
+ )
+ 
+ // escapeFixer is a hacky partial fix for the difference in escaping markdown, used with escapeReplacement
+@@ -286,22 +287,45 @@
  	return append(types, t)
  }
  
-+func (portal *Portal) roomPingRoleID() string {
-+	if portal.GuildID == "" {
++// governanceTeamRoleID returns the Discord role whose name matches the team that
++// owns this channel in governance (the role governance auto-assigns to members).
++func (portal *Portal) governanceTeamRoleID(teamName string) string {
++	if portal.GuildID == "" || teamName == "" {
 +		return ""
 +	}
-+	if roleID := portal.roomPingRoleFromOverwrites(); roleID != "" {
-+		return roleID
-+	}
 +	for _, role := range portal.bridge.DB.Role.GetAll(portal.GuildID) {
-+		if role.Name == "Tech" {
++		if strings.EqualFold(role.Name, teamName) {
 +			return role.ID
 +		}
 +	}
 +	return ""
-+}
-+
-+func (portal *Portal) roomPingRoleFromOverwrites() string {
-+	user := portal.bridge.getLoggedInUserForPortal()
-+	if user == nil || user.Session == nil {
-+		return ""
-+	}
-+	channel, _ := user.Session.State.Channel(portal.Key.ChannelID)
-+	if channel == nil {
-+		var err error
-+		channel, err = user.Session.Channel(portal.Key.ChannelID)
-+		if err != nil {
-+			return ""
-+		}
-+	}
-+	var bestID string
-+	var bestPos int
-+	for _, ow := range channel.PermissionOverwrites {
-+		if ow.Type != discordgo.PermissionOverwriteTypeRole {
-+			continue
-+		}
-+		if ow.ID == portal.GuildID {
-+			continue
-+		}
-+		if ow.Allow&discordgo.PermissionViewChannel == 0 {
-+			continue
-+		}
-+		role := portal.bridge.DB.Role.GetByID(portal.GuildID, ow.ID)
-+		if role == nil || role.Managed {
-+			continue
-+		}
-+		if role.Position > bestPos {
-+			bestPos = role.Position
-+			bestID = ow.ID
-+		}
-+	}
-+	return bestID
 +}
 +
  func (portal *Portal) replaceMatrixPingsInDiscordText(content *event.MessageEventContent, text string, allowedMentions *discordgo.MessageAllowedMentions, replyToUser id.UserID) string {
@@ -69,31 +39,25 @@
 -				text = "@here"
 -			} else {
 -				text = "@here " + text
-+		if roleID := portal.roomPingRoleID(); roleID != "" {
-+			rolePing := fmt.Sprintf("<@&%s>", roleID)
-+			for _, kw := range []string{"@room", "[@room]", "@\u2063ro\u2063om", "@here", "@everyone"} {
-+				text = strings.ReplaceAll(text, kw, rolePing)
++		// Only convert a room ping to a real ping when governance says this channel
++		// belongs to a team: ping that team's role. There is no fallback - org-wide
++		// or unlinked channels (and teams whose role is missing) silently fail, so
++		// "@room" stays as inert text and nothing is pinged.
++		if team := governancedata.Get().TeamForDiscordChannel(portal.Key.ChannelID); team != nil {
++			if roleID := portal.governanceTeamRoleID(team.TeamName); roleID != "" {
++				rolePing := fmt.Sprintf("<@&%s>", roleID)
++				for _, kw := range []string{"@room", "[@room]", "@\u2063ro\u2063om", "@here", "@everyone"} {
++					text = strings.ReplaceAll(text, kw, rolePing)
++				}
++				if !strings.Contains(text, rolePing) {
++					if text == "" {
++						text = rolePing
++					} else {
++						text = rolePing + " " + text
++					}
++				}
++				allowedMentions.Roles = appendIfNotContains(allowedMentions.Roles, roleID)
  			}
-+			if !strings.Contains(text, rolePing) {
-+				if text == "" {
-+					text = rolePing
-+				} else {
-+					text = rolePing + " " + text
-+				}
-+			}
-+			allowedMentions.Roles = appendIfNotContains(allowedMentions.Roles, roleID)
-+		} else {
-+			for _, kw := range []string{"@room", "[@room]", "@\u2063ro\u2063om"} {
-+				text = strings.ReplaceAll(text, kw, "@here")
-+			}
-+			if !strings.Contains(text, "@here") && !strings.Contains(text, "@everyone") {
-+				if text == "" {
-+					text = "@here"
-+				} else {
-+					text = "@here " + text
-+				}
-+			}
-+			allowedMentions.Parse = appendAllowedMentionParse(allowedMentions.Parse, discordgo.AllowedMentionTypeEveryone)
  		}
 -		allowedMentions.Parse = appendAllowedMentionParse(allowedMentions.Parse, discordgo.AllowedMentionTypeEveryone)
  	}

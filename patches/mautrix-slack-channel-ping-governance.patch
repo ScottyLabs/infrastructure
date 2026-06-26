@@ -1,0 +1,30 @@
+--- a/pkg/msgconv/matrixfmt/blocks.go
++++ b/pkg/msgconv/matrixfmt/blocks.go
+@@ -35,6 +35,7 @@
+ 
+ 	"go.mau.fi/mautrix-slack/pkg/bridgeidentity"
+ 	"go.mau.fi/mautrix-slack/pkg/connector/slackdb"
++	"go.mau.fi/mautrix-slack/pkg/governancedata"
+ 	"go.mau.fi/mautrix-slack/pkg/slackid"
+ )
+ 
+@@ -422,7 +423,18 @@
+ 			elems = append(elems, parser.textToElement(prefix, ctx))
+ 		}
+ 		if part == "@room" {
+-			elems = append(elems, slack.NewRichTextSectionBroadcastElement(slack.RichTextBroadcastRangeHere))
++			// Convert a room ping to a real Slack @channel broadcast only when
++			// governance says this channel belongs to a team. Org-wide / unlinked
++			// channels get inert "@channel" text so they don't blast the channel.
++			var channelID string
++			if ctx.Portal != nil {
++				_, channelID = slackid.ParsePortalID(ctx.Portal.ID)
++			}
++			if channelID != "" && governancedata.Get().TeamForSlackChannel(channelID) != nil {
++				elems = append(elems, slack.NewRichTextSectionBroadcastElement(slack.RichTextBroadcastRangeChannel))
++			} else {
++				elems = append(elems, parser.textToElement("@channel", ctx))
++			}
+ 		} else if strings.HasPrefix(part, "http://") || strings.HasPrefix(part, "https://") {
+ 			elems = append(elems, slack.NewRichTextSectionLinkElement(part, part, ctx.StylePtr()))
+ 		} else {

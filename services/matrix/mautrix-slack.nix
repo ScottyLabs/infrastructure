@@ -23,6 +23,8 @@ let
       ../../patches/mautrix-bridge-identity-slack-ghost-parse.patch
       ../../patches/mautrix-bridge-identity-keycloak-hotpath.patch
       ../../patches/mautrix-slack-reaction-mirror-summary.patch
+      ../../patches/mautrix-bridge-governancedata.patch
+      ../../patches/mautrix-slack-channel-ping-governance.patch
     ];
     postConfigure = (old.postConfigure or "") + ''
       mautrix_dir="vendor/maunium.net/go/mautrix"
