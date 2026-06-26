@@ -94,6 +94,6 @@ resource "cloudflare_dns_record" "posthog_reverse_proxy" {
   content = "1e191a7f16b24e2e436f.cf-prod-us-proxy.proxyhog.com"
   type    = "CNAME"
   ttl     = 1
-  proxied = true
+  proxied = false
   comment = "PostHog managed reverse proxy - managed by OpenTofu"
 }
