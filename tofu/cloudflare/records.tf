@@ -87,3 +87,13 @@ resource "cloudflare_dns_record" "terrier_build_a" {
   proxied = false
   comment = "${each.value.comment} - managed by OpenTofu"
 }
+
+resource "cloudflare_dns_record" "posthog_reverse_proxy" {
+  zone_id = data.cloudflare_zone.scottylabs.zone_id
+  name    = "v"
+  content = "1e191a7f16b24e2e436f.cf-prod-us-proxy.proxyhog.com"
+  type    = "CNAME"
+  ttl     = 1
+  proxied = true
+  comment = "PostHog managed reverse proxy - managed by OpenTofu"
+}
