@@ -9,23 +9,16 @@ let
   cfg = config.scottylabs.matrix;
   bridge = cfg.bridges.slack;
   # synapse_mautrix_slack_link and manual plumbing need `!slack bridge` (added in v26.04).
+  # ScottyLabs fork carries all bridge-source patches (relay outbound, bridge identity,
+  # governance channel-ping mirroring, reaction summaries) committed on top of v0.2605.0.
+  # Only the mautrix-go dependency patches remain applied here via postConfigure.
   slackPackage = pkgs.mautrix-slack.overrideAttrs (old: {
-    patches = (old.patches or [ ]) ++ [
-      ../../patches/mautrix-slack-relay-outbound.patch
-      ../../patches/mautrix-slack-preserve-topic.patch
-      ../../patches/mautrix-slack-bridge-identity-pings.patch
-      ../../patches/mautrix-slack-bridge-identity-relay-mentions.patch
-      ../../patches/mautrix-slack-bridge-identity-dedupe.patch
-      ../../patches/mautrix-slack-skip-thread-creation-relay.patch
-      ../../patches/mautrix-slack-room-ping.patch
-      ../../patches/mautrix-bridge-identity-matrix-mxid.patch
-      ../../patches/mautrix-bridge-identity-keycloak.patch
-      ../../patches/mautrix-bridge-identity-slack-ghost-parse.patch
-      ../../patches/mautrix-bridge-identity-keycloak-hotpath.patch
-      ../../patches/mautrix-slack-reaction-mirror-summary.patch
-      ../../patches/mautrix-bridge-governancedata.patch
-      ../../patches/mautrix-slack-channel-ping-governance.patch
-    ];
+    src = pkgs.fetchFromGitHub {
+      owner = "thesuperRL";
+      repo = "mautrix-slack";
+      rev = "39f897adf388176138080c97d5f94a21e9be1f30";
+      hash = "sha256-A3fnEE0jdZFsOs6p46egJ4IAmrOSdnd5wkrjHO5DT6E=";
+    };
     postConfigure = (old.postConfigure or "") + ''
       mautrix_dir="vendor/maunium.net/go/mautrix"
       if [ ! -d "$mautrix_dir" ]; then
