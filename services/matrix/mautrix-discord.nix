@@ -9,28 +9,16 @@ let
   cfg = config.scottylabs.matrix;
   bridge = cfg.bridges.discord;
   # Relay/webhook Matrix→Discord posts cannot start threads upstream; use any logged-in bridge user.
+  # ScottyLabs fork carries all bridge-source patches (relay/thread, bridge identity,
+  # governance channel-ping mirroring, reaction summaries) committed on top of v0.7.6.
+  # Only the mautrix-go dependency patch remains applied here via postConfigure.
   mautrixDiscord = pkgs.mautrix-discord.overrideAttrs (old: {
-    patches = (old.patches or [ ]) ++ [
-      ../../patches/mautrix-discord-relay-threads.patch
-      ../../patches/mautrix-discord-set-relay-automation.patch
-      ../../patches/mautrix-discord-embed-link-url.patch
-      ../../patches/mautrix-discord-ping-prefix.patch
-      ../../patches/mautrix-discord-preserve-topic.patch
-      ../../patches/mautrix-discord-skip-thread-creation-msgs.patch
-      ../../patches/mautrix-discord-bridge-identity-pings.patch
-      ../../patches/mautrix-discord-bridge-identity-replies.patch
-      ../../patches/mautrix-discord-bridge-identity-dedupe.patch
-      ../../patches/mautrix-bridge-identity-matrix-mxid.patch
-      ../../patches/mautrix-bridge-identity-keycloak.patch
-      ../../patches/mautrix-bridge-identity-slack-ghost-parse.patch
-      ../../patches/mautrix-bridge-identity-keycloak-hotpath.patch
-      ../../patches/mautrix-discord-bridge-identity-matrix-pings.patch
-      ../../patches/mautrix-discord-reaction-mirror-summary.patch
-      ../../patches/mautrix-discord-slack-puppet-outbound.patch
-      ../../patches/mautrix-discord-room-ping-role.patch
-      ../../patches/mautrix-bridge-governancedata.patch
-      ../../patches/mautrix-discord-channel-ping-governance.patch
-    ];
+    src = pkgs.fetchFromGitHub {
+      owner = "thesuperRL";
+      repo = "mautrix-discord";
+      rev = "08241ed84234ebce660f8ecabc127df1e7793658";
+      hash = "sha256-77yDe/3j4dshgY6Z/RKV9xc6qevpkA3nPnXZJkU9B/k=";
+    };
     postConfigure = (old.postConfigure or "") + ''
       mautrix_dir="vendor/maunium.net/go/mautrix"
       if [ ! -d "$mautrix_dir" ]; then
