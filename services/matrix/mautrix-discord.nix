@@ -9,14 +9,12 @@ let
   cfg = config.scottylabs.matrix;
   bridge = cfg.bridges.discord;
   # Relay/webhook Matrix→Discord posts cannot start threads upstream; use any logged-in bridge user.
-  # ScottyLabs fork carries all bridge-source patches (relay/thread, bridge identity,
-  # governance channel-ping mirroring, reaction summaries) committed on top of v0.7.6.
-  # Only the mautrix-go dependency patch remains applied here via postConfigure.
+  # ScottyLabs fork: vendored bridge v1 + mautrix-go v0.28.0 (same as Slack).
   forkSrc = pkgs.fetchFromGitHub {
     owner = "thesuperRL";
     repo = "mautrix-discord";
-    rev = "08241ed84234ebce660f8ecabc127df1e7793658";
-    hash = "sha256-77yDe/3j4dshgY6Z/RKV9xc6qevpkA3nPnXZJkU9B/k=";
+    rev = "d484a5236e39bf9c10c11335361a88fcf420bb5b";
+    hash = "sha256-g4AlB+cKvPYKI5GUlvYKNQBIgyJ8nMofSjai9It3XKs=";
   };
   mautrixDiscord = pkgs.mautrix-discord.overrideAttrs (old: {
     src = forkSrc;
@@ -26,16 +24,9 @@ let
     # Overriding src alone leaves old.goModules vendoring upstream's deps (buildGoModule pitfall).
     goModules = old.goModules.overrideAttrs {
       src = forkSrc;
-      outputHash = "sha256-ZjY2+1M1LP/zBVG5+zfX4T8Lyjx/tpDwSxLlpsBG3iA=";
+      outputHash = "sha256-D2TxgHucySBmHHl4p54iJSGCwIu3S+PqcVF0T3144ZI=";
     };
-    postConfigure = (old.postConfigure or "") + ''
-      mautrix_dir="vendor/maunium.net/go/mautrix"
-      if [ ! -d "$mautrix_dir" ]; then
-        mautrix_dir="$(go list -m -f '{{.Dir}}' maunium.net/go/mautrix)"
-      fi
-      chmod -R u+w "$mautrix_dir"
-      patch -p1 -d "$mautrix_dir" < ${../../patches/mautrix-bridge-handle-reaction-ghosts.patch}
-    '';
+    # mautrix-go patches now in personal fork (../mautrix-go) via go.mod replace directive
   });
   bridgePermissions =
     {
