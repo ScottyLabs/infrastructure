@@ -1,14 +1,13 @@
 resource "garage_bucket" "tofu_state" {
-  name = "tofu-state"
+  global_alias = "tofu-state"
 }
 
-resource "garage_access_key" "governance" {
-  name          = "governance-tofu"
-  never_expires = true
+resource "garage_key" "governance" {
+  name = "governance-tofu"
 }
 
-resource "garage_permission" "governance_tofu_state" {
-  access_key_id = garage_access_key.governance.access_key_id
+resource "garage_bucket_permission" "governance_tofu_state" {
+  access_key_id = garage_key.governance.id
   bucket_id     = garage_bucket.tofu_state.id
   read          = true
   write         = true
@@ -16,32 +15,30 @@ resource "garage_permission" "governance_tofu_state" {
 }
 
 output "governance_access_key_id" {
-  value     = garage_access_key.governance.access_key_id
+  value     = garage_key.governance.id
   sensitive = true
 }
 
 output "governance_secret_access_key" {
-  value     = garage_access_key.governance.secret_access_key
+  value     = garage_key.governance.secret_access_key
   sensitive = true
 }
 
 # Durable, org-wide bucket for static assets that outlive any single
-# kennel deployment (team-page photos, etc.). Anonymous public read is
-# enabled by calling the garage admin API once manually after the bucket
-# is created, since the henrywhitaker3/garage provider does not expose
-# website configuration. The exact request is documented in
-# docs/troubleshooting.md under "Enabling website mode on a bucket".
+# kennel deployment (team-page photos, etc.). Website mode serves
+# anonymous public reads over the garage web endpoint.
 resource "garage_bucket" "scottylabs_assets" {
-  name = "scottylabs-assets"
+  global_alias           = "scottylabs-assets"
+  website_enabled        = true
+  website_index_document = "index.html"
 }
 
-resource "garage_access_key" "scottylabs_assets_writer" {
-  name          = "scottylabs-assets-writer"
-  never_expires = true
+resource "garage_key" "scottylabs_assets_writer" {
+  name = "scottylabs-assets-writer"
 }
 
-resource "garage_permission" "scottylabs_assets_writer" {
-  access_key_id = garage_access_key.scottylabs_assets_writer.access_key_id
+resource "garage_bucket_permission" "scottylabs_assets_writer" {
+  access_key_id = garage_key.scottylabs_assets_writer.id
   bucket_id     = garage_bucket.scottylabs_assets.id
   read          = true
   write         = true
@@ -49,28 +46,29 @@ resource "garage_permission" "scottylabs_assets_writer" {
 }
 
 output "scottylabs_assets_writer_access_key_id" {
-  value     = garage_access_key.scottylabs_assets_writer.access_key_id
+  value     = garage_key.scottylabs_assets_writer.id
   sensitive = true
 }
 
 output "scottylabs_assets_writer_secret_access_key" {
-  value     = garage_access_key.scottylabs_assets_writer.secret_access_key
+  value     = garage_key.scottylabs_assets_writer.secret_access_key
   sensitive = true
 }
 
 # Static site bucket for the ScottyLabs documentation hub (CI uploads via
-# documentation/.forgejo/workflows/deploy.yml → nix run .#upload-garage).
+# documentation/.forgejo/workflows/deploy.yml -> nix run .#upload-garage).
 resource "garage_bucket" "scottylabs_docs" {
-  name = "scottylabs-docs"
+  global_alias           = "scottylabs-docs"
+  website_enabled        = true
+  website_index_document = "index.html"
 }
 
-resource "garage_access_key" "scottylabs_docs_writer" {
-  name          = "scottylabs-docs-writer"
-  never_expires = true
+resource "garage_key" "scottylabs_docs_writer" {
+  name = "scottylabs-docs-writer"
 }
 
-resource "garage_permission" "scottylabs_docs_writer" {
-  access_key_id = garage_access_key.scottylabs_docs_writer.access_key_id
+resource "garage_bucket_permission" "scottylabs_docs_writer" {
+  access_key_id = garage_key.scottylabs_docs_writer.id
   bucket_id     = garage_bucket.scottylabs_docs.id
   read          = true
   write         = true
@@ -78,11 +76,11 @@ resource "garage_permission" "scottylabs_docs_writer" {
 }
 
 output "scottylabs_docs_writer_access_key_id" {
-  value     = garage_access_key.scottylabs_docs_writer.access_key_id
+  value     = garage_key.scottylabs_docs_writer.id
   sensitive = true
 }
 
 output "scottylabs_docs_writer_secret_access_key" {
-  value     = garage_access_key.scottylabs_docs_writer.secret_access_key
+  value     = garage_key.scottylabs_docs_writer.secret_access_key
   sensitive = true
 }
