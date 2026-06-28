@@ -77,11 +77,11 @@ in
           };
           wal.path = "/var/lib/tempo/wal";
           local.path = "/var/lib/tempo/blocks";
+        };
 
-          compaction = {
-            block_retention = cfg.retentionPeriod;
-            compacted_block_retention = "1h";
-          };
+        overrides.defaults.compaction = {
+          block_retention = cfg.retentionPeriod;
+          compacted_block_retention = "1h";
         };
 
         usage_report.reporting_enabled = false;
