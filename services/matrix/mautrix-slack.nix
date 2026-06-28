@@ -12,13 +12,16 @@ let
   # ScottyLabs fork carries all bridge-source patches (relay outbound, bridge identity,
   # governance channel-ping mirroring, reaction summaries) committed on top of v0.2605.0.
   # Only the mautrix-go dependency patches remain applied here via postConfigure.
+  forkSrc = pkgs.fetchFromGitHub {
+    owner = "thesuperRL";
+    repo = "mautrix-slack";
+    rev = "39f897adf388176138080c97d5f94a21e9be1f30";
+    hash = "sha256-A3fnEE0jdZFsOs6p46egJ4IAmrOSdnd5wkrjHO5DT6E=";
+  };
   slackPackage = pkgs.mautrix-slack.overrideAttrs (old: {
-    src = pkgs.fetchFromGitHub {
-      owner = "thesuperRL";
-      repo = "mautrix-slack";
-      rev = "39f897adf388176138080c97d5f94a21e9be1f30";
-      hash = "sha256-A3fnEE0jdZFsOs6p46egJ4IAmrOSdnd5wkrjHO5DT6E=";
-    };
+    src = forkSrc;
+    # goModules must match the fork's go.mod, not the (newer) upstream
+    goModules = old.goModules.overrideAttrs { src = forkSrc; outputHash = "sha256-DNsDK48/NWylJegqI42/mbbIcSURp1VBXPKVtdq6uak="; };
     postConfigure = (old.postConfigure or "") + ''
       mautrix_dir="vendor/maunium.net/go/mautrix"
       if [ ! -d "$mautrix_dir" ]; then
