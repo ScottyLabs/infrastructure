@@ -20,6 +20,8 @@ let
   };
   slackPackage = pkgs.mautrix-slack.overrideAttrs (old: {
     src = forkSrc;
+    version = "26.05";
+    doInstallCheck = false;
     # goModules must match the fork's go.mod, not the (newer) upstream
     goModules = old.goModules.overrideAttrs { src = forkSrc; outputHash = "sha256-DNsDK48/NWylJegqI42/mbbIcSURp1VBXPKVtdq6uak="; };
     postConfigure = (old.postConfigure or "") + ''
