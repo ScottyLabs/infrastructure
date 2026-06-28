@@ -2,7 +2,7 @@
   config,
   lib,
   pkgs,
-  litellm-nix,
+  llm-pkgs,
   ...
 }:
 
@@ -22,7 +22,7 @@ let
   '';
 in
 {
-  imports = [ litellm-nix.nixosModules.default ];
+  imports = [ llm-pkgs.nixosModules.litellm ];
 
   options.scottylabs.ai-gateway.litellm = {
     enable = lib.mkEnableOption "LiteLLM proxy fronting cli-proxy-api";
