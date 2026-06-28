@@ -38,8 +38,10 @@
       url = "git+https://codeberg.org/ScottyLabs/keycloak-theme";
       flake = false;
     };
-    nixpkgs-cliproxyapi.url = "github:ap-1/nixpkgs/cliproxyapi";
-    litellm-nix.url = "git+https://codeberg.org/anish/litellm-nix";
+    llm-pkgs = {
+      url = "git+https://codeberg.org/anish/llm-pkgs";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     # deploy-01
     internet-archive = {
@@ -77,8 +79,7 @@
       comin,
       srvos,
       keycloak-theme,
-      nixpkgs-cliproxyapi,
-      litellm-nix,
+      llm-pkgs,
       internet-archive,
       terrier,
       kennel,
@@ -103,8 +104,7 @@
               srvos
               nixos-hardware
               keycloak-theme
-              nixpkgs-cliproxyapi
-              litellm-nix
+              llm-pkgs
               internet-archive
               terrier
               kennel

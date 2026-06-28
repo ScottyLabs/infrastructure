@@ -1,20 +1,18 @@
 {
   config,
-  pkgs,
-  nixpkgs-cliproxyapi,
+  llm-pkgs,
   ...
 }:
 
 {
   imports = [
-    "${nixpkgs-cliproxyapi}/nixos/modules/services/misc/cliproxyapi.nix"
+    llm-pkgs.nixosModules.cliproxyapi
   ];
 
   age.secrets.cli-proxy-api.file = ../../secrets/infra-01/cli-proxy-api.age;
 
   services.cliproxyapi = {
     enable = true;
-    package = nixpkgs-cliproxyapi.legacyPackages.${pkgs.stdenv.hostPlatform.system}.cliproxyapi;
     settings = {
       host = "127.0.0.1";
       port = 8317;
