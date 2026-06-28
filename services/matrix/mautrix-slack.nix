@@ -15,8 +15,8 @@ let
   forkSrc = pkgs.fetchFromGitHub {
     owner = "thesuperRL";
     repo = "mautrix-slack";
-    rev = "39f897adf388176138080c97d5f94a21e9be1f30";
-    hash = "sha256-A3fnEE0jdZFsOs6p46egJ4IAmrOSdnd5wkrjHO5DT6E=";
+    rev = "e2b753df98b81d0b85c5c74d8093a5e6e14e4950";
+    hash = "sha256-hkGHzUQkWA8ZRDJpeX9V2i5YMbOHjHmDYxaHfFw+EtI=";
   };
   slackPackage = pkgs.mautrix-slack.overrideAttrs (old: {
     src = forkSrc;
@@ -24,15 +24,7 @@ let
     doInstallCheck = false;
     # goModules must match the fork's go.mod, not the (newer) upstream
     goModules = old.goModules.overrideAttrs { src = forkSrc; outputHash = "sha256-DNsDK48/NWylJegqI42/mbbIcSURp1VBXPKVtdq6uak="; };
-    postConfigure = (old.postConfigure or "") + ''
-      mautrix_dir="vendor/maunium.net/go/mautrix"
-      if [ ! -d "$mautrix_dir" ]; then
-        mautrix_dir="$(go list -m -f '{{.Dir}}' maunium.net/go/mautrix)"
-      fi
-      chmod -R u+w "$mautrix_dir"
-      patch -p1 -d "$mautrix_dir" < ${../../patches/mautrix-bridgev2-relay-reactions.patch}
-      patch -p1 -d "$mautrix_dir" < ${../../patches/mautrix-bridgev2-reaction-mirror-hook.patch}
-    '';
+    # mautrix-go patches now in personal fork (../mautrix-go) via go.mod replace directive
   });
   bridgePermissions =
     {
