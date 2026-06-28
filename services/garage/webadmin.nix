@@ -30,7 +30,7 @@ let
 
   caddyWithSecurity = pkgs.caddy.withPlugins {
     plugins = [ "github.com/greenpau/caddy-security@v1.1.62" ];
-    hash = "sha256-rv1d7FumBwro6pTNmoiwY2bCtDIfAF7NwXjYoocniao=";
+    hash = "sha256-jEfl5UaTHulvkpFnOuadca4jYbZaYt8Z704ts08jHlM=";
   };
 in
 {
