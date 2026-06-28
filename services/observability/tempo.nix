@@ -65,16 +65,6 @@ in
           http.endpoint = "0.0.0.0:${toString cfg.otlpHttpPort}";
         };
 
-        ingester = {
-          trace_idle_period = "10s";
-          max_block_duration = "5m";
-        };
-
-        compactor.compaction = {
-          block_retention = cfg.retentionPeriod;
-          compacted_block_retention = "1h";
-        };
-
         storage.trace = {
           backend = "s3";
           s3 = {
@@ -87,6 +77,11 @@ in
           };
           wal.path = "/var/lib/tempo/wal";
           local.path = "/var/lib/tempo/blocks";
+
+          compaction = {
+            block_retention = cfg.retentionPeriod;
+            compacted_block_retention = "1h";
+          };
         };
 
         usage_report.reporting_enabled = false;
