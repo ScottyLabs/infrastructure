@@ -23,7 +23,7 @@ let
     version = "26.05";
     doInstallCheck = false;
     # goModules must match the fork's go.mod, not the (newer) upstream
-    goModules = old.goModules.overrideAttrs { src = forkSrc; outputHash = "sha256-DNsDK48/NWylJegqI42/mbbIcSURp1VBXPKVtdq6uak="; };
+    goModules = old.goModules.overrideAttrs { src = forkSrc; outputHash = "sha256-J1Rk6JqL4Chky59ljwJOf4GgaLU/SNyq8TSACPqbbW8="; };
     # mautrix-go patches now in personal fork (../mautrix-go) via go.mod replace directive
   });
   bridgePermissions =
