@@ -51,9 +51,19 @@
     }
   '';
 
+  # Public anonymous-read CDN for per-project asset buckets. The first path
+  # segment selects the bucket, so cdn.scottylabs.org/<repo>/<key> rewrites to
+  # Host cdn-<repo> on the s3_web listener and serves object <key>.
+  services.caddy.virtualHosts."cdn.scottylabs.org".extraConfig = ''
+    @cdn path_regexp seg ^/([^/]+)/(.*)$
+    rewrite @cdn /{re.seg.2}
+    reverse_proxy localhost:${toString config.scottylabs.garage.webPort} {
+      header_up Host cdn-{re.seg.1}
+    }
+  '';
+
   # Documentation hub static site (built by Forgejo Actions, uploaded to Garage).
   # Accept: text/markdown negotiation serves pre-built .md files to AI agents.
-  # Requires this host config on infra-01 — without it, agents get HTML from Garage.
   services.caddy.virtualHosts."docs.scottylabs.org".extraConfig = ''
     # Accept Markdown: https://acceptmarkdown.com/recipes/caddy
     # No handle blocks — NixOS runs caddy fmt on the generated Caddyfile and
