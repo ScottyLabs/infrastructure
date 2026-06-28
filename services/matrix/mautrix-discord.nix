@@ -12,12 +12,21 @@ let
   # ScottyLabs fork carries all bridge-source patches (relay/thread, bridge identity,
   # governance channel-ping mirroring, reaction summaries) committed on top of v0.7.6.
   # Only the mautrix-go dependency patch remains applied here via postConfigure.
+  forkSrc = pkgs.fetchFromGitHub {
+    owner = "thesuperRL";
+    repo = "mautrix-discord";
+    rev = "08241ed84234ebce660f8ecabc127df1e7793658";
+    hash = "sha256-77yDe/3j4dshgY6Z/RKV9xc6qevpkA3nPnXZJkU9B/k=";
+  };
   mautrixDiscord = pkgs.mautrix-discord.overrideAttrs (old: {
-    src = pkgs.fetchFromGitHub {
-      owner = "thesuperRL";
-      repo = "mautrix-discord";
-      rev = "08241ed84234ebce660f8ecabc127df1e7793658";
-      hash = "sha256-77yDe/3j4dshgY6Z/RKV9xc6qevpkA3nPnXZJkU9B/k=";
+    src = forkSrc;
+    version = "0.7.6";
+    doInstallCheck = false;
+    # goModules must match the fork's go.mod, not whatever (newer) version nixpkgs pins.
+    # Overriding src alone leaves old.goModules vendoring upstream's deps (buildGoModule pitfall).
+    goModules = old.goModules.overrideAttrs {
+      src = forkSrc;
+      outputHash = "sha256-ZjY2+1M1LP/zBVG5+zfX4T8Lyjx/tpDwSxLlpsBG3iA=";
     };
     postConfigure = (old.postConfigure or "") + ''
       mautrix_dir="vendor/maunium.net/go/mautrix"
