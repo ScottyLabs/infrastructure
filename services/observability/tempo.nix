@@ -79,10 +79,7 @@ in
           local.path = "/var/lib/tempo/blocks";
         };
 
-        overrides.defaults.compaction = {
-          block_retention = cfg.retentionPeriod;
-          compacted_block_retention = "1h";
-        };
+        overrides.defaults.compaction.block_retention = cfg.retentionPeriod;
 
         usage_report.reporting_enabled = false;
       };
