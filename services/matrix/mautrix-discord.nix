@@ -54,8 +54,9 @@ in
     environmentFile = lib.mkOption {
       type = lib.types.path;
       description = ''
-        Path to env file containing DOUBLE_PUPPET_SECRET and AVATAR_PROXY_KEY
-        (for relay webhook profile pictures).
+        Path to env file containing DOUBLE_PUPPET_SECRET, AVATAR_PROXY_KEY
+        (for relay webhook profile pictures), and DISCORD_RELAY_LOGIN_ID
+        (for thread creation and relay operations).
       '';
     };
 
@@ -63,6 +64,25 @@ in
       type = lib.types.listOf lib.types.str;
       default = [ ];
       description = "Matrix user IDs granted bridge admin permissions.";
+    };
+
+    relay.enable = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = ''
+        Enable mautrix-discord relay. Required for thread creation by logged-in users
+        (webhooks cannot start Discord threads). Requires DISCORD_RELAY_LOGIN_ID in
+        environmentFile (Discord bot or user login from `login` command).
+      '';
+    };
+
+    relayLoginId = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      description = ''
+        Optional override for bridge.relay.default_relays. If null, uses
+        DISCORD_RELAY_LOGIN_ID from environmentFile (substituted by envsubst).
+      '';
     };
   };
 
@@ -107,10 +127,22 @@ in
             allow_key_sharing = true;
             pickle_key = "generate";
           };
-          relay = {
-            enabled = false;
-            admin_only = false;
-          };
+          relay =
+            if !bridge.relay.enable then
+              {
+                enabled = false;
+                admin_only = false;
+              }
+            else
+              {
+                enabled = true;
+                admin_only = false;
+                default_relays =
+                  if bridge.relayLoginId != null then
+                    [ bridge.relayLoginId ]
+                  else
+                    [ "$DISCORD_RELAY_LOGIN_ID" ];
+              };
           permissions = bridgePermissions;
         };
       };
