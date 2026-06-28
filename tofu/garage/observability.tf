@@ -1,14 +1,13 @@
 resource "garage_bucket" "loki_chunks" {
-  name = "loki-chunks"
+  global_alias = "loki-chunks"
 }
 
-resource "garage_access_key" "loki" {
-  name          = "loki"
-  never_expires = true
+resource "garage_key" "loki" {
+  name = "loki"
 }
 
-resource "garage_permission" "loki" {
-  access_key_id = garage_access_key.loki.access_key_id
+resource "garage_bucket_permission" "loki" {
+  access_key_id = garage_key.loki.id
   bucket_id     = garage_bucket.loki_chunks.id
   read          = true
   write         = true
@@ -20,21 +19,20 @@ resource "vault_kv_secret_v2" "loki_s3" {
   name  = "infra/loki-s3"
 
   data_json = jsonencode({
-    ENV = "LOKI_S3_ACCESS_KEY_ID=${garage_access_key.loki.access_key_id}\nLOKI_S3_SECRET_ACCESS_KEY=${garage_access_key.loki.secret_access_key}\n"
+    ENV = "LOKI_S3_ACCESS_KEY_ID=${garage_key.loki.id}\nLOKI_S3_SECRET_ACCESS_KEY=${garage_key.loki.secret_access_key}\n"
   })
 }
 
 resource "garage_bucket" "tempo_traces" {
-  name = "tempo-traces"
+  global_alias = "tempo-traces"
 }
 
-resource "garage_access_key" "tempo" {
-  name          = "tempo"
-  never_expires = true
+resource "garage_key" "tempo" {
+  name = "tempo"
 }
 
-resource "garage_permission" "tempo" {
-  access_key_id = garage_access_key.tempo.access_key_id
+resource "garage_bucket_permission" "tempo" {
+  access_key_id = garage_key.tempo.id
   bucket_id     = garage_bucket.tempo_traces.id
   read          = true
   write         = true
@@ -46,6 +44,6 @@ resource "vault_kv_secret_v2" "tempo_s3" {
   name  = "infra/tempo-s3"
 
   data_json = jsonencode({
-    ENV = "TEMPO_S3_ACCESS_KEY=${garage_access_key.tempo.access_key_id}\nTEMPO_S3_SECRET_KEY=${garage_access_key.tempo.secret_access_key}\n"
+    ENV = "TEMPO_S3_ACCESS_KEY=${garage_key.tempo.id}\nTEMPO_S3_SECRET_KEY=${garage_key.tempo.secret_access_key}\n"
   })
 }
