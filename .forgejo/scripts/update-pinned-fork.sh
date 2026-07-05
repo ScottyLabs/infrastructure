@@ -2,10 +2,10 @@
 set -euo pipefail
 name="${1:?}"
 root="$(cd "$(dirname "$0")/../.." && pwd)"
-cfg_q="${root}/.forgejo/pinned-forks.toml"
+cd "$root"
 read -r owner rel <<<"$(nix eval --raw --impure --expr "
   let
-    cfg = builtins.fromTOML (builtins.readFile ${cfg_q@Q});
+    cfg = builtins.fromTOML (builtins.readFile ./.forgejo/pinned-forks.toml);
     r = builtins.head (builtins.filter (x: x.name == \"${name}\") cfg.repos);
   in r.owner + \"\t\" + r.to_update
 ")"
