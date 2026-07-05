@@ -13,8 +13,8 @@ let
   forkSrc = pkgs.fetchFromGitHub {
     owner = "thesuperRL";
     repo = "mautrix-discord";
-    rev = "39ee6a4219d4c6c0391cc16c097e2a6e255e6b16";
-    hash = "sha256-HDaO4iaDowv6XzUON33CWQrGbKKotUGUvxJjhw47ue4=";
+    rev = "d264bf524d03b4b791832673ba33a47fe40788b5";
+    hash = "sha256-0XWeRvgC3ic/FUQVwl8eHTGGstH08+N1kWc50ZyTdBw=";
   };
   mautrixDiscord = pkgs.mautrix-discord.overrideAttrs (old: {
     src = forkSrc;
