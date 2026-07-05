@@ -20,13 +20,9 @@ let
     src = forkSrc;
     version = "0.7.6";
     doInstallCheck = false;
-    # goModules must match the fork's go.mod, not whatever (newer) version nixpkgs pins.
-    # Overriding src alone leaves old.goModules vendoring upstream's deps (buildGoModule pitfall).
-    goModules = old.goModules.overrideAttrs {
-      src = forkSrc;
-      outputHash = "sha256-D2TxgHucySBmHHl4p54iJSGCwIu3S+PqcVF0T3144ZI=";
-    };
-    # mautrix-go patches now in personal fork (../mautrix-go) via go.mod replace directive
+    vendorHash = null;
+    goModules = null;
+    # fork commit 412df13 vendors deps in-tree; goModules outputHash no longer applies
   });
   bridgePermissions =
     {
