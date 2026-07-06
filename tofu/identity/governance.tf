@@ -76,6 +76,11 @@ resource "vault_policy" "governance" {
     path "secret/data/infra/litellm-master-key" {
       capabilities = ["read"]
     }
+
+    # Read shared CI cache credentials (cachix, sccache)
+    path "secret/data/shared/*" {
+      capabilities = ["read"]
+    }
   EOT
 }
 
