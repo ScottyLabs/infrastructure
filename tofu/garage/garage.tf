@@ -84,3 +84,30 @@ output "scottylabs_docs_writer_secret_access_key" {
   value     = garage_key.scottylabs_docs_writer.secret_access_key
   sensitive = true
 }
+
+# Shared sccache compilation cache for Rust builds
+resource "garage_bucket" "sccache" {
+  global_alias = "sccache"
+}
+
+resource "garage_key" "sccache" {
+  name = "sccache"
+}
+
+resource "garage_bucket_permission" "sccache" {
+  access_key_id = garage_key.sccache.id
+  bucket_id     = garage_bucket.sccache.id
+  read          = true
+  write         = true
+  owner         = false
+}
+
+resource "vault_kv_secret_v2" "sccache_s3" {
+  mount = "secret"
+  name  = "shared/sccache"
+
+  data_json = jsonencode({
+    AWS_ACCESS_KEY_ID     = garage_key.sccache.id
+    AWS_SECRET_ACCESS_KEY = garage_key.sccache.secret_access_key
+  })
+}
