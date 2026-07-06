@@ -64,6 +64,12 @@
       socketPath = "/run/redis-kennel/redis.sock";
     };
 
+    resources.garage = {
+      enable = true;
+      # Overrides the localhost default because clients presign against this host
+      s3Endpoint = "https://s3.kennel.scottylabs.org";
+    };
+
     secrets = {
       enable = true;
       vaultEndpoint = "vault://secrets2.scottylabs.org/secret?auth=approle";

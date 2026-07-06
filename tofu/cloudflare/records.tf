@@ -22,6 +22,7 @@ locals {
     deploy-01   = { ip = "128.2.25.68", comment = "Campus Cloud VM (https://netreg.net.cmu.edu/)" }
     kennel      = { ip = "128.2.25.68", comment = "Kennel deployment platform" }
     oauth       = { ip = "128.2.25.68", comment = "Ricochet OAuth callback relay" }
+    "s3.kennel" = { ip = "128.2.25.68", comment = "Kennel per-deployment garage S3 API" }
 
     # hosts/snoopy
     snoopy      = { ip = "128.237.157.156", comment = "Computer Club VM (g:scottylabs:snoopy)" }

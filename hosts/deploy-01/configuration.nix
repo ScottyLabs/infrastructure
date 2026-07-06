@@ -7,6 +7,7 @@
     # ./saml-proxy.nix
     # ./terrier-docs.nix
     ./kennel.nix
+    ./garage.nix
     ./ricochet.nix
   ];
 
