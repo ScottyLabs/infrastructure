@@ -33,3 +33,5 @@ in
 ```
 
 Commit this change to the repository. Finally, if this host will run services that use OpenBao secrets, follow the [Setting Up a New Host](../secrets/03-openbao.md#setting-up-a-new-host) instructions.
+
+If this host runs garage, initialize its cluster layout once by following the [Garage](../services/garage.md) guide.
