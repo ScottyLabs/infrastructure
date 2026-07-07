@@ -32,7 +32,7 @@
           "nixpkgs"
         ],
         "systems": "systems_3",
-        "treefmt-nix": "treefmt-nix_6"
+        "treefmt-nix": "treefmt-nix_7"
       },
       "locked": {
         "lastModified": 1770895533,
@@ -358,11 +358,11 @@
         "rust-overlay": "rust-overlay"
       },
       "locked": {
-        "lastModified": 1783366192,
-        "narHash": "sha256-9X9ifUgqecd7JLOydqgTbjsMVwlyhUkGUdtX5cEcT3k=",
+        "lastModified": 1783461239,
+        "narHash": "sha256-O+rwg3jreOAOrYd0YrNoOsRu+8is6TCPCIBN3qJTJpM=",
         "owner": "cachix",
         "repo": "devenv",
-        "rev": "29e2ff7609c380ab6e13b096d9c93eea3334ac47",
+        "rev": "6222c499fe28b87665af2bb6c626da64179cee00",
         "type": "github"
       },
       "original": {
@@ -1029,11 +1029,11 @@
         "scottylabs": "scottylabs"
       },
       "locked": {
-        "lastModified": 1783400336,
-        "narHash": "sha256-ZCBAg+7YWfc3M1SYQodDYnx0+L+lYiQPIMdeg4N38LQ=",
+        "lastModified": 1783464052,
+        "narHash": "sha256-4ypP4YSEJm60H8JHSxVMu6WA1HeDpBbf0f/nLxgGi4g=",
         "ref": "refs/heads/main",
-        "rev": "d2001a44ac132b4ebee871d4cd9cf02fc7fd7874",
-        "revCount": 199,
+        "rev": "e56626d1cba6d68227c72a88b4d101936a2ca647",
+        "revCount": 200,
         "type": "git",
         "url": "https://codeberg.org/ScottyLabs/kennel"
       },
@@ -1063,7 +1063,7 @@
         "nixpkgs": [
           "nixpkgs"
         ],
-        "treefmt-nix": "treefmt-nix_4"
+        "treefmt-nix": "treefmt-nix_5"
       },
       "locked": {
         "lastModified": 1782547286,
@@ -1368,7 +1368,7 @@
           "devenv",
           "nixpkgs"
         ],
-        "treefmt-nix": "treefmt-nix_5"
+        "treefmt-nix": "treefmt-nix_6"
       },
       "locked": {
         "lastModified": 1778381404,
@@ -1397,7 +1397,7 @@
           "devenv",
           "nixpkgs"
         ],
-        "treefmt-nix": "treefmt-nix_7"
+        "treefmt-nix": "treefmt-nix_8"
       },
       "locked": {
         "lastModified": 1763964548,
@@ -1882,14 +1882,15 @@
         "pyproject-build-systems": "pyproject-build-systems_2",
         "pyproject-nix": "pyproject-nix_2",
         "ricochet": "ricochet",
+        "treefmt-nix": "treefmt-nix_4",
         "uv2nix": "uv2nix_2"
       },
       "locked": {
-        "lastModified": 1783363692,
-        "narHash": "sha256-nmlvRcOf/FlbzYz/JtAllG5WZJXnkkqEXW6GNQVDSeo=",
+        "lastModified": 1783392061,
+        "narHash": "sha256-mCj8vgbcodZIs3soIfpyDFY40qJ9EmSjEQ3wB3naSJQ=",
         "ref": "refs/heads/main",
-        "rev": "7691402d63e899033fe01779aa1f2ffba6d10e7c",
-        "revCount": 60,
+        "rev": "cefa72e82b581f6aa89203275b18b749b9210f7a",
+        "revCount": 62,
         "type": "git",
         "url": "https://codeberg.org/ScottyLabs/devenv"
       },
@@ -2053,7 +2054,8 @@
     "treefmt-nix_4": {
       "inputs": {
         "nixpkgs": [
-          "llm-pkgs",
+          "kennel",
+          "scottylabs",
           "nixpkgs"
         ]
       },
@@ -2072,6 +2074,27 @@
       }
     },
     "treefmt-nix_5": {
+      "inputs": {
+        "nixpkgs": [
+          "llm-pkgs",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1780220602,
+        "narHash": "sha256-eynAfOmbmxJnkp7YewvCEbShNnnYJ9gLLqkzsYtBPeM=",
+        "owner": "numtide",
+        "repo": "treefmt-nix",
+        "rev": "db947814a175b7ca6ded66e21383d938df01c227",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "treefmt-nix",
+        "type": "github"
+      }
+    },
+    "treefmt-nix_6": {
       "inputs": {
         "nixpkgs": [
           "ricochet",
@@ -2094,7 +2117,7 @@
         "type": "github"
       }
     },
-    "treefmt-nix_6": {
+    "treefmt-nix_7": {
       "inputs": {
         "nixpkgs": [
           "terrier",
@@ -2116,7 +2139,7 @@
         "type": "github"
       }
     },
-    "treefmt-nix_7": {
+    "treefmt-nix_8": {
       "inputs": {
         "nixpkgs": [
           "terrier",
