@@ -9,9 +9,9 @@ let
   cfg = config.scottylabs.matrix;
   bridge = cfg.bridges.slack;
   # synapse_mautrix_slack_link and manual plumbing need `!slack bridge` (added in v26.04).
-  # ScottyLabs fork carries all bridge-source patches (relay outbound, bridge identity,
-  # governance channel-ping mirroring, reaction summaries) committed on top of v0.2605.0.
-  # Only the mautrix-go dependency patches remain applied here via postConfigure.
+  # ScottyLabs fork carries all customizations (relay outbound, bridge identity,
+  # governance channel-ping mirroring, reaction summaries) on top of v0.2605.0.
+  # mautrix-go patches live in thesuperRL/mautrix-go scottylabs-v0.28.0 via go.mod replace.
   forkSrc = pkgs.fetchFromGitHub {
     owner = "thesuperRL";
     repo = "mautrix-slack";
