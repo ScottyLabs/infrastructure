@@ -103,6 +103,10 @@ in
             "${cfg.domain}" = "$DOUBLE_PUPPET_SECRET";
           };
           delete_portal_on_channel_delete = true;
+          # Pinned false: prevents any guild-space member from self-joining a portal room via
+          # join_rule "restricted" (bypassing invites) — only ghosts and the bridge bot should
+          # ever be room members. Matches upstream default; pinned explicitly, not just inherited.
+          restricted_rooms = false;
           # Slack→Discord relay webhooks need a URL Discord can fetch for Matrix ghost avatars.
           public_address = "https://${cfg.matrixDomain}";
           avatar_proxy_key = "$AVATAR_PROXY_KEY";
