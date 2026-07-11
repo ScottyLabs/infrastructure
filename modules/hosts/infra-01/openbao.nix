@@ -1,39 +1,75 @@
 { config, ... }:
 {
-  flake.modules.nixos.infra-01-openbao = {
-    services.openbao = {
-      enable = true;
-      settings = {
-        ui = true;
-        listener.default = {
-          type = "tcp";
-          address = "127.0.0.1:8200";
-          tls_disable = true;
-          telemetry.unauthenticated_metrics_access = true;
-        };
+  flake.modules.nixos.infra-01-openbao =
+    { config, pkgs, ... }:
+    {
+      age.secrets.openbao-unseal-keys = {
+        file = ../../../secrets/infra-01/openbao-unseal-keys.age;
+        mode = "0400";
+      };
 
-        storage.postgresql.connection_url = "postgresql:///openbao?host=/run/postgresql&user=openbao";
+      services.openbao = {
+        enable = true;
+        settings = {
+          ui = true;
+          listener.default = {
+            type = "tcp";
+            address = "127.0.0.1:8200";
+            tls_disable = true;
+            telemetry.unauthenticated_metrics_access = true;
+          };
 
-        log_level = "debug";
+          storage.postgresql.connection_url = "postgresql:///openbao?host=/run/postgresql&user=openbao";
 
-        cluster_name = "default";
-        cluster_addr = "http://127.0.0.1:8201";
+          log_level = "debug";
 
-        api_addr = "https://secrets.scottylabs.org";
+          cluster_name = "default";
+          cluster_addr = "http://127.0.0.1:8201";
 
-        telemetry = {
-          prometheus_retention_time = "24h";
-          disable_hostname = true;
+          api_addr = "https://secrets.scottylabs.org";
+
+          telemetry = {
+            prometheus_retention_time = "24h";
+            disable_hostname = true;
+          };
         };
       };
+
+      # Re-unseal openbao on every (re)start using the Shamir key share(s) stored in
+      # openbao-unseal-keys.age, one per line, until the threshold is met.
+      systemd.services.openbao.serviceConfig.ExecStartPost = pkgs.writeShellScript "openbao-auto-unseal" ''
+        export VAULT_ADDR=http://127.0.0.1:8200
+        for i in $(seq 1 60); do
+          if ${pkgs.openbao}/bin/bao status 2>/dev/null | grep -q "Sealed.*false"; then
+            echo "OpenBao already unsealed"
+            exit 0
+          fi
+          if [ -s "${config.age.secrets.openbao-unseal-keys.path}" ]; then
+            break
+          fi
+          echo "Waiting for openbao API / unseal key file... ($i/60)"
+          sleep 2
+        done
+
+        while IFS= read -r key; do
+          [ -n "$key" ] || continue
+          ${pkgs.openbao}/bin/bao operator unseal "$key" >/dev/null 2>&1 || true
+          if ${pkgs.openbao}/bin/bao status 2>/dev/null | grep -q "Sealed.*false"; then
+            echo "OpenBao unsealed"
+            exit 0
+          fi
+        done < "${config.age.secrets.openbao-unseal-keys.path}"
+
+        echo "OpenBao still sealed after feeding all stored keys"
+        exit 1
+      '';
+
+      services.caddy.virtualHosts."secrets.scottylabs.org".extraConfig = ''
+        reverse_proxy 127.0.0.1:8200
+      '';
+
+      scottylabs.postgresql.databases = [ "openbao" ];
     };
-
-    services.caddy.virtualHosts."secrets.scottylabs.org".extraConfig = ''
-      reverse_proxy 127.0.0.1:8200
-    '';
-
-    scottylabs.postgresql.databases = [ "openbao" ];
-  };
 
   perSystem =
     { pkgs, ... }:
