@@ -15,8 +15,8 @@ let
   forkSrc = pkgs.fetchFromGitHub {
     owner = "thesuperRL";
     repo = "mautrix-slack";
-    rev = "263ca3859b169867368bf86b1fbbb150f8673a20";
-    hash = "sha256-TGjIzautWXh1VyXxe4plKVPAHtf2iBzUzAZwvfvyFLc=";
+    rev = "ae7292a5a1eb2339b630515729aac5399c54932b";
+    hash = "sha256-Vn3Ry54t/ZiUa/PWGvI6892/TVhcoepwRrnfsEFriAk=";
   };
   slackPackage = pkgs.mautrix-slack.overrideAttrs (old: {
     src = forkSrc;
