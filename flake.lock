@@ -1029,11 +1029,11 @@
         "scottylabs": "scottylabs"
       },
       "locked": {
-        "lastModified": 1783703000,
-        "narHash": "sha256-+QVJSzXtX/dR5cf/MROrb/NffC8dU612jMsuNFHB6iY=",
+        "lastModified": 1783824648,
+        "narHash": "sha256-Ut4JY4asTyBmAdhBfdh5n9F6V6OVjclybNkeXAccjWA=",
         "ref": "refs/heads/main",
-        "rev": "8aede81b7bf4df5d7f400370a78734a5eb5b1fbd",
-        "revCount": 210,
+        "rev": "657c93944bc7a0ad325ab41fb30c99855f3be84a",
+        "revCount": 211,
         "type": "git",
         "url": "https://codeberg.org/ScottyLabs/kennel"
       },
@@ -1886,11 +1886,11 @@
         "uv2nix": "uv2nix_2"
       },
       "locked": {
-        "lastModified": 1783702998,
-        "narHash": "sha256-vh3mGdr0FR46DCFG9Fl10ox231UqBrB6VOSr0c8t174=",
+        "lastModified": 1783824470,
+        "narHash": "sha256-Yz79aeyNXkqATouh3mwWXn/o9PYYn1WnrS5WH/cbjjQ=",
         "ref": "refs/heads/main",
-        "rev": "1ab79cb3a50e31e994397196fd837ba1a1abeb3b",
-        "revCount": 74,
+        "rev": "37968349a0508d1dc0e4abdb31d894545f0eda26",
+        "revCount": 78,
         "type": "git",
         "url": "https://codeberg.org/ScottyLabs/devenv"
       },
