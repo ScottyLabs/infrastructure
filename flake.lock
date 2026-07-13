@@ -358,11 +358,11 @@
         "rust-overlay": "rust-overlay"
       },
       "locked": {
-        "lastModified": 1783538213,
-        "narHash": "sha256-jNjKlmrejUrBgVAeiavlMLlkmC7ZEv1D9nhfuwMW5Q8=",
+        "lastModified": 1783911906,
+        "narHash": "sha256-VKpbIaPO4OkONY88DQHD/nOPSkV6o4wWMra7E4faaXU=",
         "owner": "cachix",
         "repo": "devenv",
-        "rev": "d1fb321e73048d0e1e2b523580268ebb3df2ae90",
+        "rev": "407080febcc800abfd0fd688a0d513884aad620c",
         "type": "github"
       },
       "original": {
@@ -1029,11 +1029,11 @@
         "scottylabs": "scottylabs"
       },
       "locked": {
-        "lastModified": 1783824648,
-        "narHash": "sha256-Ut4JY4asTyBmAdhBfdh5n9F6V6OVjclybNkeXAccjWA=",
+        "lastModified": 1783921464,
+        "narHash": "sha256-w1O52U+9cOdQdXJJh9gSmxKByFkXqSl5y4KztzUvYMU=",
         "ref": "refs/heads/main",
-        "rev": "657c93944bc7a0ad325ab41fb30c99855f3be84a",
-        "revCount": 211,
+        "rev": "c238cbd6e4ba05af034492f196027880cc2515e7",
+        "revCount": 212,
         "type": "git",
         "url": "https://codeberg.org/ScottyLabs/kennel"
       },
@@ -1886,11 +1886,11 @@
         "uv2nix": "uv2nix_2"
       },
       "locked": {
-        "lastModified": 1783824470,
-        "narHash": "sha256-Yz79aeyNXkqATouh3mwWXn/o9PYYn1WnrS5WH/cbjjQ=",
+        "lastModified": 1783920776,
+        "narHash": "sha256-+KmNwoN4dAwxF7Gfuet0hehpcwZJyQ1lCFkcy4lIgBQ=",
         "ref": "refs/heads/main",
-        "rev": "37968349a0508d1dc0e4abdb31d894545f0eda26",
-        "revCount": 78,
+        "rev": "e5837f788a0ad256b702b7272e929514e22b3c76",
+        "revCount": 86,
         "type": "git",
         "url": "https://codeberg.org/ScottyLabs/devenv"
       },
