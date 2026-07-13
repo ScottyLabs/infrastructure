@@ -1029,11 +1029,11 @@
         "scottylabs": "scottylabs"
       },
       "locked": {
-        "lastModified": 1783928499,
-        "narHash": "sha256-8eWUpcGXAS0cByeBkwqNIkK09UAdsCS9ZTDBFq7RWBw=",
+        "lastModified": 1783934428,
+        "narHash": "sha256-z/YHG9MhnLgSaSG5iHBHUmAc+znrKA8sEsti5GXBVzw=",
         "ref": "refs/heads/main",
-        "rev": "afc0ff6dce49e47fb424bb4069027a69c3dabf31",
-        "revCount": 213,
+        "rev": "082165ac9ac8423eeb4d44b08d64550a34e7acb8",
+        "revCount": 214,
         "type": "git",
         "url": "https://codeberg.org/ScottyLabs/kennel"
       },
