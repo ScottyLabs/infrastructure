@@ -14,6 +14,7 @@ locals {
     "KEYCLOAK_ADMIN_CLIENT_ID",
     "KEYCLOAK_ADMIN_CLIENT_SECRET",
     "LITELLM_API_KEY",
+    "LITELLM_BASE_URL",
     "CDN_S3_ENDPOINT",
     "CDN_S3_BUCKET",
     "CDN_ACCESS_KEY_ID",
@@ -64,11 +65,11 @@ resource "vault_policy" "governance" {
 
     %{~for secret in local.governance_project_secrets~}
     path "secret/data/secretspec/+/+/${secret}" {
-      capabilities = ["create", "read", "update"]
+      capabilities = ["create", "read", "update", "delete"]
     }
 
     path "secret/metadata/secretspec/+/+/${secret}" {
-      capabilities = ["create", "read", "update"]
+      capabilities = ["create", "read", "update", "delete"]
     }
     %{~endfor~}
 
