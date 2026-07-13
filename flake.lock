@@ -1622,11 +1622,11 @@
     },
     "observability": {
       "locked": {
-        "lastModified": 1782589331,
-        "narHash": "sha256-1UO6/Cu2pcqx0FOatZ4c9K9okvTeRPpw8IdXdVXYpH8=",
+        "lastModified": 1783932085,
+        "narHash": "sha256-hxayCi0IA9VaT3CXamcljdg8vThx4McnS1PQL+BIOX4=",
         "ref": "refs/heads/main",
-        "rev": "55868d4aac3a5c272a58f551d2c1a26ff4508b67",
-        "revCount": 32,
+        "rev": "72613366b60af537aa8bf64660038337f7f4bda7",
+        "revCount": 33,
         "type": "git",
         "url": "https://codeberg.org/ScottyLabs/observability"
       },
