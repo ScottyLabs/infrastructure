@@ -1029,11 +1029,11 @@
         "scottylabs": "scottylabs"
       },
       "locked": {
-        "lastModified": 1783928499,
-        "narHash": "sha256-8eWUpcGXAS0cByeBkwqNIkK09UAdsCS9ZTDBFq7RWBw=",
+        "lastModified": 1783934428,
+        "narHash": "sha256-z/YHG9MhnLgSaSG5iHBHUmAc+znrKA8sEsti5GXBVzw=",
         "ref": "refs/heads/main",
-        "rev": "afc0ff6dce49e47fb424bb4069027a69c3dabf31",
-        "revCount": 213,
+        "rev": "082165ac9ac8423eeb4d44b08d64550a34e7acb8",
+        "revCount": 214,
         "type": "git",
         "url": "https://codeberg.org/ScottyLabs/kennel"
       },
@@ -1622,11 +1622,11 @@
     },
     "observability": {
       "locked": {
-        "lastModified": 1782589331,
-        "narHash": "sha256-1UO6/Cu2pcqx0FOatZ4c9K9okvTeRPpw8IdXdVXYpH8=",
+        "lastModified": 1783932085,
+        "narHash": "sha256-hxayCi0IA9VaT3CXamcljdg8vThx4McnS1PQL+BIOX4=",
         "ref": "refs/heads/main",
-        "rev": "55868d4aac3a5c272a58f551d2c1a26ff4508b67",
-        "revCount": 32,
+        "rev": "72613366b60af537aa8bf64660038337f7f4bda7",
+        "revCount": 33,
         "type": "git",
         "url": "https://codeberg.org/ScottyLabs/observability"
       },
