@@ -45,6 +45,15 @@
           "scottylabs.org" = "ab365d7cec88f972e0b26bf59afd174f";
           "cmu.quest" = "2bf8696c7e2fdc56f9b9e98443f001cc";
           "cmu.lol" = "dbedf6cff671263c0d6f69b482895ee4";
+	  "cmu.courses" = "a3c2419a7e47cdc909022c5815310013";
+	  "cmu.dev" = "9ae67b02fb7f5a546a8fd18527115ea5";
+	  "cmu.quest" = "2bf8696c7e2fdc56f9b9e98443f001cc";
+	  "cmuhousing.com" = "90331dc9edd007e59c828faa3b8d73a9";
+	  "cmumaps.com" = "a0686a6fe9f1e181d0c1dcdf9c293a9b";
+	  "cmueats.com" = "78a8413b3e73553f7def8cefe1bdc386";
+	  "cmugpt.com" = "dfe11e930ca4ef3d94cd9f79072315cd";
+	  "tartan.vote" = "97416783adc55489c6f601bbfaa48936";
+	  "terrier.build" = "5ec9401ebede43c78ad0167fefd3b862";
         };
       };
     };
