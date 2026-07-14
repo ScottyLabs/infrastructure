@@ -33,6 +33,9 @@ in
           inherit name;
           value = {
             enable = true;
+            # Persist to disk so data survives service restarts.
+            # RDB snapshots: save after 3600s if ≥1 key changed.
+            save = [ "3600 1" "300 100" "60 10000" ];
           };
         }) cfg.servers
       );
