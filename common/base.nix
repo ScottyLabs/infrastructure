@@ -57,4 +57,7 @@
     options = "--delete-older-than 7d";
     persistent = true;
   };
+
+  # local journal buffer only, history ships to Loki via alloy
+  services.journald.extraConfig = "SystemMaxUse=500M";
 }
