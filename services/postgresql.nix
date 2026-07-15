@@ -59,6 +59,7 @@ in
     services.prometheus.exporters.postgres = {
       enable = true;
       runAsLocalSuperUser = true;
+      extraFlags = [ "--no-collector.replication" ];
     };
   };
 }
