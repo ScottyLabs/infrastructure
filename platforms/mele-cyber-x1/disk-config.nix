@@ -3,26 +3,19 @@
 {
   disko.devices = {
     disk.main = {
-      device = lib.mkDefault "/dev/sda";
+      device = lib.mkDefault "/dev/nvme0n1";
       type = "disk";
       content = {
         type = "gpt";
         partitions = {
           ESP = {
-            size = "512M";
+            size = "400M";
             type = "EF00";
             content = {
               type = "filesystem";
               format = "vfat";
               mountpoint = "/boot";
               mountOptions = [ "umask=0077" ];
-            };
-          };
-          swap = {
-            size = "512M";
-            content = {
-              type = "swap";
-              resumeDevice = true;
             };
           };
           root = {
