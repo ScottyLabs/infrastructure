@@ -3,6 +3,7 @@
 {
   imports = [
     ./disk-config.nix
+    ../../common/zram-swap.nix
     srvos.nixosModules.mixins-systemd-boot
   ];
 
