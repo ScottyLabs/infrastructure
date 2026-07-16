@@ -26,6 +26,9 @@ locals {
 
     # hosts/snoopy
     snoopy      = { ip = "128.237.157.156", comment = "Computer Club VM (g:scottylabs:snoopy)" }
+
+    # hosts/bus-sign-display
+    mele-cyber-x1 = { ip = "172.26.173.66", comment = "Mele Cyber X1 bus sign display" }
   }
 }
 
