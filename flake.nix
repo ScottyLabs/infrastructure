@@ -31,6 +31,10 @@
       url = "github:nlewo/comin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    ncro = {
+      url = "github:feel-co/ncro";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     srvos.url = "github:nix-community/srvos";
 
     # infra-01
@@ -69,6 +73,7 @@
       agenix,
       disko,
       comin,
+      ncro,
       srvos,
       keycloak-theme,
       llm-pkgs,
@@ -91,6 +96,7 @@
               hostname
               users
               comin
+              ncro
               srvos
               nixos-hardware
               keycloak-theme
