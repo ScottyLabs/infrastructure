@@ -11,6 +11,7 @@
     ./caddy.nix
     ./observability-agents.nix
     ./tailnet-client.nix
+    ./ncro.nix
   ];
 
   # Enforce that each host must have a disk configuration defined

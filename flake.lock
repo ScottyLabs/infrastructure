@@ -814,6 +814,26 @@
         "url": "https://codeberg.org/anish/llm-pkgs"
       }
     },
+    "ncro": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1784212632,
+        "narHash": "sha256-E4sJw/ySR3bEGd3eyqXErmDtjj0TF+8JGYXH9uDPctc=",
+        "owner": "feel-co",
+        "repo": "ncro",
+        "rev": "8681ec50b9570de825786f9ec599b1301214a1ff",
+        "type": "github"
+      },
+      "original": {
+        "owner": "feel-co",
+        "repo": "ncro",
+        "type": "github"
+      }
+    },
     "nix": {
       "inputs": {
         "flake-compat": [
@@ -1353,6 +1373,7 @@
         "kennel": "kennel",
         "keycloak-theme": "keycloak-theme",
         "llm-pkgs": "llm-pkgs",
+        "ncro": "ncro",
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs_4",
         "observability": "observability",
