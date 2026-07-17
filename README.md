@@ -1,4 +1,8 @@
-# ScottyLabs Infrastructure
+<div align="center">
+  <h1>
+    <pre>infrastructure</pre>
+  </h1>
+</div>
 
 This repository contains the NixOS configurations for ScottyLabs' VMs.
 
