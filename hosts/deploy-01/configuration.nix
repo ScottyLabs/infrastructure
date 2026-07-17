@@ -3,9 +3,6 @@
 {
   imports = [
     ../../platforms/campus-cloud
-    ./internet-archive.nix
-    # ./saml-proxy.nix
-    # ./terrier-docs.nix
     ./kennel.nix
     ./garage.nix
     ./ricochet.nix

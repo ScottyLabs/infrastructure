@@ -1,4 +1,17 @@
-.DS_Store
+# Nix / devenv
+.devenv/
+.devenv.flake.nix
+devenv.local.yaml
+.pre-commit-config.yaml
 result
-.patch-verify*/
-.patch-work/
+result-*
+
+# AI
+.mcp.json
+.claude
+
+# direnv
+.direnv/
+
+# OS
+.DS_Store

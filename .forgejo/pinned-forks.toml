@@ -1,9 +1,0 @@
-[[repos]]
-name = "mautrix-discord"
-owner = "thesuperRL"
-to_update = "services/matrix/mautrix-discord.nix"
-
-[[repos]]
-name = "mautrix-slack"
-owner = "thesuperRL"
-to_update = "services/matrix/mautrix-slack.nix"

@@ -44,14 +44,6 @@
     };
 
     # deploy-01
-    internet-archive = {
-      url = "git+https://codeberg.org/ScottyLabs/internet-archive";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    terrier = {
-      url = "git+https://codeberg.org/ScottyLabs/terrier";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     kennel = {
       url = "git+https://codeberg.org/ScottyLabs/kennel";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -80,8 +72,6 @@
       srvos,
       keycloak-theme,
       llm-pkgs,
-      internet-archive,
-      terrier,
       kennel,
       observability,
       ricochet,
@@ -105,8 +95,6 @@
               nixos-hardware
               keycloak-theme
               llm-pkgs
-              internet-archive
-              terrier
               kennel
               observability
               ricochet
