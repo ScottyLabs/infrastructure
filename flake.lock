@@ -1224,11 +1224,11 @@
         "scottylabs": "scottylabs"
       },
       "locked": {
-        "lastModified": 1784201804,
-        "narHash": "sha256-3pqqkYa1ab/TCEdr7GNQFR6jD1Xz/6IpPd8woUnIITg=",
+        "lastModified": 1784278153,
+        "narHash": "sha256-0zTwK6HNyOB1XdgDBxaPmwwExH2oekeFdEEGVF8O9fI=",
         "ref": "refs/heads/main",
-        "rev": "b216b3e56eecd1d914923cad0d9e5cef7e591835",
-        "revCount": 222,
+        "rev": "cbd531fb238548dcecb8bd5fd682f19e337ab558",
+        "revCount": 223,
         "type": "git",
         "url": "https://codeberg.org/ScottyLabs/kennel"
       },
@@ -2375,11 +2375,11 @@
         "scottylabs": "scottylabs_2"
       },
       "locked": {
-        "lastModified": 1784062764,
-        "narHash": "sha256-bTAm6saQXmHb8+9/Pj7bEKTUiSZ3oLUDlr+LyBzJW0c=",
+        "lastModified": 1784233332,
+        "narHash": "sha256-2Kz4GckvuurZBn9nLG6w1BpJuAYXbLth0K8aEJ4Ogiw=",
         "ref": "refs/heads/main",
-        "rev": "75052282ce4f1b5e039e17a9c51e2f50340f1f4e",
-        "revCount": 70,
+        "rev": "085a4783d6f7e25d2580b53ba8aa5250c63cca23",
+        "revCount": 73,
         "type": "git",
         "url": "https://codeberg.org/ScottyLabs/terrier"
       },
