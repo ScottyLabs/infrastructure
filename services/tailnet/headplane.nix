@@ -64,6 +64,7 @@ in
           inherit (cfg) host;
           inherit (cfg) port;
           cookie_secret_path = cfg.cookieSecretFile;
+          base_url = "https://${cfg.domain}";
         };
 
         headscale = {
