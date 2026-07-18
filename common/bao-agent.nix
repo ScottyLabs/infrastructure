@@ -35,11 +35,6 @@ let
       {{- end -}}
     '';
 
-  allProjects = lib.unique (
-    (lib.mapAttrsToList (_: s: s.project) cfg.secrets)
-    ++ (lib.mapAttrsToList (_: s: s.project) cfg.secretFiles)
-  );
-
   agentConfig = pkgs.writeText "bao-agent.hcl" ''
     vault {
       address = "https://secrets2.scottylabs.org"
@@ -170,13 +165,6 @@ in
         }
       );
       default = { };
-    };
-
-    projects = lib.mkOption {
-      type = lib.types.listOf lib.types.str;
-      default = allProjects;
-      readOnly = true;
-      internal = true;
     };
   };
 
