@@ -25,6 +25,7 @@
       "--ssh"
       "--advertise-exit-node"
       "--hostname=${hostname}"
+      "--accept-routes"
     ];
   };
 

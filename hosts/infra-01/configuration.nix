@@ -15,6 +15,7 @@
     ./ai-gateway.nix
     ./observability.nix
     ./uptime.nix
+    ./cmu-vpn
   ];
 
   # Allow building aarch64 packages via QEMU emulation
