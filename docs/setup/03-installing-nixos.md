@@ -16,7 +16,7 @@ After navigating to your local ISO file, enable `Connect at power on`, and then 
 
 <img src="./assets/mount-iso.png" alt="Mount ISO" height="300" />
 
-According to Computing Services, "there are usually a couple ways of mounting an ISO on a VM, but we have an extra layer of indirection in getting to Campus Cloud." This means we can’t upload directly to the shared datastore, `shared_vast-01_colomedia`, as trying to do so results in a certificate error. The ISO has to be selected from within VMware Remote Console.
+According to Computing Services, "there are usually a couple ways of mounting an ISO on a VM, but we have an extra layer of indirection in getting to Campus Cloud." This means we can't upload directly to the shared datastore, `shared_vast-01_colomedia`, as trying to do so results in a certificate error. The ISO has to be selected from within VMware Remote Console.
 
 Once the VMWare Remote Console is powered on, you should see the NixOS boot menu. Select the first option, ending in `(Linux LTS)`, to boot into the live environment. It will select itself in a few seconds. First, you need to set the root user password:
 

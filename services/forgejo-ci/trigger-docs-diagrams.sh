@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-# Dispatches documentation rebuild when a push changes docs/ or Excalidraw diagram files.
-# Used by infra-01 Forgejo push webhook (stdin = JSON payload).
 
 set -euo pipefail
 

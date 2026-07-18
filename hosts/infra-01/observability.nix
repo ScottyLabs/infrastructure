@@ -1,15 +1,10 @@
-{ config, ... }:
+{ self, ... }:
 
 let
-  hosts = {
-    infra-01 = "infra-01";
-    deploy-01 = "deploy-01";
-    snoopy = "snoopy";
-    bus-sign-display = "bus-sign-display";
-  };
+  hostnames = builtins.attrNames self.nixosConfigurations;
 
-  nodeTargets = map (h: "${h}:9100") (builtins.attrValues hosts);
-  systemdTargets = map (h: "${h}:9558") (builtins.attrValues hosts);
+  nodeTargets = map (h: "${h}:9100") hostnames;
+  systemdTargets = map (h: "${h}:9558") hostnames;
 in
 {
   scottylabs.bao-agent.infraSecrets = {

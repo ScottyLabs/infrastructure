@@ -1,5 +1,3 @@
-{ ... }:
-
 {
   services.caddy.globalConfig = ''
     servers {

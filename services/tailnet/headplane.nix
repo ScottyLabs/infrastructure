@@ -17,8 +17,6 @@ let
   );
 in
 {
-  # headplane is in nixpkgs; do not import tale/headplane's module (duplicate options).
-
   options.scottylabs.tailnet.headplane = {
     enable = lib.mkEnableOption "Headplane web UI for Headscale";
 
@@ -63,8 +61,8 @@ in
       enable = true;
       settings = {
         server = {
-          host = cfg.host;
-          port = cfg.port;
+          inherit (cfg) host;
+          inherit (cfg) port;
           cookie_secret_path = cfg.cookieSecretFile;
         };
 

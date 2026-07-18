@@ -59,7 +59,7 @@ in
           http_addr = "127.0.0.1";
           http_port = cfg.httpPort;
           root_url = "https://${cfg.domain}";
-          domain = cfg.domain;
+          inherit (cfg) domain;
         };
 
         analytics.reporting_enabled = false;

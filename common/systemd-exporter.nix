@@ -26,7 +26,7 @@ in
   config = lib.mkIf cfg.enable {
     services.prometheus.exporters.systemd = {
       enable = true;
-      port = cfg.port;
+      inherit (cfg) port;
       extraFlags = [
         "--systemd.collector.unit-include=${cfg.unitWhitelist}"
         "--systemd.collector.enable-restart-count"

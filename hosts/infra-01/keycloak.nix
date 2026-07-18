@@ -58,7 +58,7 @@
       keycloak-magic-link
       keycloak-remember-me-authenticator
 
-      # needed for Unix socket auth
+      # Unix socket auth
       junixsocket-common
       junixsocket-native-common
     ];

@@ -57,7 +57,11 @@ let
 
   triggerDocsDiagramsScript = pkgs.writeShellApplication {
     name = "trigger-docs-diagrams";
-    runtimeInputs = [ pkgs.bash pkgs.jq pkgs.curl ];
+    runtimeInputs = with pkgs; [
+      bash
+      jq
+      curl
+    ];
     text = ''
       export FORGEJO_TOKEN_FILE=${cfg.tokenFile}
       export FORGEJO_API_BASE=${cfg.apiBase}
@@ -114,7 +118,7 @@ in
   config = lib.mkIf cfg.enable {
     services.webhook = {
       enable = true;
-      port = cfg.port;
+      inherit (cfg) port;
       hooks = {
         flake-update = {
           execute-command = toString triggerScript;

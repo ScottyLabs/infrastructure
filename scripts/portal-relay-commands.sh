@@ -17,7 +17,7 @@ echo "# (OpenTofu Apply / synapse_mautrix_slack_link already runs these on creat
 echo
 
 jq -r '.resource.synapse_mautrix_slack_link | to_entries[] |
-  "# \(.value.team_name)\(if .value.project_name then " / \(.value.project_name)" else "" end) — Discord \(.value.discord_channel_id) ↔ Slack \(.value.slack_channel_id)
+  "# \(.value.team_name)\(if .value.project_name then " / \(.value.project_name)" else "" end) - Discord \(.value.discord_channel_id) <-> Slack \(.value.slack_channel_id)
 !discord set-relay --create mautrix
 \(if $relay != "" then "!slack set-relay \($relay)" else "# !slack set-relay <SLACK_APP_LOGIN_ID>  # from list-logins after login app" end)
 "' --arg relay "$SLACK_RELAY" "$TF_JSON"

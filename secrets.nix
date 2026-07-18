@@ -2,7 +2,7 @@ let
   users = import ./users.nix;
 
   # SSH public keys for users who can edit secrets
-  admins = builtins.attrValues (builtins.mapAttrs (_: u: u.sshPublicKey) users);
+  admins = builtins.attrValues users;
 
   # SSH host keys for machines that can decrypt
   infra-01 = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJaOgbg8hOVqI4zmEHODl1NJpAeImw/7z6jPnVSoXywt root@infra-01";

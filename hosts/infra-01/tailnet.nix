@@ -1,5 +1,3 @@
-{ ... }:
-
 {
   scottylabs.bao-agent = {
     enable = true;

@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  pkgs,
   ...
 }:
 
@@ -100,8 +99,8 @@ in
 
     services.headscale = {
       enable = true;
-      address = cfg.address;
-      port = cfg.port;
+      inherit (cfg) address;
+      inherit (cfg) port;
 
       settings = {
         server_url = "https://${cfg.domain}";

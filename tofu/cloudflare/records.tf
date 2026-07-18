@@ -1,22 +1,22 @@
 locals {
   a_records = {
     # hosts/infra-01
-    infra-01    = { ip = "128.2.25.63", comment = "Campus Cloud VM (https://netreg.net.cmu.edu/)" }
-    idp         = { ip = "128.2.25.63", comment = "Keycloak" }
-    secrets2    = { ip = "128.2.25.63", comment = "OpenBao" }
-    vault       = { ip = "128.2.25.63", comment = "Vaultwarden" }
-    webhooks    = { ip = "128.2.25.63", comment = "Nix flake updates for infrastructure" }
-    headscale   = { ip = "128.2.25.63", comment = "Headscale VPN coordination server" }
-    headplane   = { ip = "128.2.25.63", comment = "Headplane web UI for Headscale" }
-    s3          = { ip = "128.2.25.63", comment = "Garage S3-compatible object storage" }
-    assets      = { ip = "128.2.25.63", comment = "Garage public-read website endpoint for the scottylabs-assets bucket" }
-    cdn         = { ip = "128.2.25.63", comment = "Garage public-read CDN" }
-    docs        = { ip = "128.2.25.63", comment = "ScottyLabs documentation hub (Garage scottylabs-docs bucket)" }
-    garage      = { ip = "128.2.25.63", comment = "Garage web admin UI fronted by caddy with Keycloak OIDC" }
-    atlantis    = { ip = "128.2.25.63", comment = "Atlantis OpenTofu PR automation" }
-    grafana     = { ip = "128.2.25.63", comment = "Grafana observability frontend" }
-    uptime      = { ip = "128.2.25.63", comment = "Uptime Kuma public status page" }
-    litellm     = { ip = "128.2.25.63", comment = "LiteLLM AI gateway fronting cli-proxy-api" }
+    infra-01  = { ip = "128.2.25.63", comment = "Campus Cloud VM (https://netreg.net.cmu.edu/)" }
+    idp       = { ip = "128.2.25.63", comment = "Keycloak" }
+    secrets2  = { ip = "128.2.25.63", comment = "OpenBao" }
+    vault     = { ip = "128.2.25.63", comment = "Vaultwarden" }
+    webhooks  = { ip = "128.2.25.63", comment = "Nix flake updates for infrastructure" }
+    headscale = { ip = "128.2.25.63", comment = "Headscale VPN coordination server" }
+    headplane = { ip = "128.2.25.63", comment = "Headplane web UI for Headscale" }
+    s3        = { ip = "128.2.25.63", comment = "Garage S3-compatible object storage" }
+    assets    = { ip = "128.2.25.63", comment = "Garage public-read website endpoint for the scottylabs-assets bucket" }
+    cdn       = { ip = "128.2.25.63", comment = "Garage public-read CDN" }
+    docs      = { ip = "128.2.25.63", comment = "ScottyLabs documentation hub (Garage scottylabs-docs bucket)" }
+    garage    = { ip = "128.2.25.63", comment = "Garage web admin UI fronted by caddy with Keycloak OIDC" }
+    atlantis  = { ip = "128.2.25.63", comment = "Atlantis OpenTofu PR automation" }
+    grafana   = { ip = "128.2.25.63", comment = "Grafana observability frontend" }
+    uptime    = { ip = "128.2.25.63", comment = "Uptime Kuma public status page" }
+    litellm   = { ip = "128.2.25.63", comment = "LiteLLM AI gateway fronting cli-proxy-api" }
 
     # hosts/deploy-01
     deploy-01   = { ip = "128.2.25.68", comment = "Campus Cloud VM (https://netreg.net.cmu.edu/)" }
@@ -24,11 +24,11 @@ locals {
     oauth       = { ip = "128.2.25.68", comment = "Ricochet OAuth callback relay" }
     "s3.kennel" = { ip = "128.2.25.68", comment = "Kennel per-deployment garage S3 API" }
 
-    # hosts/snoopy
-    snoopy      = { ip = "128.237.157.156", comment = "Computer Club VM (g:scottylabs:snoopy)" }
+    # hosts/signage-01
+    signage-01 = { ip = "172.26.173.66", comment = "Bus sign display" }
 
-    # hosts/bus-sign-display
-    mele-cyber-x1 = { ip = "172.26.173.66", comment = "Mele Cyber X1 bus sign display" }
+    # hosts/snoopy
+    snoopy = { ip = "128.237.157.156", comment = "Computer Club VM (g:scottylabs:snoopy)" }
   }
 }
 

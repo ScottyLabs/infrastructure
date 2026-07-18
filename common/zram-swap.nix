@@ -1,4 +1,3 @@
-{ ... }:
 {
   # Copied from Pop!_OS
   boot.kernel.sysctl = {

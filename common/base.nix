@@ -22,7 +22,7 @@
   # SSH
   services.openssh.settings.PermitRootLogin = "no";
 
-  # btrbk needs sudo as a non-wheel user for btrfs snapshot commands
+  # Non-wheel sudo for btrbk snapshots
   security.sudo.execWheelOnly = lib.mkForce false;
 
   # Networking
@@ -57,6 +57,6 @@
     persistent = true;
   };
 
-  # local journal buffer only, history ships to Loki via alloy
+  # Local journal buffer only, history ships to Loki via alloy
   services.journald.extraConfig = "SystemMaxUse=500M";
 }

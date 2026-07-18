@@ -9,7 +9,7 @@ locals {
     "infra-01",
     "deploy-01",
     "snoopy",
-    "bus-sign-display",
+    "signage-01",
   ])
 }
 

@@ -33,7 +33,20 @@ in
           inherit name;
           value = {
             enable = true;
-            save = [ [ 3600 1 ] [ 300 100 ] [ 60 10000 ] ];
+            save = [
+              [
+                3600
+                1
+              ]
+              [
+                300
+                100
+              ]
+              [
+                60
+                10000
+              ]
+            ];
           };
         }) cfg.servers
       );

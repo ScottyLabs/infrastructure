@@ -38,9 +38,9 @@ in
     services.prometheus = {
       enable = true;
       checkConfig = "syntax-only";
-      listenAddress = cfg.listenAddress;
-      port = cfg.port;
-      retentionTime = cfg.retentionTime;
+      inherit (cfg) listenAddress;
+      inherit (cfg) port;
+      inherit (cfg) retentionTime;
       scrapeConfigs = cfg.scrapeJobs;
       globalConfig = {
         scrape_interval = "30s";
