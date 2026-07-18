@@ -160,7 +160,7 @@
       // builtins.mapAttrs (hostname: _: {
         deployment = {
           targetHost = "${hostname}.scottylabs.org";
-          targetUser = "apallati";
+          targetUser = "deploy";
         };
         imports = modulesFor hostname;
       }) hosts;
