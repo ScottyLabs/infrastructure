@@ -142,8 +142,8 @@
       hosts = {
         infra-01 = "x86_64-linux";
         deploy-01 = "x86_64-linux";
-        snoopy = "x86_64-linux";
         signage-01 = "x86_64-linux";
+        snoopy = "x86_64-linux";
       };
 
       nixosConfigurations = builtins.mapAttrs mkSystem hosts;
@@ -160,7 +160,7 @@
       // builtins.mapAttrs (hostname: _: {
         deployment = {
           targetHost = "${hostname}.scottylabs.org";
-          targetUser = "deploy";
+          targetUser = "apallati";
         };
         imports = modulesFor hostname;
       }) hosts;
