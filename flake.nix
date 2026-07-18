@@ -38,6 +38,7 @@
       url = "git+https://codeberg.org/ScottyLabs/keycloak-theme";
       flake = false;
     };
+    nixpkgs-keycloak.url = "github:ap-1/nixpkgs/keycloak-plugin-updates";
     llm-pkgs = {
       url = "git+https://codeberg.org/anish/llm-pkgs";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -71,6 +72,7 @@
       ncro,
       srvos,
       keycloak-theme,
+      nixpkgs-keycloak,
       llm-pkgs,
       kennel,
       observability,
@@ -111,6 +113,22 @@
         srvos.nixosModules.mixins-terminfo
         srvos.nixosModules.mixins-trusted-nix-caches
         { srvos.flake = self; }
+        {
+          nixpkgs.overlays = [
+            (
+              _: prev:
+              let
+                keycloakPkgs = import nixpkgs-keycloak {
+                  inherit (prev.stdenv.hostPlatform) system;
+                  inherit (prev) config;
+                };
+              in
+              {
+                inherit (keycloakPkgs) keycloak;
+              }
+            )
+          ];
+        }
       ];
 
       mkSystem =
