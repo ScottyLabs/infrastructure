@@ -38,6 +38,12 @@ let
 
     autoApprovers = {
       exitNode = [ "tag:server" ];
+      routes = builtins.listToAttrs (
+        map (route: {
+          name = route;
+          value = [ "tag:server" ];
+        }) cfg.autoApproveRoutes
+      );
     };
   };
 in
@@ -86,6 +92,12 @@ in
       type = lib.types.listOf lib.types.str;
       default = [ "/projects/devops" ];
       description = "Keycloak groups that may register nodes via OIDC.";
+    };
+
+    autoApproveRoutes = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [ ];
+      description = "Subnet routes auto-approved for tag:server nodes.";
     };
   };
 
