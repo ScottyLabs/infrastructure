@@ -5,7 +5,6 @@
     ./base.nix
     ./users.nix
     ./btrfs.nix
-    ./comin.nix
     ./acme.nix
     ./bao-agent.nix
     ./caddy.nix

@@ -151,14 +151,6 @@ in
         };
       }
       {
-        job_name = "comin";
-        static_configs = [
-          {
-            targets = map (h: "${h}:4243") (builtins.attrValues hosts);
-          }
-        ];
-      }
-      {
         job_name = "litellm";
         static_configs = [ { targets = [ "localhost:4000" ]; } ];
         metrics_path = "/metrics/";

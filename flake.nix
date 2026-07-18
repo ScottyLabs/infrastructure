@@ -27,10 +27,6 @@
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    comin = {
-      url = "github:nlewo/comin";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     ncro = {
       url = "github:feel-co/ncro";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -72,7 +68,6 @@
       home-manager,
       agenix,
       disko,
-      comin,
       ncro,
       srvos,
       keycloak-theme,
@@ -86,41 +81,44 @@
     let
       users = import ./users.nix;
 
+      specialArgsFor = hostname: {
+        inherit
+          self
+          hostname
+          users
+          ncro
+          srvos
+          nixos-hardware
+          keycloak-theme
+          llm-pkgs
+          kennel
+          observability
+          ricochet
+          governance
+          ;
+      };
+
+      modulesFor = hostname: [
+        ./hosts/${hostname}/configuration.nix
+        ./common
+        ./services
+
+        home-manager.nixosModules.home-manager
+        agenix.nixosModules.default
+        disko.nixosModules.disko
+
+        srvos.nixosModules.server
+        srvos.nixosModules.mixins-terminfo
+        srvos.nixosModules.mixins-trusted-nix-caches
+        { srvos.flake = self; }
+      ];
+
       mkSystem =
         hostname: system:
         nixpkgs.lib.nixosSystem {
           inherit system;
-          specialArgs = {
-            inherit
-              self
-              hostname
-              users
-              comin
-              ncro
-              srvos
-              nixos-hardware
-              keycloak-theme
-              llm-pkgs
-              kennel
-              observability
-              ricochet
-              governance
-              ;
-          };
-          modules = [
-            ./hosts/${hostname}/configuration.nix
-            ./common
-            ./services
-
-            home-manager.nixosModules.home-manager
-            agenix.nixosModules.default
-            disko.nixosModules.disko
-
-            srvos.nixosModules.server
-            srvos.nixosModules.mixins-terminfo
-            srvos.nixosModules.mixins-trusted-nix-caches
-            { srvos.flake = self; }
-          ];
+          specialArgs = specialArgsFor hostname;
+          modules = modulesFor hostname;
         };
 
       hosts = {
@@ -139,6 +137,22 @@
       );
 
       inherit nixosConfigurations;
+
+      # colmena deploys as the invoking admin over sudo
+      colmena =
+        {
+          meta = {
+            nixpkgs = import nixpkgs { system = "x86_64-linux"; };
+            nodeSpecialArgs = builtins.mapAttrs (hostname: _: specialArgsFor hostname) hosts;
+          };
+        }
+        // builtins.mapAttrs (hostname: _: {
+          deployment = {
+            targetHost = "${hostname}.scottylabs.org";
+            targetUser = null;
+          };
+          imports = modulesFor hostname;
+        }) hosts;
 
       # Host-to-project mapping for OpenBao AppRole policies
       packages.x86_64-linux.host-projects =

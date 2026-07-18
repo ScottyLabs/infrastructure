@@ -50,7 +50,6 @@
   # Nix
   nix.package = pkgs.lixPackageSets.stable.lix;
 
-  # nh doesn't touch comin sub-profiles
   nix.gc = {
     automatic = true;
     dates = "daily";
