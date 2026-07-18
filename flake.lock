@@ -1073,6 +1073,22 @@
         "type": "github"
       }
     },
+    "nixpkgs-keycloak": {
+      "locked": {
+        "lastModified": 1784101842,
+        "narHash": "sha256-/Ssebcw8oBf7w5/9wQIkKRoNEvWfMynLbUNFBVs2XTY=",
+        "owner": "ap-1",
+        "repo": "nixpkgs",
+        "rev": "210d0877af3478da39d1d1e269a68a38b52b4511",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ap-1",
+        "ref": "keycloak-plugin-updates",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "nixpkgs-src": {
       "flake": false,
       "locked": {
@@ -1321,6 +1337,7 @@
         "ncro": "ncro",
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs_3",
+        "nixpkgs-keycloak": "nixpkgs-keycloak",
         "observability": "observability",
         "ricochet": "ricochet_2",
         "srvos": "srvos"
