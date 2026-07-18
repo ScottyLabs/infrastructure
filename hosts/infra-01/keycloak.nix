@@ -1,22 +1,21 @@
 {
   config,
-  lib,
   pkgs,
   keycloak-theme,
   ...
 }:
 
+let
+  keycloak-minecraft-idp = pkgs.fetchurl {
+    url = "https://github.com/groundsgg/keycloak-minecraft-idp/releases/download/v1.1.3/keycloak-minecraft-idp-1.1.3.jar";
+    hash = "sha256-tL+snexMXmrNTv6uFvZZbpfDQ+MQsOICAVkvDGHiR7U=";
+  };
+in
 {
   age.secrets.keycloak = {
     file = ../../secrets/infra-01/keycloak.age;
     mode = "0400";
   };
-
-  nixpkgs.config.allowUnfreePredicate =
-    pkg:
-    builtins.elem (lib.getName pkg) [
-      "keycloak-magic-link"
-    ];
 
   # Load admin password from agenix secret
   systemd.services.keycloak.serviceConfig.EnvironmentFile = config.age.secrets.keycloak.path;
@@ -54,9 +53,10 @@
     };
 
     plugins = with config.services.keycloak.package.plugins; [
+      apple-identity-provider-keycloak
       keycloak-discord
-      keycloak-magic-link
       keycloak-remember-me-authenticator
+      keycloak-minecraft-idp
 
       # Unix socket auth
       junixsocket-common
