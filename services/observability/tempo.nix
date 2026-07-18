@@ -93,11 +93,21 @@ in
     };
     users.groups.tempo = { };
 
-    systemd.services.tempo.serviceConfig = {
-      DynamicUser = lib.mkForce false;
-      User = lib.mkForce "tempo";
-      Group = lib.mkForce "tempo";
-      EnvironmentFile = cfg.s3CredentialsFile;
+    systemd.services.tempo = {
+      after = [ "network-online.target" ];
+      wants = [ "network-online.target" ];
+
+      # Keep retrying if the S3 backend is not reachable yet at boot
+      startLimitIntervalSec = 0;
+
+      serviceConfig = {
+        DynamicUser = lib.mkForce false;
+        User = lib.mkForce "tempo";
+        Group = lib.mkForce "tempo";
+        EnvironmentFile = cfg.s3CredentialsFile;
+        Restart = lib.mkForce "always";
+        RestartSec = "10s";
+      };
     };
   };
 }
