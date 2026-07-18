@@ -79,6 +79,13 @@ in
           local.path = "/var/lib/tempo/blocks";
         };
 
+        live_store = {
+          wal.path = "/var/lib/tempo/live-store/traces";
+          shutdown_marker_dir = "/var/lib/tempo/live-store/shutdown-marker";
+        };
+
+        backend_scheduler.local_work_path = "/var/lib/tempo/backend-scheduler";
+
         overrides.defaults.compaction.block_retention = cfg.retentionPeriod;
 
         usage_report.reporting_enabled = false;
