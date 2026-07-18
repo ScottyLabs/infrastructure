@@ -173,6 +173,7 @@ in
     systemd.services.headscale = {
       after = [ "bao-agent.service" ];
       wants = [ "bao-agent.service" ];
+      restartTriggers = [ aclPolicy ];
     };
 
     services.caddy.virtualHosts.${cfg.domain}.extraConfig = ''
