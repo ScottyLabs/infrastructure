@@ -67,5 +67,31 @@
     saltKeyFile = "/run/secrets/litellm-salt-key";
     oidcClientSecretFile = "/run/secrets/litellm-oidc";
     cliProxyApiKeyFile = "/run/secrets/cli-proxy-api-key-client";
+    models =
+      let
+        passthrough = id: {
+          name = id;
+          upstream = "openai/${id}";
+        };
+      in
+      map passthrough [
+        "claude-opus-4-8"
+        "claude-opus-4-7"
+        "claude-opus-4-6"
+        "claude-opus-4-5-20251101"
+        "claude-opus-4-1-20250805"
+        "claude-fable-5"
+        "claude-sonnet-5"
+        "claude-sonnet-4-6"
+        "claude-sonnet-4-5-20250929"
+        "claude-haiku-4-5-20251001"
+        "gpt-5.6-sol"
+        "gpt-5.6-terra"
+        "gpt-5.6-luna"
+        "gpt-5.5"
+        "gpt-5.4"
+        "gpt-5.4-mini"
+        "codex-auto-review"
+      ];
   };
 }
