@@ -42,18 +42,14 @@
     after = [ "garage.service" ];
   };
 
-  # Public anonymous-read entry point for the scottylabs-assets bucket.
-  # Garage matches buckets by Host header on its s3_web listener, so caddy
-  # rewrites Host to the bucket's globalAlias when proxying.
+  # Public read-only vhost for the scottylabs-assets bucket, Host rewritten to its globalAlias
   services.caddy.virtualHosts."assets.scottylabs.org".extraConfig = ''
     reverse_proxy localhost:${toString config.scottylabs.garage.webPort} {
       header_up Host scottylabs-assets
     }
   '';
 
-  # Public anonymous-read CDN for per-project asset buckets. The first path
-  # segment selects the bucket, so cdn.scottylabs.org/<repo>/<key> rewrites to
-  # Host cdn-<repo> on the s3_web listener and serves object <key>.
+  # Public read-only CDN for per-project buckets, /<repo>/<key> serves <key> from cdn-<repo>
   services.caddy.virtualHosts."cdn.scottylabs.org".extraConfig = ''
     @cdn path_regexp seg ^/([^/]+)/(.*)$
     rewrite @cdn /{re.seg.2}
@@ -62,12 +58,10 @@
     }
   '';
 
-  # Documentation hub static site (built by Forgejo Actions, uploaded to Garage).
-  # Accept: text/markdown negotiation serves pre-built .md files to AI agents.
+  # Documentation hub static site served from Garage
+  # Accept text/markdown negotiation serves pre-built .md files
   services.caddy.virtualHosts."docs.scottylabs.org".extraConfig = ''
     # Accept Markdown: https://acceptmarkdown.com/recipes/caddy
-    # No handle blocks — NixOS runs caddy fmt on the generated Caddyfile and
-    # multi-handle site config fails to parse.
     @markdown header Accept *text/markdown*
 
     @markdownHtml {

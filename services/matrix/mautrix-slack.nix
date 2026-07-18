@@ -8,10 +8,8 @@
 let
   cfg = config.scottylabs.matrix;
   bridge = cfg.bridges.slack;
-  # synapse_mautrix_slack_link and manual plumbing need `!slack bridge` (added in v26.04).
-  # ScottyLabs fork carries all customizations (relay outbound, bridge identity,
-  # governance channel-ping mirroring, reaction summaries) on top of v0.2605.0.
-  # mautrix-go patches live in thesuperRL/mautrix-go scottylabs-v0.28.0 via go.mod replace.
+  # ScottyLabs fork with relay, bridge identity, governance mirroring, reaction summaries on v0.2605.0
+  # mautrix-go patches in thesuperRL/mautrix-go scottylabs-v0.28.0 via go.mod replace
   forkSrc = pkgs.fetchFromGitHub {
     owner = "thesuperRL";
     repo = "mautrix-slack";
@@ -22,26 +20,27 @@ let
     src = forkSrc;
     version = "26.05";
     doInstallCheck = false;
-    # goModules must match the fork's go.mod, not the (newer) upstream
-    goModules = old.goModules.overrideAttrs { src = forkSrc; outputHash = "sha256-J1Rk6JqL4Chky59ljwJOf4GgaLU/SNyq8TSACPqbbW8="; };
-    # mautrix-go patches now in personal fork (../mautrix-go) via go.mod replace directive
+    # Build goModules from the fork's go.mod
+    goModules = old.goModules.overrideAttrs {
+      src = forkSrc;
+      outputHash = "sha256-J1Rk6JqL4Chky59ljwJOf4GgaLU/SNyq8TSACPqbbW8=";
+    };
   });
-  bridgePermissions =
-    {
-      "*" = "user";
-      "${cfg.domain}" = "user";
-    }
-    // lib.listToAttrs (map (uid: {
+  bridgePermissions = {
+    "*" = "user";
+    "${cfg.domain}" = "user";
+  }
+  // lib.listToAttrs (
+    map (uid: {
       name = uid;
       value = "admin";
-    }) bridge.adminUsers);
+    }) bridge.adminUsers
+  );
   bridgePublicURL = "https://${cfg.matrixDomain}";
-  # Discord puppets attach com.beeper.per_message_profile (GlobalName/username). Do not use
-  # DisambiguatedName — it becomes "Name via other (@discord_…:domain)" when names collide.
-  # message_formats use .Sender.*; displayname_format uses the same fields without that prefix.
+  # Relay display name from the per-message profile
   relayDisplayName = "{{ or .PerMessageProfile.Displayname .Displayname }}";
-  # Relay templates also receive .Content (see mautrix-go bridgeconfig formatData).
-  # Unlinked mentions become [Name] labels; Keycloak-linked users get real cross-platform pings (synced from Keycloak).
+  # Relay templates receive .Content
+  # Unlinked mentions render as [Name], Keycloak-linked users get cross-platform pings
   relayMentionPrefix = "";
 in
 {
@@ -96,11 +95,11 @@ in
     services.mautrix-slack = {
       enable = true;
       package = slackPackage;
-      environmentFile = bridge.environmentFile;
+      inherit (bridge) environmentFile;
       settings = {
         homeserver = {
           address = "http://127.0.0.1:${toString cfg.synapse.listenPort}";
-          domain = cfg.domain;
+          inherit (cfg) domain;
         };
         database = {
           type = "postgres";
@@ -118,7 +117,7 @@ in
         public_media = {
           enabled = true;
           signing_key = "$PUBLIC_MEDIA_SIGNING_KEY";
-          # Required for relaying Discord attachments from encrypted rooms (content.file, not url).
+          # Relays Discord attachments from encrypted rooms
           use_database = true;
         };
         bridge = {
@@ -135,21 +134,15 @@ in
                 admin_only = false;
                 prefer_default = true;
                 default_relays =
-                  if bridge.relayLoginId != null then
-                    [ bridge.relayLoginId ]
-                  else
-                    [ "$SLACK_RELAY_LOGIN_ID" ];
-                # displayname_format + icon_url (needs public_media) show Discord sender on Slack.
-                # PerMessageProfileRelay (patched in mautrix-slack) skips relay message_formats for
-                # text so Discord markdown survives as Slack rich text; formats below still apply to
-                # media fallbacks and non-relay paths.
+                  if bridge.relayLoginId != null then [ bridge.relayLoginId ] else [ "$SLACK_RELAY_LOGIN_ID" ];
+                # displayname_format and icon_url show the Discord sender on Slack
+                # PerMessageProfileRelay keeps Discord markdown as Slack rich text
                 displayname_format = relayDisplayName;
-                # Keys must be quoted — unquoted m.text becomes nested YAML { m: { text: ... } }.
                 message_formats = {
                   "m.text" = "${relayMentionPrefix}{{ .Message }}";
                   "m.notice" = "${relayMentionPrefix}{{ .Message }}";
                   "m.emote" = "${relayMentionPrefix}* {{ .Message }}";
-                  # Discord GIF embeds (Tenor, etc.) store the page URL in Body; keep it for Slack unfurl.
+                  # Discord GIF embeds store the page URL in Body for Slack unfurl
                   "m.file" = "sent a file{{ if .Caption }}: {{ .Caption }}{{ end }}";
                   "m.image" = "{{ .Content.Body }}";
                   "m.audio" = "sent an audio file{{ if .Caption }}: {{ .Caption }}{{ end }}";
@@ -159,14 +152,13 @@ in
               };
           permissions = bridgePermissions;
         };
-        # mautrix-slack v25+ uses top-level encryption (bridge.encryption is ignored).
+        # Encryption is configured at top level
         double_puppet = {
           secrets = {
             "${cfg.domain}" = "as_token:$DOUBLE_PUPPET_SECRET";
           };
         };
-        # Stable key via environmentFile — "generate" in Nix settings is rewritten on
-        # every deploy and breaks the bridge DB (invalid pickle key / E2EE failures).
+        # Encryption key comes from the environment file
         encryption = {
           allow = true;
           default = true;

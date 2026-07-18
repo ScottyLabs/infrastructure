@@ -69,7 +69,7 @@ in
           backend = "s3";
           s3 = {
             endpoint = lib.removePrefix "https://" cfg.s3Endpoint;
-            bucket = cfg.bucket;
+            inherit (cfg) bucket;
             forcepathstyle = true;
             insecure = false;
             access_key = "\${TEMPO_S3_ACCESS_KEY}";

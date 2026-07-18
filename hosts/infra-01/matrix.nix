@@ -57,7 +57,7 @@
     bridges.slack = {
       enable = true;
       environmentFile = config.age.secrets.double-puppet-env-slack.path;
-      # Relay login ID lives in double-puppet-env.age as SLACK_RELAY_LOGIN_ID (login app, not token).
+      # Relay login ID in double-puppet-env.age as SLACK_RELAY_LOGIN_ID
       relay.enable = true;
       adminUsers = [
         "@ap-1:matrix.org"

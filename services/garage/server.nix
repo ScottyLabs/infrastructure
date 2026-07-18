@@ -76,9 +76,7 @@ in
 
         s3_web = {
           bind_addr = "[::]:${toString cfg.webPort}";
-          # An empty root_domain makes bucket lookup a full Host-header
-          # match against the bucket's globalAlias. Per-bucket caddy
-          # vhosts handle public hostname mapping by rewriting Host.
+          # Empty root_domain matches buckets by full Host header against their globalAlias
           root_domain = "";
         };
 

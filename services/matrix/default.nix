@@ -34,8 +34,7 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    # Both bridge modules set SupplementaryGroups independently; the last import wins
-    # without this, leaving Synapse unable to read the other bridge registration file.
+    # Give Synapse both bridge registration groups
     systemd.services.matrix-synapse.serviceConfig.SupplementaryGroups = lib.mkForce [
       "mautrix-discord"
       "mautrix-slack-registration"

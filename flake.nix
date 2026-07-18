@@ -125,33 +125,26 @@
         infra-01 = "x86_64-linux";
         deploy-01 = "x86_64-linux";
         snoopy = "x86_64-linux";
-        bus-sign-display = "x86_64-linux";
+        signage-01 = "x86_64-linux";
       };
 
       nixosConfigurations = builtins.mapAttrs mkSystem hosts;
-
     in
     {
-      formatter = nixpkgs.lib.genAttrs [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" ] (
-        system: nixpkgs.legacyPackages.${system}.nixfmt-tree
-      );
-
       inherit nixosConfigurations;
 
-      # colmena deploys as the invoking admin over sudo
-      colmena =
-        {
-          meta = {
-            nixpkgs = import nixpkgs { system = "x86_64-linux"; };
-            nodeSpecialArgs = builtins.mapAttrs (hostname: _: specialArgsFor hostname) hosts;
-          };
-        }
-        // builtins.mapAttrs (hostname: _: {
-          deployment = {
-            targetHost = "${hostname}.scottylabs.org";
-            targetUser = null;
-          };
-          imports = modulesFor hostname;
-        }) hosts;
+      colmena = {
+        meta = {
+          nixpkgs = import nixpkgs { system = "x86_64-linux"; };
+          nodeSpecialArgs = builtins.mapAttrs (hostname: _: specialArgsFor hostname) hosts;
+        };
+      }
+      // builtins.mapAttrs (hostname: _: {
+        deployment = {
+          targetHost = "${hostname}.scottylabs.org";
+          targetUser = "deploy";
+        };
+        imports = modulesFor hostname;
+      }) hosts;
     };
 }

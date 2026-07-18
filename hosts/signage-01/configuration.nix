@@ -8,8 +8,7 @@
     ../../common/firefox.nix
   ];
 
-  # srvos server profile disables fonts/XDG for headless servers,
-  # but this kiosk needs them for Firefox rendering
+  # Enable fonts for kiosk Firefox rendering that srvos server profile disables
   fonts.fontconfig.enable = true;
 
   system.stateVersion = "25.11";

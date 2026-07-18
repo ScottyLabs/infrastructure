@@ -189,7 +189,7 @@ in
         };
         GENERIC_ROLE_MAPPINGS_DEFAULT_ROLE = "internal_user";
 
-        # Skip the username/password form and jump straight to Keycloak.
+        # Redirect the login form straight to Keycloak
         AUTO_REDIRECT_UI_LOGIN_TO_SSO = "true";
       };
 

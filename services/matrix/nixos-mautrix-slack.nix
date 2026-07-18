@@ -1,5 +1,3 @@
-# NixOS module for mautrix-slack (not yet upstream in nixpkgs).
-# Pattern matches nixpkgs services.matrix.mautrix-discord.
 {
   lib,
   config,
@@ -8,7 +6,7 @@
 }:
 let
   cfg = config.services.mautrix-slack;
-  dataDir = cfg.dataDir;
+  inherit (cfg) dataDir;
   format = pkgs.formats.yaml { };
 
   registrationFile = "${dataDir}/slack-registration.yaml";
@@ -23,7 +21,7 @@ in
     package = lib.mkPackageOption pkgs "mautrix-slack" { };
 
     settings = lib.mkOption {
-      type = format.type;
+      inherit (format) type;
       default = { };
       description = ''
         {file}`config.yaml` as a Nix attribute set.
@@ -65,11 +63,12 @@ in
 
     serviceDependencies = lib.mkOption {
       type = lib.types.listOf lib.types.str;
-      default =
-        [ cfg.registrationServiceUnit ]
-        ++ lib.optional config.services.matrix-synapse.enable config.services.matrix-synapse.serviceUnit
-        ++ lib.optional config.services.matrix-conduit.enable "matrix-conduit.service"
-        ++ lib.optional config.services.dendrite.enable "dendrite.service";
+      default = [
+        cfg.registrationServiceUnit
+      ]
+      ++ lib.optional config.services.matrix-synapse.enable config.services.matrix-synapse.serviceUnit
+      ++ lib.optional config.services.matrix-conduit.enable "matrix-conduit.service"
+      ++ lib.optional config.services.dendrite.enable "dendrite.service";
     };
   };
 

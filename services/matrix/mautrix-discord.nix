@@ -8,31 +8,31 @@
 let
   cfg = config.scottylabs.matrix;
   bridge = cfg.bridges.discord;
-  # Relay/webhook Matrix→Discord posts cannot start threads upstream; use any logged-in bridge user.
-  # ScottyLabs fork: vendored bridge v1 + mautrix-go v0.28.0 (same as Slack).
+  # ScottyLabs fork, vendored bridge v1 + mautrix-go v0.28.0
   forkSrc = pkgs.fetchFromGitHub {
     owner = "thesuperRL";
     repo = "mautrix-discord";
     rev = "38c0a91baca4ab40152fbec38e20b58a450fed16";
     hash = "sha256-nX1Vw3Pgg5myDpyvC/mEvKoPkXaV4NXxrrQfmI+b8lA=";
   };
-  mautrixDiscord = pkgs.mautrix-discord.overrideAttrs (old: {
+  mautrixDiscord = pkgs.mautrix-discord.overrideAttrs (_old: {
     src = forkSrc;
     version = "0.7.6";
     doInstallCheck = false;
     vendorHash = null;
     goModules = null;
-    # fork commit 412df13 vendors deps in-tree; goModules outputHash no longer applies
+    # Deps vendored in-tree by the fork
   });
-  bridgePermissions =
-    {
-      "*" = "user";
-      "${cfg.domain}" = "user";
-    }
-    // lib.listToAttrs (map (uid: {
+  bridgePermissions = {
+    "*" = "user";
+    "${cfg.domain}" = "user";
+  }
+  // lib.listToAttrs (
+    map (uid: {
       name = uid;
       value = "admin";
-    }) bridge.adminUsers);
+    }) bridge.adminUsers
+  );
 in
 {
   options.scottylabs.matrix.bridges.discord = {
@@ -77,11 +77,11 @@ in
     services.mautrix-discord = {
       enable = true;
       package = mautrixDiscord;
-      environmentFile = bridge.environmentFile;
+      inherit (bridge) environmentFile;
       settings = {
         homeserver = {
           address = "http://127.0.0.1:${toString cfg.synapse.listenPort}";
-          domain = cfg.domain;
+          inherit (cfg) domain;
         };
         appservice = {
           database = {
@@ -94,7 +94,7 @@ in
           };
         };
         bridge = {
-          # Matrix ghost display names for relay formatting on mautrix-slack (GlobalName, then username).
+          # Ghost display names for relay formatting on mautrix-slack
           displayname_template = "{{if .Webhook}}Webhook{{else}}{{or .GlobalName .Username}}{{if .Bot}} (bot){{end}}{{end}}";
           double_puppet_server_map = {
             "${cfg.domain}" = "https://${cfg.matrixDomain}";
@@ -103,11 +103,9 @@ in
             "${cfg.domain}" = "$DOUBLE_PUPPET_SECRET";
           };
           delete_portal_on_channel_delete = true;
-          # Pinned false: prevents any guild-space member from self-joining a portal room via
-          # join_rule "restricted" (bypassing invites) — only ghosts and the bridge bot should
-          # ever be room members. Matches upstream default; pinned explicitly, not just inherited.
+          # Portal rooms hold only ghosts and the bridge bot
           restricted_rooms = false;
-          # Slack→Discord relay webhooks need a URL Discord can fetch for Matrix ghost avatars.
+          # Public base URL for the bridge
           public_address = "https://${cfg.matrixDomain}";
           avatar_proxy_key = "$AVATAR_PROXY_KEY";
           enable_webhook_avatars = true;
@@ -129,10 +127,7 @@ in
                 enabled = true;
                 admin_only = false;
                 default_relays =
-                  if bridge.relayLoginId != null then
-                    [ bridge.relayLoginId ]
-                  else
-                    [ "$DISCORD_RELAY_LOGIN_ID" ];
+                  if bridge.relayLoginId != null then [ bridge.relayLoginId ] else [ "$DISCORD_RELAY_LOGIN_ID" ];
               };
           permissions = bridgePermissions;
         };

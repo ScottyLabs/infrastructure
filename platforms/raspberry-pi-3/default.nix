@@ -5,24 +5,19 @@
     # Pi-specific kernel, device tree, firmware, and boot config
     nixos-hardware.nixosModules.raspberry-pi-3
     ./disk-config.nix
+    ../../common/zram-swap.nix
   ];
 
-  # Pi 3 boots via Broadcom firmware into extlinux, not UEFI/GRUB
+  # Pi 3 boots via Broadcom firmware into extlinux
   boot.loader.grub.enable = false;
   boot.loader.generic-extlinux-compatible.enable = true;
 
-  # Ensure USB keyboard/storage work in initrd, for recovery
+  # USB keyboard and storage in initrd
   boot.initrd.availableKernelModules = [
     "usbhid"
     "usb_storage"
   ];
 
-  # Needed for Wayland/cage compositor
+  # Needed for wayland/cage compositor
   hardware.graphics.enable = true;
-
-  # Use compressed RAM swap instead of a disk partition
-  zramSwap = {
-    enable = true;
-    memoryPercent = 50;
-  };
 }

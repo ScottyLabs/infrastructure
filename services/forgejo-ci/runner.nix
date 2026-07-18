@@ -60,18 +60,18 @@ in
       instances.default = {
         enable = true;
         inherit (cfg) name url;
-        tokenFile = cfg.tokenFile;
+        inherit (cfg) tokenFile;
         labels = runnerLabels;
 
         settings = {
           runner = {
-            capacity = cfg.capacity;
+            inherit (cfg) capacity;
             labels = runnerLabels;
           };
           cache = {
             enabled = true;
             dir = "/var/lib/gitea-runner/cache";
-            # docker0 gateway; jobs run on docker0 (container.network = "bridge").
+            # docker0 gateway
             host = "172.17.0.1";
             port = cfg.cachePort;
           };
@@ -82,9 +82,7 @@ in
       };
     };
 
-    # Pin docker0 to a known subnet so it can't drift onto default-address-pools,
-    # and push auto-created per-job (WORKFLOW-*) networks to 10.89 so they don't
-    # overlap CMU-SECURE client space (172.26.0.0/16) and steal host routes.
+    # Pin docker0 and per-job networks to fixed subnets clear of CMU-SECURE space
     virtualisation.docker = {
       enable = true;
       daemon.settings = {
@@ -100,7 +98,7 @@ in
 
     networking.firewall.trustedInterfaces = [ "docker0" ];
 
-    # Create a static user because gitea-actions-runner uses a dynamic one
+    # Static user for the runner
     users.users.gitea-runner = {
       isSystemUser = true;
       group = "gitea-runner";

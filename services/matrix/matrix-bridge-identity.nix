@@ -1,4 +1,3 @@
-# Keycloak-backed bridge identity lookups for cross-platform @mentions (no static JSON file).
 {
   config,
   lib,
@@ -10,18 +9,14 @@ let
   cfg = config.scottylabs.matrix;
   identityCfg = cfg.bridgeIdentity;
 
-  org = builtins.fromTOML (builtins.readFile "${governance}/data/org.toml");
+  org = fromTOML (builtins.readFile "${governance}/data/org.toml");
   keycloakUrl = org.org.keycloak.url;
   keycloakRealm = org.org.keycloak.realm;
-  matrixDomain =
-    org.org.communication.matrix_domain or cfg.domain;
+  matrixDomain = org.org.communication.matrix_domain or cfg.domain;
 in
 {
   options.scottylabs.matrix.bridgeIdentity = {
-    enable = lib.mkEnableOption ''
-      Resolve Discord ↔ Slack identity links from Keycloak at runtime for mautrix bridge mentions.
-      Bridges query Keycloak directly with an auto-refreshed in-memory cache (no identity map file).
-    '';
+    enable = lib.mkEnableOption "Discord/Slack identity link resolution from Keycloak for bridge mentions";
 
     environmentFile = lib.mkOption {
       type = lib.types.nullOr lib.types.path;

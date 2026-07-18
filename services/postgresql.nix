@@ -7,14 +7,14 @@
 
 let
   cfg = config.scottylabs.postgresql;
-  pgExtensions = [
-    { pkg = ps: ps.pg_uuidv7; sql = "pg_uuidv7"; }
-    { pkg = ps: ps.pgvector;  sql = "vector"; }
-    { pkg = ps: ps.postgis;   sql = "postgis"; }
-  ];
-  createExtSql = lib.concatMapStringsSep " "
-    (e: "CREATE EXTENSION IF NOT EXISTS ${e.sql};")
-    pgExtensions;
+  pgExtensions = {
+    pg_uuidv7 = "pg_uuidv7";
+    pgvector = "vector";
+    postgis = "postgis";
+  };
+  createExtSql = lib.concatMapStringsSep " " (sql: "CREATE EXTENSION IF NOT EXISTS ${sql};") (
+    lib.attrValues pgExtensions
+  );
 in
 {
   options.scottylabs.postgresql = {
@@ -33,7 +33,7 @@ in
     services.postgresql = {
       enable = true;
       package = pkgs.postgresql_18;
-      extensions = ps: map (e: e.pkg ps) pgExtensions;
+      extensions = ps: map (name: ps.${name}) (lib.attrNames pgExtensions);
 
       ensureDatabases = cfg.databases;
 
@@ -43,7 +43,7 @@ in
       }) cfg.databases;
     };
 
-    # Kennel creates service databases at runtime via createdb, which clones template1, so seed it there.
+    # Seed extensions into template1 and each database
     systemd.services.postgresql-setup.postStart = lib.mkAfter (
       lib.concatMapStringsSep "\n" (db: ''
         psql --port=${toString config.services.postgresql.settings.port} -d ${db} -c '${createExtSql}'

@@ -22,7 +22,7 @@ in
     services.cadvisor = {
       enable = true;
       listenAddress = "0.0.0.0";
-      port = cfg.port;
+      inherit (cfg) port;
     };
   };
 }

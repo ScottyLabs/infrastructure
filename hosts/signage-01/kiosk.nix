@@ -4,7 +4,7 @@ let
   kioskUrl = "https://signage.andrew.cmu.edu/frontend/63";
 
   errorPage = pkgs.replaceVars ./html/error.html {
-    kioskUrl = kioskUrl; # Automatically replaces @kioskUrl@ in the file
+    inherit kioskUrl; # Automatically replaces @kioskUrl@ in the file
   };
 in
 {
@@ -14,8 +14,7 @@ in
     user = "kiosk";
     program = toString (
       pkgs.writeShellScript "kiosk-browser" ''
-        # Error page will redirect to kioskUrl instantly if it is online.
-
+        # Error page redirects to kioskUrl when online
         exec ${pkgs.firefox}/bin/firefox --kiosk="file://${errorPage}"
       ''
     );

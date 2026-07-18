@@ -103,7 +103,7 @@ in
           pkgs.opentofu
           pkgs.gzip
         ];
-        environment = conf.environment;
+        inherit (conf) environment;
 
         serviceConfig = {
           Type = "oneshot";

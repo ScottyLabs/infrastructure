@@ -41,7 +41,10 @@
   scottylabs.tofu.configurations.identity = {
     source = ../../tofu/identity;
     environmentFile = config.age.secrets.tofu-identity.path;
-    after = [ "openbao.service" "keycloak.service" ];
+    after = [
+      "openbao.service"
+      "keycloak.service"
+    ];
     environment.VAULT_ADDR = "http://127.0.0.1:8200";
 
     # OpenBao must be unsealed before we can configure it

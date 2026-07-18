@@ -6,25 +6,45 @@
 }:
 
 {
-  users.users = builtins.mapAttrs (andrewId: userData: {
-    isNormalUser = true;
-    extraGroups = [
-      "wheel"
-      "docker"
-    ];
-    openssh.authorizedKeys.keys = [ userData.sshPublicKey ];
-  }) users;
+  users.users =
+    (builtins.mapAttrs (_: key: {
+      isNormalUser = true;
+      extraGroups = [
+        "wheel"
+        "docker"
+      ];
+      openssh.authorizedKeys.keys = [ key ];
+    }) users)
+    // {
+      deploy = {
+        isNormalUser = true;
+        openssh.authorizedKeys.keys = builtins.attrValues users;
+      };
+    };
+
+  security.sudo.extraRules = [
+    {
+      users = [ "deploy" ];
+      commands = [
+        {
+          command = "ALL";
+          options = [ "NOPASSWD" ];
+        }
+      ];
+    }
+  ];
+  nix.settings.trusted-users = [ "deploy" ];
 
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = true;
   home-manager.backupFileExtension = "backup";
 
-  home-manager.users = builtins.mapAttrs (andrewId: userData: {
+  home-manager.users = lib.genAttrs (builtins.attrNames users) (_: {
     home.stateVersion = "25.11";
     home.packages = with pkgs; [
       eza
       bat
-      pfetch
+      fastfetch
     ];
 
     programs.zsh = {
@@ -41,7 +61,7 @@
           zstyle ':omz:plugins:eza' 'icons' yes
         '')
         ''
-          pfetch
+          fastfetch
         ''
       ];
 
@@ -61,5 +81,5 @@
       enableZshIntegration = true;
       options = [ "--cmd cd" ];
     };
-  }) users;
+  });
 }
