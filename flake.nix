@@ -153,15 +153,5 @@
           };
           imports = modulesFor hostname;
         }) hosts;
-
-      # Host-to-project mapping for OpenBao AppRole policies
-      packages.x86_64-linux.host-projects =
-        let
-          pkgs = nixpkgs.legacyPackages.x86_64-linux;
-          mapping = builtins.mapAttrs (
-            hostname: _: self.nixosConfigurations.${hostname}.config.scottylabs.bao-agent.projects
-          ) hosts;
-        in
-        pkgs.writeText "host-projects.json" (builtins.toJSON mapping);
     };
 }
