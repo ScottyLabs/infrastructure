@@ -49,7 +49,7 @@ bao kv list secret/projects/my-project/prod
 
 ### Setting Up a New Host
 
-After adding a host to `hosts` in `flake.nix` and deploying, the AppRole is created automatically. You need to generate credentials:
+After adding a host to the `hosts` list in `tofu/identity/approle.tf` and deploying, the AppRole is created automatically. You need to generate credentials:
 
 1. Get the role ID (on infra-01 after tofu-identity runs):
 
