@@ -57,7 +57,6 @@
       keycloak-discord
       keycloak-magic-link
       keycloak-remember-me-authenticator
-      keycloak-metrics-spi
 
       # needed for Unix socket auth
       junixsocket-common
