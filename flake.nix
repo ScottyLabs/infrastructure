@@ -59,110 +59,24 @@
       url = "git+https://codeberg.org/ScottyLabs/governance";
       flake = false;
     };
+
+    # Flake infrastructure
+    flake-parts.url = "github:hercules-ci/flake-parts";
+    import-tree.url = "github:vic/import-tree";
+    colmena = {
+      url = "github:zhaofengli/colmena";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
-    {
-      self,
-      nixpkgs,
-      nixos-hardware,
-      home-manager,
-      agenix,
-      disko,
-      ncro,
-      srvos,
-      keycloak-theme,
-      nixpkgs-keycloak,
-      llm-pkgs,
-      kennel,
-      observability,
-      ricochet,
-      governance,
-      ...
-    }:
-    let
-      users = import ./users.nix;
-
-      specialArgsFor = hostname: {
-        inherit
-          self
-          hostname
-          users
-          ncro
-          srvos
-          nixos-hardware
-          keycloak-theme
-          llm-pkgs
-          kennel
-          observability
-          ricochet
-          governance
-          ;
-      };
-
-      modulesFor = hostname: [
-        ./hosts/${hostname}/configuration.nix
-        ./common
-        ./services
-
-        home-manager.nixosModules.home-manager
-        agenix.nixosModules.default
-        disko.nixosModules.disko
-
-        srvos.nixosModules.server
-        srvos.nixosModules.mixins-terminfo
-        srvos.nixosModules.mixins-trusted-nix-caches
-        { srvos.flake = self; }
-        {
-          nixpkgs.overlays = [
-            (
-              _: prev:
-              let
-                keycloakPkgs = import nixpkgs-keycloak {
-                  inherit (prev.stdenv.hostPlatform) system;
-                  inherit (prev) config;
-                };
-              in
-              {
-                inherit (keycloakPkgs) keycloak;
-              }
-            )
-          ];
-        }
+    inputs:
+    inputs.flake-parts.lib.mkFlake { inherit inputs; } {
+      imports = [
+        inputs.flake-parts.flakeModules.modules
+        (inputs.import-tree ./modules)
       ];
 
-      mkSystem =
-        hostname: system:
-        nixpkgs.lib.nixosSystem {
-          inherit system;
-          specialArgs = specialArgsFor hostname;
-          modules = modulesFor hostname;
-        };
-
-      hosts = {
-        infra-01 = "x86_64-linux";
-        deploy-01 = "x86_64-linux";
-        signage-01 = "x86_64-linux";
-        snoopy = "x86_64-linux";
-      };
-
-      nixosConfigurations = builtins.mapAttrs mkSystem hosts;
-    in
-    {
-      inherit nixosConfigurations;
-
-      colmena = {
-        meta = {
-          nixpkgs = import nixpkgs { system = "x86_64-linux"; };
-          nodeSpecialArgs = builtins.mapAttrs (hostname: _: specialArgsFor hostname) hosts;
-        };
-      }
-      // builtins.mapAttrs (hostname: _: {
-        deployment = {
-          targetHost = "${hostname}.scottylabs.org";
-          targetUser = "deploy";
-        };
-        imports = modulesFor hostname;
-      }) hosts;
+      systems = [ "x86_64-linux" ];
     };
 }
