@@ -1,4 +1,4 @@
-{ inputs, ... }:
+{ inputs, pkgs, ... }:
 
 {
   imports = [ inputs.scottylabs.devenvModules.default ];
@@ -7,4 +7,6 @@
     enable = true;
     project.name = "infrastructure";
   };
+
+  packages = [ inputs.colmena.packages.${pkgs.system}.colmena ];
 }
