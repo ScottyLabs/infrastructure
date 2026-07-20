@@ -34,8 +34,8 @@ resource "vault_jwt_auth_backend_role" "default" {
   token_period    = 7776000 # 90 days, renews on each shell entry
 
   allowed_redirect_uris = [
-    "https://secrets2.scottylabs.org/v1/auth/oidc/callback",
-    "https://secrets2.scottylabs.org/ui/vault/auth/oidc/oidc/callback",
+    "https://secrets.scottylabs.org/v1/auth/oidc/callback",
+    "https://secrets.scottylabs.org/ui/vault/auth/oidc/oidc/callback",
     "http://localhost:8250/oidc/callback",
   ]
 }
