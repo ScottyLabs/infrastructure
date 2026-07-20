@@ -1,6 +1,11 @@
 inputs:
   nixpkgs:
     url: github:nixos/nixpkgs/nixos-unstable
+  colmena:
+    url: github:zhaofengli/colmena
+    inputs:
+      nixpkgs:
+        follows: nixpkgs
   scottylabs:
     url: git+https://codeberg.org/ScottyLabs/devenv
     inputs:
