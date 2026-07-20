@@ -43,6 +43,7 @@
       scottylabs.tofu.configurations.identity = {
         source = ../../tofu/identity;
         environmentFile = config.age.secrets.tofu-identity.path;
+        s3Backend = true;
         after = [
           "openbao.service"
           "keycloak.service"
