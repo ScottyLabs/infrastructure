@@ -63,7 +63,11 @@
         };
 
         services.vault.agents.default.settings = {
-          vault.address = "https://secrets.scottylabs.org";
+          vault.address =
+            if config.services.openbao.enable then
+              "http://127.0.0.1:8200"
+            else
+              "https://secrets.scottylabs.org";
           auto_auth.method = [
             {
               type = "approle";
