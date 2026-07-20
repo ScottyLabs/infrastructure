@@ -1,26 +1,5 @@
 # Troubleshooting
 
-## comin not deploying after a force push
-
-If someone force pushes to the repository, comin's cached repo and state can get out of sync with the remote. Symptoms include comin fetching successfully but never triggering a build.
-
-To fix:
-
-```bash
-sudo systemctl stop comin
-sudo rm -rf /var/lib/comin/repository
-sudo rm /var/lib/comin/store.json
-sudo systemctl start comin
-```
-
-Wait ~30 seconds, then verify:
-
-```bash
-comin status
-```
-
-You should see a new build being evaluated or deployed.
-
 ## ACME first-deploy race when adding a new subdomain
 
 When a new subdomain is added to `tofu/cloudflare/records.tf` and a corresponding nginx vhost with `enableACME = true; forceSSL = true;` is added in the same comin reconcile, the first ACME issuance attempt typically fails. Let's Encrypt's resolvers query authoritative DNS faster than the new Cloudflare record propagates, so HTTP-01 validation hits NXDOMAIN.

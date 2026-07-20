@@ -12,16 +12,27 @@ Here, you can switch the boot mode from the default (Legacy/BIOS) to UEFI via `V
 
 <img src="./assets/vm-boot-mode.png" alt="VM boot mode" height="300" />
 
-In this repository, add `hostname` to the `hosts` array in [flake.nix](../../flake.nix) and to the `hosts` list in [tofu/identity/approle.tf](../../tofu/identity/approle.tf) (the AppRole host list is hardcoded there). If not already present, create a [user entry](../../users.nix) for yourself, following [these instructions](../create-user-entry.md). Then, create `hosts/hostname/configuration.nix` following the pattern of the other hosts in [hosts/](../../hosts/):
+In this repository, add `hostname` to the `hosts` list in [modules/systems.nix](../../modules/systems.nix), and add it to the `hosts` list in [tofu/identity/approle.tf](../../tofu/identity/approle.tf) (the AppRole host list is hardcoded there). If not already present, create a [user entry](../../modules/users.nix) for yourself, following [these instructions](../create-user-entry.md). Then define the host's configuration aspect and its role, following the pattern of the other hosts:
 
 ```nix
-{ config, lib, pkgs, ... }:
-
+# host-specific settings go in modules/hostname/configuration.nix
 {
-  imports = [
-    ../../platforms/campus-cloud
-  ];
+  flake.modules.nixos.hostname-configuration = {
+    networking.hostName = "hostname";
 
-  system.stateVersion = "25.11"; # use the version of NixOS you are installing
+    system.stateVersion = "26.11"; # use the version of NixOS you are installing
+  };
+}
+```
+
+```nix
+# compose platform, host config, and services in modules/roles/hostname.nix
+{ config, ... }:
+{
+  flake.modules.nixos.hostname.imports = with config.flake.modules.nixos; [
+    campus-cloud
+
+    hostname-configuration
+  ];
 }
 ```

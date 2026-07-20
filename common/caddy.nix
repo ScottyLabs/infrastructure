@@ -1,5 +1,0 @@
-{
-  services.caddy.globalConfig = ''
-    metrics
-  '';
-}

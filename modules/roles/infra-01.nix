@@ -1,0 +1,44 @@
+{ config, ... }:
+{
+  flake.modules.nixos.infra-01.imports = with config.flake.modules.nixos; [
+    campus-cloud
+    infra-01-configuration
+    infra-01-forgejo-ci
+    infra-01-keycloak
+    infra-01-vaultwarden
+    infra-01-openbao
+    infra-01-opentofu
+    infra-01-tailnet
+    infra-01-matrix
+    infra-01-garage
+    infra-01-atlantis
+    infra-01-ai-gateway
+    infra-01-observability
+    infra-01-uptime
+    infra-01-cmu-vpn
+
+    server
+    webadmin
+    runner
+    webhook
+    headscale
+    headplane
+    grafana
+    loki
+    prometheus
+    tempo
+    matrix
+    synapse
+    well-known
+    mautrix-slack
+    mautrix-discord
+    nixos-mautrix-slack
+    matrix-bridge-identity
+    bridge-media-proxy
+    atlantis
+    litellm
+    postgresql
+    tofu-runner
+    uptime-kuma
+  ];
+}
