@@ -30,7 +30,7 @@
           cluster_name = "default";
           cluster_addr = "http://127.0.0.1:8201";
 
-          api_addr = "https://secrets2.scottylabs.org";
+          api_addr = "https://secrets.scottylabs.org";
 
           telemetry = {
             prometheus_retention_time = "24h";
@@ -64,7 +64,7 @@
         '';
       };
 
-      services.caddy.virtualHosts."secrets2.scottylabs.org".extraConfig = ''
+      services.caddy.virtualHosts."secrets.scottylabs.org".extraConfig = ''
         reverse_proxy 127.0.0.1:8200
       '';
 

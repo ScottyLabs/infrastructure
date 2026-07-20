@@ -26,13 +26,13 @@
 
         oidcSecretFile = lib.mkOption {
           type = lib.types.path;
-          default = "/run/secrets/grafana-oidc";
+          default = "/run/credentials/grafana.service/oidc";
           description = "Path to the file containing the Keycloak OIDC client_secret.";
         };
 
         secretKeyFile = lib.mkOption {
           type = lib.types.path;
-          default = "/run/secrets/grafana-secret-key";
+          default = "/run/credentials/grafana.service/secretkey";
           description = "Path to the file containing the Grafana security.secret_key value.";
         };
 

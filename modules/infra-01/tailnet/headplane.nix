@@ -95,11 +95,9 @@
 
         systemd.services.headplane = {
           after = [
-            "bao-agent.service"
             "headscale.service"
           ];
           wants = [
-            "bao-agent.service"
             "headscale.service"
           ];
         };

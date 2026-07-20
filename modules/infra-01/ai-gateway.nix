@@ -18,7 +18,7 @@
         settings = {
           host = "127.0.0.1";
           port = 8317;
-          api-keys = [ { _secret = "/run/secrets/cli-proxy-api-key-server"; } ];
+          api-keys = [ { _secret = "/run/credentials/cliproxyapi.service/API_KEY"; } ];
           remote-management = {
             allow-remote = false;
             disable-control-panel = true;
@@ -27,48 +27,36 @@
         };
       };
 
-      systemd.services.cliproxyapi = {
-        after = [ "bao-agent.service" ];
-        wants = [ "bao-agent.service" ];
+      systemd.services.cliproxyapi.vault.infraSecrets.API_KEY = {
+        path = "cli-proxy-api-key";
+        key = "API_KEY";
       };
 
-      scottylabs.bao-agent = {
-        enable = true;
-        infraSecrets = {
-          litellm-master-key = {
-            path = "litellm-master-key";
-            key = "MASTER_KEY";
-            user = "litellm";
-          };
-          litellm-salt-key = {
-            path = "litellm-salt-key";
-            key = "SALT_KEY";
-            user = "litellm";
-          };
-          litellm-oidc = {
-            path = "litellm-oidc";
-            key = "CLIENT_SECRET";
-            user = "litellm";
-          };
-          cli-proxy-api-key-server = {
-            path = "cli-proxy-api-key";
-            key = "API_KEY";
-            user = "cliproxyapi";
-          };
-          cli-proxy-api-key-client = {
-            path = "cli-proxy-api-key";
-            key = "API_KEY";
-            user = "litellm";
-          };
+      systemd.services.litellm.vault.infraSecrets = {
+        master = {
+          path = "litellm-master-key";
+          key = "MASTER_KEY";
+        };
+        salt = {
+          path = "litellm-salt-key";
+          key = "SALT_KEY";
+        };
+        oidc = {
+          path = "litellm-oidc";
+          key = "CLIENT_SECRET";
+        };
+        cliproxy = {
+          path = "cli-proxy-api-key";
+          key = "API_KEY";
         };
       };
 
       scottylabs.ai-gateway.litellm = {
         enable = true;
-        masterKeyFile = "/run/secrets/litellm-master-key";
-        saltKeyFile = "/run/secrets/litellm-salt-key";
-        oidcClientSecretFile = "/run/secrets/litellm-oidc";
-        cliProxyApiKeyFile = "/run/secrets/cli-proxy-api-key-client";
+        masterKeyFile = "/run/credentials/litellm.service/master";
+        saltKeyFile = "/run/credentials/litellm.service/salt";
+        oidcClientSecretFile = "/run/credentials/litellm.service/oidc";
+        cliProxyApiKeyFile = "/run/credentials/litellm.service/cliproxy";
         models =
           let
             passthrough = id: {

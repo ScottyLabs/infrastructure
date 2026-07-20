@@ -64,13 +64,13 @@
 
         oidcSecretFile = lib.mkOption {
           type = lib.types.path;
-          default = "/run/secrets/garage-webadmin-oidc";
+          default = "/run/credentials/caddy.service/oidc";
           description = "Path to a file containing the raw OIDC client secret value";
         };
 
         jwtSecretFile = lib.mkOption {
           type = lib.types.path;
-          default = "/run/secrets/garage-webadmin-jwt";
+          default = "/run/credentials/caddy.service/jwt";
           description = "Path to a file containing the raw JWT shared key value";
         };
 
@@ -166,14 +166,8 @@
               '')
             ];
           };
-          after = [
-            "bao-agent.service"
-            "keycloak.service"
-          ];
-          wants = [
-            "bao-agent.service"
-            "keycloak.service"
-          ];
+          after = [ "keycloak.service" ];
+          wants = [ "keycloak.service" ];
         };
       };
     };

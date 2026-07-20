@@ -1,47 +1,40 @@
 {
   flake.modules.nixos.infra-01-tailnet = {
-    scottylabs.bao-agent = {
-      enable = true;
-      infraSecrets = {
-        headscale-oidc = {
-          path = "headscale-oidc";
-          key = "CLIENT_SECRET";
-          user = "headscale";
-        };
-        headplane-oidc = {
-          path = "headplane-oidc";
-          key = "CLIENT_SECRET";
-          user = "headscale";
-        };
-        headplane-cookie = {
-          path = "headplane-cookie";
-          key = "SECRET";
-          user = "headscale";
-        };
-        headplane-api-key = {
-          path = "headplane-api-key";
-          key = "API_KEY";
-          user = "headscale";
-        };
-        headplane-agent = {
-          path = "headplane-agent";
-          key = "SECRET";
-          user = "headscale";
-        };
-      };
-    };
-
     scottylabs.tailnet = {
       headscale = {
         enable = true;
-        oidcClientSecretFile = "/run/secrets/headscale-oidc";
+        oidcClientSecretFile = "/run/credentials/headscale.service/CLIENT_SECRET";
       };
       headplane = {
         enable = true;
-        oidcClientSecretFile = "/run/secrets/headplane-oidc";
-        cookieSecretFile = "/run/secrets/headplane-cookie";
-        apiKeyFile = "/run/secrets/headplane-api-key";
-        agentPreAuthKeyFile = "/run/secrets/headplane-agent";
+        oidcClientSecretFile = "/run/credentials/headplane.service/oidc";
+        cookieSecretFile = "/run/credentials/headplane.service/cookie";
+        apiKeyFile = "/run/credentials/headplane.service/apikey";
+        agentPreAuthKeyFile = "/run/credentials/headplane.service/agent";
+      };
+    };
+
+    systemd.services.headscale.vault.infraSecrets.CLIENT_SECRET = {
+      path = "headscale-oidc";
+      key = "CLIENT_SECRET";
+    };
+
+    systemd.services.headplane.vault.infraSecrets = {
+      oidc = {
+        path = "headplane-oidc";
+        key = "CLIENT_SECRET";
+      };
+      cookie = {
+        path = "headplane-cookie";
+        key = "SECRET";
+      };
+      apikey = {
+        path = "headplane-api-key";
+        key = "API_KEY";
+      };
+      agent = {
+        path = "headplane-agent";
+        key = "SECRET";
       };
     };
   };

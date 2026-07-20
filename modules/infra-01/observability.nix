@@ -1,6 +1,6 @@
 {
   flake.modules.nixos.infra-01-observability =
-    { inputs, ... }:
+    { inputs, lib, ... }:
 
     let
       hostnames = builtins.attrNames inputs.self.nixosConfigurations;
@@ -9,47 +9,63 @@
       systemdTargets = map (h: "${h}:9558") hostnames;
     in
     {
-      scottylabs.bao-agent.infraSecrets = {
-        grafana-oidc = {
+      systemd.services.grafana.vault.infraSecrets = {
+        oidc = {
           path = "grafana-oidc";
           key = "CLIENT_SECRET";
-          user = "grafana";
         };
-        grafana-secret-key = {
+        secretkey = {
           path = "grafana-secret-key";
           key = "SECRET_KEY";
-          user = "grafana";
         };
-        loki-s3 = {
-          path = "loki-s3";
-          key = "ENV";
-          user = "loki";
-        };
-        tempo-s3 = {
-          path = "tempo-s3";
-          key = "ENV";
-          user = "tempo";
-        };
-        discord-webhook-alerts = {
-          path = "discord-webhook-alerts";
-          key = "URL";
-          user = "grafana";
-        };
-        slack-webhook-alerts = {
-          path = "slack-webhook-alerts";
-          key = "URL";
-          user = "grafana";
-        };
-        uptime-kuma-metrics = {
+      };
+
+      systemd.services.loki.vault.environmentTemplate = ''
+        {{ with secret "secret/data/infra/loki-s3" }}{{ .Data.data.ENV }}{{ end }}
+      '';
+
+      systemd.services.tempo.vault.environmentTemplate = ''
+        {{ with secret "secret/data/infra/tempo-s3" }}{{ .Data.data.ENV }}{{ end }}
+      '';
+
+      systemd.services.prometheus.vault.infraSecrets = {
+        uptimekuma = {
           path = "uptime-kuma-metrics";
           key = "API_KEY";
-          user = "prometheus";
         };
-        litellm-metrics-key = {
+        litellmmetrics = {
           path = "litellm-master-key";
           key = "MASTER_KEY";
-          user = "prometheus";
         };
+      };
+
+      # The observability flake reads these via $__file{/run/secrets/<name>}
+      services.vault.agents.files.settings = {
+        vault.address = "https://secrets.scottylabs.org";
+        auto_auth.method = [
+          {
+            type = "approle";
+            config = {
+              role_id_file_path = "/run/agenix/bao-role-id";
+              secret_id_file_path = "/run/agenix/bao-secret-id";
+              remove_secret_id_file_after_reading = false;
+            };
+          }
+        ];
+        template = lib.mkForce [
+          {
+            contents = ''{{ with secret "secret/data/infra/discord-webhook-alerts" }}{{ .Data.data.URL }}{{ end }}'';
+            destination = "/run/secrets/discord-webhook-alerts";
+            perms = "0400";
+            user = "grafana";
+          }
+          {
+            contents = ''{{ with secret "secret/data/infra/slack-webhook-alerts" }}{{ .Data.data.URL }}{{ end }}'';
+            destination = "/run/secrets/slack-webhook-alerts";
+            perms = "0400";
+            user = "grafana";
+          }
+        ];
       };
 
       scottylabs.prometheus = {
@@ -133,6 +149,7 @@
                 targets = [
                   "infra-01:4194"
                   "deploy-01:4194"
+                  "signage-01:4194"
                   "snoopy:4194"
                 ];
               }
@@ -144,14 +161,14 @@
             metrics_path = "/metrics";
             basic_auth = {
               username = "prometheus";
-              password_file = "/run/secrets/uptime-kuma-metrics";
+              password_file = "/run/credentials/prometheus.service/uptimekuma";
             };
           }
           {
             job_name = "litellm";
             static_configs = [ { targets = [ "localhost:4000" ]; } ];
             metrics_path = "/metrics/";
-            authorization.credentials_file = "/run/secrets/litellm-metrics-key";
+            authorization.credentials_file = "/run/credentials/prometheus.service/litellmmetrics";
           }
           {
             job_name = "atlantis";
@@ -166,36 +183,8 @@
         ];
       };
 
-      scottylabs.loki = {
-        enable = true;
-        s3CredentialsFile = "/run/secrets/loki-s3";
-      };
-
-      scottylabs.tempo = {
-        enable = true;
-        s3CredentialsFile = "/run/secrets/tempo-s3";
-      };
-
+      scottylabs.loki.enable = true;
+      scottylabs.tempo.enable = true;
       scottylabs.grafana.enable = true;
-
-      systemd.services.loki = {
-        after = [ "bao-agent.service" ];
-        wants = [ "bao-agent.service" ];
-      };
-
-      systemd.services.tempo = {
-        after = [ "bao-agent.service" ];
-        wants = [ "bao-agent.service" ];
-      };
-
-      systemd.services.grafana = {
-        after = [ "bao-agent.service" ];
-        wants = [ "bao-agent.service" ];
-      };
-
-      systemd.services.prometheus = {
-        after = [ "bao-agent.service" ];
-        wants = [ "bao-agent.service" ];
-      };
     };
 }

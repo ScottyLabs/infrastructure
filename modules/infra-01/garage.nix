@@ -12,19 +12,14 @@
         };
       };
 
-      scottylabs.bao-agent = {
-        enable = true;
-        infraSecrets = {
-          garage-webadmin-oidc = {
-            path = "garage-webadmin-oidc";
-            key = "CLIENT_SECRET";
-            user = "caddy";
-          };
-          garage-webadmin-jwt = {
-            path = "garage-webadmin-jwt";
-            key = "SECRET";
-            user = "caddy";
-          };
+      systemd.services.caddy.vault.infraSecrets = {
+        oidc = {
+          path = "garage-webadmin-oidc";
+          key = "CLIENT_SECRET";
+        };
+        jwt = {
+          path = "garage-webadmin-jwt";
+          key = "SECRET";
         };
       };
 
