@@ -24,6 +24,29 @@ output "governance_secret_access_key" {
   sensitive = true
 }
 
+resource "garage_key" "infra_tofu_state" {
+  name = "infra-tofu-state"
+}
+
+resource "garage_bucket_permission" "infra_tofu_state" {
+  access_key_id = garage_key.infra_tofu_state.id
+  bucket_id     = garage_bucket.tofu_state.id
+  read          = true
+  write         = true
+  owner         = true
+}
+
+# S3 credentials for the tofu-runner remote state backend
+resource "vault_kv_secret_v2" "infra_tofu_state_s3" {
+  mount = "secret"
+  name  = "infra/tofu-state-s3"
+
+  data_json = jsonencode({
+    AWS_ACCESS_KEY_ID     = garage_key.infra_tofu_state.id
+    AWS_SECRET_ACCESS_KEY = garage_key.infra_tofu_state.secret_access_key
+  })
+}
+
 # Durable, org-wide bucket for static assets that outlive any single
 # kennel deployment (team-page photos, etc.). Website mode serves
 # anonymous public reads over the garage web endpoint.

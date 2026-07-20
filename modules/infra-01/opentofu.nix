@@ -11,6 +11,7 @@
       scottylabs.tofu.configurations.cloudflare = {
         source = ../../tofu/cloudflare;
         environmentFile = config.age.secrets.tofu-cloudflare.path;
+        s3Backend = true;
       };
     };
 }

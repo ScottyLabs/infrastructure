@@ -56,6 +56,12 @@
                   default = { };
                   description = "Additional files to copy into the working directory at apply time";
                 };
+
+                s3Backend = lib.mkOption {
+                  type = lib.types.bool;
+                  default = false;
+                  description = "Store state in the tofu-state garage bucket over S3";
+                };
               };
             }
           );
@@ -94,8 +100,16 @@
           name = "tofu-${name}";
           value = {
             description = "Apply ${name} configuration via OpenTofu";
-            after = [ "network-online.target" ] ++ conf.after;
-            wants = [ "network-online.target" ] ++ conf.after;
+            after = [
+              "network-online.target"
+            ]
+            ++ conf.after
+            ++ lib.optional conf.s3Backend "tofu-garage.service";
+            wants = [
+              "network-online.target"
+            ]
+            ++ conf.after
+            ++ lib.optional conf.s3Backend "tofu-garage.service";
             wantedBy = [ "multi-user.target" ];
 
             # Re-run when the source config changes
@@ -107,10 +121,19 @@
             ];
             inherit (conf) environment;
 
+            vault = lib.mkIf conf.s3Backend {
+              environmentTemplate = ''
+                {{ with secret "secret/data/infra/tofu-state-s3" }}
+                AWS_ACCESS_KEY_ID={{ .Data.data.AWS_ACCESS_KEY_ID }}
+                AWS_SECRET_ACCESS_KEY={{ .Data.data.AWS_SECRET_ACCESS_KEY }}
+                {{ end }}
+              '';
+            };
+
             serviceConfig = {
               Type = "oneshot";
               RemainAfterExit = true;
-              EnvironmentFile = conf.environmentFile;
+              EnvironmentFile = [ conf.environmentFile ];
             };
 
             script = ''
