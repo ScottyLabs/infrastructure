@@ -42,8 +42,10 @@
       # Creates the JWT auth backend + role for Keycloak and configures project groups
       scottylabs.tofu.configurations.identity = {
         source = ../../tofu/identity;
-        environmentFile = config.age.secrets.tofu-identity.path;
-        s3Backend = true;
+        environmentFile = [
+          config.age.secrets.tofu-identity.path
+          config.age.secrets.tofu-state-s3.path
+        ];
         after = [
           "openbao.service"
           "keycloak.service"

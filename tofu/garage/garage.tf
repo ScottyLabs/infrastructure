@@ -36,15 +36,14 @@ resource "garage_bucket_permission" "infra_tofu_state" {
   owner         = true
 }
 
-# S3 credentials for the tofu-runner remote state backend
-resource "vault_kv_secret_v2" "infra_tofu_state_s3" {
-  mount = "secret"
-  name  = "infra/tofu-state-s3"
+output "infra_tofu_state_access_key_id" {
+  value     = garage_key.infra_tofu_state.id
+  sensitive = true
+}
 
-  data_json = jsonencode({
-    AWS_ACCESS_KEY_ID     = garage_key.infra_tofu_state.id
-    AWS_SECRET_ACCESS_KEY = garage_key.infra_tofu_state.secret_access_key
-  })
+output "infra_tofu_state_secret_access_key" {
+  value     = garage_key.infra_tofu_state.secret_access_key
+  sensitive = true
 }
 
 # Durable, org-wide bucket for static assets that outlive any single

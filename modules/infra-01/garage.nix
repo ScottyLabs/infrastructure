@@ -35,7 +35,7 @@
 
       scottylabs.tofu.configurations.garage = {
         source = ../../tofu/garage;
-        environmentFile = config.age.secrets.tofu-garage.path;
+        environmentFile = [ config.age.secrets.tofu-garage.path ];
         after = [ "garage.service" ];
       };
 
