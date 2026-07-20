@@ -6,7 +6,6 @@
       (with config.flake.modules.nixos; [
         acme
         alloy
-        bao-agent
         base
         btrfs
         caddy
@@ -17,6 +16,7 @@
         otel-collector
         shell
         systemd-exporter
+        systemd-vaultd
         tailnet-client
       ])
       ++ [

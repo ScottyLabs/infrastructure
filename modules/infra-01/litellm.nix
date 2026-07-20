@@ -224,11 +224,9 @@
 
         systemd.services.litellm = {
           after = [
-            "bao-agent.service"
             "postgresql.service"
           ];
           wants = [
-            "bao-agent.service"
             "postgresql.service"
           ];
           serviceConfig = {

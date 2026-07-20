@@ -3,8 +3,7 @@
     { pkgs, lib, ... }:
 
     {
-
-      # Lord Linus Torvalds, please forgive me.
+      # Lord Linus Torvalds, please forgive me
       nixpkgs.config.allowUnfreePredicate =
         pkg:
         builtins.elem (lib.getName pkg) [

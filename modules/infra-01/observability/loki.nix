@@ -28,18 +28,10 @@
           default = "https://s3.scottylabs.org";
         };
 
-        s3CredentialsFile = lib.mkOption {
-          type = lib.types.path;
-          description = ''
-            Path to env file containing LOKI_S3_ACCESS_KEY_ID and
-            LOKI_S3_SECRET_ACCESS_KEY. Templated by bao-agent.
-          '';
-        };
-
         retentionPeriod = lib.mkOption {
           type = lib.types.str;
           default = "720h";
-          description = "Chunk retention. 720h = 30d.";
+          description = "Chunk retention";
         };
       };
 
@@ -110,8 +102,6 @@
 
           extraFlags = [ "-config.expand-env=true" ];
         };
-
-        systemd.services.loki.serviceConfig.EnvironmentFile = cfg.s3CredentialsFile;
       };
     };
 }

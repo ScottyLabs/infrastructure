@@ -7,20 +7,11 @@
     }:
 
     {
-      scottylabs.bao-agent = {
-        enable = true;
-        infraSecrets.headscale = {
-          path = "headscale";
-          key = "HEADSCALE_AUTHKEY";
-          user = "root";
-        };
-      };
-
       # Enable Headscale and IP forwarding
       services.tailscale = {
         enable = true;
         useRoutingFeatures = "server";
-        authKeyFile = "/run/secrets/headscale";
+        authKeyFile = "/run/credentials/tailscaled.service/HEADSCALE_AUTHKEY";
         extraUpFlags = [
           "--login-server=https://headscale.scottylabs.org"
           "--ssh"
@@ -29,9 +20,9 @@
         ];
       };
 
-      systemd.services.tailscaled = {
-        after = [ "bao-agent.service" ];
-        wants = [ "bao-agent.service" ];
+      systemd.services.tailscaled.vault.infraSecrets.HEADSCALE_AUTHKEY = {
+        path = "headscale";
+        key = "HEADSCALE_AUTHKEY";
       };
 
       # Open firewall for Tailscale

@@ -38,14 +38,6 @@
           default = "https://s3.scottylabs.org";
         };
 
-        s3CredentialsFile = lib.mkOption {
-          type = lib.types.path;
-          description = ''
-            Path to env file containing TEMPO_S3_ACCESS_KEY_ID and
-            TEMPO_S3_SECRET_ACCESS_KEY. Templated by bao-agent.
-          '';
-        };
-
         retentionPeriod = lib.mkOption {
           type = lib.types.str;
           default = "336h";
@@ -113,7 +105,6 @@
             DynamicUser = lib.mkForce false;
             User = lib.mkForce "tempo";
             Group = lib.mkForce "tempo";
-            EnvironmentFile = cfg.s3CredentialsFile;
             Restart = lib.mkForce "always";
             RestartSec = "10s";
           };

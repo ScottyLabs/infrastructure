@@ -30,7 +30,7 @@ sudo journalctl -u tofu-identity | grep '"<hostname>"' | tail -1
 2. Generate a secret ID:
 
 ```bash
-export BAO_ADDR=https://secrets2.scottylabs.org
+export BAO_ADDR=https://secrets.scottylabs.org
 bao login -method=oidc
 bao write -f auth/approle/role/<hostname>/secret-id # requires devops group membership
 ```

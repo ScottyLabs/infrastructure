@@ -32,6 +32,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     srvos.url = "github:nix-community/srvos";
+    systemd-vaultd = {
+      url = "github:numtide/systemd-vaultd";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     # infra-01
     keycloak-theme = {
