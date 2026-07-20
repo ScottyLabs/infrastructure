@@ -3,7 +3,7 @@ locals {
     # hosts/infra-01
     infra-01  = { ip = "128.2.25.63", comment = "Campus Cloud VM (https://netreg.net.cmu.edu/)" }
     idp       = { ip = "128.2.25.63", comment = "Keycloak" }
-    secrets2  = { ip = "128.2.25.63", comment = "OpenBao" }
+    secrets   = { ip = "128.2.25.63", comment = "OpenBao" }
     vault     = { ip = "128.2.25.63", comment = "Vaultwarden" }
     webhooks  = { ip = "128.2.25.63", comment = "Nix flake updates for infrastructure" }
     headscale = { ip = "128.2.25.63", comment = "Headscale VPN coordination server" }
