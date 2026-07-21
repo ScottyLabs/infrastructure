@@ -76,6 +76,12 @@
                 {
                   listing_visibility = "unauth";
                   max_lease_ttl = "8760h";
+                  default_lease_ttl = "768h";
+                  token_type = "default-service";
+                  audit_non_hmac_request_keys = [ ];
+                  audit_non_hmac_response_keys = [ ];
+                  allowed_response_headers = [ ];
+                  passthrough_request_headers = [ ];
                 }
               ];
             };
