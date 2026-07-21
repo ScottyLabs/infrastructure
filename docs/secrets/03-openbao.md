@@ -19,7 +19,7 @@ OpenBao stores secrets centrally and delivers them at runtime, complementing age
 
 ### Setting Up a New Host
 
-After adding a host to the `hosts` list in the openbao terranix configuration (`modules/infra-01/openbao.nix`) and applying it, the AppRole is created automatically. You need to generate credentials:
+After adding a host to the `hosts` list in the openbao terranix configuration (`modules/hosts/infra-01/openbao.nix`) and applying it, the AppRole is created automatically. You need to generate credentials:
 
 1. Get the role ID (on infra-01):
 

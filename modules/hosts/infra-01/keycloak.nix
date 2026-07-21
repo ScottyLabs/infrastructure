@@ -28,7 +28,7 @@
       ];
 
       age.secrets.keycloak = {
-        file = ../../secrets/infra-01/keycloak.age;
+        file = ../../../secrets/infra-01/keycloak.age;
         mode = "0400";
       };
 

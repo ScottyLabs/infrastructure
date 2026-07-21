@@ -12,10 +12,10 @@ Here, you can switch the boot mode from the default (Legacy/BIOS) to UEFI via `V
 
 <img src="./assets/vm-boot-mode.png" alt="VM boot mode" height="300" />
 
-In this repository, add `hostname` to the `hosts` list in [modules/systems.nix](../../modules/systems.nix), and add it to the `hosts` list in the openbao terranix configuration ([modules/infra-01/openbao.nix](../../modules/infra-01/openbao.nix)), which provisions its AppRole. If not already present, create a [user entry](../../modules/users.nix) for yourself, following [these instructions](../create-user-entry.md). Then define the host's configuration aspect and its role, following the pattern of the other hosts:
+In this repository, add `hostname` to the `hosts` list in [modules/systems.nix](../../modules/systems.nix), and add it to the `hosts` list in the openbao terranix configuration ([modules/hosts/infra-01/openbao.nix](../../modules/hosts/infra-01/openbao.nix)), which provisions its AppRole. If not already present, create a [user entry](../../modules/users.nix) for yourself, following [these instructions](../create-user-entry.md). Then define the host's configuration aspect and its role, following the pattern of the other hosts:
 
 ```nix
-# host-specific settings go in modules/hostname/configuration.nix
+# host-specific settings go in modules/hosts/hostname/configuration.nix
 {
   flake.modules.nixos.hostname-configuration = {
     networking.hostName = "hostname";

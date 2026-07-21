@@ -5,7 +5,7 @@
 
     {
       age.secrets.vaultwarden = {
-        file = ../../secrets/infra-01/vaultwarden.age;
+        file = ../../../secrets/infra-01/vaultwarden.age;
         mode = "0400";
         owner = "vaultwarden";
       };

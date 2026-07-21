@@ -35,7 +35,7 @@
       };
 
       age.secrets.atlantis = {
-        file = ../../../secrets/infra-01/atlantis.age;
+        file = ../../../../secrets/infra-01/atlantis.age;
         owner = "atlantis";
         mode = "0400";
       };

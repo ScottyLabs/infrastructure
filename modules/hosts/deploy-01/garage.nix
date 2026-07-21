@@ -11,7 +11,7 @@
       };
 
       age.secrets.garage = {
-        file = ../../secrets/deploy-01/garage.age;
+        file = ../../../secrets/deploy-01/garage.age;
         mode = "0400";
       };
     };
