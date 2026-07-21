@@ -128,6 +128,8 @@
       packages.atlantis-yaml = pkgs.writeText "atlantis.yaml" (
         builtins.toJSON {
           version = 3;
+          parallel_plan = true;
+          parallel_apply = true;
           projects = lib.mapAttrsToList (name: _: {
             inherit name;
             dir = ".";
