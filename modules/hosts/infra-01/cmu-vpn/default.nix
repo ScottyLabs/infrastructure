@@ -9,8 +9,8 @@
     let
       # TODO: use flake input once nix supports sha256 repos
       umvpnSrc = fetchTarball {
-        url = "https://codeberg.org/ScottyLabs/umvpn/archive/0a2eba6d928f862140598f03e874b4cb12cf1d58d6d9c066d2ee97de9bff398a.tar.gz";
-        sha256 = "sha256-hakHXfzLQjJ4W9HIwb9t9SnNC9wZByU6MYPT/fERs9U=";
+        url = "https://codeberg.org/ScottyLabs/umvpn/archive/eef7188f6f9da52f350d2ad534d62bd0231cf344faf44493bfb750d777df4ecf.tar.gz";
+        sha256 = "sha256-V5SH2H9AxrmxhcjavFVuHtHPIPuVixhSDxWrZPiwfLM=";
       };
     in
     {
