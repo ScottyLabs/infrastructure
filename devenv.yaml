@@ -1,11 +1,13 @@
 inputs:
+  nixpkgs:
+    url: github:nixos/nixpkgs/nixos-unstable
   scottylabs:
-    url: github:ScottyLabs/devenv
-  treefmt-nix:
-    url: github:numtide/treefmt-nix
+    url: git+https://codeberg.org/ScottyLabs/devenv
     inputs:
       nixpkgs:
         follows: nixpkgs
+  treefmt-nix:
+    url: github:numtide/treefmt-nix
   git-hooks:
     url: github:cachix/git-hooks.nix
     inputs:

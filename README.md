@@ -23,4 +23,4 @@ Datasources are not provisioned locally; queries are validated against prod via 
 
 ## Deploy
 
-A push to `main` fires the Codeberg webhook at `webhooks.scottylabs.org`, which dispatches `infrastructure/.forgejo/workflows/update-flake.yml` and bumps `flake.lock` in `infrastructure`. Comin rebuilds infra-01 within a minute, after which Grafana's provisioner picks up the new dashboards path and reloads.
+A push to `main` fires the Codeberg webhook at `webhooks.scottylabs.org`, which dispatches `infrastructure/.forgejo/workflows/update-flake.yml` and bumps `flake.lock` in `infrastructure`. Once infra-01 rebuilds, Grafana's provisioner picks up the new dashboards path and reloads.
