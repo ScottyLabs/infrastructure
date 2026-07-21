@@ -10,7 +10,6 @@
         oidcClientSecretFile = "/run/credentials/headplane.service/oidc";
         cookieSecretFile = "/run/credentials/headplane.service/cookie";
         apiKeyFile = "/run/credentials/headplane.service/apikey";
-        agentPreAuthKeyFile = "/run/credentials/headplane.service/agent";
       };
     };
 
@@ -31,10 +30,6 @@
       apikey = {
         path = "headplane-api-key";
         key = "API_KEY";
-      };
-      agent = {
-        path = "headplane-agent";
-        key = "SECRET";
       };
     };
   };

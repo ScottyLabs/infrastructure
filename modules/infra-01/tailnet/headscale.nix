@@ -249,7 +249,6 @@
               };
             };
 
-            resource.random_bytes.headplane_agent.length = 32;
             resource.random_password.headplane_cookie.length = 32;
 
             resource.vault_kv_secret_v2 = {
@@ -267,11 +266,6 @@
                 mount = "secret";
                 name = "infra/headplane-cookie";
                 data_json = "\${jsonencode({ SECRET = random_password.headplane_cookie.result })}";
-              };
-              headplane_agent = {
-                mount = "secret";
-                name = "infra/headplane-agent";
-                data_json = "\${jsonencode({ SECRET = random_bytes.headplane_agent.base64 })}";
               };
             };
 
