@@ -6,6 +6,16 @@ repos:
     allow_custom_workflows: false
     workflow: governance
 
+  - id: codeberg.org/ScottyLabs/infrastructure
+    plan_requirements: [approved]
+    apply_requirements: [approved, mergeable, undiverged]
+    import_requirements: [approved, mergeable, undiverged]
+    allow_custom_workflows: false
+    workflow: terranix
+    pre_workflow_hooks:
+      - run: install -m 644 "$(nix build --print-out-paths .#atlantis-yaml)" atlantis.yaml
+        description: Generate atlantis.yaml from the flake
+
 workflows:
   governance:
     plan:
@@ -51,6 +61,22 @@ workflows:
             name: TF_CLI_CONFIG_FILE
             command: 'echo "$HOME/.terraform.d/dev_overrides.tfrc"'
         - import
+
+  terranix:
+    plan:
+      steps:
+        - env:
+            name: TF_WORKSPACE
+            value: default
+        - run: nix build ".#$PROJECT_NAME.config" --out-link config.tf.json
+        - run: tofu init -input=false
+        - run: tofu plan -input=false -out "$PLANFILE"
+    apply:
+      steps:
+        - env:
+            name: TF_WORKSPACE
+            value: default
+        - run: tofu apply -input=false "$PLANFILE"
 
 metrics:
   prometheus:

@@ -12,7 +12,18 @@ The `-A` flag is necessary for forwarding your local SSH keys to the remote serv
 scp ~/.ssh/id_ed25519 andrewid@hostname:~/.ssh/
 ```
 
-Once you're in, run `update` once. Always make sure to use the `update` alias for `sudo nixos-rebuild switch`, since it creates a btrfs backup first. You can use `rollback` if something goes wrong.
+Once the host key is in `secrets.nix` (below) and the host is in `modules/systems.nix`, deploy it from your workstation:
+
+```bash
+colmena apply --on hostname
+```
+
+If an activation goes wrong, roll back on the host to the previous generation:
+
+```bash
+sudo nix-env --rollback -p /nix/var/nix/profiles/system
+sudo /nix/var/nix/profiles/system/bin/switch-to-configuration switch
+```
 
 Finally, add the VM's SSH host key to [`secrets.nix`](../../secrets.nix) so that agenix can encrypt secrets for this host:
 

@@ -1,3 +1,4 @@
+{ config, ... }:
 {
   flake.modules.nixos.infra-01-garage =
     { config, ... }:
@@ -26,17 +27,6 @@
       age.secrets.garage = {
         file = ../../secrets/infra-01/garage.age;
         mode = "0400";
-      };
-
-      age.secrets.tofu-garage = {
-        file = ../../secrets/infra-01/tofu-garage.age;
-        mode = "0400";
-      };
-
-      scottylabs.tofu.configurations.garage = {
-        source = ../../tofu/garage;
-        environmentFile = [ config.age.secrets.tofu-garage.path ];
-        after = [ "garage.service" ];
       };
 
       # Public read-only vhost for the scottylabs-assets bucket, Host rewritten to its globalAlias
@@ -89,5 +79,144 @@
           header_up Host scottylabs-docs
         }
       '';
+    };
+
+  perSystem =
+    { pkgs, ... }:
+    {
+      terranix.terranixConfigurations.garage = {
+        terraformWrapper.package = pkgs.opentofu;
+        modules = [
+          config.flake.modules.terranix.base
+          {
+            dns = {
+              s3 = {
+                host = "infra-01";
+                type = "CNAME";
+                comment = "Garage S3-compatible object storage";
+              };
+              assets = {
+                host = "infra-01";
+                type = "CNAME";
+                comment = "Garage public-read website endpoint for the scottylabs-assets bucket";
+              };
+              cdn = {
+                host = "infra-01";
+                type = "CNAME";
+                comment = "Garage public-read CDN";
+              };
+              docs = {
+                host = "infra-01";
+                type = "CNAME";
+                comment = "ScottyLabs documentation hub (Garage scottylabs-docs bucket)";
+              };
+            };
+            resource.garage_bucket = {
+              tofu_state.global_alias = "tofu-state";
+              # Org-wide static assets that outlive any single kennel deployment
+              scottylabs_assets = {
+                global_alias = "scottylabs-assets";
+                website_enabled = true;
+                website_index_document = "index.html";
+              };
+              # Documentation hub, uploaded by documentation CI
+              scottylabs_docs = {
+                global_alias = "scottylabs-docs";
+                website_enabled = true;
+                website_index_document = "index.html";
+              };
+              # Shared sccache compilation cache for Rust builds
+              sccache.global_alias = "sccache";
+            };
+
+            resource.garage_key = {
+              governance.name = "governance-tofu";
+              infra_tofu_state.name = "infra-tofu-state";
+              scottylabs_assets_writer.name = "scottylabs-assets-writer";
+              scottylabs_docs_writer.name = "scottylabs-docs-writer";
+              sccache.name = "sccache";
+            };
+
+            resource.garage_bucket_permission = {
+              governance_tofu_state = {
+                access_key_id = "\${garage_key.governance.id}";
+                bucket_id = "\${garage_bucket.tofu_state.id}";
+                read = true;
+                write = true;
+                owner = true;
+              };
+              infra_tofu_state = {
+                access_key_id = "\${garage_key.infra_tofu_state.id}";
+                bucket_id = "\${garage_bucket.tofu_state.id}";
+                read = true;
+                write = true;
+                owner = true;
+              };
+              scottylabs_assets_writer = {
+                access_key_id = "\${garage_key.scottylabs_assets_writer.id}";
+                bucket_id = "\${garage_bucket.scottylabs_assets.id}";
+                read = true;
+                write = true;
+                owner = true;
+              };
+              scottylabs_docs_writer = {
+                access_key_id = "\${garage_key.scottylabs_docs_writer.id}";
+                bucket_id = "\${garage_bucket.scottylabs_docs.id}";
+                read = true;
+                write = true;
+                owner = true;
+              };
+              sccache = {
+                access_key_id = "\${garage_key.sccache.id}";
+                bucket_id = "\${garage_bucket.sccache.id}";
+                read = true;
+                write = true;
+                owner = false;
+              };
+            };
+
+            resource.vault_kv_secret_v2.sccache_s3 = {
+              mount = "secret";
+              name = "shared/sccache";
+              data_json = "\${jsonencode({ AWS_ACCESS_KEY_ID = garage_key.sccache.id, AWS_SECRET_ACCESS_KEY = garage_key.sccache.secret_access_key })}";
+            };
+
+            output = {
+              governance_access_key_id = {
+                value = "\${garage_key.governance.id}";
+                sensitive = true;
+              };
+              governance_secret_access_key = {
+                value = "\${garage_key.governance.secret_access_key}";
+                sensitive = true;
+              };
+              infra_tofu_state_access_key_id = {
+                value = "\${garage_key.infra_tofu_state.id}";
+                sensitive = true;
+              };
+              infra_tofu_state_secret_access_key = {
+                value = "\${garage_key.infra_tofu_state.secret_access_key}";
+                sensitive = true;
+              };
+              scottylabs_assets_writer_access_key_id = {
+                value = "\${garage_key.scottylabs_assets_writer.id}";
+                sensitive = true;
+              };
+              scottylabs_assets_writer_secret_access_key = {
+                value = "\${garage_key.scottylabs_assets_writer.secret_access_key}";
+                sensitive = true;
+              };
+              scottylabs_docs_writer_access_key_id = {
+                value = "\${garage_key.scottylabs_docs_writer.id}";
+                sensitive = true;
+              };
+              scottylabs_docs_writer_secret_access_key = {
+                value = "\${garage_key.scottylabs_docs_writer.secret_access_key}";
+                sensitive = true;
+              };
+            };
+          }
+        ];
+      };
     };
 }

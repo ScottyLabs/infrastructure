@@ -2,7 +2,7 @@
 
 ## ACME first-deploy race when adding a new subdomain
 
-When a new subdomain is added to `tofu/cloudflare/records.tf` and a corresponding nginx vhost with `enableACME = true; forceSSL = true;` is added in the same comin reconcile, the first ACME issuance attempt typically fails. Let's Encrypt's resolvers query authoritative DNS faster than the new Cloudflare record propagates, so HTTP-01 validation hits NXDOMAIN.
+When a new DNS record is added to a service's terranix configuration and a corresponding nginx vhost with `enableACME = true; forceSSL = true;` is deployed around the same time, the first ACME issuance attempt typically fails. Let's Encrypt's resolvers query authoritative DNS faster than the new Cloudflare record propagates, so HTTP-01 validation hits NXDOMAIN.
 
 Symptoms from outside the cluster:
 

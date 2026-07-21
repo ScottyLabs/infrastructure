@@ -1,3 +1,4 @@
+{ config, ... }:
 {
   flake.modules.nixos.infra-01-keycloak =
     {
@@ -88,5 +89,25 @@
       };
 
       scottylabs.postgresql.databases = [ "keycloak" ];
+    };
+
+  perSystem =
+    { pkgs, ... }:
+    {
+      terranix.terranixConfigurations.keycloak = {
+        terraformWrapper.package = pkgs.opentofu;
+        modules = [
+          config.flake.modules.terranix.base
+          config.flake.modules.terranix.s3-state
+          {
+            terraform.backend.s3.key = "services/keycloak.tfstate";
+            dns.idp = {
+              host = "infra-01";
+              type = "CNAME";
+              comment = "Keycloak";
+            };
+          }
+        ];
+      };
     };
 }

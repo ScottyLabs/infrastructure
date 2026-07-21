@@ -1,3 +1,4 @@
+{ config, ... }:
 {
   flake.modules.nixos.infra-01-ai-gateway =
     {
@@ -83,6 +84,82 @@
             "gpt-5.4-mini"
             "codex-auto-review"
           ];
+      };
+    };
+
+  perSystem =
+    { pkgs, ... }:
+    {
+      terranix.terranixConfigurations.litellm = {
+        terraformWrapper.package = pkgs.opentofu;
+        modules = [
+          config.flake.modules.terranix.base
+          config.flake.modules.terranix.s3-state
+          {
+            terraform.backend.s3.key = "services/litellm.tfstate";
+            dns.litellm = {
+              host = "infra-01";
+              type = "CNAME";
+              comment = "LiteLLM AI gateway fronting cli-proxy-api";
+            };
+            resource.keycloak_openid_client.litellm = {
+              realm_id = "\${data.keycloak_realm.scottylabs.id}";
+              client_id = "litellm";
+              name = "LiteLLM";
+              enabled = true;
+              access_type = "CONFIDENTIAL";
+              standard_flow_enabled = true;
+              direct_access_grants_enabled = false;
+              valid_redirect_uris = [ "https://litellm.scottylabs.org/sso/callback" ];
+            };
+
+            resource.keycloak_openid_group_membership_protocol_mapper.litellm_groups = {
+              realm_id = "\${data.keycloak_realm.scottylabs.id}";
+              client_id = "\${keycloak_openid_client.litellm.id}";
+              name = "groups";
+              claim_name = "groups";
+              full_path = true;
+            };
+
+            resource.random_password = {
+              litellm_master_key = {
+                length = 48;
+                special = false;
+              };
+              litellm_salt_key = {
+                length = 48;
+                special = false;
+              };
+              cli_proxy_api_key = {
+                length = 48;
+                special = false;
+              };
+            };
+
+            resource.vault_kv_secret_v2 = {
+              litellm_oidc = {
+                mount = "secret";
+                name = "infra/litellm-oidc";
+                data_json = "\${jsonencode({ CLIENT_SECRET = keycloak_openid_client.litellm.client_secret })}";
+              };
+              litellm_master_key = {
+                mount = "secret";
+                name = "infra/litellm-master-key";
+                data_json = ''''${jsonencode({ MASTER_KEY = "sk-''${random_password.litellm_master_key.result}" })}'';
+              };
+              litellm_salt_key = {
+                mount = "secret";
+                name = "infra/litellm-salt-key";
+                data_json = "\${jsonencode({ SALT_KEY = random_password.litellm_salt_key.result })}";
+              };
+              cli_proxy_api_key = {
+                mount = "secret";
+                name = "infra/cli-proxy-api-key";
+                data_json = "\${jsonencode({ API_KEY = random_password.cli_proxy_api_key.result })}";
+              };
+            };
+          }
+        ];
       };
     };
 }
