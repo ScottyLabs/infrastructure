@@ -1,7 +1,7 @@
 { config, ... }:
 {
   flake.modules.nixos.infra-01-observability =
-    { inputs, lib, ... }:
+    { inputs, ... }:
 
     let
       hostnames = builtins.attrNames inputs.self.nixosConfigurations;
@@ -53,7 +53,7 @@
             };
           }
         ];
-        template = lib.mkForce [
+        template = [
           {
             contents = ''{{ with secret "secret/data/infra/discord-webhook-alerts" }}{{ .Data.data.URL }}{{ end }}'';
             destination = "/run/secrets/discord-webhook-alerts";
