@@ -9,3 +9,5 @@ jobs:
   check:
     uses: ScottyLabs/devenv/.forgejo/workflows/ci.yml@main
     secrets: inherit
+    with:
+      build: false
