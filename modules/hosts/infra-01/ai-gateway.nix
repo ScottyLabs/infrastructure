@@ -70,7 +70,7 @@
           let
             passthrough = id: {
               name = id;
-              upstream = "openai/${id}";
+              upstream = "scottylabs/${id}";
             };
           in
           map passthrough [
