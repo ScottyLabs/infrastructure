@@ -7,9 +7,9 @@ repos:
     workflow: governance
 
   - id: codeberg.org/ScottyLabs/infrastructure
-    plan_requirements: [approved]
-    apply_requirements: [approved, mergeable, undiverged]
-    import_requirements: [approved, mergeable, undiverged]
+    plan_requirements: [mergeable]
+    apply_requirements: [mergeable, undiverged]
+    import_requirements: [mergeable, undiverged]
     allow_custom_workflows: false
     workflow: terranix
     pre_workflow_hooks:
