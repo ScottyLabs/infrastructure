@@ -12,7 +12,7 @@
         inputs.llm-pkgs.nixosModules.cliproxyapi
       ];
 
-      age.secrets.cli-proxy-api.file = ../../secrets/infra-01/cli-proxy-api.age;
+      age.secrets.cli-proxy-api.file = ../../../secrets/infra-01/cli-proxy-api.age;
 
       services.cliproxyapi = {
         enable = true;

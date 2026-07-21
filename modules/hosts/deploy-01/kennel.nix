@@ -21,21 +21,21 @@
       ];
 
       age.secrets.kennel = {
-        file = ../../secrets/deploy-01/kennel.age;
+        file = ../../../secrets/deploy-01/kennel.age;
         owner = "kennel";
         group = "kennel";
         mode = "0440";
       };
 
       age.secrets.kennel-webhook-secret = {
-        file = ../../secrets/deploy-01/kennel-webhook-secret.age;
+        file = ../../../secrets/deploy-01/kennel-webhook-secret.age;
         owner = "kennel";
         group = "kennel";
         mode = "0400";
       };
 
       age.secrets.kennel-forgejo-token = {
-        file = ../../secrets/deploy-01/kennel-forgejo-token.age;
+        file = ../../../secrets/deploy-01/kennel-forgejo-token.age;
         owner = "kennel";
         group = "kennel";
         mode = "0400";

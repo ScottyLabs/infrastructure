@@ -17,8 +17,8 @@
       imports = [ (umvpnSrc + "/nix/module.nix") ];
 
       age.secrets = {
-        cmu-vpn-password.file = ../../../secrets/infra-01/cmu-vpn-password.age;
-        cmu-vpn-passkey.file = ../../../secrets/infra-01/cmu-vpn-passkey.age;
+        cmu-vpn-password.file = ../../../../secrets/infra-01/cmu-vpn-password.age;
+        cmu-vpn-passkey.file = ../../../../secrets/infra-01/cmu-vpn-passkey.age;
       };
 
       services.umvpn = {

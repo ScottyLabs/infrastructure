@@ -25,7 +25,7 @@
       };
 
       age.secrets.garage = {
-        file = ../../secrets/infra-01/garage.age;
+        file = ../../../secrets/infra-01/garage.age;
         mode = "0400";
       };
 

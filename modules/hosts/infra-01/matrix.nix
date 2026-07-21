@@ -4,31 +4,31 @@
 
     {
       age.secrets.matrix-registration = {
-        file = ../../secrets/infra-01/matrix-registration.age;
+        file = ../../../secrets/infra-01/matrix-registration.age;
         owner = "matrix-synapse";
         mode = "0400";
       };
 
       age.secrets.double-puppet = {
-        file = ../../secrets/infra-01/double-puppet.age;
+        file = ../../../secrets/infra-01/double-puppet.age;
         owner = "matrix-synapse";
         mode = "0400";
       };
 
       age.secrets.double-puppet-env = {
-        file = ../../secrets/infra-01/double-puppet-env.age;
+        file = ../../../secrets/infra-01/double-puppet-env.age;
         owner = "mautrix-discord";
         mode = "0400";
       };
 
       age.secrets.double-puppet-env-slack = {
-        file = ../../secrets/infra-01/double-puppet-env.age;
+        file = ../../../secrets/infra-01/double-puppet-env.age;
         owner = "mautrix-slack";
         mode = "0400";
       };
 
       age.secrets.bridge-identity = {
-        file = ../../secrets/infra-01/bridge-identity-sync.age;
+        file = ../../../secrets/infra-01/bridge-identity-sync.age;
         mode = "0400";
       };
 
