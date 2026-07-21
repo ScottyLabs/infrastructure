@@ -7,7 +7,6 @@
     infra-01-keycloak
     infra-01-vaultwarden
     infra-01-openbao
-    infra-01-opentofu
     infra-01-tailnet
     infra-01-matrix
     infra-01-garage
@@ -38,7 +37,7 @@
     atlantis
     litellm
     postgresql
-    tofu-runner
+    tofu-providers
     uptime-kuma
   ];
 }

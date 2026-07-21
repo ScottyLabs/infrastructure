@@ -1,3 +1,4 @@
+{ config, ... }:
 {
   flake.modules.nixos.infra-01-vaultwarden =
     { config, ... }:
@@ -44,5 +45,25 @@
       '';
 
       scottylabs.postgresql.databases = [ "vaultwarden" ];
+    };
+
+  perSystem =
+    { pkgs, ... }:
+    {
+      terranix.terranixConfigurations.vaultwarden = {
+        terraformWrapper.package = pkgs.opentofu;
+        modules = [
+          config.flake.modules.terranix.base
+          config.flake.modules.terranix.s3-state
+          {
+            terraform.backend.s3.key = "services/vaultwarden.tfstate";
+            dns.vault = {
+              host = "infra-01";
+              type = "CNAME";
+              comment = "Vaultwarden";
+            };
+          }
+        ];
+      };
     };
 }

@@ -1,3 +1,4 @@
+{ config, ... }:
 {
   flake.modules.nixos.infra-01-observability =
     { inputs, lib, ... }:
@@ -186,5 +187,105 @@
       scottylabs.loki.enable = true;
       scottylabs.tempo.enable = true;
       scottylabs.grafana.enable = true;
+    };
+
+  perSystem =
+    { pkgs, ... }:
+    {
+      terranix.terranixConfigurations.observability = {
+        terraformWrapper.package = pkgs.opentofu;
+        modules = [
+          config.flake.modules.terranix.base
+          config.flake.modules.terranix.s3-state
+          {
+            terraform.backend.s3.key = "services/observability.tfstate";
+            dns = {
+              grafana = {
+                host = "infra-01";
+                type = "CNAME";
+                comment = "Grafana observability frontend";
+              };
+              uptime = {
+                host = "infra-01";
+                type = "CNAME";
+                comment = "Uptime Kuma public status page";
+              };
+            };
+            resource.keycloak_openid_client.grafana = {
+              realm_id = "\${data.keycloak_realm.scottylabs.id}";
+              client_id = "grafana";
+              name = "Grafana";
+              enabled = true;
+              access_type = "CONFIDENTIAL";
+              standard_flow_enabled = true;
+              direct_access_grants_enabled = false;
+              valid_redirect_uris = [ "https://grafana.scottylabs.org/login/generic_oauth" ];
+            };
+
+            resource.keycloak_openid_group_membership_protocol_mapper.grafana_groups = {
+              realm_id = "\${data.keycloak_realm.scottylabs.id}";
+              client_id = "\${keycloak_openid_client.grafana.id}";
+              name = "groups";
+              claim_name = "groups";
+              full_path = true;
+            };
+
+            resource.random_password.grafana_secret_key = {
+              length = 64;
+              special = false;
+            };
+
+            resource.vault_kv_secret_v2 = {
+              grafana_oidc = {
+                mount = "secret";
+                name = "infra/grafana-oidc";
+                data_json = "\${jsonencode({ CLIENT_SECRET = keycloak_openid_client.grafana.client_secret })}";
+              };
+              grafana_secret_key = {
+                mount = "secret";
+                name = "infra/grafana-secret-key";
+                data_json = "\${jsonencode({ SECRET_KEY = random_password.grafana_secret_key.result })}";
+              };
+              loki_s3 = {
+                mount = "secret";
+                name = "infra/loki-s3";
+                data_json = ''''${jsonencode({ ENV = "LOKI_S3_ACCESS_KEY_ID=''${garage_key.loki.id}\nLOKI_S3_SECRET_ACCESS_KEY=''${garage_key.loki.secret_access_key}\n" })}'';
+              };
+              tempo_s3 = {
+                mount = "secret";
+                name = "infra/tempo-s3";
+                data_json = ''''${jsonencode({ ENV = "TEMPO_S3_ACCESS_KEY=''${garage_key.tempo.id}\nTEMPO_S3_SECRET_KEY=''${garage_key.tempo.secret_access_key}\n" })}'';
+              };
+            };
+
+            resource.garage_bucket = {
+              loki_chunks.global_alias = "loki-chunks";
+              tempo_traces.global_alias = "tempo-traces";
+            };
+
+            resource.garage_key = {
+              loki.name = "loki";
+              tempo.name = "tempo";
+            };
+
+            resource.garage_bucket_permission = {
+              loki = {
+                access_key_id = "\${garage_key.loki.id}";
+                bucket_id = "\${garage_bucket.loki_chunks.id}";
+                read = true;
+                write = true;
+                owner = false;
+              };
+              tempo = {
+                access_key_id = "\${garage_key.tempo.id}";
+                bucket_id = "\${garage_bucket.tempo_traces.id}";
+                read = true;
+                write = true;
+                owner = false;
+              };
+            };
+          }
+        ];
+      };
     };
 }

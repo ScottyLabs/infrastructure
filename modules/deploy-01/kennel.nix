@@ -1,3 +1,4 @@
+{ config, ... }:
 {
   flake.modules.nixos.deploy-01-kennel =
     { config, inputs, ... }:
@@ -112,5 +113,61 @@
           };
         }
       ];
+    };
+
+  perSystem =
+    { pkgs, ... }:
+    {
+      terranix.terranixConfigurations.kennel = {
+        terraformWrapper.package = pkgs.opentofu;
+        modules = [
+          config.flake.modules.terranix.base
+          config.flake.modules.terranix.s3-state
+          {
+            terraform.backend.s3.key = "services/kennel.tfstate";
+            dns = {
+              kennel = {
+                host = "deploy-01";
+                type = "CNAME";
+                comment = "Kennel deployment platform";
+              };
+              "s3.kennel" = {
+                host = "deploy-01";
+                type = "CNAME";
+                comment = "Kennel per-deployment garage S3 API";
+              };
+              "*" = {
+                zone = "scottylabs.net";
+                host = "deploy-01";
+                type = "CNAME";
+                comment = "Kennel deployment platform wildcard";
+              };
+            };
+            resource.vault_policy.kennel = {
+              name = "kennel";
+              policy = ''
+                path "secret/data/secretspec/+/+/*" {
+                  capabilities = ["read"]
+                }
+
+                path "secret/metadata/secretspec/+/+/*" {
+                  capabilities = ["list", "read"]
+                }
+              '';
+            };
+
+            resource.vault_approle_auth_backend_role.kennel = {
+              backend = "approle";
+              role_name = "kennel";
+              token_policies = [ "\${vault_policy.kennel.name}" ];
+              token_ttl = 3600;
+              token_max_ttl = 86400;
+              secret_id_ttl = 0;
+            };
+
+            output.kennel_approle_role_id.value = "\${vault_approle_auth_backend_role.kennel.role_id}";
+          }
+        ];
+      };
     };
 }

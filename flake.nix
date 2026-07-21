@@ -71,6 +71,10 @@
       url = "github:zhaofengli/colmena";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    terranix = {
+      url = "github:terranix/terranix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -79,6 +83,7 @@
       imports = [
         inputs.flake-parts.flakeModules.modules
         (inputs.import-tree ./modules)
+        inputs.terranix.flakeModule
       ];
 
       systems = [ "x86_64-linux" ];

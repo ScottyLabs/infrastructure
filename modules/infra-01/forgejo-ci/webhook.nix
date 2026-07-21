@@ -1,3 +1,4 @@
+{ config, ... }:
 {
   flake.modules.nixos.webhook =
     {
@@ -144,6 +145,26 @@
         services.caddy.virtualHosts.${cfg.domain}.extraConfig = ''
           reverse_proxy 127.0.0.1:${toString cfg.port}
         '';
+      };
+    };
+
+  perSystem =
+    { pkgs, ... }:
+    {
+      terranix.terranixConfigurations.webhook = {
+        terraformWrapper.package = pkgs.opentofu;
+        modules = [
+          config.flake.modules.terranix.base
+          config.flake.modules.terranix.s3-state
+          {
+            terraform.backend.s3.key = "services/webhook.tfstate";
+            dns.webhooks = {
+              host = "infra-01";
+              type = "CNAME";
+              comment = "Nix flake updates for infrastructure";
+            };
+          }
+        ];
       };
     };
 }

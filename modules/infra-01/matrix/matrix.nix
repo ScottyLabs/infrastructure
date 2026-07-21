@@ -1,3 +1,4 @@
+{ config, ... }:
 {
   flake.modules.nixos.matrix =
     {
@@ -32,6 +33,35 @@
         systemd.services.matrix-synapse.serviceConfig.SupplementaryGroups = lib.mkForce [
           "mautrix-discord"
           "mautrix-slack-registration"
+        ];
+      };
+    };
+
+  perSystem =
+    { pkgs, ... }:
+    {
+      terranix.terranixConfigurations.matrix = {
+        terraformWrapper.package = pkgs.opentofu;
+        modules = [
+          config.flake.modules.terranix.base
+          config.flake.modules.terranix.s3-state
+          {
+            terraform.backend.s3.key = "services/matrix.tfstate";
+            dns = {
+              "@" = {
+                zone = "doggylabs.org";
+                host = "infra-01";
+                type = "CNAME";
+                comment = "Matrix homeserver (Synapse)";
+              };
+              matrix = {
+                zone = "doggylabs.org";
+                host = "infra-01";
+                type = "CNAME";
+                comment = "Matrix homeserver (Synapse)";
+              };
+            };
+          }
         ];
       };
     };

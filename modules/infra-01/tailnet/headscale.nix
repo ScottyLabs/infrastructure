@@ -1,3 +1,4 @@
+{ config, ... }:
 {
   flake.modules.nixos.headscale =
     {
@@ -183,6 +184,109 @@
         '';
 
         scottylabs.postgresql.databases = [ "headscale" ];
+      };
+    };
+
+  perSystem =
+    { pkgs, ... }:
+    {
+      terranix.terranixConfigurations.headscale = {
+        terraformWrapper.package = pkgs.opentofu;
+        modules = [
+          config.flake.modules.terranix.base
+          config.flake.modules.terranix.s3-state
+          {
+            terraform.backend.s3.key = "services/headscale.tfstate";
+            dns = {
+              headscale = {
+                host = "infra-01";
+                type = "CNAME";
+                comment = "Headscale VPN coordination server";
+              };
+              headplane = {
+                host = "infra-01";
+                type = "CNAME";
+                comment = "Headplane web UI for Headscale";
+              };
+            };
+            resource.keycloak_openid_client = {
+              headscale = {
+                realm_id = "\${data.keycloak_realm.scottylabs.id}";
+                client_id = "headscale";
+                name = "Headscale";
+                enabled = true;
+                access_type = "CONFIDENTIAL";
+                standard_flow_enabled = true;
+                direct_access_grants_enabled = false;
+                valid_redirect_uris = [ "https://headscale.scottylabs.org/oidc/callback" ];
+              };
+              headplane = {
+                realm_id = "\${data.keycloak_realm.scottylabs.id}";
+                client_id = "headplane";
+                name = "Headplane";
+                enabled = true;
+                access_type = "CONFIDENTIAL";
+                standard_flow_enabled = true;
+                direct_access_grants_enabled = false;
+                valid_redirect_uris = [ "https://headplane.scottylabs.org/admin/oidc/callback" ];
+              };
+            };
+
+            resource.keycloak_openid_group_membership_protocol_mapper = {
+              headscale_groups = {
+                realm_id = "\${data.keycloak_realm.scottylabs.id}";
+                client_id = "\${keycloak_openid_client.headscale.id}";
+                name = "groups";
+                claim_name = "groups";
+                full_path = true;
+              };
+              headplane_groups = {
+                realm_id = "\${data.keycloak_realm.scottylabs.id}";
+                client_id = "\${keycloak_openid_client.headplane.id}";
+                name = "groups";
+                claim_name = "groups";
+                full_path = true;
+              };
+            };
+
+            resource.random_bytes.headplane_agent.length = 32;
+            resource.random_password.headplane_cookie.length = 32;
+
+            resource.vault_kv_secret_v2 = {
+              headscale_oidc = {
+                mount = "secret";
+                name = "infra/headscale-oidc";
+                data_json = "\${jsonencode({ CLIENT_SECRET = keycloak_openid_client.headscale.client_secret })}";
+              };
+              headplane_oidc = {
+                mount = "secret";
+                name = "infra/headplane-oidc";
+                data_json = "\${jsonencode({ CLIENT_SECRET = keycloak_openid_client.headplane.client_secret })}";
+              };
+              headplane_cookie = {
+                mount = "secret";
+                name = "infra/headplane-cookie";
+                data_json = "\${jsonencode({ SECRET = random_password.headplane_cookie.result })}";
+              };
+              headplane_agent = {
+                mount = "secret";
+                name = "infra/headplane-agent";
+                data_json = "\${jsonencode({ SECRET = random_bytes.headplane_agent.base64 })}";
+              };
+            };
+
+            output = {
+              headscale_client_secret = {
+                value = "\${keycloak_openid_client.headscale.client_secret}";
+                sensitive = true;
+              };
+              headplane_client_secret = {
+                value = "\${keycloak_openid_client.headplane.client_secret}";
+                sensitive = true;
+              };
+            };
+          }
+        ];
       };
     };
 }
