@@ -48,7 +48,7 @@
             dns.secrets = {
               host = "infra-01";
               type = "CNAME";
-              comment = "OpenBao";
+              comment = "OpenBao (secrets.scottylabs.org)";
             };
             variable.oidc_client_secret = {
               description = "OIDC client secret from Keycloak";
