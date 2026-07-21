@@ -51,11 +51,6 @@
           type = lib.types.path;
           description = "Path to a file containing a Headscale API key for headplane.";
         };
-
-        agentPreAuthKeyFile = lib.mkOption {
-          type = lib.types.path;
-          description = "Path to a file containing the Headplane agent pre-auth key (32+ chars).";
-        };
       };
 
       config = lib.mkIf cfg.enable {
@@ -73,13 +68,13 @@
               url = "https://${headscaleCfg.domain}";
               config_path = "${headscaleConfigForHeadplane}";
               config_strict = false;
+              api_key_path = cfg.apiKeyFile;
             };
 
             oidc = {
               issuer = headscaleCfg.oidcIssuer;
               client_id = "headplane";
               client_secret_path = cfg.oidcClientSecretFile;
-              headscale_api_key_path = cfg.apiKeyFile;
               disable_api_key_login = false;
             };
 
@@ -87,7 +82,6 @@
               proc.enabled = true;
               agent = {
                 enabled = true;
-                pre_authkey_path = cfg.agentPreAuthKeyFile;
               };
             };
           };
