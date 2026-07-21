@@ -1,4 +1,8 @@
-# observability
+<div align="center">
+  <h1>
+    <pre>observability</pre>
+  </h1>
+</div>
 
 Grafana dashboards and alert rules for ScottyLabs services. Pulled into `infrastructure/` as a flake input, materialized read-only into Grafana's provisioning directory on infra-01.
 
