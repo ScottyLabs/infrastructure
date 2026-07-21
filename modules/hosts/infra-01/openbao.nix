@@ -50,11 +50,6 @@
               type = "CNAME";
               comment = "OpenBao";
             };
-            variable.oidc_client_secret = {
-              description = "OIDC client secret from Keycloak";
-              sensitive = true;
-            };
-
             locals.hosts = ''''${toset(["infra-01", "deploy-01", "snoopy", "signage-01"])}'';
 
             resource.vault_mount.kv = {
@@ -69,7 +64,7 @@
               type = "oidc";
               oidc_discovery_url = "https://idp.scottylabs.org/realms/scottylabs";
               oidc_client_id = "openbao";
-              oidc_client_secret = "\${var.oidc_client_secret}";
+              oidc_client_secret = "\${keycloak_openid_client.openbao.client_secret}";
               default_role = "default";
               # Makes OIDC the default option on the login page
               tune = [
@@ -132,15 +127,25 @@
               '';
             };
 
-            data.keycloak_openid_client.openbao = {
+            resource.keycloak_openid_client.openbao = {
               realm_id = "\${data.keycloak_realm.scottylabs.id}";
               client_id = "openbao";
+              name = "OpenBao";
+              enabled = true;
+              access_type = "CONFIDENTIAL";
+              standard_flow_enabled = true;
+              direct_access_grants_enabled = false;
+              valid_redirect_uris = [
+                "https://secrets.scottylabs.org/ui/vault/auth/oidc/oidc/callback"
+                "https://secrets.scottylabs.org/v1/auth/oidc/*"
+                "http://localhost:8250/oidc/callback"
+              ];
             };
 
             # Groups mapper to send full paths in token
             resource.keycloak_openid_group_membership_protocol_mapper.openbao_groups = {
               realm_id = "\${data.keycloak_realm.scottylabs.id}";
-              client_id = "\${data.keycloak_openid_client.openbao.id}";
+              client_id = "\${keycloak_openid_client.openbao.id}";
               name = "groups";
               claim_name = "groups";
               full_path = true;
