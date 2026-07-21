@@ -15,6 +15,7 @@
     infra-01-observability
     infra-01-uptime
     infra-01-cmu-vpn
+    infra-01-renovate
 
     server
     webadmin

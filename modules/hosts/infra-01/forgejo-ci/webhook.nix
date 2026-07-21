@@ -58,6 +58,27 @@
         ];
       };
 
+      triggerRenovateScript = pkgs.writeShellScript "trigger-renovate" ''
+        set -euo pipefail
+        ${pkgs.sudo}/bin/sudo ${pkgs.systemd}/bin/systemctl start renovate.service
+      '';
+
+      mainBranchTriggerRule = {
+        and = [
+          pushEventTriggerRule
+          {
+            match = {
+              type = "value";
+              value = "refs/heads/main";
+              parameter = {
+                source = "payload";
+                name = "ref";
+              };
+            };
+          }
+        ];
+      };
+
       triggerDocsDiagramsScript = pkgs.writeShellApplication {
         name = "trigger-docs-diagrams";
         runtimeInputs = with pkgs; [
@@ -139,8 +160,25 @@
               command-working-directory = "/tmp";
               trigger-rule = pushEventTriggerRule;
             };
+            renovate-update = {
+              execute-command = toString triggerRenovateScript;
+              command-working-directory = "/tmp";
+              trigger-rule = mainBranchTriggerRule;
+            };
           };
         };
+
+        security.sudo.extraRules = [
+          {
+            users = [ "webhook" ];
+            commands = [
+              {
+                command = "${pkgs.systemd}/bin/systemctl start renovate.service";
+                options = [ "NOPASSWD" ];
+              }
+            ];
+          }
+        ];
 
         services.caddy.virtualHosts.${cfg.domain}.extraConfig = ''
           reverse_proxy 127.0.0.1:${toString cfg.port}
