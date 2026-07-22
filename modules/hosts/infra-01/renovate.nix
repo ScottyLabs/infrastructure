@@ -15,7 +15,10 @@
           RENOVATE_TOKEN = config.age.secrets.renovate-token.path;
         };
 
-        runtimePackages = [ pkgs.nix pkgs.devenv ];
+        runtimePackages = [
+          pkgs.nix
+          pkgs.devenv
+        ];
 
         settings = {
           platform = "forgejo";
@@ -27,7 +30,10 @@
           onboarding = false;
           requireConfig = "optional";
 
-          enabledManagers = [ "custom.regex" "nix" ];
+          enabledManagers = [
+            "custom.regex"
+            "nix"
+          ];
 
           allowedCommands = [ "^devenv update$" ];
 

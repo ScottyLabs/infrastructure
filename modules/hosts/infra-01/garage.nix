@@ -88,6 +88,13 @@
         terraformWrapper.package = pkgs.opentofu;
         modules = [
           config.flake.modules.terranix.base
+          (
+            { lib, ... }:
+            {
+              # Don't use S3 state backend for S3 state itself
+              terraform.backend = lib.mkForce { local = { }; };
+            }
+          )
           {
             dns = {
               s3 = {
