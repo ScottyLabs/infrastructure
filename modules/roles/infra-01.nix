@@ -3,6 +3,7 @@
   flake.modules.nixos.infra-01.imports = with config.flake.modules.nixos; [
     campus-cloud
     infra-01-configuration
+    infra-01-forgejo
     infra-01-forgejo-ci
     infra-01-keycloak
     infra-01-vaultwarden

@@ -42,6 +42,7 @@
         terraformWrapper.package = pkgs.opentofu;
         modules = [
           config.flake.modules.terranix.base
+          config.flake.modules.terranix.s3-state
           {
             terraform.backend.s3.key = "services/openbao.tfstate";
             dns.secrets = {

@@ -28,11 +28,10 @@
       ];
 
       age.secrets.keycloak = {
-        file = ../../../secrets/infra-01/keycloak.age;
+        file = ../../../../secrets/infra-01/keycloak.age;
         mode = "0400";
       };
 
-      # Load admin password from agenix secret
       systemd.services.keycloak.serviceConfig.EnvironmentFile = config.age.secrets.keycloak.path;
 
       services.keycloak = {
@@ -40,7 +39,7 @@
         database = {
           type = "postgresql";
           createLocally = false;
-          host = "/run/postgresql"; # unix socket
+          host = "/run/postgresql";
           name = "keycloak";
           username = "keycloak";
           useSSL = false;
@@ -98,6 +97,7 @@
         terraformWrapper.package = pkgs.opentofu;
         modules = [
           config.flake.modules.terranix.base
+          config.flake.modules.terranix.s3-state
           {
             terraform.backend.s3.key = "services/keycloak.tfstate";
             dns.idp = {
