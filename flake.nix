@@ -64,11 +64,6 @@
       flake = false;
     };
 
-    scottylabs = {
-      url = "git+https://codeberg.org/ScottyLabs/devenv";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     # Flake infrastructure
     flake-parts.url = "github:hercules-ci/flake-parts";
     import-tree.url = "github:vic/import-tree";
