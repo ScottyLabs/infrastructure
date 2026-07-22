@@ -1,7 +1,10 @@
+{ inputs, ... }:
 {
   flake.modules.terranix.base =
     { lib, config, ... }:
     {
+      imports = [ inputs.scottylabs.terranixModules.s3Backend ];
+
       options.dns = lib.mkOption {
         type = lib.types.attrsOf (
           lib.types.submodule {
@@ -118,30 +121,16 @@
   perSystem =
     {
       config,
-      lib,
       pkgs,
       ...
     }:
     {
       terranix.exportDevShells = false;
 
-      packages.atlantis-yaml = pkgs.writeText "atlantis.yaml" (
-        builtins.toJSON {
-          version = 3;
-          parallel_plan = true;
-          parallel_apply = true;
-          projects = lib.mapAttrsToList (name: _: {
-            inherit name;
-            dir = ".";
-            workspace = name;
-            autoplan.when_modified = [
-              "modules/**"
-              "flake.nix"
-              "flake.lock"
-            ];
-          }) (lib.removeAttrs config.terranix.terranixConfigurations [ "garage" ]);
-        }
-      );
+      packages.atlantis-yaml = (inputs.scottylabs.mkLib pkgs).mkAtlantisYaml {
+        terranixConfigurations = config.terranix.terranixConfigurations;
+        exclude = [ "garage" ];
+      };
     };
 
   flake.modules.nixos.tofu-providers = {
