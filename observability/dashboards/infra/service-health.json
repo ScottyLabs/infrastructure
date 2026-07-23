@@ -1,0 +1,50 @@
+{
+  "title": "Service health",
+  "uid": "infra-service-health",
+  "schemaVersion": 39,
+  "tags": ["infra"],
+  "timezone": "browser",
+  "time": { "from": "now-1h", "to": "now" },
+  "refresh": "30s",
+  "panels": [
+    {
+      "id": 1, "type": "stat", "title": "Failed units (total)",
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "sum(systemd_unit_state{state=\"failed\"} == 1) or vector(0)" }],
+      "fieldConfig": { "defaults": { "unit": "short", "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 1 }] } } }
+    },
+    {
+      "id": 2, "type": "stat", "title": "Active units (total)",
+      "gridPos": { "h": 6, "w": 6, "x": 6, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "sum(systemd_unit_state{state=\"active\"} == 1)" }],
+      "fieldConfig": { "defaults": { "unit": "short" } }
+    },
+    {
+      "id": 3, "type": "table", "title": "Currently failed units",
+      "gridPos": { "h": 10, "w": 12, "x": 12, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "systemd_unit_state{state=\"failed\"} == 1", "format": "table", "instant": true }],
+      "transformations": [{ "id": "organize", "options": { "excludeByName": { "__name__": true, "Time": true, "Value": true, "state": true, "job": true } } }]
+    },
+    {
+      "id": 4, "type": "timeseries", "title": "Failed units over time",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 6 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "sum by (instance) (systemd_unit_state{state=\"failed\"} == 1) or on() (vector(0))", "legendFormat": "{{instance}}" }],
+      "fieldConfig": { "defaults": { "unit": "short", "min": 0 } }
+    },
+    {
+      "id": 5, "type": "table", "title": "Most recently started units (top 20)",
+      "gridPos": { "h": 12, "w": 24, "x": 0, "y": 14 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "topk(20, systemd_unit_start_time_seconds * on(instance, name) group_left systemd_unit_state{state=\"active\"})", "format": "table", "instant": true }],
+      "transformations": [
+        { "id": "organize", "options": { "excludeByName": { "__name__": true, "Time": true, "job": true, "state": true } } },
+        { "id": "convertFieldType", "options": { "conversions": [{ "destinationType": "time", "targetField": "Value" }] } },
+        { "id": "renameByRegex", "options": { "regex": "Value", "renamePattern": "Started" } }
+      ]
+    }
+  ]
+}
