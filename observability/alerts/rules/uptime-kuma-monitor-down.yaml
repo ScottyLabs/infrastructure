@@ -1,0 +1,35 @@
+apiVersion: 1
+groups:
+  - orgId: 1
+    name: uptime-kuma
+    folder: alerts
+    interval: 1m
+    rules:
+      - uid: infra-uptime-kuma-monitor-down
+        title: Uptime Kuma monitor down
+        condition: A
+        for: 5m
+        noDataState: Alerting
+        execErrState: Alerting
+        annotations:
+          summary: '{{ $labels.monitor_name }} appears down'
+          description: |
+            Prometheus reports monitor_status == 0 for this Uptime Kuma target
+            name={{ $labels.monitor_name }}, type={{ $labels.monitor_type }}.
+            URL or host details are in dashboard labels monitor_url/monitor_hostname.
+        labels:
+          severity: critical
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+              expr: monitor_status == bool 0
+              instant: true
+              intervalMs: 60000
+              refId: A

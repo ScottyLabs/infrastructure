@@ -1,0 +1,45 @@
+apiVersion: 1
+groups:
+  - orgId: 1
+    name: hosts
+    folder: alerts
+    interval: 1m
+    rules:
+      - uid: infra-disk-full
+        title: Root filesystem >75% full
+        condition: B
+        for: 5m
+        noDataState: Alerting
+        execErrState: Alerting
+        annotations:
+          summary: "{{ $labels.instance }} root filesystem is {{ $values.A.Value | humanizePercentage }} full (threshold 75%)"
+        labels:
+          severity: critical
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+              expr: 1 - (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"})
+              instant: true
+              intervalMs: 60000
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: A
+              conditions:
+                - evaluator:
+                    type: gt
+                    params:
+                      - 0.75
+              refId: B

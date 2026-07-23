@@ -1,0 +1,74 @@
+{
+  "title": "Keycloak",
+  "uid": "infra-keycloak",
+  "schemaVersion": 39,
+  "tags": ["infra"],
+  "timezone": "browser",
+  "time": { "from": "now-6h", "to": "now" },
+  "refresh": "30s",
+  "panels": [
+    {
+      "id": 1, "type": "timeseries", "title": "Login-action activity by status",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "sum by (code) (rate(keycloak_response_total{resource=~\".*login-actions.*\"}[5m]))", "legendFormat": "{{code}}" }],
+      "fieldConfig": { "defaults": { "unit": "ops" } }
+    },
+    {
+      "id": 2, "type": "timeseries", "title": "OIDC token-endpoint activity",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "sum by (code) (rate(keycloak_response_total{resource=~\".*openid-connect.*\",method=\"POST\"}[5m]))", "legendFormat": "{{code}}" }],
+      "fieldConfig": { "defaults": { "unit": "ops" } }
+    },
+    {
+      "id": 3, "type": "timeseries", "title": "Total HTTP response rate by status",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "sum by (code) (rate(keycloak_response_total[5m]))", "legendFormat": "{{code}}" }],
+      "fieldConfig": { "defaults": { "unit": "ops", "custom": { "stacking": { "mode": "normal" } } } }
+    },
+    {
+      "id": 4, "type": "timeseries", "title": "Error responses (4xx + 5xx)",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "sum by (code, resource) (rate(keycloak_response_errors_total[5m]))", "legendFormat": "{{code}} {{resource}}" }],
+      "fieldConfig": { "defaults": { "unit": "ops" } }
+    },
+    {
+      "id": 5, "type": "timeseries", "title": "JVM heap used / committed / max",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "expr": "base_memory_used_heap_bytes", "legendFormat": "used" },
+        { "expr": "base_memory_committedHeap_bytes", "legendFormat": "committed" },
+        { "expr": "base_memory_maxHeap_bytes", "legendFormat": "max" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "bytes" } }
+    },
+    {
+      "id": 6, "type": "timeseries", "title": "DB connection pool",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "expr": "agroal_active_count", "legendFormat": "active" },
+        { "expr": "agroal_available_count", "legendFormat": "available" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "short" } }
+    },
+    {
+      "id": 7, "type": "timeseries", "title": "GC time rate",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "rate(base_gc_time[5m])", "legendFormat": "{{name}}" }],
+      "fieldConfig": { "defaults": { "unit": "ms" } }
+    },
+    {
+      "id": 8, "type": "timeseries", "title": "Cache size",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "cache_size", "legendFormat": "{{cache}}" }],
+      "fieldConfig": { "defaults": { "unit": "short" } }
+    }
+  ]
+}

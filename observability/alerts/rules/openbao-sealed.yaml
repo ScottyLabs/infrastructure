@@ -1,0 +1,31 @@
+apiVersion: 1
+groups:
+  - orgId: 1
+    name: openbao
+    folder: alerts
+    interval: 1m
+    rules:
+      - uid: infra-openbao-sealed
+        title: OpenBao sealed
+        condition: A
+        for: 1m
+        noDataState: Alerting
+        execErrState: Alerting
+        annotations:
+          summary: "OpenBao is sealed; bao-agent will lose its token within ~1h and dependent services will start failing"
+        labels:
+          severity: critical
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+              expr: vault_core_unsealed == bool 0
+              instant: true
+              intervalMs: 60000
+              refId: A

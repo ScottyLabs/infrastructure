@@ -1,0 +1,11 @@
+# Nix / devenv
+.devenv/
+.pre-commit-config.yaml
+
+# AI
+.mcp.json
+.claude
+TODO.md
+
+# OS
+.DS_Store
