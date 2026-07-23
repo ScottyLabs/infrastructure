@@ -99,7 +99,7 @@ in
 
         resource.keycloak_oidc_identity_provider.cmu_git = forgejoIdp {
           alias = "cmu-dev";
-          display_name = "CMU Git";
+          display_name = "cmu.dev";
           base = "https://git.cmu.dev";
           client_id = "\${data.vault_kv_secret_v2.forgejo_idp.data[\"CLIENT_ID\"]}";
           client_secret = "\${data.vault_kv_secret_v2.forgejo_idp.data[\"CLIENT_SECRET\"]}";

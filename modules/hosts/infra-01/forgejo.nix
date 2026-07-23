@@ -178,6 +178,7 @@
               --group-claim-name groups \
               --admin-group /projects/devops/admins \
               --allow-username-change \
+              --icon-url "https://identity.andrew.cmu.edu/incommon/cmu-181x125.gif" \
               --skip-local-2fa
           fi
         '';
@@ -211,7 +212,7 @@
             resource.keycloak_openid_client.forgejo = {
               realm_id = "\${data.keycloak_realm.scottylabs.id}";
               client_id = "forgejo";
-              name = "Forgejo";
+              name = "cmu.dev";
               enabled = true;
               access_type = "CONFIDENTIAL";
               standard_flow_enabled = true;
