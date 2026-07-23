@@ -92,7 +92,7 @@ in
           hide_on_login_page = true;
           store_token = true;
           sync_mode = "IMPORT";
-          default_scopes = "openid profile";
+          default_scopes = "openid profile email";
           client_id = "193590704321-04lnrs4bkqn7jmpva58g4utnqao7bgio.apps.googleusercontent.com";
           client_secret = "\${data.vault_kv_secret_v2.keycloak_idp.data[\"GOOGLE_CLIENT_SECRET\"]}";
         };
@@ -122,7 +122,7 @@ in
               "name";
           slack_id =
             oidcMapper "\${keycloak_oidc_identity_provider.slack.alias}" "slack_id"
-              "https://slack.com/user_id";
+              "https://slack\\.com/user_id";
           slack_email = oidcMapper "\${keycloak_oidc_identity_provider.slack.alias}" "slack_email" "email";
           slack_name = oidcMapper "\${keycloak_oidc_identity_provider.slack.alias}" "slack_name" "name";
           google_id = oidcMapper "\${keycloak_oidc_google_identity_provider.google.alias}" "google_id" "sub";
