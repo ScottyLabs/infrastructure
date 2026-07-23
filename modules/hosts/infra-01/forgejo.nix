@@ -100,6 +100,7 @@
           };
 
           actions.ENABLED = true;
+          metrics.ENABLED = true;
         };
       };
 
@@ -185,7 +186,13 @@
       };
 
       services.caddy.virtualHosts."git.cmu.dev".extraConfig = ''
-        reverse_proxy 127.0.0.1:3002
+        @metrics path /metrics
+        handle @metrics {
+          respond 404
+        }
+        handle {
+          reverse_proxy 127.0.0.1:3002
+        }
       '';
 
       scottylabs.postgresql.databases = [ "forgejo" ];

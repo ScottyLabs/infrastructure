@@ -140,6 +140,11 @@
             metrics_path = "/realms/master/metrics";
           }
           {
+            job_name = "forgejo";
+            static_configs = [ { targets = [ "localhost:3002" ]; } ];
+            metrics_path = "/metrics";
+          }
+          {
             job_name = "kennel";
             static_configs = [ { targets = [ "deploy-01:3001" ]; } ];
           }
