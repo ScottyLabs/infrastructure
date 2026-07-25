@@ -189,7 +189,10 @@
         ];
       };
 
-      scottylabs.loki.enable = true;
+      scottylabs.loki = {
+        enable = true;
+        retentionPeriod = "4320h"; # 6 months (180 days)
+      };
       scottylabs.tempo.enable = true;
       scottylabs.grafana.enable = true;
     };
