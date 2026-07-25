@@ -48,7 +48,6 @@
         # Seed extensions and fix public schema ownership into template1 and each
         # database. ALTER SCHEMA public OWNER TO pg_database_owner ensures any user
         # that owns a database gets CREATE on its public schema (PG 15+ requirement).
-        # Fixing template1 propagates to all future databases kennel provisions.
         systemd.services.postgresql-setup.postStart = lib.mkAfter (
           lib.concatMapStringsSep "\n" (db: ''
             psql --port=${toString config.services.postgresql.settings.port} -d ${db} -c '${createExtSql}'
