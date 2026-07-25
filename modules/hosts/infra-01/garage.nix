@@ -79,6 +79,13 @@
           header_up Host scottylabs-docs
         }
       '';
+
+      # DevOps runbooks static site served from Garage
+      services.caddy.virtualHosts."docs.devops.scottylabs.org".extraConfig = ''
+        reverse_proxy localhost:${toString config.scottylabs.garage.webPort} {
+          header_up Host scottylabs-devops-docs
+        }
+      '';
     };
 
   perSystem =
@@ -111,6 +118,11 @@
                 type = "CNAME";
                 comment = "ScottyLabs documentation hub (Garage scottylabs-docs bucket)";
               };
+              "docs.devops" = {
+                host = "infra-01";
+                type = "CNAME";
+                comment = "DevOps runbooks (Garage scottylabs-devops-docs bucket)";
+              };
             };
             resource.garage_bucket = {
               tofu_state.global_alias = "tofu-state";
@@ -126,6 +138,12 @@
                 website_enabled = true;
                 website_index_document = "index.html";
               };
+              # DevOps runbooks, uploaded by devops-troubleshooting-docs CI
+              scottylabs_devops_docs = {
+                global_alias = "scottylabs-devops-docs";
+                website_enabled = true;
+                website_index_document = "index.html";
+              };
               # Shared sccache compilation cache for Rust builds
               sccache.global_alias = "sccache";
             };
@@ -136,6 +154,7 @@
               scottylabs_assets_writer.name = "scottylabs-assets-writer";
               scottylabs_docs_writer.name = "scottylabs-docs-writer";
               sccache.name = "sccache";
+              scottylabs_devops_docs_writer.name = "scottylabs-devops-docs-writer";
             };
 
             resource.garage_bucket_permission = {
@@ -174,12 +193,26 @@
                 write = true;
                 owner = false;
               };
+              scottylabs_devops_docs_writer = {
+                access_key_id = "\${garage_key.scottylabs_devops_docs_writer.id}";
+                bucket_id = "\${garage_bucket.scottylabs_devops_docs.id}";
+                read = true;
+                write = true;
+                owner = true;
+              };
             };
 
-            resource.vault_kv_secret_v2.sccache_s3 = {
-              mount = "secret";
-              name = "shared/sccache";
-              data_json = "\${jsonencode({ AWS_ACCESS_KEY_ID = garage_key.sccache.id, AWS_SECRET_ACCESS_KEY = garage_key.sccache.secret_access_key })}";
+            resource.vault_kv_secret_v2 = {
+              sccache_s3 = {
+                mount = "secret";
+                name = "shared/sccache";
+                data_json = "\${jsonencode({ AWS_ACCESS_KEY_ID = garage_key.sccache.id, AWS_SECRET_ACCESS_KEY = garage_key.sccache.secret_access_key })}";
+              };
+              devops_docs_garage = {
+                mount = "secret";
+                name = "shared/devops-docs-garage";
+                data_json = "\${jsonencode({ access_key_id = garage_key.scottylabs_devops_docs_writer.id, secret_access_key = garage_key.scottylabs_devops_docs_writer.secret_access_key })}";
+              };
             };
 
             output = {
@@ -213,6 +246,14 @@
               };
               scottylabs_docs_writer_secret_access_key = {
                 value = "\${garage_key.scottylabs_docs_writer.secret_access_key}";
+                sensitive = true;
+              };
+              scottylabs_devops_docs_writer_access_key_id = {
+                value = "\${garage_key.scottylabs_devops_docs_writer.id}";
+                sensitive = true;
+              };
+              scottylabs_devops_docs_writer_secret_access_key = {
+                value = "\${garage_key.scottylabs_devops_docs_writer.secret_access_key}";
                 sensitive = true;
               };
             };
