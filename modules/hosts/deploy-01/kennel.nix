@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, grafana, ... }:
 {
   flake.modules.nixos.deploy-01-kennel =
     { config, inputs, ... }:
@@ -114,6 +114,311 @@
         }
       ];
     };
+
+  scottylabs.observability = {
+    dashboards = [
+      {
+        folder = "kennel";
+        name = "overview";
+        source = grafana.dashboard {
+          title = "Kennel";
+          uid = "kennel-overview";
+          tags = [ "kennel" ];
+          from = "now-6h";
+          panels = [
+            (grafana.stat {
+              title = "Projects";
+              id = 1;
+              pos = {
+                h = 5;
+                w = 4;
+                x = 0;
+                y = 0;
+              };
+              targets = [ (grafana.target { expr = "kennel_projects"; }) ];
+              defaults = {
+                unit = "short";
+              };
+              options = {
+                graphMode = "none";
+                colorMode = "value";
+                reduceOptions.calcs = [ "lastNotNull" ];
+              };
+            })
+            (grafana.stat {
+              title = "Deployments";
+              id = 2;
+              pos = {
+                h = 5;
+                w = 4;
+                x = 4;
+                y = 0;
+              };
+              targets = [ (grafana.target { expr = "kennel_deployments"; }) ];
+              defaults = {
+                unit = "short";
+                color = {
+                  mode = "fixed";
+                  fixedColor = "green";
+                };
+              };
+              options = {
+                graphMode = "none";
+                colorMode = "value";
+                reduceOptions.calcs = [ "lastNotNull" ];
+              };
+            })
+            (grafana.stat {
+              title = "Failed deployments";
+              id = 3;
+              pos = {
+                h = 5;
+                w = 4;
+                x = 8;
+                y = 0;
+              };
+              targets = [
+                (grafana.target {
+                  expr = "count(systemd_unit_state{name=~\"kennel-.*\\\\.service\",state=\"failed\"} == 1) or vector(0)";
+                })
+              ];
+              defaults = {
+                unit = "short";
+                thresholds = {
+                  mode = "absolute";
+                  steps = [
+                    {
+                      color = "green";
+                      value = null;
+                    }
+                    {
+                      color = "red";
+                      value = 1;
+                    }
+                  ];
+                };
+              };
+              options = {
+                graphMode = "none";
+                colorMode = "value";
+                reduceOptions.calcs = [ "lastNotNull" ];
+              };
+            })
+            (grafana.timeseries {
+              title = "Build state over time";
+              id = 4;
+              pos = {
+                h = 8;
+                w = 12;
+                x = 12;
+                y = 0;
+              };
+              targets = [
+                (grafana.target {
+                  expr = "kennel_builds";
+                  legend = "{{status}}";
+                })
+              ];
+              defaults = {
+                unit = "short";
+                custom.stacking.mode = "normal";
+              };
+            })
+            (grafana.timeseries {
+              title = "Queue depth + in-flight";
+              id = 5;
+              pos = {
+                h = 8;
+                w = 12;
+                x = 0;
+                y = 5;
+              };
+              targets = [
+                (grafana.target {
+                  expr = "kennel_builds{status=\"queued\"}";
+                  legend = "queued";
+                })
+                (grafana.target {
+                  expr = "kennel_builds{status=\"building\"}";
+                  legend = "building";
+                })
+              ];
+              defaults = {
+                unit = "short";
+              };
+            })
+            (grafana.table {
+              title = "Most recently started deployments (top 20)";
+              id = 6;
+              pos = {
+                h = 12;
+                w = 12;
+                x = 0;
+                y = 13;
+              };
+              targets = [
+                (grafana.target {
+                  expr = "topk(20, systemd_unit_start_time_seconds{name=~\"kennel-.*\\\\.service\"})";
+                  format = "table";
+                  instant = true;
+                })
+              ];
+              transformations = [
+                {
+                  id = "organize";
+                  options.excludeByName = {
+                    "__name__" = true;
+                    "Time" = true;
+                    "job" = true;
+                    "state" = true;
+                  };
+                }
+                {
+                  id = "convertFieldType";
+                  options.conversions = [
+                    {
+                      destinationType = "time";
+                      targetField = "Value";
+                    }
+                  ];
+                }
+                {
+                  id = "renameByRegex";
+                  options = {
+                    regex = "Value";
+                    renamePattern = "Started";
+                  };
+                }
+              ];
+            })
+            (grafana.timeseries {
+              title = "Restart count (top 10 kennel units)";
+              id = 7;
+              pos = {
+                h = 12;
+                w = 12;
+                x = 12;
+                y = 8;
+              };
+              targets = [
+                (grafana.target {
+                  expr = "topk(10, systemd_service_restart_total{name=~\"kennel-.*\\\\.service\"})";
+                  legend = "{{name}}";
+                })
+              ];
+              defaults = {
+                unit = "short";
+              };
+            })
+            (grafana.table {
+              title = "Currently failed kennel units";
+              id = 8;
+              pos = {
+                h = 8;
+                w = 24;
+                x = 0;
+                y = 25;
+              };
+              targets = [
+                (grafana.target {
+                  expr = "systemd_unit_state{name=~\"kennel-.*\\\\.service\",state=\"failed\"} == 1";
+                  format = "table";
+                  instant = true;
+                })
+              ];
+              transformations = [
+                {
+                  id = "organize";
+                  options.excludeByName = {
+                    "__name__" = true;
+                    "Time" = true;
+                    "Value" = true;
+                    "state" = true;
+                    "job" = true;
+                  };
+                }
+              ];
+            })
+            (grafana.timeseries {
+              title = "CPU usage per deployment";
+              id = 10;
+              pos = {
+                h = 8;
+                w = 12;
+                x = 0;
+                y = 33;
+              };
+              targets = [
+                (grafana.target {
+                  expr = "label_replace(rate(container_cpu_usage_seconds_total{id=~\"/kennel\\\\.slice/kennel-.*\\\\.service\",cpu=\"total\"}[5m]), \"unit\", \"$1\", \"id\", \"/kennel\\\\.slice/(.+)\\\\.service\")";
+                  legend = "{{unit}}";
+                })
+              ];
+              defaults = {
+                unit = "percentunit";
+                custom = {
+                  stacking.mode = "normal";
+                  fillOpacity = 30;
+                };
+              };
+            })
+            (grafana.timeseries {
+              title = "Memory working set per deployment";
+              id = 11;
+              pos = {
+                h = 8;
+                w = 12;
+                x = 12;
+                y = 33;
+              };
+              targets = [
+                (grafana.target {
+                  expr = "label_replace(container_memory_working_set_bytes{id=~\"/kennel\\\\.slice/kennel-.*\\\\.service\"}, \"unit\", \"$1\", \"id\", \"/kennel\\\\.slice/(.+)\\\\.service\")";
+                  legend = "{{unit}}";
+                })
+              ];
+              defaults = {
+                unit = "bytes";
+              };
+            })
+            (grafana.timeseries {
+              title = "Tasks per deployment";
+              id = 9;
+              pos = {
+                h = 8;
+                w = 24;
+                x = 0;
+                y = 41;
+              };
+              targets = [
+                (grafana.target {
+                  expr = "systemd_unit_tasks_current{name=~\"kennel-.*\\\\.service\"}";
+                  legend = "{{name}}";
+                })
+              ];
+              defaults = {
+                unit = "short";
+              };
+            })
+          ];
+        };
+      }
+    ];
+    alerts.rules = [
+      {
+        name = "kennel-deploy-failed";
+        source = grafana.promAlert {
+          name = "kennel";
+          uid = "infra-kennel-deploy-failed";
+          title = "Kennel deployment failed";
+          expr = "systemd_unit_state{name=~\"kennel-.*\\\\.service\",state=\"failed\"} == bool 1";
+          severity = "critical";
+          summary = "{{ $labels.name }} on {{ $labels.instance }} is in failed state";
+          duration = "5m";
+        };
+      }
+    ];
+  };
 
   perSystem =
     { pkgs, ... }:

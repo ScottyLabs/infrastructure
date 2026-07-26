@@ -1,4 +1,4 @@
-{ inputs, ... }:
+{ inputs, grafana, ... }:
 {
   flake.modules.nixos.litellm =
     {
@@ -246,4 +246,263 @@
         scottylabs.postgresql.databases = [ "litellm" ];
       };
     };
+
+  scottylabs.observability = {
+    dashboards = [
+      {
+        folder = "infra";
+        name = "litellm";
+        source = grafana.dashboard {
+          title = "LiteLLM";
+          uid = "infra-litellm";
+          from = "now-6h";
+          panels = [
+            (grafana.stat {
+              title = "Up";
+              pos = {
+                h = 6;
+                w = 6;
+                x = 0;
+                y = 0;
+              };
+              targets = [ (grafana.target { expr = "up{job=\"litellm\"}"; }) ];
+              defaults.mappings = [
+                {
+                  type = "value";
+                  options = {
+                    "0" = {
+                      text = "DOWN";
+                      color = "red";
+                    };
+                    "1" = {
+                      text = "up";
+                      color = "green";
+                    };
+                  };
+                }
+              ];
+            })
+            (grafana.stat {
+              title = "Requests / sec";
+              pos = {
+                h = 6;
+                w = 6;
+                x = 6;
+                y = 0;
+              };
+              targets = [ (grafana.target { expr = "sum(rate(litellm_proxy_total_requests_metric[5m]))"; }) ];
+              defaults.unit = "reqps";
+            })
+            (grafana.stat {
+              title = "Error rate (5m)";
+              pos = {
+                h = 6;
+                w = 6;
+                x = 12;
+                y = 0;
+              };
+              targets = [
+                (grafana.target {
+                  expr = "sum(rate(litellm_proxy_failed_requests_metric[5m])) / clamp_min(sum(rate(litellm_proxy_total_requests_metric[5m])), 1)";
+                })
+              ];
+              defaults = {
+                unit = "percentunit";
+                min = 0;
+                max = 1;
+                thresholds = {
+                  mode = "absolute";
+                  steps = [
+                    {
+                      color = "green";
+                      value = null;
+                    }
+                    {
+                      color = "yellow";
+                      value = 0.05;
+                    }
+                    {
+                      color = "red";
+                      value = 0.10;
+                    }
+                  ];
+                };
+              };
+            })
+            (grafana.stat {
+              title = "Total spend";
+              pos = {
+                h = 6;
+                w = 6;
+                x = 18;
+                y = 0;
+              };
+              targets = [ (grafana.target { expr = "sum(litellm_spend_metric)"; }) ];
+              defaults = {
+                unit = "currencyUSD";
+                decimals = 2;
+              };
+            })
+            (grafana.timeseries {
+              title = "Request rate by model";
+              pos = {
+                h = 8;
+                w = 12;
+                x = 0;
+                y = 6;
+              };
+              targets = [
+                (grafana.target {
+                  expr = "sum by (model) (rate(litellm_proxy_total_requests_metric[5m]))";
+                  legend = "{{model}}";
+                })
+              ];
+              defaults = {
+                unit = "reqps";
+                custom = {
+                  stacking = {
+                    mode = "normal";
+                  };
+                };
+              };
+            })
+            (grafana.timeseries {
+              title = "Request latency (proxy total)";
+              pos = {
+                h = 8;
+                w = 12;
+                x = 12;
+                y = 6;
+              };
+              targets = [
+                (grafana.target {
+                  expr = "histogram_quantile(0.50, sum by (le) (rate(litellm_request_total_latency_metric_bucket[5m])))";
+                  legend = "p50";
+                })
+                (grafana.target {
+                  expr = "histogram_quantile(0.95, sum by (le) (rate(litellm_request_total_latency_metric_bucket[5m])))";
+                  legend = "p95";
+                })
+                (grafana.target {
+                  expr = "histogram_quantile(0.99, sum by (le) (rate(litellm_request_total_latency_metric_bucket[5m])))";
+                  legend = "p99";
+                })
+              ];
+              defaults.unit = "s";
+            })
+            (grafana.timeseries {
+              title = "Upstream LLM-API latency p95 by model";
+              pos = {
+                h = 8;
+                w = 12;
+                x = 0;
+                y = 14;
+              };
+              targets = [
+                (grafana.target {
+                  expr = "histogram_quantile(0.95, sum by (le, model) (rate(litellm_llm_api_latency_metric_bucket[5m])))";
+                  legend = "{{model}}";
+                })
+              ];
+              defaults.unit = "s";
+            })
+            (grafana.timeseries {
+              title = "Token throughput";
+              pos = {
+                h = 8;
+                w = 12;
+                x = 12;
+                y = 14;
+              };
+              targets = [
+                (grafana.target {
+                  expr = "sum(rate(litellm_input_tokens_metric[5m]))";
+                  legend = "input";
+                })
+                (grafana.target {
+                  expr = "sum(rate(litellm_output_tokens_metric[5m]))";
+                  legend = "output";
+                })
+              ];
+              defaults.unit = "short";
+            })
+            (grafana.timeseries {
+              title = "Spend rate by team (1h)";
+              pos = {
+                h = 8;
+                w = 12;
+                x = 0;
+                y = 22;
+              };
+              targets = [
+                (grafana.target {
+                  expr = "sum by (team_alias) (rate(litellm_spend_metric[1h]))";
+                  legend = "{{team_alias}}";
+                })
+              ];
+              defaults.unit = "currencyUSD";
+            })
+            (grafana.timeseries {
+              title = "Failed requests by exception";
+              pos = {
+                h = 8;
+                w = 12;
+                x = 12;
+                y = 22;
+              };
+              targets = [
+                (grafana.target {
+                  expr = "sum by (exception_class) (rate(litellm_proxy_failed_requests_metric[5m]))";
+                  legend = "{{exception_class}}";
+                })
+              ];
+              defaults.unit = "ops";
+            })
+          ];
+        };
+      }
+    ];
+    alerts.rules = [
+      {
+        name = "litellm-down";
+        source = grafana.promAlert {
+          name = "litellm";
+          uid = "infra-litellm-down";
+          title = "LiteLLM down";
+          expr = "up{job=\"litellm\"} == bool 0";
+          severity = "critical";
+          summary = "LiteLLM proxy on infra-01 is not responding to prometheus scrapes; all model traffic is failing";
+          duration = "2m";
+        };
+      }
+      {
+        name = "litellm-high-error-rate";
+        source = grafana.thresholdAlert {
+          name = "litellm";
+          uid = "infra-litellm-high-error-rate";
+          title = "LiteLLM error rate above 10%";
+          expr = "sum(rate(litellm_proxy_failed_requests_metric[5m])) / clamp_min(sum(rate(litellm_proxy_total_requests_metric[5m])), 1)";
+          threshold = 0.10;
+          severity = "warning";
+          summary = "LiteLLM is returning errors for more than 10% of requests over the last 5 minutes ({{ printf \"%.0f\" (mul $values.A.Value 100.0) }}%)";
+          from = 300;
+          noData = "OK";
+        };
+      }
+      {
+        name = "litellm-upstream-failures";
+        source = grafana.thresholdAlert {
+          name = "litellm";
+          uid = "infra-litellm-upstream-failures";
+          title = "LiteLLM upstream failing";
+          expr = "sum by (model) (rate(litellm_deployment_failure_responses[5m]))";
+          threshold = 0.1;
+          severity = "warning";
+          summary = "LiteLLM is logging sustained upstream failures against {{ $labels.model }}; cli-proxy-api may be unhealthy";
+          from = 300;
+          noData = "OK";
+        };
+      }
+    ];
+  };
 }

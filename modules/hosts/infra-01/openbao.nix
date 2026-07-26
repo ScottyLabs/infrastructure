@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, grafana, ... }:
 {
   flake.modules.nixos.infra-01-openbao = {
     services.openbao = {
@@ -33,6 +33,221 @@
     '';
 
     scottylabs.postgresql.databases = [ "openbao" ];
+  };
+
+  scottylabs.observability = {
+    dashboards = [
+      {
+        folder = "infra";
+        name = "openbao";
+        source = grafana.dashboard {
+          title = "OpenBao";
+          uid = "infra-openbao";
+          panels = [
+            (grafana.stat {
+              title = "Sealed";
+              pos = {
+                h = 6;
+                w = 6;
+                x = 0;
+                y = 0;
+              };
+              targets = [ (grafana.target { expr = "vault_core_unsealed"; }) ];
+              defaults.mappings = [
+                {
+                  type = "value";
+                  options = {
+                    "0" = {
+                      text = "SEALED";
+                      color = "red";
+                    };
+                    "1" = {
+                      text = "unsealed";
+                      color = "green";
+                    };
+                  };
+                }
+              ];
+            })
+            (grafana.stat {
+              title = "Cache hit ratio";
+              pos = {
+                h = 6;
+                w = 6;
+                x = 6;
+                y = 0;
+              };
+              targets = [ (grafana.target { expr = "vault_cache_hit / (vault_cache_hit + vault_cache_miss)"; }) ];
+              defaults = {
+                unit = "percentunit";
+                min = 0;
+                max = 1;
+              };
+            })
+            (grafana.timeseries {
+              title = "Audit log request rate";
+              pos = {
+                h = 8;
+                w = 12;
+                x = 12;
+                y = 0;
+              };
+              targets = [
+                (grafana.target {
+                  expr = "rate(vault_audit_log_request_count[5m])";
+                  legend = "requests";
+                })
+                (grafana.target {
+                  expr = "rate(vault_audit_log_response_count[5m])";
+                  legend = "responses";
+                })
+              ];
+              defaults.unit = "ops";
+            })
+            (grafana.stat {
+              title = "Audit log failures";
+              pos = {
+                h = 6;
+                w = 6;
+                x = 0;
+                y = 6;
+              };
+              targets = [
+                (grafana.target { expr = "vault_audit_log_request_failure + vault_audit_log_response_failure"; })
+              ];
+              defaults = {
+                unit = "short";
+                thresholds = {
+                  mode = "absolute";
+                  steps = [
+                    {
+                      color = "green";
+                      value = null;
+                    }
+                    {
+                      color = "red";
+                      value = 1;
+                    }
+                  ];
+                };
+              };
+            })
+            (grafana.timeseries {
+              title = "Barrier operation rates";
+              pos = {
+                h = 8;
+                w = 12;
+                x = 6;
+                y = 6;
+              };
+              targets = [
+                (grafana.target {
+                  expr = "rate(vault_barrier_get_count[5m])";
+                  legend = "get";
+                })
+                (grafana.target {
+                  expr = "rate(vault_barrier_put_count[5m])";
+                  legend = "put";
+                })
+                (grafana.target {
+                  expr = "rate(vault_barrier_list_count[5m])";
+                  legend = "list";
+                })
+                (grafana.target {
+                  expr = "rate(vault_barrier_delete_count[5m])";
+                  legend = "delete";
+                })
+              ];
+              defaults = {
+                unit = "ops";
+                custom = {
+                  stacking = {
+                    mode = "normal";
+                  };
+                };
+              };
+            })
+            (grafana.timeseries {
+              title = "Barrier latency (p99)";
+              pos = {
+                h = 8;
+                w = 12;
+                x = 0;
+                y = 14;
+              };
+              targets = [
+                (grafana.target {
+                  expr = "vault_barrier_get{quantile=\"0.99\"}";
+                  legend = "get";
+                })
+                (grafana.target {
+                  expr = "vault_barrier_put{quantile=\"0.99\"}";
+                  legend = "put";
+                })
+                (grafana.target {
+                  expr = "vault_barrier_list{quantile=\"0.99\"}";
+                  legend = "list";
+                })
+              ];
+              defaults.unit = "s";
+            })
+            (grafana.timeseries {
+              title = "Runtime memory + goroutines";
+              pos = {
+                h = 8;
+                w = 12;
+                x = 12;
+                y = 14;
+              };
+              targets = [
+                (grafana.target {
+                  expr = "vault_runtime_alloc_bytes";
+                  legend = "alloc bytes";
+                })
+                (grafana.target {
+                  expr = "vault_runtime_sys_bytes";
+                  legend = "sys bytes";
+                })
+                (grafana.target {
+                  expr = "vault_runtime_num_goroutines * 1048576";
+                  legend = "goroutines (x1MiB scale)";
+                })
+              ];
+              defaults.unit = "bytes";
+            })
+            (grafana.timeseries {
+              title = "GC pauses";
+              pos = {
+                h = 8;
+                w = 24;
+                x = 0;
+                y = 22;
+              };
+              targets = [
+                (grafana.target {
+                  expr = "rate(vault_runtime_gc_pause_ns_sum[5m]) / 1e9";
+                  legend = "GC pause s/s";
+                })
+              ];
+              defaults.unit = "s";
+            })
+          ];
+        };
+      }
+    ];
+    alerts.rules = [
+      {
+        name = "openbao-sealed";
+        source = grafana.promAlert {
+          name = "openbao";
+          uid = "infra-openbao-sealed";
+          title = "OpenBao sealed";
+          expr = "vault_core_unsealed == bool 0";
+          severity = "critical";
+          summary = "OpenBao is sealed; bao-agent will lose its token within ~1h and dependent services will start failing";
+        };
+      }
+    ];
   };
 
   perSystem =

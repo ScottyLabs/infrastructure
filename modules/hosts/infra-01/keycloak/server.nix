@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, grafana, ... }:
 {
   flake.modules.nixos.infra-01-keycloak =
     {
@@ -90,6 +90,167 @@
       scottylabs.postgresql.databases = [ "keycloak" ];
     };
 
+  scottylabs.observability.dashboards = [
+    {
+      folder = "infra";
+      name = "keycloak";
+      source = grafana.dashboard {
+        title = "Keycloak";
+        uid = "infra-keycloak";
+        from = "now-6h";
+        panels = [
+          (grafana.timeseries {
+            title = "Login-action activity by status";
+            pos = {
+              h = 8;
+              w = 12;
+              x = 0;
+              y = 0;
+            };
+            targets = [
+              (grafana.target {
+                expr = "sum by (code) (rate(keycloak_response_total{resource=~\".*login-actions.*\"}[5m]))";
+                legend = "{{code}}";
+              })
+            ];
+            defaults.unit = "ops";
+          })
+          (grafana.timeseries {
+            title = "OIDC token-endpoint activity";
+            pos = {
+              h = 8;
+              w = 12;
+              x = 12;
+              y = 0;
+            };
+            targets = [
+              (grafana.target {
+                expr = "sum by (code) (rate(keycloak_response_total{resource=~\".*openid-connect.*\",method=\"POST\"}[5m]))";
+                legend = "{{code}}";
+              })
+            ];
+            defaults.unit = "ops";
+          })
+          (grafana.timeseries {
+            title = "Total HTTP response rate by status";
+            pos = {
+              h = 8;
+              w = 12;
+              x = 0;
+              y = 8;
+            };
+            targets = [
+              (grafana.target {
+                expr = "sum by (code) (rate(keycloak_response_total[5m]))";
+                legend = "{{code}}";
+              })
+            ];
+            defaults = {
+              unit = "ops";
+              custom = {
+                stacking = {
+                  mode = "normal";
+                };
+              };
+            };
+          })
+          (grafana.timeseries {
+            title = "Error responses (4xx + 5xx)";
+            pos = {
+              h = 8;
+              w = 12;
+              x = 12;
+              y = 8;
+            };
+            targets = [
+              (grafana.target {
+                expr = "sum by (code, resource) (rate(keycloak_response_errors_total[5m]))";
+                legend = "{{code}} {{resource}}";
+              })
+            ];
+            defaults.unit = "ops";
+          })
+          (grafana.timeseries {
+            title = "JVM heap used / committed / max";
+            pos = {
+              h = 8;
+              w = 12;
+              x = 0;
+              y = 16;
+            };
+            targets = [
+              (grafana.target {
+                expr = "base_memory_used_heap_bytes";
+                legend = "used";
+              })
+              (grafana.target {
+                expr = "base_memory_committedHeap_bytes";
+                legend = "committed";
+              })
+              (grafana.target {
+                expr = "base_memory_maxHeap_bytes";
+                legend = "max";
+              })
+            ];
+            defaults.unit = "bytes";
+          })
+          (grafana.timeseries {
+            title = "DB connection pool";
+            pos = {
+              h = 8;
+              w = 12;
+              x = 12;
+              y = 16;
+            };
+            targets = [
+              (grafana.target {
+                expr = "agroal_active_count";
+                legend = "active";
+              })
+              (grafana.target {
+                expr = "agroal_available_count";
+                legend = "available";
+              })
+            ];
+            defaults.unit = "short";
+          })
+          (grafana.timeseries {
+            title = "GC time rate";
+            pos = {
+              h = 8;
+              w = 12;
+              x = 0;
+              y = 24;
+            };
+            targets = [
+              (grafana.target {
+                expr = "rate(base_gc_time[5m])";
+                legend = "{{name}}";
+              })
+            ];
+            defaults.unit = "ms";
+          })
+          (grafana.timeseries {
+            title = "Cache size";
+            pos = {
+              h = 8;
+              w = 12;
+              x = 12;
+              y = 24;
+            };
+            targets = [
+              (grafana.target {
+                expr = "cache_size";
+                legend = "{{cache}}";
+              })
+            ];
+            defaults.unit = "short";
+          })
+        ];
+      };
+    }
+  ];
+
   perSystem =
     { pkgs, ... }:
     {
@@ -109,4 +270,19 @@
         ];
       };
     };
+
+  scottylabs.observability.alerts.rules = [
+    {
+      name = "keycloak-down";
+      source = grafana.upAlert {
+        name = "keycloak";
+        job = "keycloak";
+        uid = "infra-keycloak-down";
+        title = "Keycloak down";
+        severity = "critical";
+        summary = "Keycloak (SSO) is not responding to Prometheus scrapes";
+        duration = "2m";
+      };
+    }
+  ];
 }

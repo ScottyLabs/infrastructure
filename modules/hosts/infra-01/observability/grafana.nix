@@ -1,14 +1,41 @@
-{ inputs, ... }:
+{ config, ... }:
+let
+  obs = config.scottylabs.observability;
+in
 {
   flake.modules.nixos.grafana =
     {
       config,
       lib,
+      pkgs,
       ...
     }:
 
     let
       cfg = config.scottylabs.grafana;
+
+      renderSource =
+        ext: item:
+        if builtins.isAttrs item.source then
+          pkgs.writeText "${item.name}.${ext}" (builtins.toJSON item.source)
+        else
+          item.source;
+
+      dashboardsDir = pkgs.linkFarm "grafana-dashboards" (
+        map (d: {
+          name = "${d.folder}/${d.name}.json";
+          path = renderSource "json" d;
+        }) obs.dashboards
+      );
+
+      alertDir =
+        kind: items:
+        pkgs.linkFarm "grafana-alerts-${kind}" (
+          map (a: {
+            name = "${a.name}.yaml";
+            path = renderSource "yaml" a;
+          }) items
+        );
     in
     {
       options.scottylabs.grafana = {
@@ -154,16 +181,16 @@
                 allowUiUpdates = false;
                 disableDeletion = true;
                 options = {
-                  path = "${inputs.observability}/dashboards";
+                  path = dashboardsDir;
                   foldersFromFilesStructure = true;
                 };
               }
             ];
 
             alerting = {
-              rules.path = "${inputs.observability}/alerts/rules";
-              contactPoints.path = "${inputs.observability}/alerts/contact-points";
-              policies.path = "${inputs.observability}/alerts/policies";
+              rules.path = alertDir "rules" obs.alerts.rules;
+              contactPoints.path = alertDir "contact-points" obs.alerts.contactPoints;
+              policies.path = alertDir "policies" obs.alerts.policies;
             };
           };
         };

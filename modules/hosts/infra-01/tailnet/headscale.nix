@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, grafana, ... }:
 {
   flake.modules.nixos.headscale =
     {
@@ -186,6 +186,95 @@
         scottylabs.postgresql.databases = [ "headscale" ];
       };
     };
+
+  scottylabs.observability.dashboards = [
+    {
+      folder = "infra";
+      name = "headscale";
+      source = grafana.dashboard {
+        title = "Headscale";
+        uid = "infra-headscale";
+        from = "now-6h";
+        panels = [
+          (grafana.stat {
+            title = "Nodes in store";
+            pos = {
+              h = 6;
+              w = 6;
+              x = 0;
+              y = 0;
+            };
+            targets = [ (grafana.target { expr = "headscale_nodestore_nodes_total"; }) ];
+            defaults.unit = "short";
+          })
+          (grafana.timeseries {
+            title = "MapResponses sent/sec";
+            pos = {
+              h = 8;
+              w = 9;
+              x = 6;
+              y = 0;
+            };
+            targets = [
+              (grafana.target {
+                expr = "sum by (type) (rate(headscale_mapresponse_sent_total[5m]))";
+                legend = "{{type}}";
+              })
+            ];
+            defaults.unit = "ops";
+          })
+          (grafana.timeseries {
+            title = "Endpoint updates from clients/sec";
+            pos = {
+              h = 8;
+              w = 9;
+              x = 15;
+              y = 0;
+            };
+            targets = [
+              (grafana.target {
+                expr = "rate(headscale_mapresponse_endpoint_updates_total[5m])";
+                legend = "updates";
+              })
+            ];
+            defaults.unit = "ops";
+          })
+          (grafana.timeseries {
+            title = "HTTP latency (p95)";
+            pos = {
+              h = 8;
+              w = 12;
+              x = 0;
+              y = 8;
+            };
+            targets = [
+              (grafana.target {
+                expr = "histogram_quantile(0.95, sum by (le, path) (rate(headscale_http_duration_seconds_bucket[5m])))";
+                legend = "{{path}}";
+              })
+            ];
+            defaults.unit = "s";
+          })
+          (grafana.timeseries {
+            title = "NodeStore operation duration (p95)";
+            pos = {
+              h = 8;
+              w = 12;
+              x = 12;
+              y = 8;
+            };
+            targets = [
+              (grafana.target {
+                expr = "histogram_quantile(0.95, sum by (le, operation) (rate(headscale_nodestore_operation_duration_seconds_bucket[5m])))";
+                legend = "{{operation}}";
+              })
+            ];
+            defaults.unit = "s";
+          })
+        ];
+      };
+    }
+  ];
 
   perSystem =
     { pkgs, ... }:

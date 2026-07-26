@@ -1,3 +1,4 @@
+{ grafana, ... }:
 {
   flake.modules.nixos.btrfs =
     { pkgs, ... }:
@@ -38,4 +39,22 @@
         };
       };
     };
+
+  scottylabs.observability.alerts.rules = [
+    {
+      name = "btrfs-allocation";
+      source = grafana.thresholdAlert {
+        name = "hosts";
+        uid = "infra-btrfs-allocation";
+        title = "btrfs allocation >95%";
+        expr = "sum by (instance, uuid) (node_btrfs_size_bytes * node_btrfs_allocation_ratio) / sum by (instance, uuid) (node_btrfs_device_size_bytes)";
+        threshold = 0.95;
+        op = "gt";
+        severity = "critical";
+        summary = "{{ $labels.instance }} btrfs is {{ $values.A.Value | humanizePercentage }} chunk-allocated (near exhaustion, writes may fail despite free space)";
+        duration = "5m";
+        from = 600;
+      };
+    }
+  ];
 }

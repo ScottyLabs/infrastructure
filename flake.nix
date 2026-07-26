@@ -53,7 +53,6 @@
       url = "git+https://codeberg.org/ScottyLabs/kennel";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    observability.url = "git+https://codeberg.org/ScottyLabs/observability";
     ricochet = {
       url = "git+https://codeberg.org/anish/ricochet";
       inputs.nixpkgs.follows = "nixpkgs";

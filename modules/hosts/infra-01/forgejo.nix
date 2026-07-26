@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, grafana, ... }:
 {
   flake.modules.nixos.infra-01-forgejo =
     {
@@ -197,6 +197,177 @@
 
       scottylabs.postgresql.databases = [ "forgejo" ];
     };
+
+  scottylabs.observability = {
+    dashboards = [
+      {
+        folder = "infra";
+        name = "forgejo";
+        source = grafana.dashboard {
+          title = "Forgejo";
+          uid = "infra-forgejo";
+          panels = grafana.grid [
+            (grafana.stat {
+              title = "Up";
+              pos = {
+                w = 4;
+                h = 5;
+              };
+              targets = [ (grafana.target { expr = "up{job=\"forgejo\"}"; }) ];
+              defaults.mappings = [
+                {
+                  type = "value";
+                  options = {
+                    "0" = {
+                      text = "DOWN";
+                      color = "red";
+                    };
+                    "1" = {
+                      text = "up";
+                      color = "green";
+                    };
+                  };
+                }
+              ];
+            })
+            (grafana.stat {
+              title = "Repositories";
+              pos = {
+                w = 4;
+                h = 5;
+              };
+              targets = [ (grafana.target { expr = "gitea_repositories"; }) ];
+            })
+            (grafana.stat {
+              title = "Users";
+              pos = {
+                w = 4;
+                h = 5;
+              };
+              targets = [ (grafana.target { expr = "gitea_users"; }) ];
+            })
+            (grafana.stat {
+              title = "Organizations";
+              pos = {
+                w = 4;
+                h = 5;
+              };
+              targets = [ (grafana.target { expr = "gitea_organizations"; }) ];
+            })
+            (grafana.stat {
+              title = "Open issues";
+              pos = {
+                w = 4;
+                h = 5;
+              };
+              targets = [ (grafana.target { expr = "gitea_issues_open"; }) ];
+            })
+            (grafana.stat {
+              title = "Releases";
+              pos = {
+                w = 4;
+                h = 5;
+              };
+              targets = [ (grafana.target { expr = "gitea_releases"; }) ];
+            })
+            (grafana.timeseries {
+              title = "Issues";
+              pos = {
+                w = 12;
+                h = 8;
+              };
+              targets = [
+                (grafana.target {
+                  expr = "gitea_issues_open";
+                  legend = "open";
+                })
+                (grafana.target {
+                  expr = "gitea_issues_closed";
+                  legend = "closed";
+                })
+              ];
+            })
+            (grafana.timeseries {
+              title = "Repositories & users";
+              pos = {
+                w = 12;
+                h = 8;
+              };
+              targets = [
+                (grafana.target {
+                  expr = "gitea_repositories";
+                  legend = "repositories";
+                })
+                (grafana.target {
+                  expr = "gitea_users";
+                  legend = "users";
+                })
+              ];
+            })
+            (grafana.timeseries {
+              title = "Memory";
+              pos = {
+                w = 8;
+                h = 8;
+              };
+              targets = [
+                (grafana.target {
+                  expr = "go_memstats_alloc_bytes{job=\"forgejo\"}";
+                  legend = "alloc";
+                })
+                (grafana.target {
+                  expr = "go_memstats_sys_bytes{job=\"forgejo\"}";
+                  legend = "sys";
+                })
+              ];
+              defaults.unit = "bytes";
+            })
+            (grafana.timeseries {
+              title = "Goroutines";
+              pos = {
+                w = 8;
+                h = 8;
+              };
+              targets = [
+                (grafana.target {
+                  expr = "go_goroutines{job=\"forgejo\"}";
+                  legend = "goroutines";
+                })
+              ];
+            })
+            (grafana.timeseries {
+              title = "CPU";
+              pos = {
+                w = 8;
+                h = 8;
+              };
+              targets = [
+                (grafana.target {
+                  expr = "rate(process_cpu_seconds_total{job=\"forgejo\"}[5m])";
+                  legend = "cpu";
+                })
+              ];
+              defaults.unit = "percentunit";
+            })
+          ];
+        };
+      }
+    ];
+    alerts.rules = [
+      {
+        name = "forgejo-down";
+        source = grafana.upAlert {
+          name = "forgejo";
+          job = "forgejo";
+          uid = "infra-forgejo-down";
+          title = "Forgejo down";
+          severity = "critical";
+          summary = "Forgejo (git.cmu.dev) is not responding to Prometheus scrapes";
+          duration = "2m";
+        };
+      }
+    ];
+  };
 
   perSystem =
     { pkgs, ... }:
