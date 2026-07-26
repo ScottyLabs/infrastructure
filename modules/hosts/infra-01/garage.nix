@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, grafana, ... }:
 {
   flake.modules.nixos.infra-01-garage =
     { config, ... }:
@@ -80,6 +80,159 @@
         }
       '';
     };
+
+  scottylabs.observability.dashboards = [
+    {
+      folder = "infra";
+      name = "garage";
+      source = grafana.dashboard {
+        title = "Garage / S3";
+        uid = "infra-garage";
+        panels = [
+          (grafana.stat {
+            title = "Cluster healthy";
+            pos = {
+              h = 6;
+              w = 6;
+              x = 0;
+              y = 0;
+            };
+            targets = [ (grafana.target { expr = "cluster_healthy"; }) ];
+            defaults.mappings = [
+              {
+                type = "value";
+                options = {
+                  "0" = {
+                    text = "DEGRADED";
+                    color = "red";
+                  };
+                  "1" = {
+                    text = "healthy";
+                    color = "green";
+                  };
+                };
+              }
+            ];
+          })
+          (grafana.stat {
+            title = "Connected nodes";
+            pos = {
+              h = 6;
+              w = 6;
+              x = 6;
+              y = 0;
+            };
+            targets = [ (grafana.target { expr = "cluster_connected_nodes"; }) ];
+            defaults.unit = "short";
+          })
+          (grafana.timeseries {
+            title = "API request rate by operation";
+            pos = {
+              h = 8;
+              w = 12;
+              x = 12;
+              y = 0;
+            };
+            targets = [
+              (grafana.target {
+                expr = "sum by (api_endpoint) (rate(api_s3_request_counter[5m]))";
+                legend = "{{api_endpoint}}";
+              })
+            ];
+            defaults.unit = "ops";
+          })
+          (grafana.timeseries {
+            title = "API error rate";
+            pos = {
+              h = 8;
+              w = 12;
+              x = 0;
+              y = 6;
+            };
+            targets = [
+              (grafana.target {
+                expr = "sum by (api_endpoint) (rate(api_s3_error_counter[5m]))";
+                legend = "{{api_endpoint}}";
+              })
+            ];
+            defaults.unit = "ops";
+          })
+          (grafana.timeseries {
+            title = "API latency (p95)";
+            pos = {
+              h = 8;
+              w = 12;
+              x = 12;
+              y = 8;
+            };
+            targets = [
+              (grafana.target {
+                expr = "histogram_quantile(0.95, sum by (le, api_endpoint) (rate(api_s3_request_duration_bucket[5m])))";
+                legend = "{{api_endpoint}}";
+              })
+            ];
+            defaults.unit = "s";
+          })
+          (grafana.timeseries {
+            title = "Local disk used vs available";
+            pos = {
+              h = 8;
+              w = 12;
+              x = 0;
+              y = 14;
+            };
+            targets = [
+              (grafana.target {
+                expr = "garage_local_disk_total - garage_local_disk_avail";
+                legend = "used";
+              })
+              (grafana.target {
+                expr = "garage_local_disk_avail";
+                legend = "available";
+              })
+            ];
+            defaults.unit = "bytes";
+          })
+          (grafana.timeseries {
+            title = "Block I/O bytes/sec";
+            pos = {
+              h = 8;
+              w = 12;
+              x = 12;
+              y = 16;
+            };
+            targets = [
+              (grafana.target {
+                expr = "rate(block_bytes_read[5m])";
+                legend = "read";
+              })
+              (grafana.target {
+                expr = "rate(block_bytes_written[5m])";
+                legend = "write";
+              })
+            ];
+            defaults.unit = "Bps";
+          })
+          (grafana.timeseries {
+            title = "Block resync queue length";
+            pos = {
+              h = 8;
+              w = 24;
+              x = 0;
+              y = 22;
+            };
+            targets = [
+              (grafana.target {
+                expr = "block_resync_queue_length";
+                legend = "queued";
+              })
+            ];
+            defaults.unit = "short";
+          })
+        ];
+      };
+    }
+  ];
 
   perSystem =
     { pkgs, ... }:

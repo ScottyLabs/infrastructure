@@ -1,3 +1,4 @@
+{ grafana, ... }:
 {
   flake.modules.nixos.uptime-kuma =
     {
@@ -40,4 +41,26 @@
         '';
       };
     };
+
+  scottylabs.observability.alerts.rules = [
+    {
+      name = "uptime-kuma-monitor-down";
+      source = grafana.promAlert {
+        name = "uptime-kuma";
+        uid = "infra-uptime-kuma-monitor-down";
+        title = "Uptime Kuma monitor down";
+        expr = "monitor_status == bool 0";
+        severity = "critical";
+        summary = "{{ $labels.monitor_name }} appears down";
+        duration = "5m";
+        annotations = {
+          description = ''
+            Prometheus reports monitor_status == 0 for this Uptime Kuma target
+            name={{ $labels.monitor_name }}, type={{ $labels.monitor_type }}.
+            URL or host details are in dashboard labels monitor_url/monitor_hostname.
+          '';
+        };
+      };
+    }
+  ];
 }

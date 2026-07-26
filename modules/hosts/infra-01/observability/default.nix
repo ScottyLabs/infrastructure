@@ -197,6 +197,83 @@
       scottylabs.grafana.enable = true;
     };
 
+  scottylabs.observability.alerts = {
+    contactPoints = [
+      {
+        name = "discord";
+        source = {
+          apiVersion = 1;
+          contactPoints = [
+            {
+              orgId = 1;
+              name = "discord";
+              receivers = [
+                {
+                  uid = "discord-default";
+                  type = "discord";
+                  settings = {
+                    url = "$__file{/run/secrets/discord-webhook-alerts}";
+                    use_discord_username = true;
+                  };
+                }
+              ];
+            }
+          ];
+        };
+      }
+      {
+        name = "slack";
+        source = {
+          apiVersion = 1;
+          contactPoints = [
+            {
+              orgId = 1;
+              name = "slack";
+              receivers = [
+                {
+                  uid = "slack-default";
+                  type = "slack";
+                  settings = {
+                    url = "$__file{/run/secrets/slack-webhook-alerts}";
+                    username = "Grafana";
+                  };
+                }
+              ];
+            }
+          ];
+        };
+      }
+    ];
+    policies = [
+      {
+        name = "default";
+        source = {
+          apiVersion = 1;
+          policies = [
+            {
+              orgId = 1;
+              receiver = "discord";
+              group_by = [
+                "alertname"
+                "instance"
+                "monitor_name"
+              ];
+              group_wait = "30s";
+              group_interval = "5m";
+              repeat_interval = "4h";
+              routes = [
+                {
+                  receiver = "slack";
+                  continue = true;
+                }
+              ];
+            }
+          ];
+        };
+      }
+    ];
+  };
+
   perSystem =
     { pkgs, ... }:
     {
