@@ -68,6 +68,9 @@ workflows:
         - env:
             name: TF_WORKSPACE
             value: default
+        - env:
+            name: TF_CLI_CONFIG_FILE
+            command: 'echo "$FORGEJO_TFRC"'
         - run: nix build ".#$PROJECT_NAME.config" --out-link config.tf.json
         - run: tofu init -input=false
         - run: tofu plan -input=false -out "$PLANFILE"
@@ -76,6 +79,9 @@ workflows:
         - env:
             name: TF_WORKSPACE
             value: default
+        - env:
+            name: TF_CLI_CONFIG_FILE
+            command: 'echo "$FORGEJO_TFRC"'
         - run: tofu apply -input=false "$PLANFILE"
     import:
       steps:
