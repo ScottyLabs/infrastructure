@@ -2,7 +2,35 @@
 {
   flake.modules.nixos.infra-01-atlantis =
     { config, pkgs, ... }:
+    let
+      forgejoProvider = pkgs.stdenvNoCC.mkDerivation {
+        pname = "terraform-provider-forgejo";
+        version = "1.4.2-team-repository.2";
+        src = pkgs.fetchurl {
+          url = "https://github.com/ap-1/terraform-provider-forgejo/releases/download/v1.4.2-team-repository.2/terraform-provider-forgejo_1.4.2-team-repository.2_linux_amd64.zip";
+          hash = "sha256-GMMlBaarmhOxpgNwDjl+2L65qh1nIT6RFj+JAsGZT5E=";
+        };
+        nativeBuildInputs = [ pkgs.unzip ];
+        sourceRoot = ".";
+        dontConfigure = true;
+        dontBuild = true;
+        installPhase = ''
+          runHook preInstall
+          install -Dm755 -t "$out" terraform-provider-forgejo_*
+          runHook postInstall
+        '';
+      };
 
+      # Patched svalabs/forgejo fork, substituted at plan/apply via dev_overrides
+      forgejoTfrc = pkgs.writeText "forgejo-dev-overrides.tfrc" ''
+        provider_installation {
+          dev_overrides {
+            "svalabs/forgejo" = "${forgejoProvider}"
+          }
+          direct {}
+        }
+      '';
+    in
     {
       scottylabs.atlantis = {
         enable = true;
@@ -47,6 +75,7 @@
       systemd.services.atlantis.environment = {
         TF_PLUGIN_CACHE_DIR = "/var/lib/atlantis/plugin-cache";
         TF_PLUGIN_CACHE_MAY_BREAK_DEPENDENCY_LOCK_FILE = "1";
+        FORGEJO_TFRC = "${forgejoTfrc}";
       };
 
       systemd.tmpfiles.rules = [ "d /var/lib/atlantis/plugin-cache 0755 atlantis atlantis -" ];
