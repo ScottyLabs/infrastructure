@@ -37,14 +37,14 @@
 
           allowedCommands = [ "^devenv update$" ];
 
-          commitMessagePrefix = "chore(deps): ";
+          commitMessagePrefix = "chore: ";
 
           nix.enabled = true;
 
           lockFileMaintenance = {
             enabled = true;
             schedule = [ "before 5am on Monday" ];
-            commitMessageAction = "lock file maintenance";
+            commitMessageAction = "update lockfiles";
           };
 
           customManagers = [
@@ -56,7 +56,7 @@
               ];
               currentValueTemplate = "main";
               depNameTemplate = "scottylabs-devenv";
-              packageNameTemplate = "https://codeberg.org/ScottyLabs/devenv";
+              packageNameTemplate = "https://codeberg.org/ScottyLabs/kennel";
               datasourceTemplate = "git-refs";
             }
           ];
