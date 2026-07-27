@@ -77,6 +77,14 @@ workflows:
             name: TF_WORKSPACE
             value: default
         - run: tofu apply -input=false "$PLANFILE"
+    import:
+      steps:
+        - env:
+            name: TF_WORKSPACE
+            value: default
+        - run: nix build ".#$PROJECT_NAME.config" --out-link config.tf.json
+        - run: tofu init -input=false
+        - run: tofu import -input=false $(printf '%s' $COMMENT_ARGS | sed 's/,/ /' | tr -d '\\')
 
 metrics:
   prometheus:
