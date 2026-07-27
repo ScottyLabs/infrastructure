@@ -7,7 +7,7 @@ inputs:
       nixpkgs:
         follows: nixpkgs
   scottylabs:
-    url: git+https://codeberg.org/ScottyLabs/devenv
+    url: git+https://codeberg.org/ScottyLabs/kennel
     inputs:
       nixpkgs:
         follows: nixpkgs

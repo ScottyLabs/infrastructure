@@ -1,4 +1,9 @@
-{ config, grafana, ... }:
+{
+  config,
+  grafana,
+  inputs,
+  ...
+}:
 {
   flake.modules.nixos.infra-01-openbao = {
     services.openbao = {
@@ -265,7 +270,7 @@
               type = "CNAME";
               comment = "OpenBao";
             };
-            locals.hosts = ''''${toset(["infra-01", "deploy-01", "snoopy", "signage-01"])}'';
+            locals.hosts = "\${toset(${builtins.toJSON (builtins.attrNames inputs.self.nixosConfigurations)})}";
 
             resource.vault_mount.kv = {
               path = "secret";
@@ -340,6 +345,65 @@
                   capabilities = ["list", "read"]
                 }
               '';
+            };
+
+            # DevOps and all-members access via OIDC identity groups
+            resource.vault_policy.devops = {
+              name = "devops";
+              policy = ''
+                # Manage all secrets
+                path "secret/*" {
+                  capabilities = ["create", "read", "update", "delete", "list"]
+                }
+
+                # Manage AppRole auth
+                path "auth/approle/*" {
+                  capabilities = ["create", "read", "update", "delete", "list"]
+                }
+
+                # View OIDC auth
+                path "auth/oidc/*" {
+                  capabilities = ["read", "list"]
+                }
+
+                # View policies
+                path "sys/policies/*" {
+                  capabilities = ["read", "list"]
+                }
+
+                # View auth methods
+                path "sys/auth" {
+                  capabilities = ["read"]
+                }
+              '';
+            };
+            resource.vault_policy.shared_read = {
+              name = "shared-read";
+              policy = ''
+                path "secret/data/shared/*" {
+                  capabilities = ["read"]
+                }
+              '';
+            };
+            resource.vault_identity_group.devops = {
+              name = "devops";
+              type = "external";
+              policies = [ "\${vault_policy.devops.name}" ];
+            };
+            resource.vault_identity_group.all_members = {
+              name = "all-members";
+              type = "external";
+              policies = [ "\${vault_policy.shared_read.name}" ];
+            };
+            resource.vault_identity_group_alias.devops = {
+              name = "/projects/devops";
+              mount_accessor = "\${vault_jwt_auth_backend.oidc.accessor}";
+              canonical_id = "\${vault_identity_group.devops.id}";
+            };
+            resource.vault_identity_group_alias.all_members = {
+              name = "/projects";
+              mount_accessor = "\${vault_jwt_auth_backend.oidc.accessor}";
+              canonical_id = "\${vault_identity_group.all_members.id}";
             };
 
             resource.keycloak_openid_client.openbao = {
