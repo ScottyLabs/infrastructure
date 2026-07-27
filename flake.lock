@@ -928,11 +928,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1784212632,
-        "narHash": "sha256-E4sJw/ySR3bEGd3eyqXErmDtjj0TF+8JGYXH9uDPctc=",
+        "lastModified": 1785065918,
+        "narHash": "sha256-0yNI8Nl9NRAjjLHmxtqKzvbYLw70YJrziUbGtDZ73cg=",
         "owner": "feel-co",
         "repo": "ncro",
-        "rev": "8681ec50b9570de825786f9ec599b1301214a1ff",
+        "rev": "78f8757663f3daa44eb8c4f04fa923de7fe992f7",
         "type": "github"
       },
       "original": {
