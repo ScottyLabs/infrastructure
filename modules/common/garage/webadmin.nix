@@ -184,8 +184,7 @@
           {
             terraform.backend.s3.key = "services/garage-webadmin.tfstate";
             dns.garage = {
-              host = "infra-01";
-              type = "CNAME";
+              tunnel = "infra-01";
               comment = "Garage web admin UI fronted by caddy with Keycloak OIDC";
             };
             resource.keycloak_openid_client.garage_webadmin = {

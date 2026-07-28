@@ -10,6 +10,7 @@
         btrfs
         caddy
         cadvisor
+        cloudflared
         ncro
         node-exporter
         observability-agents

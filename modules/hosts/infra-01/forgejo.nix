@@ -382,8 +382,7 @@
 
             dns.git = {
               zone = "cmu.dev";
-              host = "infra-01";
-              type = "CNAME";
+              tunnel = "infra-01";
               comment = "Forgejo";
             };
 

@@ -197,8 +197,7 @@
           {
             terraform.backend.s3.key = "services/webhook.tfstate";
             dns.webhooks = {
-              host = "infra-01";
-              type = "CNAME";
+              tunnel = "infra-01";
               comment = "Nix flake updates for infrastructure";
             };
           }

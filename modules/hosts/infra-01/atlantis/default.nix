@@ -484,8 +484,7 @@
           {
             terraform.backend.s3.key = "services/atlantis.tfstate";
             dns.atlantis = {
-              host = "infra-01";
-              type = "CNAME";
+              tunnel = "infra-01";
               comment = "Atlantis OpenTofu PR automation";
             };
           }

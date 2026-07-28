@@ -262,8 +262,7 @@
           {
             terraform.backend.s3.key = "services/keycloak.tfstate";
             dns.idp = {
-              host = "infra-01";
-              type = "CNAME";
+              tunnel = "infra-01";
               comment = "Keycloak";
             };
           }

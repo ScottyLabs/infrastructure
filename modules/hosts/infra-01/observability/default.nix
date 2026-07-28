@@ -286,13 +286,11 @@
             terraform.backend.s3.key = "services/observability.tfstate";
             dns = {
               grafana = {
-                host = "infra-01";
-                type = "CNAME";
+                tunnel = "infra-01";
                 comment = "Grafana observability frontend";
               };
               uptime = {
-                host = "infra-01";
-                type = "CNAME";
+                tunnel = "infra-01";
                 comment = "Uptime Kuma public status page";
               };
             };

@@ -55,7 +55,7 @@
         domains = {
           ephemeral = "scottylabs.net";
           cloudflare = {
-            publicIp = "128.2.25.68";
+            tunnelId = "1ce95b80-2f68-4136-b3ac-b7e2eab6b4ef";
             zones = {
               "scottylabs.org" = "ab365d7cec88f972e0b26bf59afd174f";
               "cmu.quest" = "2bf8696c7e2fdc56f9b9e98443f001cc";
@@ -432,19 +432,16 @@
             terraform.backend.s3.key = "services/kennel.tfstate";
             dns = {
               kennel = {
-                host = "deploy-01";
-                type = "CNAME";
+                tunnel = "deploy-01";
                 comment = "Kennel deployment platform";
               };
               "s3.kennel" = {
-                host = "deploy-01";
-                type = "CNAME";
+                tunnel = "deploy-01";
                 comment = "Kennel per-deployment garage S3 API";
               };
               "*" = {
                 zone = "scottylabs.net";
-                host = "deploy-01";
-                type = "CNAME";
+                tunnel = "deploy-01";
                 comment = "Kennel deployment platform wildcard";
               };
             };

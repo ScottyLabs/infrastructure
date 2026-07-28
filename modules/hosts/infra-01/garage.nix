@@ -245,23 +245,19 @@
           {
             dns = {
               s3 = {
-                host = "infra-01";
-                type = "CNAME";
+                tunnel = "infra-01";
                 comment = "Garage S3-compatible object storage";
               };
               assets = {
-                host = "infra-01";
-                type = "CNAME";
+                tunnel = "infra-01";
                 comment = "Garage public-read website endpoint for the scottylabs-assets bucket";
               };
               cdn = {
-                host = "infra-01";
-                type = "CNAME";
+                tunnel = "infra-01";
                 comment = "Garage public-read CDN";
               };
               docs = {
-                host = "infra-01";
-                type = "CNAME";
+                tunnel = "infra-01";
                 comment = "ScottyLabs documentation hub (Garage scottylabs-docs bucket)";
               };
             };

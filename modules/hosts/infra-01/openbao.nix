@@ -266,8 +266,7 @@
           {
             terraform.backend.s3.key = "services/openbao.tfstate";
             dns.secrets = {
-              host = "infra-01";
-              type = "CNAME";
+              tunnel = "infra-01";
               comment = "OpenBao";
             };
             locals.hosts = "\${toset(${builtins.toJSON (builtins.attrNames inputs.self.nixosConfigurations)})}";

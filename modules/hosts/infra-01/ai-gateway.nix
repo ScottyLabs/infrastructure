@@ -104,8 +104,7 @@
           {
             terraform.backend.s3.key = "services/litellm.tfstate";
             dns.litellm = {
-              host = "infra-01";
-              type = "CNAME";
+              tunnel = "infra-01";
               comment = "LiteLLM AI gateway fronting cli-proxy-api";
             };
             resource.keycloak_openid_client.litellm = {
