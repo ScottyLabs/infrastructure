@@ -1,10 +1,25 @@
 { grafana, ... }:
 {
-  flake.modules.nixos.caddy = {
-    services.caddy.globalConfig = ''
-      metrics
-    '';
-  };
+  flake.modules.nixos.caddy =
+    { config, pkgs, ... }:
+    {
+      services.caddy = {
+        # cloudflare for DNS-01 renewal of proxied vhosts, security for the garage webadmin portal
+        package = pkgs.caddy.withPlugins {
+          plugins = [
+            "github.com/caddy-dns/cloudflare@v0.2.4"
+            "github.com/greenpau/caddy-security@v1.1.62"
+          ];
+          hash = "sha256-xR0TSpdPvgyLZrFpxmLLP0P6orpQOmcaXC+zQIN78XY=";
+        };
+        environmentFile = config.age.secrets.cloudflare-api-token.path;
+        globalConfig = ''
+          metrics
+
+          acme_dns cloudflare {env.CF_DNS_API_TOKEN}
+        '';
+      };
+    };
 
   scottylabs.observability.dashboards = [
     {

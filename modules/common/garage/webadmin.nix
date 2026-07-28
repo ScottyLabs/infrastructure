@@ -30,11 +30,6 @@
           runHook postInstall
         '';
       };
-
-      caddyWithSecurity = pkgs.caddy.withPlugins {
-        plugins = [ "github.com/greenpau/caddy-security@v1.1.62" ];
-        hash = "sha256-jEfl5UaTHulvkpFnOuadca4jYbZaYt8Z704ts08jHlM=";
-      };
     in
     {
       options.scottylabs.garage.webadmin = {
@@ -84,8 +79,6 @@
 
       config = lib.mkIf (cfg.enable && cfg.webadmin.enable) {
         services.caddy = {
-          package = caddyWithSecurity;
-
           globalConfig = ''
             order authenticate before respond
             order authorize before basicauth
