@@ -5,6 +5,9 @@ repos:
     allowed_overrides: [apply_requirements]
     allow_custom_workflows: false
     workflow: governance
+    pre_workflow_hooks:
+      - run: bash .forgejo/scripts/install-forgejo-provider.sh
+        description: Install local-only OpenTofu providers
 
   - id: codeberg.org/ScottyLabs/infrastructure
     plan_requirements: [mergeable]
@@ -20,7 +23,6 @@ workflows:
   governance:
     plan:
       steps:
-        - run: bash ../../.forgejo/scripts/install-forgejo-provider.sh
         - env:
             name: CARGO_TARGET_DIR
             command: 'echo "$HOME/cargo-target"'
@@ -35,7 +37,6 @@ workflows:
         - plan
     apply:
       steps:
-        - run: bash ../../.forgejo/scripts/install-forgejo-provider.sh
         - env:
             name: CARGO_TARGET_DIR
             command: 'echo "$HOME/cargo-target"'
@@ -49,7 +50,6 @@ workflows:
         - apply
     import:
       steps:
-        - run: bash ../../.forgejo/scripts/install-forgejo-provider.sh
         - env:
             name: CARGO_TARGET_DIR
             command: 'echo "$HOME/cargo-target"'
