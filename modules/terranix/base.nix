@@ -1,3 +1,16 @@
+{ inputs, lib, ... }:
+let
+  # Per-host tunnel IDs from scottylabs.cloudflared.tunnelId
+  tunnelIds = lib.filterAttrs (_: id: id != null) (
+    lib.mapAttrs (
+      _: host: host.config.scottylabs.cloudflared.tunnelId or null
+    ) inputs.self.nixosConfigurations
+  );
+
+  tunnelIdFor =
+    record: host:
+    tunnelIds.${host} or (throw "dns.${record}: host ${host} has no scottylabs.cloudflared.tunnelId");
+in
 {
   flake.modules.terranix.base =
     { lib, config, ... }:
@@ -15,12 +28,20 @@
                 default = null;
                 description = "Serving host; renders a CNAME to <host>.scottylabs.org.";
               };
+              tunnel = lib.mkOption {
+                type = lib.types.nullOr lib.types.str;
+                default = null;
+                description = "Host whose Cloudflare Tunnel serves this record";
+              };
               target = lib.mkOption {
                 type = lib.types.nullOr lib.types.str;
                 default = null;
                 description = "Verbatim record content (A address or external CNAME target).";
               };
-              type = lib.mkOption { type = lib.types.str; };
+              type = lib.mkOption {
+                type = lib.types.str;
+                default = "CNAME";
+              };
               proxied = lib.mkOption {
                 type = lib.types.bool;
                 default = false;
@@ -92,16 +113,23 @@
           for_each = lib.mapAttrs (
             name: e:
             assert lib.assertMsg (
-              (e.host != null) != (e.target != null)
-            ) "dns.${name}: exactly one of host or target must be set";
+              lib.count (v: v != null) [
+                e.host
+                e.target
+                e.tunnel
+              ] == 1
+            ) "dns.${name}: exactly one of host, target, or tunnel must be set";
             {
-              inherit (e)
-                zone
-                type
-                comment
-                proxied
-                ;
-              content = if e.host != null then "${e.host}.scottylabs.org" else e.target;
+              inherit (e) zone type comment;
+              # Tunnel CNAMEs only resolve through the Cloudflare proxy
+              proxied = e.proxied || e.tunnel != null;
+              content =
+                if e.host != null then
+                  "${e.host}.scottylabs.org"
+                else if e.tunnel != null then
+                  "${tunnelIdFor name e.tunnel}.cfargotunnel.com"
+                else
+                  e.target;
             }
           ) config.dns;
           zone_id = "\${local.zone_ids[each.value.zone]}";

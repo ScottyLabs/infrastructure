@@ -50,14 +50,12 @@
             dns = {
               "@" = {
                 zone = "doggylabs.org";
-                host = "infra-01";
-                type = "CNAME";
+                tunnel = "infra-01";
                 comment = "Matrix homeserver (Synapse)";
               };
               matrix = {
                 zone = "doggylabs.org";
-                host = "infra-01";
-                type = "CNAME";
+                tunnel = "infra-01";
                 comment = "Matrix homeserver (Synapse)";
               };
             };
