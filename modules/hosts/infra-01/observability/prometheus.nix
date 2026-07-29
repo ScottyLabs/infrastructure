@@ -1,5 +1,5 @@
 {
-  flake.modules.nixos.prometheus =
+  flake.modules.nixos.infra-01-prometheus =
     {
       config,
       lib,

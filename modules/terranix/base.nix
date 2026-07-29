@@ -172,7 +172,7 @@ in
       );
     };
 
-  flake.modules.nixos.tofu-providers = {
+  flake.modules.nixos.infra-01-tofu-providers = {
     age.secrets.tofu-providers = {
       file = ../../secrets/infra-01/tofu-providers.age;
       mode = "0400";

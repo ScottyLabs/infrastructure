@@ -1,5 +1,5 @@
 {
-  flake.modules.nixos.atlantis =
+  flake.modules.nixos.infra-01-atlantis-service =
     {
       config,
       lib,

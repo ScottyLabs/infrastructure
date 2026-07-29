@@ -1,5 +1,5 @@
 {
-  flake.modules.nixos.bridge-media-proxy =
+  flake.modules.nixos.infra-01-bridge-media-proxy =
     {
       config,
       lib,

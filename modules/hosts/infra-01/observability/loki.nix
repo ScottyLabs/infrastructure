@@ -1,5 +1,5 @@
 {
-  flake.modules.nixos.loki =
+  flake.modules.nixos.infra-01-loki =
     {
       config,
       lib,

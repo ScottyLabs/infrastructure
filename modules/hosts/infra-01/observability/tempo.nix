@@ -1,5 +1,5 @@
 {
-  flake.modules.nixos.tempo =
+  flake.modules.nixos.infra-01-tempo =
     {
       config,
       lib,

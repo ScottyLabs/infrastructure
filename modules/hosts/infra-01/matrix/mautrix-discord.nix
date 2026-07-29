@@ -1,5 +1,5 @@
 {
-  flake.modules.nixos.mautrix-discord =
+  flake.modules.nixos.infra-01-mautrix-discord =
     {
       config,
       lib,

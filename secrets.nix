@@ -47,6 +47,10 @@ in
   "secrets/deploy-01/garage.age".publicKeys = admins ++ [ deploy-01 ];
   "secrets/deploy-01/cloudflared-tunnel.age".publicKeys = admins ++ [ deploy-01 ];
 
+  # signage-01
+  "secrets/signage-01/bao-role-id.age".publicKeys = admins;
+  "secrets/signage-01/bao-secret-id.age".publicKeys = admins;
+
   # snoopy
   "secrets/snoopy/bao-role-id.age".publicKeys = admins ++ [ snoopy ];
   "secrets/snoopy/bao-secret-id.age".publicKeys = admins ++ [ snoopy ];

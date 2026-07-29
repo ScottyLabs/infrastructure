@@ -1,6 +1,6 @@
 { config, grafana, ... }:
 {
-  flake.modules.nixos.headscale =
+  flake.modules.nixos.infra-01-headscale =
     {
       config,
       lib,

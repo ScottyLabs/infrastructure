@@ -1,6 +1,6 @@
 { config, ... }:
 {
-  flake.modules.nixos.webhook =
+  flake.modules.nixos.infra-01-webhook =
     {
       config,
       lib,
