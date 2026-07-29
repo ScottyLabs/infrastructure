@@ -1,5 +1,5 @@
 {
-  flake.modules.nixos.valkey =
+  flake.modules.nixos.deploy-01-valkey =
     {
       config,
       lib,

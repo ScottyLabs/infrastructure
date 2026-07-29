@@ -1,6 +1,6 @@
 { inputs, grafana, ... }:
 {
-  flake.modules.nixos.litellm =
+  flake.modules.nixos.infra-01-litellm =
     {
       config,
       lib,

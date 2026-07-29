@@ -1,6 +1,6 @@
 { inputs, ... }:
 {
-  flake.modules.nixos.matrix-bridge-identity =
+  flake.modules.nixos.infra-01-matrix-bridge-identity =
     {
       config,
       lib,

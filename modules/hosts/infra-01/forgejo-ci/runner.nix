@@ -1,5 +1,5 @@
 {
-  flake.modules.nixos.runner =
+  flake.modules.nixos.infra-01-runner =
     {
       config,
       lib,

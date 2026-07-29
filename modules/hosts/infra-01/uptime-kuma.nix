@@ -1,6 +1,6 @@
 { grafana, ... }:
 {
-  flake.modules.nixos.uptime-kuma =
+  flake.modules.nixos.infra-01-uptime-kuma =
     {
       config,
       lib,

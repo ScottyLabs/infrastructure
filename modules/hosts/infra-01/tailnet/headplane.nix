@@ -1,5 +1,5 @@
 {
-  flake.modules.nixos.headplane =
+  flake.modules.nixos.infra-01-headplane =
     {
       config,
       lib,

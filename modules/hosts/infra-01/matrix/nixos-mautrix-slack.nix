@@ -1,5 +1,5 @@
 {
-  flake.modules.nixos.nixos-mautrix-slack =
+  flake.modules.nixos.infra-01-nixos-mautrix-slack =
     {
       lib,
       config,

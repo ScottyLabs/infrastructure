@@ -1,6 +1,6 @@
 { grafana, ... }:
 {
-  flake.modules.nixos.synapse =
+  flake.modules.nixos.infra-01-synapse =
     {
       config,
       lib,

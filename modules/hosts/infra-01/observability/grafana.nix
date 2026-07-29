@@ -3,7 +3,7 @@ let
   obs = config.scottylabs.observability;
 in
 {
-  flake.modules.nixos.grafana =
+  flake.modules.nixos.infra-01-grafana =
     {
       config,
       lib,

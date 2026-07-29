@@ -1,6 +1,6 @@
 { config, ... }:
 {
-  flake.modules.nixos.matrix =
+  flake.modules.nixos.infra-01-matrix-options =
     {
       config,
       lib,

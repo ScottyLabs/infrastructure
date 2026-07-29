@@ -1,5 +1,5 @@
 {
-  flake.modules.nixos.well-known =
+  flake.modules.nixos.infra-01-well-known =
     {
       config,
       lib,
