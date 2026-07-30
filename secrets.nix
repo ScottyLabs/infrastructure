@@ -7,11 +7,13 @@ let
   # SSH host keys for machines that can decrypt
   infra-01 = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJaOgbg8hOVqI4zmEHODl1NJpAeImw/7z6jPnVSoXywt root@infra-01";
   deploy-01 = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOm8p8uaXbhMbJGhkYJZWBzqYB25D9AVCUc5ACcMwU3c root@deploy-01";
+  signage-01 = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDm0ICyouMcMYFuoo2t6SYLJiOLNjcbuaLYnhHi67ATy root@signage-01";
   snoopy = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJJxoj1W19busC7uwr4iNXlJHP3uMS7Wg3M+Kv6j0TPa root@snoopy";
 
   hosts = [
     infra-01
     deploy-01
+    signage-01
     snoopy
   ];
 in
@@ -48,8 +50,8 @@ in
   "secrets/deploy-01/cloudflared-tunnel.age".publicKeys = admins ++ [ deploy-01 ];
 
   # signage-01
-  "secrets/signage-01/bao-role-id.age".publicKeys = admins;
-  "secrets/signage-01/bao-secret-id.age".publicKeys = admins;
+  "secrets/signage-01/bao-role-id.age".publicKeys = admins ++ [ signage-01 ];
+  "secrets/signage-01/bao-secret-id.age".publicKeys = admins ++ [ signage-01 ];
 
   # snoopy
   "secrets/snoopy/bao-role-id.age".publicKeys = admins ++ [ snoopy ];
