@@ -11,11 +11,11 @@
         caddy
         cadvisor
         cloudflared
+        ip-address
         ncro
         node-exporter
         observability-agents
         otel-collector
-        public-ip
         shell
         systemd-exporter
         systemd-vaultd
