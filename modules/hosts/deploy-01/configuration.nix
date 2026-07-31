@@ -3,7 +3,7 @@
     networking.hostName = "deploy-01";
 
     # Campus Cloud VM (dept:scottylabs)
-    scottylabs.publicIp = "128.2.25.68";
+    scottylabs.ipAddress = "128.2.25.68";
 
     # Public ingress tunnel (cloudflared tunnel create deploy-01)
     scottylabs.cloudflared = {

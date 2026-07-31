@@ -39,12 +39,22 @@ in
         inherit specialArgs;
       };
     }
-    // lib.genAttrs hosts (hostname: {
-      deployment = {
-        targetHost = "${hostname}.scottylabs.org";
-        targetUser = "deploy";
-      };
-      imports = modulesFor hostname;
-    })
+    // lib.genAttrs hosts (
+      hostname:
+      let
+        bastion = config.flake.nixosConfigurations.${hostname}.config.scottylabs.bastion;
+      in
+      {
+        deployment = {
+          targetHost = "${hostname}.scottylabs.org";
+          targetUser = "deploy";
+          sshOptions = lib.optionals (bastion != null) [
+            "-J"
+            "deploy@${bastion}"
+          ];
+        };
+        imports = modulesFor hostname;
+      }
+    )
   );
 }

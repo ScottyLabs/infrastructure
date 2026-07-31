@@ -16,7 +16,7 @@
           {
             terraform.backend.s3.key = "services/hosts.tfstate";
             dns = lib.mapAttrs (name: host: {
-              target = host.config.scottylabs.publicIp;
+              target = host.config.scottylabs.ipAddress;
               type = "A";
               comment = "NixOS host ${name}";
             }) inputs.self.nixosConfigurations;
