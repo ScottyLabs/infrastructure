@@ -89,7 +89,7 @@ options.scottylabs.nodeExporter = {
 
 Importing the module does nothing until `scottylabs.nodeExporter.enable` is set, which `modules/global/observability-agents.nix` does for all the agents.
 
-The `scottylabs.*` namespace is the repository's own settings surface, alongside the upstream NixOS options. It carries options such as the public IP (`scottylabs.publicIp`) and the observability-agent toggles (`scottylabs.nodeExporter.enable`). A module's `options.scottylabs.*` block shows what it exposes and whether another module must switch it on.
+The `scottylabs.*` namespace is the repository's own settings surface, alongside the upstream NixOS options. It carries options such as the host IP address (`scottylabs.ipAddress`) and the observability-agent toggles (`scottylabs.nodeExporter.enable`). A module's `options.scottylabs.*` block shows what it exposes and whether another module must switch it on.
 
 ## Flake-level configuration
 
