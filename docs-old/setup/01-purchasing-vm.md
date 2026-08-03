@@ -24,10 +24,10 @@ Before continuing, you must have permissions on NetReg. If you do not have permi
 - Hardware Address: The MAC address provided by Computing Services
 - Affiliation: `ScottyLabs`
 
-You must then wait for the public IP to be assigned to the VM, which can take up to 30 minutes. Once you have the IP, declare it in the host's configuration module as `scottylabs.publicIp`:
+You must then wait for the public IP to be assigned to the VM, which can take up to 30 minutes. Once you have the IP, declare it in the host's configuration module as `scottylabs.ipAddress`:
 
 ```nix
-scottylabs.publicIp = "<public-ip>";
+scottylabs.ipAddress = "<ip-address>";
 ```
 
 The `hosts` terranix configuration provisions the `A` record from it (via an Atlantis plan/apply, or `nix run .#hosts` on infra-01). Cloudflare proxying is already off by default for these records.
