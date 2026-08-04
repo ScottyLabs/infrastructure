@@ -19,8 +19,6 @@ let
 in
 {
   # infra-01
-  "secrets/infra-01/codeberg-token.age".publicKeys = admins ++ [ infra-01 ];
-  "secrets/infra-01/forgejo-runner-token.age".publicKeys = admins ++ [ infra-01 ];
   "secrets/infra-01/forgejo-mailer.age".publicKeys = admins ++ [ infra-01 ];
   "secrets/infra-01/forgejo-signing-key.age".publicKeys = admins ++ [ infra-01 ];
   "secrets/infra-01/renovate-token.age".publicKeys = admins ++ [ infra-01 ];
@@ -39,6 +37,7 @@ in
   "secrets/infra-01/cmu-vpn-password.age".publicKeys = admins ++ [ infra-01 ];
   "secrets/infra-01/cmu-vpn-passkey.age".publicKeys = admins ++ [ infra-01 ];
   "secrets/infra-01/cloudflared-tunnel.age".publicKeys = admins ++ [ infra-01 ];
+  "secrets/infra-01/snot-webhook-secret.age".publicKeys = admins ++ [ infra-01 ];
 
   # deploy-01
   "secrets/deploy-01/bao-role-id.age".publicKeys = admins ++ [ deploy-01 ];
@@ -56,6 +55,7 @@ in
   # snoopy
   "secrets/snoopy/bao-role-id.age".publicKeys = admins ++ [ snoopy ];
   "secrets/snoopy/bao-secret-id.age".publicKeys = admins ++ [ snoopy ];
+  "secrets/snoopy/forgejo-runner-token.age".publicKeys = admins ++ [ snoopy ];
 
   # all
   "secrets/cloudflare-api-token.age".publicKeys = admins ++ hosts;

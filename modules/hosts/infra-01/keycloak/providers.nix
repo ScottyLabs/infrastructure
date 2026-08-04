@@ -106,7 +106,7 @@ in
           default_scopes = "openid profile email";
         };
 
-        # TODO: https://codeberg.org/ScottyLabs/infrastructure/issues/83
+        # TODO: https://git.cmu.dev/ScottyLabs/infrastructure/issues/83
         # TODO: discord IdP unavailable without the keycloak-discord server plugin
 
         resource.keycloak_custom_identity_provider_mapper = {

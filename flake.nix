@@ -39,7 +39,7 @@
 
     # infra-01
     keycloak-theme = {
-      url = "git+https://codeberg.org/ScottyLabs/keycloak-theme";
+      url = "git+https://git.cmu.dev/ScottyLabs/keycloak-theme";
       flake = false;
     };
     nixpkgs-keycloak.url = "github:ap-1/nixpkgs/keycloak-plugin-updates";
@@ -47,10 +47,19 @@
       url = "git+https://codeberg.org/anish/llm-pkgs";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    snot = {
+      url = "git+https://tangled.org/isabelroses.com/snot";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    # TODO: https://github.com/NixOS/nixpkgs/pull/529621
+    nixpkgs-forgejo-runner = {
+      url = "github:emilylange/nixpkgs?ref=nixos/forgejo-runner";
+      flake = false;
+    };
 
     # deploy-01
     kennel = {
-      url = "git+https://codeberg.org/ScottyLabs/kennel";
+      url = "git+https://git.cmu.dev/ScottyLabs/kennel";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     ricochet = {
@@ -59,7 +68,7 @@
     };
 
     governance = {
-      url = "git+https://codeberg.org/ScottyLabs/governance";
+      url = "git+https://git.cmu.dev/ScottyLabs/governance";
       flake = false;
     };
 

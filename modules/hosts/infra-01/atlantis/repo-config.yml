@@ -1,5 +1,5 @@
 repos:
-  - id: codeberg.org/ScottyLabs/governance
+  - id: git.cmu.dev/ScottyLabs/governance
     apply_requirements: [mergeable, undiverged]
     import_requirements: [mergeable, undiverged]
     allowed_overrides: [apply_requirements]
@@ -9,7 +9,7 @@ repos:
       - run: bash .forgejo/scripts/install-forgejo-provider.sh
         description: Install local-only OpenTofu providers
 
-  - id: codeberg.org/ScottyLabs/infrastructure
+  - id: git.cmu.dev/ScottyLabs/infrastructure
     plan_requirements: [mergeable]
     apply_requirements: [mergeable, undiverged]
     import_requirements: [mergeable, undiverged]

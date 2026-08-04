@@ -17,6 +17,7 @@
     {
       services.forgejo = {
         enable = true;
+        package = pkgs.forgejo;
         lfs.enable = true;
         dump.enable = true;
 
@@ -382,7 +383,7 @@
 
             dns.git = {
               zone = "cmu.dev";
-              tunnel = "infra-01";
+              host = "infra-01";
               comment = "Forgejo";
             };
 

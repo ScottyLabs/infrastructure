@@ -22,8 +22,8 @@
 
         settings = {
           platform = "forgejo";
-          endpoint = "https://codeberg.org";
-          gitAuthor = "scottylabs-bot <ops+codeberg@scottylabs.org>";
+          endpoint = "https://git.cmu.dev";
+          gitAuthor = "scottylabs-bot <ops+cmu-dev@scottylabs.org>";
           autodiscover = true;
           autodiscoverFilter = [ "ScottyLabs/*" ];
 
@@ -52,11 +52,11 @@
               customType = "regex";
               managerFilePatterns = [ ''/devenv\.lock$/'' ];
               matchStrings = [
-                ''"rev":\s*"(?<currentDigest>[a-f0-9]{40})",\s*"revCount":\s*\d+,\s*"type":\s*"git",\s*"url":\s*"https://codeberg\.org/ScottyLabs/devenv"''
+                ''"rev":\s*"(?<currentDigest>[a-f0-9]{40})",\s*"revCount":\s*\d+,\s*"type":\s*"git",\s*"url":\s*"https://git\.cmu\.dev/ScottyLabs/kennel"''
               ];
               currentValueTemplate = "main";
               depNameTemplate = "scottylabs-devenv";
-              packageNameTemplate = "https://codeberg.org/ScottyLabs/kennel";
+              packageNameTemplate = "https://git.cmu.dev/ScottyLabs/kennel";
               datasourceTemplate = "git-refs";
             }
           ];
