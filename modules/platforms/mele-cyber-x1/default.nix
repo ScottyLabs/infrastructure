@@ -13,6 +13,9 @@
       hardware.graphics.enable = true;
       services.seatd.enable = true;
 
+      # i915 GuC/DMC firmware for the Alder Lake-N iGPU
+      hardware.enableRedistributableFirmware = true;
+
       # QEMU
       virtualisation.vmVariant = {
         virtualisation.qemu.options = [

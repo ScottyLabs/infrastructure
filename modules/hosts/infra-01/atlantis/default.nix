@@ -47,9 +47,9 @@
           pkgs.gcc
         ];
         extraArgs = [
-          "--gitea-base-url=https://codeberg.org"
+          "--gitea-base-url=https://git.cmu.dev"
           "--gitea-user=scottylabs-bot"
-          "--repo-allowlist=codeberg.org/ScottyLabs/governance,codeberg.org/ScottyLabs/infrastructure"
+          "--repo-allowlist=git.cmu.dev/ScottyLabs/governance,git.cmu.dev/ScottyLabs/infrastructure"
           "--allow-fork-prs"
           "--default-tf-distribution=opentofu"
           "--write-git-creds"
@@ -77,6 +77,10 @@
         TF_PLUGIN_CACHE_MAY_BREAK_DEPENDENCY_LOCK_FILE = "1";
         FORGEJO_TFRC = "${forgejoTfrc}";
       };
+
+      systemd.services.atlantis.vault.environmentTemplate = ''
+        {{ with secret "secret/data/infra/atlantis" }}ATLANTIS_GITEA_WEBHOOK_SECRET={{ .Data.data.GITEA_WEBHOOK_SECRET }}{{ end }}
+      '';
 
       systemd.tmpfiles.rules = [ "d /var/lib/atlantis/plugin-cache 0755 atlantis atlantis -" ];
     };
@@ -486,6 +490,85 @@
             dns.atlantis = {
               tunnel = "infra-01";
               comment = "Atlantis OpenTofu PR automation";
+            };
+
+            terraform.required_providers.forgejo = {
+              source = "svalabs/forgejo";
+              version = "~> 1.0";
+            };
+            provider.forgejo = {
+              host = "\${var.forgejo_url}";
+              api_token = "\${var.forgejo_token}";
+            };
+            variable.forgejo_url = {
+              type = "string";
+              default = "https://git.cmu.dev";
+            };
+            variable.forgejo_token.sensitive = true;
+
+            resource.random_password.atlantis_webhook_secret = {
+              length = 64;
+              special = false;
+            };
+
+            resource.vault_kv_secret_v2.atlantis_webhook = {
+              mount = "secret";
+              name = "infra/atlantis";
+              data_json = "\${jsonencode({ GITEA_WEBHOOK_SECRET = random_password.atlantis_webhook_secret.result })}";
+            };
+
+            data.forgejo_repository = {
+              infrastructure = {
+                owner = "ScottyLabs";
+                name = "infrastructure";
+              };
+              governance = {
+                owner = "ScottyLabs";
+                name = "governance";
+              };
+            };
+
+            resource.forgejo_repository_webhook = {
+              infrastructure = {
+                repository_id = "\${data.forgejo_repository.infrastructure.id}";
+                type = "forgejo";
+                url = "https://atlantis.scottylabs.org/events";
+                content_type = "json";
+                secret = "\${random_password.atlantis_webhook_secret.result}";
+                active = true;
+                events = [
+                  "pull_request"
+                  "pull_request_assign"
+                  "pull_request_label"
+                  "pull_request_milestone"
+                  "pull_request_comment"
+                  "pull_request_review_approved"
+                  "pull_request_review_rejected"
+                  "pull_request_review_comment"
+                  "pull_request_sync"
+                  "pull_request_review_request"
+                ];
+              };
+              governance = {
+                repository_id = "\${data.forgejo_repository.governance.id}";
+                type = "forgejo";
+                url = "https://atlantis.scottylabs.org/events";
+                content_type = "json";
+                secret = "\${random_password.atlantis_webhook_secret.result}";
+                active = true;
+                events = [
+                  "pull_request"
+                  "pull_request_assign"
+                  "pull_request_label"
+                  "pull_request_milestone"
+                  "pull_request_comment"
+                  "pull_request_review_approved"
+                  "pull_request_review_rejected"
+                  "pull_request_review_comment"
+                  "pull_request_sync"
+                  "pull_request_review_request"
+                ];
+              };
             };
           }
         ];

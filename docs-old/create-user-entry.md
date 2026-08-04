@@ -16,4 +16,4 @@ Then copy your public key:
 cat ~/.ssh/id_ed25519.pub
 ```
 
-Copy the output and add it as your user entry's value. Make sure to add it as a signing key on [Codeberg](https://codeberg.org/user/settings/keys) (and optionally [GitHub](https://github.com/settings/keys)) so commits show as `Verified`.
+Copy the output and add it as your user entry's value. Make sure to add it as a signing key on [git.cmu.dev](https://git.cmu.dev/user/settings/keys) (and optionally [GitHub](https://github.com/settings/keys)) so commits show as `Verified`.

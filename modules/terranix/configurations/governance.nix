@@ -147,7 +147,7 @@ in
             };
             variable.forgejo_url = {
               type = "string";
-              default = "https://codeberg.org";
+              default = "https://git.cmu.dev";
             };
             variable.forgejo_token.sensitive = true;
 

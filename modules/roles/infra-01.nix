@@ -17,7 +17,6 @@
     infra-01-cmu-vpn
     infra-01-configuration
     infra-01-forgejo
-    infra-01-forgejo-ci
     infra-01-garage
     infra-01-grafana
     infra-01-headplane
@@ -35,7 +34,7 @@
     infra-01-openbao
     infra-01-prometheus
     infra-01-renovate
-    infra-01-runner
+    infra-01-snot
     infra-01-synapse
     infra-01-tailnet
     infra-01-tempo
