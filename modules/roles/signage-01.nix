@@ -9,5 +9,6 @@
     signage-01-configuration
     signage-01-firefox
     signage-01-kiosk
+    signage-01-wireless
   ];
 }
