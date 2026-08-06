@@ -56,6 +56,10 @@
       url = "github:emilylange/nixpkgs?ref=nixos/forgejo-runner";
       flake = false;
     };
+    catppuccin = {
+      url = "github:catppuccin/nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     # deploy-01
     kennel = {

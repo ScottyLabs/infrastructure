@@ -32,6 +32,7 @@
           (with pkgs; [
             bash
             coreutils
+            curl
             gitFull
             gnutar
             gzip
