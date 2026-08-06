@@ -3,6 +3,7 @@
   flake.modules.nixos.infra-01-forgejo =
     {
       config,
+      inputs,
       lib,
       pkgs,
       ...
@@ -15,6 +16,8 @@
       signingPubKey = pkgs.writeText "forgejo-signing.pub" "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHIq2XYZ218T07NQbBXLCT8H+h3GVv/tqS63dnMBjCdp cmu.dev commit signing";
     in
     {
+      imports = [ inputs.catppuccin.nixosModules.catppuccin ];
+
       services.forgejo = {
         enable = true;
         package = pkgs.forgejo;
@@ -105,16 +108,46 @@
         };
       };
 
+      catppuccin = {
+        enable = true;
+        autoEnable = false;
+        forgejo = {
+          enable = true;
+          flavor = "mocha";
+          accent = "mauve";
+        };
+      };
+
+      # stock themes plus the two mauve catppuccin variants
+      services.forgejo.settings.ui.THEMES = lib.mkForce (
+        lib.concatStringsSep "," [
+          "forgejo-auto"
+          "forgejo-light"
+          "forgejo-dark"
+          "gitea-auto"
+          "gitea-light"
+          "gitea-dark"
+          "forgejo-auto-deuteranopia-protanopia"
+          "forgejo-light-deuteranopia-protanopia"
+          "forgejo-dark-deuteranopia-protanopia"
+          "forgejo-auto-tritanopia"
+          "forgejo-light-tritanopia"
+          "forgejo-dark-tritanopia"
+          "catppuccin-mocha-mauve"
+          "catppuccin-latte-mauve"
+        ]
+      );
+
       # Mailgun SMTP username and password
       age.secrets.forgejo-mailer = {
-        file = ../../../secrets/infra-01/forgejo-mailer.age;
+        file = ../../../../secrets/infra-01/forgejo-mailer.age;
         mode = "0400";
         owner = "forgejo";
       };
 
       # Instance signing key private half
       age.secrets.forgejo-signing-key = {
-        file = ../../../secrets/infra-01/forgejo-signing-key.age;
+        file = ../../../../secrets/infra-01/forgejo-signing-key.age;
         path = signingKeyPriv;
         owner = "forgejo";
         group = "forgejo";
@@ -125,6 +158,9 @@
       systemd.tmpfiles.rules = [
         "d ${stateDir}/.ssh 0700 forgejo forgejo -"
         "L+ ${signingKeyPub} - - - - ${signingPubKey}"
+        "d ${config.services.forgejo.customDir}/public/assets/img 0755 forgejo forgejo -"
+        "L+ ${config.services.forgejo.customDir}/public/assets/img/logo.svg - - - - ${./logo.svg}"
+        "L+ ${config.services.forgejo.customDir}/public/assets/img/favicon.svg - - - - ${./logo.svg}"
       ];
 
       # Keycloak OIDC client_secret from OpenBao
