@@ -329,8 +329,8 @@
             resource.vault_jwt_auth_backend.forgejo = {
               path = "jwt";
               type = "jwt";
-              oidc_discovery_url = "https://git.cmu.dev";
-              bound_issuer = "https://git.cmu.dev";
+              oidc_discovery_url = "https://git.cmu.dev/api/actions";
+              bound_issuer = "https://git.cmu.dev/api/actions";
             };
 
             resource.vault_jwt_auth_backend_role.ci = {
