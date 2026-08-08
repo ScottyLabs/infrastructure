@@ -15,18 +15,6 @@
       };
     in
     {
-      nixpkgs.overlays = [
-        (_: prev: {
-          inherit
-            (import inputs.nixpkgs-keycloak {
-              inherit (prev.stdenv.hostPlatform) system;
-              inherit (prev) config;
-            })
-            keycloak
-            ;
-        })
-      ];
-
       age.secrets.keycloak = {
         file = ../../../../secrets/infra-01/keycloak.age;
         mode = "0400";
