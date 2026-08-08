@@ -42,7 +42,6 @@
       url = "git+https://git.cmu.dev/ScottyLabs/keycloak-theme";
       flake = false;
     };
-    nixpkgs-keycloak.url = "github:ap-1/nixpkgs/keycloak-plugin-updates";
     llm-pkgs = {
       url = "git+https://codeberg.org/anish/llm-pkgs";
       inputs.nixpkgs.follows = "nixpkgs";

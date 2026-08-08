@@ -7,5 +7,4 @@ on:
 
 jobs:
   check:
-    uses: ScottyLabs/kennel/.forgejo/workflows/ci.yml@main
-    secrets: inherit
+    uses: https://git.cmu.dev/ScottyLabs/kennel/.forgejo/workflows/ci.yml@main

@@ -278,6 +278,14 @@
               description = "KV v2 secrets engine";
             };
 
+            variable.cachix_auth_token.sensitive = true;
+
+            resource.vault_kv_secret_v2.cachix = {
+              mount = "\${vault_mount.kv.path}";
+              name = "shared/cachix";
+              data_json = "\${jsonencode({ CACHIX_AUTH_TOKEN = var.cachix_auth_token })}";
+            };
+
             resource.vault_jwt_auth_backend.oidc = {
               path = "oidc";
               type = "oidc";
@@ -315,6 +323,40 @@
                 "https://secrets.scottylabs.org/ui/vault/auth/oidc/oidc/callback"
                 "http://localhost:8250/oidc/callback"
               ];
+            };
+
+            # CI authenticates via Forgejo Actions OIDC
+            resource.vault_jwt_auth_backend.forgejo = {
+              path = "jwt";
+              type = "jwt";
+              oidc_discovery_url = "https://git.cmu.dev";
+              bound_issuer = "https://git.cmu.dev";
+            };
+
+            resource.vault_jwt_auth_backend_role.ci = {
+              backend = "\${vault_jwt_auth_backend.forgejo.path}";
+              role_name = "ci";
+              role_type = "jwt";
+              user_claim = "sub";
+              bound_audiences = [ "openbao" ];
+              bound_claims = {
+                repository_owner = "ScottyLabs";
+              };
+              token_policies = [ "\${vault_policy.ci.name}" ];
+              token_ttl = 900;
+              token_max_ttl = 900;
+            };
+
+            resource.vault_policy.ci = {
+              name = "ci";
+              policy = ''
+                path "secret/data/shared/*" {
+                  capabilities = ["read"]
+                }
+                path "secret/data/secretspec/+/ci/*" {
+                  capabilities = ["read"]
+                }
+              '';
             };
 
             # Machine authentication for NixOS hosts
