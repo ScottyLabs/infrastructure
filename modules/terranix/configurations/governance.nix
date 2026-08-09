@@ -196,6 +196,34 @@ in
               name = "BOT_TOKEN";
               data = "\${var.forgejo_token}";
             };
+
+            data.vault_kv_secret_v2.governance_cache_sccache = {
+              mount = "secret";
+              name = "shared/sccache";
+            };
+
+            data.vault_kv_secret_v2.governance_cache_cachix = {
+              mount = "secret";
+              name = "shared/cachix";
+            };
+
+            resource.forgejo_repository_action_secret.aws_access_key_id = {
+              repository_id = "\${data.forgejo_repository.governance.id}";
+              name = "AWS_ACCESS_KEY_ID";
+              data = "\${data.vault_kv_secret_v2.governance_cache_sccache.data[\"AWS_ACCESS_KEY_ID\"]}";
+            };
+
+            resource.forgejo_repository_action_secret.aws_secret_access_key = {
+              repository_id = "\${data.forgejo_repository.governance.id}";
+              name = "AWS_SECRET_ACCESS_KEY";
+              data = "\${data.vault_kv_secret_v2.governance_cache_sccache.data[\"AWS_SECRET_ACCESS_KEY\"]}";
+            };
+
+            resource.forgejo_repository_action_secret.cachix_auth_token = {
+              repository_id = "\${data.forgejo_repository.governance.id}";
+              name = "CACHIX_AUTH_TOKEN";
+              data = "\${data.vault_kv_secret_v2.governance_cache_cachix.data[\"CACHIX_AUTH_TOKEN\"]}";
+            };
           }
         ];
       };
