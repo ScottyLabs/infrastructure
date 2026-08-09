@@ -285,6 +285,7 @@
               scottylabs_assets_writer.name = "scottylabs-assets-writer";
               scottylabs_docs_writer.name = "scottylabs-docs-writer";
               sccache.name = "sccache";
+              sccache_reader.name = "sccache-reader";
             };
 
             resource.garage_bucket_permission = {
@@ -321,6 +322,13 @@
                 bucket_id = "\${garage_bucket.sccache.id}";
                 read = true;
                 write = true;
+                owner = false;
+              };
+              sccache_reader = {
+                access_key_id = "\${garage_key.sccache_reader.id}";
+                bucket_id = "\${garage_bucket.sccache.id}";
+                read = true;
+                write = false;
                 owner = false;
               };
             };
@@ -362,6 +370,14 @@
               };
               scottylabs_docs_writer_secret_access_key = {
                 value = "\${garage_key.scottylabs_docs_writer.secret_access_key}";
+                sensitive = true;
+              };
+              sccache_reader_access_key_id = {
+                value = "\${garage_key.sccache_reader.id}";
+                sensitive = true;
+              };
+              sccache_reader_secret_access_key = {
+                value = "\${garage_key.sccache_reader.secret_access_key}";
                 sensitive = true;
               };
             };

@@ -22,16 +22,6 @@ let
     "CDN_SECRET_ACCESS_KEY"
     "CDN_PUBLIC_URL"
   ];
-
-  # Governance CI secrets that don't have tofu owners
-  kvCiSecrets = [
-    "DISCORD_TOKEN"
-    "SLACK_TOKEN"
-    "MATRIX_ADMIN_TOKEN"
-    "POSTHOG_TOKEN"
-    "POSTHOG_ORGANIZATION_ID"
-    "SIGNING_KEY"
-  ];
 in
 {
   perSystem =
@@ -146,83 +136,25 @@ in
               role = "\${each.value}";
             };
 
-            # CI action secrets for the governance repo since it can't use OpenBao
-            terraform.required_providers.forgejo = {
-              source = "svalabs/forgejo";
-              version = "~> 1.0";
-            };
-            provider.forgejo = {
-              host = "\${var.forgejo_url}";
-              api_token = "\${var.forgejo_token}";
-            };
-            variable.forgejo_url = {
-              type = "string";
-              default = "https://git.cmu.dev";
-            };
             variable.forgejo_token.sensitive = true;
 
-            data.forgejo_repository.governance = {
-              owner = "ScottyLabs";
-              name = "governance";
-            };
-
-            data.vault_kv_secret_v2.governance_ci = {
-              for_each = "\${toset(${builtins.toJSON kvCiSecrets})}";
+            # CI secrets with tofu owners
+            resource.vault_kv_secret_v2.governance_ci_keycloak_client_id = {
               mount = "secret";
-              name = "secretspec/governance/ci/\${each.value}";
+              name = "secretspec/governance/ci/KEYCLOAK_CLIENT_ID";
+              data_json = "\${jsonencode({ value = keycloak_openid_client.governance_cli.client_id })}";
             };
 
-            resource.forgejo_repository_action_secret.governance_ci = {
-              for_each = "\${toset(${builtins.toJSON kvCiSecrets})}";
-              repository_id = "\${data.forgejo_repository.governance.id}";
-              name = "\${each.value}";
-              data = "\${data.vault_kv_secret_v2.governance_ci[each.value].data[\"value\"]}";
-            };
-
-            resource.forgejo_repository_action_secret.keycloak_client_id = {
-              repository_id = "\${data.forgejo_repository.governance.id}";
-              name = "KEYCLOAK_CLIENT_ID";
-              data = "\${keycloak_openid_client.governance_cli.client_id}";
-            };
-
-            resource.forgejo_repository_action_secret.keycloak_client_secret = {
-              repository_id = "\${data.forgejo_repository.governance.id}";
-              name = "KEYCLOAK_CLIENT_SECRET";
-              data = "\${keycloak_openid_client.governance_cli.client_secret}";
-            };
-
-            resource.forgejo_repository_action_secret.bot_token = {
-              repository_id = "\${data.forgejo_repository.governance.id}";
-              name = "BOT_TOKEN";
-              data = "\${var.forgejo_token}";
-            };
-
-            data.vault_kv_secret_v2.governance_cache_sccache = {
+            resource.vault_kv_secret_v2.governance_ci_keycloak_client_secret = {
               mount = "secret";
-              name = "shared/sccache";
+              name = "secretspec/governance/ci/KEYCLOAK_CLIENT_SECRET";
+              data_json = "\${jsonencode({ value = keycloak_openid_client.governance_cli.client_secret })}";
             };
 
-            data.vault_kv_secret_v2.governance_cache_cachix = {
+            resource.vault_kv_secret_v2.governance_ci_bot_token = {
               mount = "secret";
-              name = "shared/cachix";
-            };
-
-            resource.forgejo_repository_action_secret.aws_access_key_id = {
-              repository_id = "\${data.forgejo_repository.governance.id}";
-              name = "AWS_ACCESS_KEY_ID";
-              data = "\${data.vault_kv_secret_v2.governance_cache_sccache.data[\"AWS_ACCESS_KEY_ID\"]}";
-            };
-
-            resource.forgejo_repository_action_secret.aws_secret_access_key = {
-              repository_id = "\${data.forgejo_repository.governance.id}";
-              name = "AWS_SECRET_ACCESS_KEY";
-              data = "\${data.vault_kv_secret_v2.governance_cache_sccache.data[\"AWS_SECRET_ACCESS_KEY\"]}";
-            };
-
-            resource.forgejo_repository_action_secret.cachix_auth_token = {
-              repository_id = "\${data.forgejo_repository.governance.id}";
-              name = "CACHIX_AUTH_TOKEN";
-              data = "\${data.vault_kv_secret_v2.governance_cache_cachix.data[\"CACHIX_AUTH_TOKEN\"]}";
+              name = "secretspec/governance/ci/BOT_TOKEN";
+              data_json = "\${jsonencode({ value = var.forgejo_token })}";
             };
           }
         ];
