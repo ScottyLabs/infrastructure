@@ -3,6 +3,7 @@
     {
       config,
       inputs,
+      lib,
       pkgs,
       ...
     }:
@@ -63,7 +64,10 @@
         secrets.server.connections.default.token_url = config.age.secrets.forgejo-runner-token.path;
       };
 
-      systemd.services.forgejo-runner-scottylabs.environment.SSL_CERT_FILE =
-        "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
+      # GITHUB_WORKSPACE derives from HOME, and the cache actions tar resolved paths relative to it
+      systemd.services.forgejo-runner-scottylabs.environment = {
+        HOME = lib.mkForce "/var/lib/private/forgejo-runner/scottylabs";
+        SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
+      };
     };
 }
