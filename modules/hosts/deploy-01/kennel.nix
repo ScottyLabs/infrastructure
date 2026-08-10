@@ -455,6 +455,15 @@
                 path "secret/metadata/secretspec/+/+/*" {
                   capabilities = ["list", "read"]
                 }
+
+                # Project specs reach shared cache credentials by ref
+                path "secret/data/shared/*" {
+                  capabilities = ["read"]
+                }
+
+                path "secret/metadata/shared/*" {
+                  capabilities = ["list", "read"]
+                }
               '';
             };
 
