@@ -95,7 +95,7 @@
 
         secrets = {
           enable = true;
-          vaultEndpoint = "vault://secrets.scottylabs.org/secret?auth=approle";
+          vaultEndpoint = "openbao://secrets.scottylabs.org/secret?auth=approle";
         };
 
         forgejo.apiTokenFile = config.age.secrets.kennel-forgejo-token.path;
