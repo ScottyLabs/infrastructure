@@ -90,6 +90,7 @@
 
             limits_config = {
               retention_period = cfg.retentionPeriod;
+              max_query_length = cfg.retentionPeriod;
               reject_old_samples = true;
               reject_old_samples_max_age = "168h";
               ingestion_rate_mb = 16;

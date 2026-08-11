@@ -10,12 +10,31 @@
     let
       cfg = config.scottylabs.alloy;
 
-      alloyConfig = pkgs.writeText "scottylabs.alloy" ''
+      configText = pkgs.writeText "scottylabs.alloy.in" ''
         loki.relabel "journal" {
           forward_to = []
           rule {
             source_labels = ["__journal__systemd_unit"]
             target_label  = "unit"
+          }
+          // kennel-build-<project>-<branch> -> unit=kennel-build, project=<project>
+          // Branch kinds gated in kennel's webhook handler
+          rule {
+            source_labels = ["unit"]
+            regex         = "kennel-build-(.+)-(?:main|staging|dev|pr-[0-9]+)\\.service"
+            replacement   = "''${1}"
+            target_label  = "project"
+          }
+          rule {
+            source_labels = ["unit"]
+            regex         = "kennel-build-.+"
+            replacement   = "kennel-build"
+            target_label  = "unit"
+          }
+          // Logs Drilldown pivots on service_name
+          rule {
+            source_labels = ["unit"]
+            target_label  = "service_name"
           }
           rule {
             source_labels = ["__journal_priority_keyword"]
@@ -43,6 +62,13 @@
           }
         }
       '';
+
+      alloyConfig =
+        pkgs.runCommand "scottylabs.alloy" { nativeBuildInputs = [ config.services.alloy.package ]; }
+          ''
+            cp ${configText} $out
+            alloy validate $out
+          '';
     in
     {
       options.scottylabs.alloy = {
