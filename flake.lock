@@ -768,11 +768,11 @@
     "governance": {
       "flake": false,
       "locked": {
-        "lastModified": 1786371112,
-        "narHash": "sha256-rMfRscovppQKeo2O4rcjJzBCH8Uigb3+pCf9OCSBD8g=",
+        "lastModified": 1786404442,
+        "narHash": "sha256-ZsDz751LuilppAibrHNDuTLnjwnBMgQ/VeN5vUd+SnY=",
         "ref": "refs/heads/main",
-        "rev": "8036bc3de972ff2effe70835f41dd5145b90850b",
-        "revCount": 237,
+        "rev": "dc248d6f3456db11b60f8188e307f70b4515f9e0",
+        "revCount": 240,
         "type": "git",
         "url": "https://git.cmu.dev/ScottyLabs/governance"
       },
