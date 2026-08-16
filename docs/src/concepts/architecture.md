@@ -1,6 +1,6 @@
 # Architecture
 
-This repository holds the NixOS configuration for every ScottyLabs machine. `infra-01` runs the shared services (identity, git, secrets, monitoring), `deploy-01` runs the Kennel deployment platform, `signage-01` is a display kiosk, and `snoopy` is a Computer Club virtual machine. Each host's full system is built from a set of small modules that live under `modules/`.
+This repository holds the Nix configuration for every ScottyLabs machine. `infra-01` runs the shared services (identity, git, secrets, monitoring), `deploy-01` runs the Kennel deployment platform, `signage-01` is a display kiosk, and `snoopy` is a Computer Club virtual machine, all running NixOS. `infra-02` is a Mac mini running nix-darwin. Each host's full system is built from a set of small modules that live under `modules/`.
 
 A service is defined in one file and then listed by name on the hosts that should run it.
 
@@ -18,7 +18,7 @@ imports = [
 
 `import-tree ./modules` imports every `.nix` file under `modules/` as a flake-parts module, merging their definitions into one flake-wide configuration.
 
-`flake-parts.flakeModules.modules` adds the `flake.modules` option that those files write into. Modules meant for a NixOS host go under `flake.modules.nixos`. A typical file declares one named entry:
+`flake-parts.flakeModules.modules` adds the `flake.modules` option that those files write into. Modules meant for a NixOS host go under `flake.modules.nixos`, and modules meant for a nix-darwin host go under `flake.modules.darwin`. Home-manager configuration that both platforms share goes under `flake.modules.homeManager` and is imported by each platform's shell module. A typical file declares one named entry:
 
 ```nix
 # modules/global/base.nix
@@ -35,7 +35,7 @@ Each file names its entry after where the file lives:
 - A platform under `modules/platforms/` takes its directory name, so `modules/platforms/campus-cloud/default.nix` declares `campus-cloud`
 - A module under `modules/hosts/<host>/` takes the host as a prefix, so `modules/hosts/infra-01/forgejo.nix` declares `infra-01-forgejo` and `modules/hosts/deploy-01/kennel.nix` declares `deploy-01-kennel`
 
-Every name is unique across the tree. To find the entry a file provides, read its first few lines. Every module across the tree is available as `config.flake.modules.nixos.<name>` in a single flat namespace, regardless of how deeply its file is nested.
+Every name is unique across the tree. To find the entry a file provides, read its first few lines. Every module across the tree is available as `config.flake.modules.nixos.<name>` (or `config.flake.modules.darwin.<name>` for darwin modules) in a single flat namespace, regardless of how deeply its file is nested.
 
 ## Roles
 
@@ -61,17 +61,22 @@ flake.modules.nixos.infra-01.imports = with config.flake.modules.nixos; [
 
 ## Platforms
 
-Each host role includes a platform. Platforms live in `modules/platforms/` and hold the machine-dependent parts of a configuration, such as the boot loader, kernel modules, and disk layout via disko. `campus-cloud` covers the CMU Campus Cloud VMware guests used by `infra-01` and `deploy-01`, `mele-cyber-x1` covers the signage hardware, and `computer-club` covers `snoopy`.
+Each host role includes a platform. Platforms live in `modules/platforms/` and hold the machine-dependent parts of a configuration, such as the boot loader, kernel modules, and disk layout via disko, or on darwin the host architecture and power behaviour. `campus-cloud` covers the CMU Campus Cloud VMware guests used by `infra-01` and `deploy-01`, `mele-cyber-x1` covers the signage hardware, `computer-club` covers `snoopy`, and `mac-mini` covers `infra-02`.
 
 ## Systems and deployment
 
-`modules/systems.nix` produces the `nixosConfigurations` used for local builds and the `colmenaHive` used for deployment. Both come from the same per-host module list, which combines the host role with the global role:
+`modules/systems.nix` produces the `nixosConfigurations` and `darwinConfigurations` used for local builds, and the `colmenaHive` used to deploy every host. Each configuration comes from a per-host module list that combines the host role with the matching global role:
 
 ```nix
 modulesFor = hostname: [ nixos.${hostname} nixos.global ];
+darwinModulesFor = hostname: [ darwin.${hostname} darwin.global ];
 ```
 
-`nixosConfigurations` calls `nixpkgs.lib.nixosSystem` for each host with that module list. `colmenaHive` passes the same list to Colmena and adds deployment settings, so each host is reached over SSH at `<hostname>.scottylabs.org` as the `deploy` user. Both forms receive the same `specialArgs` (`inputs` and the contents of `users.nix`), so a module behaves identically whether it is built locally or deployed.
+`nixosConfigurations` calls `nixpkgs.lib.nixosSystem` for each NixOS host and `darwinConfigurations` calls `nix-darwin.lib.darwinSystem` for each Mac. `colmenaHive` holds both kinds of node, each reached over SSH at `<hostname>.scottylabs.org` as the `deploy` user, with LAN-only hosts jumping through the FQDN in `scottylabs.bastion`. A darwin node also carries `deployment.systemType = "darwin"`, so Colmena builds it with `darwinSystem` and activates it via `darwin-rebuild`. Both host kinds get their `scottylabs.org` A record from the same `scottylabs.ipAddress`, which `modules/terranix/` reads across the whole flake.
+
+Colmena's nix-darwin support is unreleased, so `flake.nix` pins the `colmena` input to the [nix-community/colmena#319](https://github.com/nix-community/colmena/pull/319) branch until it merges.
+
+Every form receives the same `specialArgs` (`inputs` and the contents of `users.nix`), so a module behaves identically whether it is built locally or deployed.
 
 ## Imported modules and enable flags
 

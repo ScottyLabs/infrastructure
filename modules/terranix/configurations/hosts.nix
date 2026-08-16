@@ -15,11 +15,17 @@
           config.flake.modules.terranix.s3-state
           {
             terraform.backend.s3.key = "services/hosts.tfstate";
-            dns = lib.mapAttrs (name: host: {
-              target = host.config.scottylabs.ipAddress;
-              type = "A";
-              comment = "NixOS host ${name}";
-            }) inputs.self.nixosConfigurations;
+            dns =
+              (lib.mapAttrs (name: host: {
+                target = host.config.scottylabs.ipAddress;
+                type = "A";
+                comment = "NixOS host ${name}";
+              }) inputs.self.nixosConfigurations)
+              // (lib.mapAttrs (name: host: {
+                target = host.config.scottylabs.ipAddress;
+                type = "A";
+                comment = "darwin host ${name}";
+              }) inputs.self.darwinConfigurations);
           }
         ];
       };

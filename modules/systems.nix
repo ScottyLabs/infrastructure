@@ -6,6 +6,7 @@
 }:
 let
   nixos = config.flake.modules.nixos;
+  darwin = config.flake.modules.darwin;
   users = import ../users.nix;
 
   hosts = [
@@ -15,11 +16,20 @@ let
     "snoopy"
   ];
 
+  darwinHosts = [
+    "infra-02"
+  ];
+
   specialArgs = { inherit inputs users; };
 
   modulesFor = hostname: [
     nixos.${hostname}
     nixos.global
+  ];
+
+  darwinModulesFor = hostname: [
+    darwin.${hostname}
+    darwin.global
   ];
 in
 {
@@ -32,10 +42,20 @@ in
     }
   );
 
+  flake.darwinConfigurations = lib.genAttrs darwinHosts (
+    hostname:
+    inputs.nix-darwin.lib.darwinSystem {
+      inherit specialArgs;
+      modules = darwinModulesFor hostname;
+    }
+  );
+
   flake.colmenaHive = inputs.colmena.lib.makeHive (
     {
       meta = {
         nixpkgs = import inputs.nixpkgs { system = "x86_64-linux"; };
+        inherit (inputs) nix-darwin;
+        nodeNixpkgs = lib.genAttrs darwinHosts (_: import inputs.nixpkgs { system = "aarch64-darwin"; });
         inherit specialArgs;
       };
     }
@@ -54,6 +74,24 @@ in
           ];
         };
         imports = modulesFor hostname;
+      }
+    )
+    // lib.genAttrs darwinHosts (
+      hostname:
+      let
+        bastion = config.flake.darwinConfigurations.${hostname}.config.scottylabs.bastion;
+      in
+      {
+        deployment = {
+          systemType = "darwin";
+          targetHost = "${hostname}.scottylabs.org";
+          targetUser = "deploy";
+          sshOptions = lib.optionals (bastion != null) [
+            "-J"
+            "deploy@${bastion}"
+          ];
+        };
+        imports = darwinModulesFor hostname;
       }
     )
   );

@@ -32,4 +32,23 @@
         { srvos.flake = inputs.self; }
       ];
   };
+
+  # Base layer composed onto every darwin host
+  flake.modules.darwin.global =
+    { pkgs, ... }:
+    {
+      imports = [
+        config.flake.modules.darwin.ip-address
+        config.flake.modules.darwin.shell
+        inputs.home-manager.darwinModules.home-manager
+        inputs.nix-homebrew.darwinModules.nix-homebrew
+      ];
+
+      # Nix
+      nix.package = pkgs.lixPackageSets.stable.lix;
+      nix.settings.experimental-features = "nix-command flakes";
+
+      # Set Git commit hash for darwin-version
+      system.configurationRevision = inputs.self.rev or inputs.self.dirtyRev or null;
+    };
 }
