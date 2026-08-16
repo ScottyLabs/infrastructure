@@ -23,6 +23,23 @@
         "type": "github"
       }
     },
+    "brew-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1786348930,
+        "narHash": "sha256-bCQJkbgsAMDp5HQystZLCq11UHiyEuoWbxKulAPYrh8=",
+        "owner": "Homebrew",
+        "repo": "brew",
+        "rev": "3ecc9eff23feebf1bc73846d74e14a122c93b66f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Homebrew",
+        "ref": "6.0.16",
+        "repo": "brew",
+        "type": "github"
+      }
+    },
     "cachix": {
       "inputs": {
         "devenv": [
@@ -165,15 +182,16 @@
         "stable": "stable"
       },
       "locked": {
-        "lastModified": 1785930890,
-        "narHash": "sha256-QN4Oy1B4Vma9DiMyXiyssrpgMuIPgkNyO8jb6k2H4oY=",
-        "owner": "zhaofengli",
+        "lastModified": 1782874432,
+        "narHash": "sha256-oSezg20de4iVtDPjfXlUL+jXvz3fcfpBdK/dutY9Bs8=",
+        "owner": "zw3rk",
         "repo": "colmena",
-        "rev": "a156fd9146e69a577fe6f5542a7c6ed83a6888ce",
+        "rev": "a6bdf1e2228b6bd00a7e13a4d5dfb5169f48ab82",
         "type": "github"
       },
       "original": {
-        "owner": "zhaofengli",
+        "owner": "zw3rk",
+        "ref": "a6bdf1e2228b",
         "repo": "colmena",
         "type": "github"
       }
@@ -982,6 +1000,27 @@
         "type": "github"
       }
     },
+    "nix-darwin": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1786845137,
+        "narHash": "sha256-oQFip+v0luP8NIxJzmiW4Wu8bILsbFWom5l0zonl8hQ=",
+        "owner": "nix-darwin",
+        "repo": "nix-darwin",
+        "rev": "4cff07de74b50e64bdd68cd4e722ab5b6b35ee48",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-darwin",
+        "ref": "master",
+        "repo": "nix-darwin",
+        "type": "github"
+      }
+    },
     "nix-github-actions": {
       "inputs": {
         "nixpkgs": [
@@ -1000,6 +1039,24 @@
       "original": {
         "owner": "nix-community",
         "repo": "nix-github-actions",
+        "type": "github"
+      }
+    },
+    "nix-homebrew": {
+      "inputs": {
+        "brew-src": "brew-src"
+      },
+      "locked": {
+        "lastModified": 1786686423,
+        "narHash": "sha256-8q3WdB8o3VUI7rOz1OXfioXIaaWbFTAxRJAkWLlfc0s=",
+        "owner": "zhaofengli",
+        "repo": "nix-homebrew",
+        "rev": "ccabf79a6b9845eb72b51ea1d9c7ce3446350df3",
+        "type": "github"
+      },
+      "original": {
+        "owner": "zhaofengli",
+        "repo": "nix-homebrew",
         "type": "github"
       }
     },
@@ -1504,6 +1561,8 @@
         "keycloak-theme": "keycloak-theme",
         "llm-pkgs": "llm-pkgs",
         "ncro": "ncro",
+        "nix-darwin": "nix-darwin",
+        "nix-homebrew": "nix-homebrew",
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs_4",
         "nixpkgs-forgejo-runner": "nixpkgs-forgejo-runner",

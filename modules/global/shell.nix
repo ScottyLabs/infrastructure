@@ -1,8 +1,8 @@
+{ config, ... }:
 {
   flake.modules.nixos.shell =
     {
       lib,
-      pkgs,
       users,
       ...
     }:
@@ -41,48 +41,80 @@
       home-manager.useUserPackages = true;
       home-manager.backupFileExtension = "backup";
 
-      home-manager.users = lib.genAttrs (builtins.attrNames users) (_: {
-        home.stateVersion = "25.11";
-        home.packages = with pkgs; [
-          eza
-          bat
-          fastfetch
+      home-manager.users = lib.genAttrs (builtins.attrNames users) (
+        _: config.flake.modules.homeManager.shell
+      );
+    };
+
+  flake.modules.darwin.shell =
+    { users, ... }:
+    {
+      # deploy account colmena connects as
+      users.knownUsers = [ "deploy" ];
+      users.users.deploy = {
+        uid = 550;
+        gid = 20;
+        home = "/Users/deploy";
+        createHome = true;
+        shell = "/bin/zsh";
+        ignoreShellProgramCheck = true;
+        openssh.authorizedKeys.keys = builtins.attrValues users;
+      };
+
+      security.sudo.extraConfig = "deploy ALL=(ALL) NOPASSWD: ALL";
+
+      nix.settings.trusted-users = [ "deploy" ];
+
+      home-manager.useGlobalPkgs = true;
+      home-manager.useUserPackages = true;
+      home-manager.backupFileExtension = "backup";
+
+      home-manager.users.deploy = config.flake.modules.homeManager.shell;
+    };
+
+  flake.modules.homeManager.shell =
+    { lib, pkgs, ... }:
+    {
+      home.stateVersion = "25.11";
+      home.packages = with pkgs; [
+        eza
+        bat
+        fastfetch
+      ];
+
+      programs.zsh = {
+        enable = true;
+        enableCompletion = true;
+
+        shellAliases = {
+          cat = "bat --style=plain --paging=never";
+        };
+
+        initContent = lib.mkMerge [
+          (lib.mkBefore ''
+            zstyle ':omz:plugins:eza' 'git-status' yes
+            zstyle ':omz:plugins:eza' 'icons' yes
+          '')
+          ''
+            fastfetch
+          ''
         ];
 
-        programs.zsh = {
+        oh-my-zsh = {
           enable = true;
-          enableCompletion = true;
-
-          shellAliases = {
-            cat = "bat --style=plain --paging=never";
-          };
-
-          initContent = lib.mkMerge [
-            (lib.mkBefore ''
-              zstyle ':omz:plugins:eza' 'git-status' yes
-              zstyle ':omz:plugins:eza' 'icons' yes
-            '')
-            ''
-              fastfetch
-            ''
-          ];
-
-          oh-my-zsh = {
-            enable = true;
-            plugins = [ "eza" ];
-          };
+          plugins = [ "eza" ];
         };
+      };
 
-        programs.starship = {
-          enable = true;
-          enableZshIntegration = true;
-        };
+      programs.starship = {
+        enable = true;
+        enableZshIntegration = true;
+      };
 
-        programs.zoxide = {
-          enable = true;
-          enableZshIntegration = true;
-          options = [ "--cmd cd" ];
-        };
-      });
+      programs.zoxide = {
+        enable = true;
+        enableZshIntegration = true;
+        options = [ "--cmd cd" ];
+      };
     };
 }

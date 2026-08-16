@@ -70,6 +70,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # infra-02
+    nix-darwin = {
+      url = "github:nix-darwin/nix-darwin/master";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    nix-homebrew.url = "github:zhaofengli/nix-homebrew";
+
     governance = {
       url = "git+https://git.cmu.dev/ScottyLabs/governance";
       flake = false;
@@ -78,8 +85,9 @@
     # Flake infrastructure
     flake-parts.url = "github:hercules-ci/flake-parts";
     import-tree.url = "github:vic/import-tree";
+    # nix-community/colmena#319 (nix-darwin support) until it merges upstream
     colmena = {
-      url = "github:zhaofengli/colmena";
+      url = "github:zw3rk/colmena/a6bdf1e2228b";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     terranix = {

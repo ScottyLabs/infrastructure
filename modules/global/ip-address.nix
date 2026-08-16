@@ -1,5 +1,5 @@
-{
-  flake.modules.nixos.ip-address =
+let
+  ipAddress =
     { lib, ... }:
     {
       options.scottylabs.ipAddress = lib.mkOption {
@@ -13,4 +13,8 @@
         description = "Jump host FQDN for LAN-only nodes unreachable directly from a deployer";
       };
     };
+in
+{
+  flake.modules.nixos.ip-address = ipAddress;
+  flake.modules.darwin.ip-address = ipAddress;
 }
