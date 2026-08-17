@@ -1,4 +1,7 @@
 { config, ... }:
+let
+  hm = config.flake.modules.homeManager.shell;
+in
 {
   flake.modules.nixos.shell =
     {
@@ -41,13 +44,11 @@
       home-manager.useUserPackages = true;
       home-manager.backupFileExtension = "backup";
 
-      home-manager.users = lib.genAttrs (builtins.attrNames users) (
-        _: config.flake.modules.homeManager.shell
-      );
+      home-manager.users = lib.genAttrs (builtins.attrNames users) (_: hm);
     };
 
   flake.modules.darwin.shell =
-    { users, ... }:
+    { config, users, ... }:
     {
       # deploy account colmena connects as
       users.knownUsers = [ "deploy" ];
@@ -76,7 +77,10 @@
       home-manager.useUserPackages = true;
       home-manager.backupFileExtension = "backup";
 
-      home-manager.users.deploy = config.flake.modules.homeManager.shell;
+      # admin home path so home-manager can target the account
+      users.users.${config.system.primaryUser}.home = "/Users/${config.system.primaryUser}";
+      home-manager.users.${config.system.primaryUser} = hm;
+      home-manager.users.deploy = hm;
     };
 
   flake.modules.homeManager.shell =
