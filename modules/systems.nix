@@ -84,6 +84,8 @@ in
       {
         deployment = {
           systemType = "darwin";
+          # x86_64 deployers cannot cross-build darwin, and the mini can build itself
+          buildOnTarget = true;
           targetHost = "${hostname}.scottylabs.org";
           targetUser = "deploy";
           sshOptions = lib.optionals (bastion != null) [
