@@ -16,6 +16,9 @@
       # i915 GuC/DMC firmware for the Alder Lake-N iGPU
       hardware.enableRedistributableFirmware = true;
 
+      # KMS before plymouth, else simpledrm handover kills the splash
+      boot.initrd.kernelModules = [ "i915" ];
+
       # QEMU
       virtualisation.vmVariant = {
         virtualisation.qemu.options = [
