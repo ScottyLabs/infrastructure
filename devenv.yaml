@@ -2,7 +2,7 @@ inputs:
   nixpkgs:
     url: github:nixos/nixpkgs/nixos-unstable
   colmena:
-    url: github:zhaofengli/colmena
+    url: github:zw3rk/colmena/a6bdf1e2228b6bd00a7e13a4d5dfb5169f48ab82
     inputs:
       nixpkgs:
         follows: nixpkgs
