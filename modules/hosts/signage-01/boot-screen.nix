@@ -1,16 +1,29 @@
 {
   flake.modules.nixos.signage-01-boot-screen =
-    { lib, pkgs, ... }:
+    {
+      config,
+      lib,
+      pkgs,
+      ...
+    }:
 
     {
-      # Fix grub res
-      boot.loader.grub.gfxmodeEfi = "3840x2160";
-      boot.loader.grub.gfxpayloadEfi = "keep";
-
-      # No more grub menu
       boot.loader.timeout = lib.mkForce 0;
-      boot.loader.grub.timeoutStyle = "hidden";
-      boot.loader.grub.splashImage = null;
+
+      # udev-trigger returns before i915 binds, so splash can race KMS
+      boot.initrd.systemd.services.plymouth-start.after = [ "systemd-modules-load.service" ];
+
+      # Hold the splash on screen until cage launches
+      systemd.services.plymouth-quit.serviceConfig.ExecStart = [
+        ""
+        "${config.boot.plymouth.package}/bin/plymouth quit --retain-splash"
+      ];
+
+      # These tty resets would wipe the retained splash
+      systemd.services.cage-tty1.serviceConfig = {
+        TTYReset = lib.mkForce "no";
+        TTYVTDisallocate = lib.mkForce "no";
+      };
 
       # Quiet boot
       boot.consoleLogLevel = 0;
