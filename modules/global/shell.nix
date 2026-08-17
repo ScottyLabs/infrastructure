@@ -65,6 +65,13 @@
 
       nix.settings.trusted-users = [ "deploy" ];
 
+      # grant deploy SSH access when Remote Login is restricted to specific users
+      system.activationScripts.postActivation.text = ''
+        if /usr/sbin/dseditgroup -o read com.apple.access_ssh >/dev/null 2>&1; then
+          /usr/sbin/dseditgroup -o edit -a deploy -t user com.apple.access_ssh
+        fi
+      '';
+
       home-manager.useGlobalPkgs = true;
       home-manager.useUserPackages = true;
       home-manager.backupFileExtension = "backup";
