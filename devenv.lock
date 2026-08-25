@@ -871,6 +871,9 @@
         "devenv": "devenv",
         "git-hooks": "git-hooks",
         "nixpkgs": "nixpkgs",
+        "pre-commit-hooks": [
+          "git-hooks"
+        ],
         "scottylabs": "scottylabs",
         "treefmt-nix": "treefmt-nix_4"
       }
