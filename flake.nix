@@ -50,11 +50,6 @@
       url = "git+https://tangled.org/isabelroses.com/snot";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # TODO: https://github.com/NixOS/nixpkgs/pull/529621
-    nixpkgs-forgejo-runner = {
-      url = "github:emilylange/nixpkgs?ref=nixos/forgejo-runner";
-      flake = false;
-    };
     catppuccin = {
       url = "github:catppuccin/nix";
       inputs.nixpkgs.follows = "nixpkgs";

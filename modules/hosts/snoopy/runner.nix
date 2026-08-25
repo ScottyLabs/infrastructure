@@ -9,10 +9,6 @@
     }:
 
     {
-      imports = [
-        "${inputs.nixpkgs-forgejo-runner}/nixos/modules/services/continuous-integration/forgejo-runner.nix"
-      ];
-
       age.secrets.forgejo-runner-token = {
         file = ../../../secrets/snoopy/forgejo-runner-token.age;
         mode = "0400";
