@@ -22,7 +22,10 @@
         enable = true;
         package = pkgs.forgejo;
         lfs.enable = true;
-        dump.enable = true;
+        dump = {
+          enable = true;
+          interval = "*-*-1/3 04:31:00"; # every 3 days
+        };
 
         database = {
           type = "postgres";
@@ -162,6 +165,24 @@
         "L+ ${config.services.forgejo.customDir}/public/assets/img/logo.svg - - - - ${./logo.svg}"
         "L+ ${config.services.forgejo.customDir}/public/assets/img/favicon.svg - - - - ${./logo.svg}"
       ];
+
+      # Delete Forgejo dumps older than 30 days
+      systemd.services.forgejo-dump-cleanup = {
+        description = "Clean up Forgejo dumps older than 30 days";
+        serviceConfig = {
+          Type = "oneshot";
+          User = "forgejo";
+          ExecStart = "${pkgs.findutils}/bin/find ${stateDir}/dump -name '*.zip' -mtime +30 -delete";
+        };
+      };
+
+      systemd.timers.forgejo-dump-cleanup = {
+        wantedBy = [ "timers.target" ];
+        timerConfig = {
+          OnCalendar = "daily";
+          Persistent = true;
+        };
+      };
 
       # Keycloak OIDC client_secret from OpenBao
       systemd.services.forgejo = {
