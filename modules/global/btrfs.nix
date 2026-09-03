@@ -56,5 +56,20 @@
         from = 600;
       };
     }
+    {
+      name = "disk-usage-warning";
+      source = grafana.thresholdAlert {
+        name = "hosts";
+        uid = "infra-disk-usage-warning";
+        title = "disk usage >75%";
+        expr = "1 - (node_filesystem_avail_bytes{mountpoint=\"/\",fstype!=\"tmpfs\"} / node_filesystem_size_bytes{mountpoint=\"/\",fstype!=\"tmpfs\"})";
+        threshold = 0.75;
+        op = "gt";
+        severity = "warning";
+        summary = "{{ $labels.instance }} / is {{ $values.A.Value | humanizePercentage }} full - investigate before hitting btrfs allocation limit";
+        duration = "10m";
+        from = 600;
+      };
+    }
   ];
 }
