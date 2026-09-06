@@ -243,6 +243,29 @@
           ];
         };
       }
+      {
+        name = "slack-critical";
+        source = {
+          apiVersion = 1;
+          contactPoints = [
+            {
+              orgId = 1;
+              name = "slack-critical";
+              receivers = [
+                {
+                  uid = "slack-critical";
+                  type = "slack";
+                  settings = {
+                    url = "$__file{/run/secrets/slack-webhook-alerts}";
+                    username = "Grafana";
+                    mention_channel = "channel";
+                  };
+                }
+              ];
+            }
+          ];
+        };
+      }
     ];
     policies = [
       {
@@ -263,8 +286,11 @@
               repeat_interval = "4h";
               routes = [
                 {
+                  receiver = "slack-critical";
+                  matchers = [ "severity = critical" ];
+                }
+                {
                   receiver = "slack";
-                  continue = true;
                 }
               ];
             }
