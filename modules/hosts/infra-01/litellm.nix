@@ -22,6 +22,17 @@
           printf 'CLI_PROXY_API_KEY=%s\n' "$(cat ${cfg.cliProxyApiKeyFile})"
         } > ${cfg.runtimeEnvFile}
       '';
+      expressionPkg = pkgs.python313Packages.buildPythonPackage {
+        pname = "expression";
+        version = "5.7.0";
+        format = "wheel";
+        src = pkgs.fetchurl {
+          url = "https://files.pythonhosted.org/packages/07/9d/790e25dcba0b299f9a756ae2dcc52a705be07bd1c3fd54267ade0521bea6/expression-5.7.0-py3-none-any.whl";
+          hash = "sha256-2NkDy53cslLb1kYS4ym9hvCddwx4Eur4+cwLn45kgL0=";
+        };
+        propagatedBuildInputs = [ pkgs.python313Packages.typing-extensions ];
+        doCheck = false;
+      };
     in
     {
       imports = [ inputs.llm-pkgs.nixosModules.litellm ];
@@ -193,6 +204,8 @@
 
             # Redirect the login form straight to Keycloak
             AUTO_REDIRECT_UI_LOGIN_TO_SSO = "true";
+
+            PYTHONPATH = "${expressionPkg}/lib/python3.13/site-packages";
           };
 
           settings = lib.recursiveUpdate {
