@@ -8,7 +8,14 @@
     }:
 
     {
+      # Inform kernel of the resolution
+      boot.loader.grub.gfxmodeEfi = "3840x2160";
+      boot.loader.grub.gfxpayloadEfi = "keep";
+
+      # Disable default grub artwork
       boot.loader.timeout = lib.mkForce 0;
+      boot.loader.grub.timeoutStyle = "hidden";
+      boot.loader.grub.splashImage = null;
 
       # udev-trigger returns before i915 binds, so splash can race KMS
       boot.initrd.systemd.services.plymouth-start.after = [ "systemd-modules-load.service" ];
@@ -23,7 +30,11 @@
       systemd.services.cage-tty1.serviceConfig = {
         TTYReset = lib.mkForce "no";
         TTYVTDisallocate = lib.mkForce "no";
+        TTYVHangup = lib.mkForce "no";
       };
+
+      # Bypass getty login prompt
+      systemd.targets.getty.wants = lib.mkForce [ ];
 
       # Quiet boot
       boot.consoleLogLevel = 0;
@@ -31,7 +42,13 @@
         "bgrt_disable"
         "quiet"
         "udev.log_level=0"
+        "rd.udev.log_level=0"
+        "systemd.show_status=false"
+        "rd.systemd.show_status=false"
         "vt.global_cursor_default=0"
+        # srvos puts a serial console on the cmdline
+        "plymouth.ignore-serial-consoles"
+        "initcall_blacklist=simpledrm_platform_driver_init"
       ];
 
       # Splash screen
