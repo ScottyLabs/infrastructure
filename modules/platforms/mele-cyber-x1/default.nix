@@ -1,13 +1,21 @@
 { config, ... }:
 {
   flake.modules.nixos.mele-cyber-x1 =
-    { inputs, ... }:
+    { ... }:
     {
       imports = [
         config.flake.modules.nixos.mele-cyber-x1-disk
         config.flake.modules.nixos.zram-swap
-        inputs.srvos.nixosModules.mixins-systemd-boot
       ];
+
+      # Use grub instead of systemd-boot default
+      boot.loader.grub = {
+        enable = true;
+        efiSupport = true;
+        device = "nodev";
+        configurationLimit = 10;
+      };
+      boot.loader.efi.canTouchEfiVariables = true;
 
       # Needed for Wayland/cage compositor
       hardware.graphics.enable = true;
