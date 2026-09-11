@@ -14,6 +14,41 @@
       signingKeyPriv = "${stateDir}/.ssh/signing_ed25519";
       signingKeyPub = "${signingKeyPriv}.pub";
       signingPubKey = pkgs.writeText "forgejo-signing.pub" "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHIq2XYZ218T07NQbBXLCT8H+h3GVv/tqS63dnMBjCdp cmu.dev commit signing";
+      robotsTxt = pkgs.writeText "forgejo-robots.txt" ''
+        # Custom robots.txt for git.cmu.dev
+        # Based on Forgejo default; archive/ added to prevent crawlers from
+        # generating and permanently caching large S3 bundles per unique commit hash.
+        # See: https://forgejo.org/docs/latest/admin/search-engines-indexation/
+
+        User-agent: *
+        Disallow: /api/
+        Disallow: /avatars/
+        Disallow: /user/
+        Disallow: /swagger.*.json
+        Disallow: /explore/*?*
+
+        Disallow: /repo/create
+        Disallow: /repo/migrate
+        Disallow: /org/create
+        Disallow: /*/*/fork
+
+        Disallow: /*/*/watchers
+        Disallow: /*/*/stargazers
+        Disallow: /*/*/forks
+
+        Disallow: /*/*/src/
+        Disallow: /*/*/blame/
+        Disallow: /*/*/commit/
+        Disallow: /*/*/commits/
+        Disallow: /*/*/raw/
+        Disallow: /*/*/media/
+        Disallow: /*/*/tags
+        Disallow: /*/*/graph
+        Disallow: /*/*/branches
+        Disallow: /*/*/compare
+        Disallow: /*/*/lastcommit/
+        Disallow: /*/*/archive/
+      '';
     in
     {
       imports = [ inputs.catppuccin.nixosModules.catppuccin ];
@@ -54,6 +89,7 @@
             DEFAULT_PUSH_CREATE_PRIVATE = false;
             ENABLE_PUSH_CREATE_USER = true;
             ENABLE_PUSH_CREATE_ORG = true;
+            DISABLE_DOWNLOAD_SOURCE_ARCHIVES = true;
           };
 
           # Instance-signed commits Forgejo generates
@@ -164,6 +200,7 @@
         "d ${config.services.forgejo.customDir}/public/assets/img 0755 forgejo forgejo -"
         "L+ ${config.services.forgejo.customDir}/public/assets/img/logo.svg - - - - ${./logo.svg}"
         "L+ ${config.services.forgejo.customDir}/public/assets/img/favicon.svg - - - - ${./logo.svg}"
+        "L+ ${config.services.forgejo.customDir}/public/robots.txt - - - - ${robotsTxt}"
       ];
 
       # Delete Forgejo dumps older than 30 days
