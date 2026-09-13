@@ -24,7 +24,7 @@
         lfs.enable = true;
         dump = {
           enable = true;
-          interval = "*-*-1/3 04:31:00"; # every 3 days
+          interval = "*-*-1/3 04:31:00";
         };
 
         database = {
@@ -174,6 +174,10 @@
           User = "forgejo";
           ExecStart = "${pkgs.findutils}/bin/find ${stateDir}/dump -name '*.zip' -mtime +30 -delete";
         };
+      };
+
+      systemd.timers.forgejo-dump = {
+        timerConfig.OnCalendar = lib.mkForce "*-*-1/3 04:31:00";
       };
 
       systemd.timers.forgejo-dump-cleanup = {

@@ -41,6 +41,10 @@
         persistent = true;
       };
 
+      nix.settings = {
+        min-free = 10 * 1024 * 1024 * 1024;
+        max-free = 20 * 1024 * 1024 * 1024;
+      };
       # Local journal buffer only, history ships to Loki via alloy
       services.journald.extraConfig = "SystemMaxUse=500M";
 

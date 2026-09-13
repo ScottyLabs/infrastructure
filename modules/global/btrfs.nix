@@ -31,7 +31,7 @@
         onCalendar = "*-*-* 03:00:00"; # after daily nix.gc at 00:00
         settings = {
           snapshot_preserve_min = "2d"; # always keep at least 2 days
-          snapshot_preserve = "7d";
+          snapshot_preserve = "3d";
           volume."/mnt/btrfs-root" = {
             snapshot_dir = ".snapshots"; # Store snapshots in /.snapshots
             subvolume."@".snapshot_create = "always"; # Snapshot root
