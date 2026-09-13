@@ -107,6 +107,8 @@
             enable_metrics = true;
             registration_shared_secret_path = cfg.synapse.registrationSecretFile;
 
+            media_retention.remote_media_lifetime = "5d";
+
             trusted_key_servers = [
               {
                 server_name = "matrix.org";
