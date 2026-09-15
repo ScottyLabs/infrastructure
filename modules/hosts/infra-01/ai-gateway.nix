@@ -1,17 +1,9 @@
 { config, ... }:
 {
   flake.modules.nixos.infra-01-ai-gateway =
-    {
-      config,
-      inputs,
-      ...
-    }:
+    { config, ... }:
 
     {
-      imports = [
-        inputs.llm-pkgs.nixosModules.cliproxyapi
-      ];
-
       age.secrets.cli-proxy-api.file = ../../../secrets/infra-01/cli-proxy-api.age;
 
       services.cliproxyapi = {
@@ -74,20 +66,20 @@
             };
           in
           map passthrough [
+            "claude-fable-5-1"
+            "claude-fable-5"
             "claude-opus-5"
             "claude-opus-4-8"
             "claude-opus-4-7"
             "claude-opus-4-6"
-            "claude-fable-5"
             "claude-sonnet-5"
             "claude-sonnet-4-6"
             "claude-haiku-4-5-20251001"
+            "gpt-6-astra"
             "gpt-5.6-sol"
             "gpt-5.6-terra"
             "gpt-5.6-luna"
             "gpt-5.5"
-            "gpt-5.4"
-            "gpt-5.4-mini"
             "codex-auto-review"
           ];
       };

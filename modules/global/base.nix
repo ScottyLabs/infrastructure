@@ -46,7 +46,7 @@
         max-free = 20 * 1024 * 1024 * 1024;
       };
       # Local journal buffer only, history ships to Loki via alloy
-      services.journald.extraConfig = "SystemMaxUse=500M";
+      services.journald.settings.Journal.SystemMaxUse = "500M";
 
       assertions = [
         {
