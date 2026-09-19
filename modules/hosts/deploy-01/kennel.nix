@@ -68,6 +68,8 @@
               "cmugpt.com" = "dfe11e930ca4ef3d94cd9f79072315cd";
               "tartan.vote" = "97416783adc55489c6f601bbfaa48936";
               "terrier.build" = "5ec9401ebede43c78ad0167fefd3b862";
+              "cmucal.com" = "b485862979e222b68b5980cc50e8c63b";
+              "cmustudy.com" = "3b8197fed31cd2c5f52b2bbbe8b1fa0f";
             };
           };
         };
