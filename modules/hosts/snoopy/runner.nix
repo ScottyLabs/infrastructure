@@ -44,8 +44,7 @@
 
         settings = {
           runner = {
-            capacity = 4;
-            labels = [ "native:host" ];
+            capacity = 1;
           };
           cache = {
             enabled = true;
