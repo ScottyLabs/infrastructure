@@ -1,4 +1,7 @@
 let
+  # CMU Entra tenant
+  cmuEntra = "https://login.microsoftonline.com/e36ee38f-91b8-4dca-9b13-caa5360c9714";
+
   # claim -> user attribute importer for an OIDC IdP
   oidcMapper = alias: attr: claim: {
     realm = "\${data.keycloak_realm.scottylabs.id}";
@@ -66,14 +69,6 @@ in
           name = "infra/forgejo-idp";
         };
 
-        resource.keycloak_oidc_identity_provider.codeberg = forgejoIdp {
-          alias = "codeberg";
-          display_name = "Codeberg";
-          base = "https://codeberg.org";
-          client_id = "63438ffe-847f-4467-a3ac-b795bc56fd5e";
-          client_secret = "\${data.vault_kv_secret_v2.keycloak_idp.data[\"CODEBERG_CLIENT_SECRET\"]}";
-        };
-
         resource.keycloak_oidc_identity_provider.slack = oidcIdp {
           alias = "slack";
           display_name = "Slack";
@@ -106,20 +101,41 @@ in
           default_scopes = "openid profile email";
         };
 
+        resource.keycloak_oidc_identity_provider.cmu = {
+          realm = "\${data.keycloak_realm.scottylabs.id}";
+          alias = "cmu";
+          display_name = "CMU";
+          store_token = true;
+          trust_email = true;
+          sync_mode = "IMPORT";
+          first_broker_login_flow_alias = "Auto-link LDAP users";
+          post_broker_login_flow_alias = "SAML post login";
+          backchannel_supported = false;
+          validate_signature = true;
+          client_id = "9e6c9456-6584-42aa-8d2a-1ba4e45dd0a6";
+          client_secret = "\${data.vault_kv_secret_v2.keycloak_idp.data[\"CMU_CLIENT_SECRET\"]}";
+          authorization_url = "${cmuEntra}/oauth2/v2.0/authorize";
+          token_url = "${cmuEntra}/oauth2/v2.0/token";
+          logout_url = "${cmuEntra}/oauth2/v2.0/logout";
+          user_info_url = "https://graph.microsoft.com/oidc/userinfo";
+          jwks_url = "${cmuEntra}/discovery/v2.0/keys";
+          issuer = "${cmuEntra}/v2.0";
+          default_scopes = "openid profile email offline_access";
+          extra_config = {
+            clientAuthMethod = "client_secret_post";
+            pkceEnabled = "true";
+            pkceMethod = "S256";
+            # auto-link keys on the localpart, so reject non-Andrew usernames
+            filteredByClaim = "true";
+            claimFilterName = "preferred_username";
+            claimFilterValue = "(?i)[^@]+@andrew\\.cmu\\.edu";
+          };
+        };
+
         # TODO: https://git.cmu.dev/ScottyLabs/infrastructure/issues/83
         # TODO: discord IdP unavailable without the keycloak-discord server plugin
 
         resource.keycloak_custom_identity_provider_mapper = {
-          codeberg_id = oidcMapper "\${keycloak_oidc_identity_provider.codeberg.alias}" "codeberg_id" "sub";
-          codeberg_username =
-            oidcMapper "\${keycloak_oidc_identity_provider.codeberg.alias}" "codeberg_username"
-              "preferred_username";
-          codeberg_email =
-            oidcMapper "\${keycloak_oidc_identity_provider.codeberg.alias}" "codeberg_email"
-              "email";
-          codeberg_name =
-            oidcMapper "\${keycloak_oidc_identity_provider.codeberg.alias}" "codeberg_name"
-              "name";
           slack_id =
             oidcMapper "\${keycloak_oidc_identity_provider.slack.alias}" "slack_id"
               "https://slack\\.com/user_id";
@@ -178,6 +194,18 @@ in
               claim = "name";
               "user.attribute" = "cmudev_name";
               syncMode = "FORCE";
+            };
+          };
+          cmu_username = {
+            realm = "\${data.keycloak_realm.scottylabs.id}";
+            name = "username";
+            identity_provider_alias = "\${keycloak_oidc_identity_provider.cmu.alias}";
+            identity_provider_mapper = "oidc-username-idp-mapper";
+            extra_config = {
+              # andrewid@andrew.cmu.edu -> andrewid, matching LDAP
+              template = "$\${CLAIM.preferred_username | localpart}";
+              target = "BROKER_USERNAME";
+              syncMode = "INHERIT";
             };
           };
         };
