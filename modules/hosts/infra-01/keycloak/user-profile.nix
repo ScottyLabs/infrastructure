@@ -291,10 +291,6 @@ in
             (metaAttr "google_id" "Google ID")
             (metaAttr "google_email" "Google Email")
             (metaAttr "google_name" "Google Name")
-            (metaAttr "github_id" "GitHub ID")
-            (metaAttr "github_username" "GitHub Username")
-            (metaAttr "github_email" "GitHub Email")
-            (metaAttr "github_name" "GitHub Name")
           ];
           group = [
             {

@@ -15,19 +15,6 @@ let
     };
   };
 
-  # GitHub /user json field -> user attribute importer
-  githubMapper = attr: field: {
-    realm = "\${data.keycloak_realm.scottylabs.id}";
-    name = attr;
-    identity_provider_alias = "github";
-    identity_provider_mapper = "github-user-attribute-mapper";
-    extra_config = {
-      jsonField = field;
-      userAttribute = attr;
-      syncMode = "FORCE";
-    };
-  };
-
   oidcIdp =
     args:
     {
@@ -132,7 +119,39 @@ in
           };
         };
 
-        # TODO: https://git.cmu.dev/ScottyLabs/infrastructure/issues/83
+        resource.keycloak_saml_identity_provider.cmu_saml = {
+          realm = "\${data.keycloak_realm.scottylabs.id}";
+          alias = "cmu-saml";
+          display_name = "CMU SAML";
+          enabled = false;
+          store_token = false;
+          trust_email = true;
+          hide_on_login_page = true;
+          sync_mode = "FORCE";
+          gui_order = "7";
+          first_broker_login_flow_alias = "Auto-link LDAP users";
+          post_broker_login_flow_alias = "SAML post login";
+          entity_id = "https://idp.scottylabs.org/realms/scottylabs";
+          single_sign_on_service_url = "https://login.cmu.edu/idp/profile/SAML2/POST/SSO";
+          name_id_policy_format = "Transient";
+          principal_type = "FRIENDLY_ATTRIBUTE";
+          principal_attribute = "eduPersonPrincipalName";
+          validate_signature = true;
+          want_authn_requests_signed = true;
+          signature_algorithm = "RSA_SHA256";
+          xml_sign_key_info_key_name_transformer = "KEY_ID";
+          post_binding_authn_request = true;
+          post_binding_response = true;
+          extra_config = {
+            idpEntityId = "https://login.cmu.edu/idp/shibboleth";
+            # signing keys from metadata, no pinned cert
+            useMetadataDescriptorUrl = "true";
+            metadataDescriptorUrl = "https://login.cmu.edu/idp/shibboleth";
+            allowCreate = "true";
+            attributeConsumingServiceIndex = "0";
+          };
+        };
+
         # TODO: discord IdP unavailable without the keycloak-discord server plugin
 
         resource.keycloak_custom_identity_provider_mapper = {
@@ -148,10 +167,6 @@ in
           google_name =
             oidcMapper "\${keycloak_oidc_google_identity_provider.google.alias}" "google_name"
               "name";
-          github_id = githubMapper "github_id" "id";
-          github_username = githubMapper "github_username" "login";
-          github_email = githubMapper "github_email" "email";
-          github_name = githubMapper "github_name" "name";
           cmudev_id = {
             realm = "\${data.keycloak_realm.scottylabs.id}";
             name = "cmudev_id";
@@ -204,6 +219,17 @@ in
             extra_config = {
               # andrewid@andrew.cmu.edu -> andrewid, matching LDAP
               template = "$\${CLAIM.preferred_username | localpart}";
+              target = "BROKER_USERNAME";
+              syncMode = "INHERIT";
+            };
+          };
+          cmu_saml_username = {
+            realm = "\${data.keycloak_realm.scottylabs.id}";
+            name = "username";
+            identity_provider_alias = "\${keycloak_saml_identity_provider.cmu_saml.alias}";
+            identity_provider_mapper = "saml-username-idp-mapper";
+            extra_config = {
+              template = "$\${ATTRIBUTE.urn:oid:1.3.6.1.4.1.5923.1.1.1.6 | localpart}";
               target = "BROKER_USERNAME";
               syncMode = "INHERIT";
             };

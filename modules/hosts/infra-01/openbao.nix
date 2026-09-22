@@ -394,7 +394,7 @@
               policy = ''
                 # Manage all secrets
                 path "secret/*" {
-                  capabilities = ["create", "read", "update", "delete", "list"]
+                  capabilities = ["create", "read", "update", "patch", "delete", "list"]
                 }
 
                 # Manage AppRole auth
