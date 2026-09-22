@@ -68,6 +68,9 @@
         mode = "0400";
       };
 
+      # atlantis exits at startup if the gitea API returns 502
+      systemd.services.atlantis.after = [ "forgejo.service" ];
+
       systemd.services.atlantis.serviceConfig.EnvironmentFile = [
         config.age.secrets.tofu-providers.path
       ];

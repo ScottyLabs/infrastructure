@@ -104,8 +104,9 @@
           settings.app_service_config_files = [ registrationFile ];
         };
 
+        # o+x so synapse reaches the registration file via its group
         systemd.tmpfiles.rules = [
-          "d ${cfg.dataDir} 770 mautrix-slack mautrix-slack -"
+          "d ${cfg.dataDir} 771 mautrix-slack mautrix-slack -"
         ];
 
         systemd.services = {
