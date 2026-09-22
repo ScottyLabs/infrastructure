@@ -26,6 +26,13 @@
                 type = "A";
                 comment = "darwin host ${name}";
               }) inputs.self.darwinConfigurations);
+
+            resource.cloudflare_zone_setting.always_use_https = {
+              for_each = "\${{ for z in data.cloudflare_zones.all.result : z.id => z.id }}";
+              zone_id = "\${each.value}";
+              setting_id = "always_use_https";
+              value = "on";
+            };
           }
         ];
       };
