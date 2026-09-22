@@ -59,6 +59,7 @@ in
         resource.keycloak_oidc_identity_provider.slack = oidcIdp {
           alias = "slack";
           display_name = "Slack";
+          gui_order = "4";
           client_id = "3505580336.8910681007893";
           client_secret = "\${data.vault_kv_secret_v2.keycloak_idp.data[\"SLACK_CLIENT_SECRET\"]}";
           authorization_url = "https://slack.com/openid/connect/authorize";
@@ -70,6 +71,7 @@ in
 
         resource.keycloak_oidc_google_identity_provider.google = {
           realm = "\${data.keycloak_realm.scottylabs.id}";
+          gui_order = "3";
           link_only = true;
           hide_on_login_page = true;
           store_token = true;
@@ -82,6 +84,7 @@ in
         resource.keycloak_oidc_identity_provider.cmu_git = forgejoIdp {
           alias = "cmu-dev";
           display_name = "cmu.dev";
+          gui_order = "1";
           base = "https://git.cmu.dev";
           client_id = "\${data.vault_kv_secret_v2.forgejo_idp.data[\"CLIENT_ID\"]}";
           client_secret = "\${data.vault_kv_secret_v2.forgejo_idp.data[\"CLIENT_SECRET\"]}";
@@ -92,6 +95,7 @@ in
           realm = "\${data.keycloak_realm.scottylabs.id}";
           alias = "cmu";
           display_name = "CMU";
+          gui_order = "0";
           store_token = true;
           trust_email = true;
           sync_mode = "IMPORT";
@@ -126,6 +130,7 @@ in
           enabled = false;
           store_token = false;
           trust_email = true;
+          link_only = true;
           hide_on_login_page = true;
           sync_mode = "FORCE";
           gui_order = "7";
