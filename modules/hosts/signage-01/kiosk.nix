@@ -24,6 +24,7 @@
         environment = {
           WLR_NO_HARDWARE_CURSORS = "1";
           XDG_SEAT = "seat0";
+          GTK_THEME = "Adwaita:dark";
         };
 
         extraArguments = [ ];
@@ -47,6 +48,9 @@
 
       # Don't blank the screen or suspend on lid/idle
       services.logind.settings.Login.HandleLidSwitch = "ignore";
+
+      # Remove reboot console messages
+      services.logind.settings.Login.WallMessages = false;
 
       # Cage expects at least one input device, tell wlroots not to care
       systemd.services.cage-tty1.environment = {

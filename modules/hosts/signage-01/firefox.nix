@@ -48,6 +48,16 @@
           "browser.newtabpage.activity-stream.showSponsoredCheckboxes" = false;
           "browser.newtabpage.activity-stream.default.sites" = "";
 
+          "browser.display.background_color" = "#000000";
+          "browser.display.background_color.dark" = "#000000";
+          "ui.systemUsesDarkTheme" = 1;
+          "browser.theme.content-theme" = 0;
+          "browser.theme.toolbar-theme" = 0;
+          "browser.startup.blankWindow" = false;
+
+          "nglayout.initialpaint.delay" = 250;
+          "nglayout.initialpaint.delay_in_oopif" = 250;
+
           # recommendations
           "extensions.getAddons.showPane" = false;
           "extensions.htmlaboutaddons.recommendations.enabled" = false;
