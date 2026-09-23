@@ -26,6 +26,15 @@
         "${config.boot.plymouth.package}/bin/plymouth quit --retain-splash"
       ];
 
+      # Kill splash after cage init
+      systemd.services.plymouth-quit.wantedBy = lib.mkForce [ ];
+      systemd.services.plymouth-quit-wait.wantedBy = lib.mkForce [ ];
+
+      # Opem plymouth shutdown window right after cage goes down
+      systemd.services.plymouth-reboot.after = [ "cage-tty1.service" ];
+      systemd.services.plymouth-poweroff.after = [ "cage-tty1.service" ];
+      systemd.services.plymouth-halt.after = [ "cage-tty1.service" ];
+
       # These tty resets would wipe the retained splash
       systemd.services.cage-tty1.serviceConfig = {
         TTYReset = lib.mkForce "no";
@@ -49,7 +58,11 @@
         # srvos puts a serial console on the cmdline
         "plymouth.ignore-serial-consoles"
         "initcall_blacklist=simpledrm_platform_driver_init"
+        "i915.enable_fbc=0"
       ];
+
+      # Remove extraneous consoles
+      srvos.boot.consoles = [ "ttyS0,115200" ];
 
       # Splash screen
       boot.plymouth = {
