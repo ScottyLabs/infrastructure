@@ -17,14 +17,24 @@
             source_labels = ["__journal__systemd_unit"]
             target_label  = "unit"
           }
-          // kennel-build-<project>-<branch> -> unit=kennel-build, project=<project>
-          // Branch kinds gated in kennel's webhook handler
+          // Kennel LogExtraFields
           rule {
-            source_labels = ["unit"]
-            regex         = "kennel-build-(.+)-(?:main|staging|dev|pr-[0-9]+)\\.service"
-            replacement   = "''${1}"
+            source_labels = ["__journal_kennel_project"]
             target_label  = "project"
           }
+          rule {
+            source_labels = ["__journal_kennel_build_id"]
+            target_label  = "build_id"
+          }
+          rule {
+            source_labels = ["__journal_kennel_branch"]
+            target_label  = "branch"
+          }
+          rule {
+            source_labels = ["__journal_kennel_commit"]
+            target_label  = "commit"
+          }
+          // Collapse per-branch build units
           rule {
             source_labels = ["unit"]
             regex         = "kennel-build-.+"
@@ -47,12 +57,35 @@
         }
 
         loki.source.journal "default" {
-          forward_to    = [loki.write.default.receiver]
+          forward_to    = [loki.process.journal.receiver]
           max_age       = "12h"
           relabel_rules = loki.relabel.journal.rules
           labels        = {
             job  = "systemd-journal",
             host = "${config.networking.hostName}",
+          }
+        }
+
+        loki.process "journal" {
+          forward_to = [loki.write.default.receiver]
+          // Kennel daemon JSON logs
+          stage.match {
+            selector = "{unit=\"kennel.service\"}"
+            stage.json {
+              expressions = {
+                project  = "fields.project",
+                build_id = "fields.build_id",
+                branch   = "fields.branch",
+                commit   = "fields.commit",
+              }
+            }
+            stage.labels {
+              values = { project = "" }
+            }
+          }
+          // Too high-cardinality for labels
+          stage.structured_metadata {
+            values = { build_id = "", branch = "", commit = "" }
           }
         }
 
