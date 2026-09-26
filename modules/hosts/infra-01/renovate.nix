@@ -13,6 +13,10 @@
 
         credentials = {
           RENOVATE_TOKEN = config.age.secrets.renovate-token.path;
+          # Expose the vault agent's token so secretspec can authenticate to
+          # openbao when devenv update runs. Auth success is all that's needed;
+          # per-secret 403s (infra policy has no shared/* read) are non-fatal.
+          BAO_TOKEN = "/run/vault-renovate-token";
         };
 
         runtimePackages = [
@@ -68,5 +72,18 @@
           };
         };
       };
+
+      # Write the infra-01 vault agent's token to a file for the credential above.
+      # The freeformType on settings means this merges cleanly with the global agent config.
+      services.vault.agents.default.settings.sink = [
+        {
+          type = "file";
+          config.path = "/run/vault-renovate-token";
+        }
+      ];
+
+      # Ensure vault agent has authenticated and written the token before Renovate starts.
+      systemd.services.renovate.after = [ "vault-agent-default.service" ];
+      systemd.services.renovate.wants = [ "vault-agent-default.service" ];
     };
 }
