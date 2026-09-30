@@ -38,6 +38,7 @@ in
   "secrets/infra-01/cmu-vpn-passkey.age".publicKeys = admins ++ [ infra-01 ];
   "secrets/infra-01/cloudflared-tunnel.age".publicKeys = admins ++ [ infra-01 ];
   "secrets/infra-01/snot-webhook-secret.age".publicKeys = admins ++ [ infra-01 ];
+  "secrets/infra-01/typesafe-api-key.age".publicKeys = admins ++ [ infra-01 ];
 
   # deploy-01
   "secrets/deploy-01/bao-role-id.age".publicKeys = admins ++ [ deploy-01 ];
