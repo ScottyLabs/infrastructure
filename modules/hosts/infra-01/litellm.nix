@@ -20,6 +20,7 @@
           printf 'LITELLM_SALT_KEY=%s\n' "$(cat ${cfg.saltKeyFile})"
           printf 'GENERIC_CLIENT_SECRET=%s\n' "$(cat ${cfg.oidcClientSecretFile})"
           printf 'CLI_PROXY_API_KEY=%s\n' "$(cat ${cfg.cliProxyApiKeyFile})"
+          printf 'TYPESAFE_API_KEY=%s\n' "$(cat "$CREDENTIALS_DIRECTORY/typesafe")"
         } > ${cfg.runtimeEnvFile}
       '';
       expressionPkg = pkgs.python313Packages.buildPythonPackage {
@@ -121,8 +122,8 @@
 
         cliProxyApiUrl = lib.mkOption {
           type = lib.types.str;
-          default = "http://127.0.0.1:8317/v1";
-          description = "OpenAI-compatible base URL of the cli-proxy-api backend.";
+          default = "http://127.0.0.1:8317";
+          description = "Base URL of the cli-proxy-api backend.";
         };
 
         models = lib.mkOption {
@@ -140,6 +141,17 @@
                     `anthropic/claude-3-5-sonnet-20241022`). The prefix selects
                     the chat-completion adapter LiteLLM uses to call the
                     cli-proxy-api backend.
+                  '';
+                };
+                apiBase = lib.mkOption {
+                  type = lib.types.str;
+                  default = "${cfg.cliProxyApiUrl}/v1";
+                  defaultText = lib.literalExpression ''"''${config.scottylabs.ai-gateway.litellm.cliProxyApiUrl}/v1"'';
+                  description = ''
+                    URL LiteLLM sends this model's requests to. The default is
+                    cli-proxy-api's OpenAI-compatible endpoint. Models using the
+                    `anthropic/` adapter need the base URL instead, because
+                    LiteLLM appends `/v1/messages` itself.
                   '';
                 };
               };
@@ -213,7 +225,7 @@
               model_name = m.name;
               litellm_params = {
                 model = m.upstream;
-                api_base = cfg.cliProxyApiUrl;
+                api_base = m.apiBase;
                 api_key = "os.environ/CLI_PROXY_API_KEY";
               };
             }) cfg.models;

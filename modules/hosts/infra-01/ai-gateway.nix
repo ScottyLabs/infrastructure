@@ -1,13 +1,14 @@
-{ config, ... }:
+{ config, inputs, ... }:
 {
   flake.modules.nixos.infra-01-ai-gateway =
-    { config, ... }:
+    { config, pkgs, ... }:
 
     {
       age.secrets.cli-proxy-api.file = ../../../secrets/infra-01/cli-proxy-api.age;
 
       services.cliproxyapi = {
         enable = true;
+        package = inputs.nixpkgs-cliproxyapi.legacyPackages.${pkgs.stdenv.hostPlatform.system}.cliproxyapi;
         settings = {
           host = "127.0.0.1";
           port = 8317;
@@ -52,6 +53,11 @@
         };
       };
 
+      age.secrets.typesafe-api-key.file = ../../../secrets/infra-01/typesafe-api-key.age;
+      systemd.services.litellm.serviceConfig.LoadCredential = [
+        "typesafe:${config.age.secrets.typesafe-api-key.path}"
+      ];
+
       scottylabs.ai-gateway.litellm = {
         enable = true;
         masterKeyFile = "/run/credentials/litellm.service/master";
@@ -60,26 +66,27 @@
         cliProxyApiKeyFile = "/run/credentials/litellm.service/cliproxy";
         models =
           let
-            passthrough = id: {
+            openai = id: {
               name = id;
-              upstream = "scottylabs/${id}";
+              upstream = "openai/${id}";
+            };
+            anthropic = id: {
+              name = id;
+              upstream = "anthropic/${id}";
+              apiBase = config.scottylabs.ai-gateway.litellm.cliProxyApiUrl;
             };
           in
-          map passthrough [
+          map anthropic [
             "claude-fable-5-1"
-            "claude-fable-5"
-            "claude-opus-5"
-            "claude-opus-4-8"
-            "claude-opus-4-7"
-            "claude-opus-4-6"
-            "claude-sonnet-5"
-            "claude-sonnet-4-6"
+            "claude-opus-5-5"
+            "claude-sonnet-5-5"
             "claude-haiku-4-5-20251001"
+          ]
+          ++ map openai [
             "gpt-6-astra"
-            "gpt-5.6-sol"
+            "gpt-6.1-sol"
             "gpt-5.6-terra"
-            "gpt-5.6-luna"
-            "gpt-5.5"
+            "gpt-6-luna"
             "codex-auto-review"
           ];
       };
