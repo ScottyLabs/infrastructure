@@ -248,12 +248,8 @@
         };
 
         systemd.services.litellm = {
-          after = [
-            "postgresql.service"
-          ];
-          wants = [
-            "postgresql.service"
-          ];
+          after = [ "postgresql.target" ];
+          wants = [ "postgresql.target" ];
           serviceConfig = {
             DynamicUser = lib.mkForce false;
             User = "litellm";
