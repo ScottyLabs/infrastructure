@@ -137,6 +137,11 @@
         };
 
         scottylabs.postgresql.databases = [ "mautrix-discord" ];
+
+        systemd.services.mautrix-discord = {
+          wants = [ "postgresql.target" ];
+          after = [ "postgresql.target" ];
+        };
       };
     };
 }

@@ -171,6 +171,11 @@
         };
 
         scottylabs.postgresql.databases = [ "mautrix-slack" ];
+
+        systemd.services.mautrix-slack = {
+          wants = [ "postgresql.target" ];
+          after = [ "postgresql.target" ];
+        };
       };
     };
 }
