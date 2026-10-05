@@ -1,14 +1,13 @@
-{ config, inputs, ... }:
+{ config, ... }:
 {
   flake.modules.nixos.infra-01-ai-gateway =
-    { config, pkgs, ... }:
+    { config, ... }:
 
     {
       age.secrets.cli-proxy-api.file = ../../../secrets/infra-01/cli-proxy-api.age;
 
       services.cliproxyapi = {
         enable = true;
-        package = inputs.nixpkgs-cliproxyapi.legacyPackages.${pkgs.stdenv.hostPlatform.system}.cliproxyapi;
         settings = {
           host = "127.0.0.1";
           port = 8317;
