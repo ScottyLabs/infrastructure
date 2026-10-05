@@ -57,6 +57,24 @@
           enable = true;
           initialEmail = "admin@scottylabs.org";
           initialPasswordFile = config.age.secrets.pgadmin.path;
+          # TODO: https://github.com/NixOS/nixpkgs/pull/569309
+          package = pkgs.pgadmin4.override {
+            python3 = pkgs.python3.override {
+              packageOverrides = _final: prev: {
+                psycopg = prev.psycopg.overridePythonAttrs {
+                  version = "3.3.4";
+                  src = pkgs.fetchFromGitHub {
+                    owner = "psycopg";
+                    repo = "psycopg";
+                    tag = "3.3.4";
+                    hash = "sha256-hHgswbqaoQRQrUxhNFG6tfmlap1mVUo/OkNsWF686U4=";
+                  };
+                  doCheck = false;
+                  pythonImportsCheck = [ "psycopg" ];
+                };
+              };
+            };
+          };
         };
 
         age.secrets.pgadmin = {
