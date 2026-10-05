@@ -42,13 +42,9 @@
       url = "git+https://git.cmu.dev/ScottyLabs/keycloak-theme";
       flake = false;
     };
-    # TODO: https://github.com/NixOS/nixpkgs#568429
-    nixpkgs-cliproxyapi.url = "github:ap-1/nixpkgs/cliproxyapi-8.0.4";
-    # TODO: https://github.com/NixOS/nixpkgs#568471
-    nixpkgs-litellm.url = "github:ap-1/nixpkgs/litellm";
     llm-pkgs = {
       url = "git+https://codeberg.org/anish/llm-pkgs";
-      inputs.nixpkgs.follows = "nixpkgs-litellm";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     snot = {
       url = "git+https://tangled.org/isabelroses.com/snot";
