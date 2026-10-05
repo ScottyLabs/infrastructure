@@ -95,8 +95,16 @@
         users.groups.tempo = { };
 
         systemd.services.tempo = {
-          after = [ "network-online.target" ];
-          wants = [ "network-online.target" ];
+          after = [
+            "network-online.target"
+            "caddy.service"
+            "garage.service"
+          ];
+          wants = [
+            "network-online.target"
+            "caddy.service"
+            "garage.service"
+          ];
 
           # Keep retrying if the S3 backend is not reachable yet at boot
           startLimitIntervalSec = 0;
