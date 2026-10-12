@@ -10,14 +10,24 @@
 
     let
       cfg = config.scottylabs.postgresql;
-      pgExtensions = {
+
+      # Package attribute = name used by CREATE EXTENSION
+      extensions = {
         pg_uuidv7 = "pg_uuidv7";
         pgvector = "vector";
         postgis = "postgis";
       };
-      createExtSql = lib.concatMapStringsSep " " (sql: "CREATE EXTENSION IF NOT EXISTS ${sql};") (
-        lib.attrValues pgExtensions
-      );
+
+      # Lets database owners create them without being superuser
+      trusted =
+        sqlName: pkg:
+        pkgs.runCommand "${pkg.pname}-${pkg.version}" { inherit (pkg) pname version; } ''
+          cp -rs --no-preserve=mode ${pkg} $out
+          control=$out/share/postgresql/extension/${sqlName}.control
+          rm $control
+          cat ${pkg}/share/postgresql/extension/${sqlName}.control > $control
+          echo "trusted = true" >> $control
+        '';
     in
     {
       options.scottylabs.postgresql = {
@@ -36,7 +46,7 @@
         services.postgresql = {
           enable = true;
           package = pkgs.postgresql_18;
-          extensions = ps: map (name: ps.${name}) (lib.attrNames pgExtensions);
+          extensions = ps: lib.mapAttrsToList (attr: sqlName: trusted sqlName ps.${attr}) extensions;
 
           initdbArgs = [
             "--locale-provider=builtin"
@@ -50,13 +60,6 @@
             ensureDBOwnership = true;
           }) cfg.databases;
         };
-
-        # Seed extensions into template1 and each database
-        systemd.services.postgresql-setup.postStart = lib.mkAfter (
-          lib.concatMapStringsSep "\n" (db: ''
-            psql --port=${toString config.services.postgresql.settings.port} -d ${db} -c '${createExtSql}'
-          '') ([ "template1" ] ++ cfg.databases)
-        );
 
         services.pgadmin = {
           enable = true;
