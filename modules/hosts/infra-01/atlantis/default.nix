@@ -75,6 +75,7 @@
           "caddy.service"
         ];
         wants = [ "caddy.service" ];
+        serviceConfig.ExecStartPre = "${pkgs.curl}/bin/curl --fail --silent --output /dev/null --retry 60 --retry-delay 1 --retry-all-errors https://git.cmu.dev/api/v1/version";
       };
 
       systemd.services.atlantis.serviceConfig.EnvironmentFile = [
