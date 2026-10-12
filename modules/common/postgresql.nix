@@ -38,6 +38,11 @@
           package = pkgs.postgresql_18;
           extensions = ps: map (name: ps.${name}) (lib.attrNames pgExtensions);
 
+          initdbArgs = [
+            "--locale-provider=builtin"
+            "--locale=C.UTF-8"
+          ];
+
           ensureDatabases = cfg.databases;
 
           ensureUsers = map (name: {
