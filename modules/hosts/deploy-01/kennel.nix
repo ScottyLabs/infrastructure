@@ -419,6 +419,17 @@
           duration = "5m";
         };
       }
+      {
+        name = "kennel-deploy-platform-failure";
+        source = grafana.promAlert {
+          name = "kennel";
+          uid = "infra-kennel-deploy-platform-failure";
+          title = "Kennel deploy failed in the platform";
+          expr = "kennel_deploy_failures{stage=~\"provision|systemd|routing|internal\"} > bool 0";
+          severity = "critical";
+          summary = "A kennel deploy failed at the {{ $labels.stage }} stage; search kennel.service logs for \"deploy failed\"";
+        };
+      }
     ];
   };
 
