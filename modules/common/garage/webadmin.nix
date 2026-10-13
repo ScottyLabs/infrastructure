@@ -91,6 +91,10 @@
                 client_secret {env.OIDC_CLIENT_SECRET}
                 scopes openid email profile
                 metadata_url ${cfg.webadmin.keycloakMetadataUrl}
+                # Async fetch so caddy reloads while keycloak restarts
+                delay_start 1
+                retry_attempts 60
+                retry_interval 2
               }
 
               authentication portal garageportal {
@@ -145,12 +149,6 @@
               (pkgs.writeShellScript "compose-garage-webadmin-env" ''
                 set -eu
                 umask 0077
-                for i in $(seq 1 60); do
-                  if ${pkgs.curl}/bin/curl -sf -o /dev/null --max-time 2 ${cfg.webadmin.keycloakMetadataUrl}; then
-                    break
-                  fi
-                  sleep 1
-                done
                 if [ -s ${cfg.webadmin.oidcSecretFile} ] && [ -s ${cfg.webadmin.jwtSecretFile} ]; then
                   {
                     printf 'OIDC_CLIENT_SECRET=%s\n' "$(cat ${cfg.webadmin.oidcSecretFile})"
