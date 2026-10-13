@@ -20,7 +20,11 @@
         mode = "0400";
       };
 
-      systemd.services.keycloak.serviceConfig.EnvironmentFile = config.age.secrets.keycloak.path;
+      systemd.services.keycloak.serviceConfig = {
+        EnvironmentFile = config.age.secrets.keycloak.path;
+        Restart = "on-failure";
+        RestartSec = 5;
+      };
 
       services.keycloak = {
         enable = true;
@@ -38,7 +42,7 @@
           hostname-strict = true;
           hostname-backchannel-dynamic = true;
           proxy-headers = "xforwarded";
-          proxy-trusted-addresses = "127.0.0.1,::1";
+          proxy-trusted-addresses = "127.0.0.1";
           http-enabled = true;
           http-host = "127.0.0.1";
           http-port = 8080;
