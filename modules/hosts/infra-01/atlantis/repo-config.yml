@@ -16,6 +16,8 @@ repos:
     allow_custom_workflows: false
     workflow: terranix
     pre_workflow_hooks:
+      - run: nix flake archive
+        description: Fetch flake inputs before parallel plans
       - run: install -m 644 "$(nix build --print-out-paths .#atlantis-yaml)" atlantis.yaml
         description: Generate atlantis.yaml from the flake
 
