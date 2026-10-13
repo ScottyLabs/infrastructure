@@ -22,9 +22,12 @@
         ];
       };
 
-      # Btrbk does not create snapshot directories automatically
       systemd.tmpfiles.rules = [
+        # Btrbk does not create snapshot directories automatically
         "d /mnt/btrfs-root/.snapshots 0755 root root"
+        # Return emptied data chunks left by nix gc to the unallocated pool
+        "w /sys/fs/btrfs/*/allocation/data/dynamic_reclaim - - - - 1"
+        "w /sys/fs/btrfs/*/allocation/data/periodic_reclaim - - - - 1"
       ];
 
       services.btrbk.instances."btrbk" = {
