@@ -80,7 +80,6 @@
           vars @cloudflared client_addr {header.Cf-Connecting-Ip}
 
           reverse_proxy 127.0.0.1:8080 {
-            header_up X-Forwarded-Port {server_port}
             header_up X-Forwarded-For {vars.client_addr}
           }
         '';
