@@ -38,6 +38,7 @@
           hostname-strict = true;
           hostname-backchannel-dynamic = true;
           proxy-headers = "xforwarded";
+          proxy-trusted-addresses = "127.0.0.1,::1";
           http-enabled = true;
           http-host = "127.0.0.1";
           http-port = 8080;
@@ -68,9 +69,15 @@
 
       services.caddy = {
         enable = true;
+        # Cf-Connecting-Ip only trusted from cloudflared on loopback
         virtualHosts."idp.scottylabs.org".extraConfig = ''
+          @cloudflared remote_ip 127.0.0.1 ::1
+          vars client_addr {remote_host}
+          vars @cloudflared client_addr {header.Cf-Connecting-Ip}
+
           reverse_proxy 127.0.0.1:8080 {
             header_up X-Forwarded-Port {server_port}
+            header_up X-Forwarded-For {vars.client_addr}
           }
         '';
       };
