@@ -333,11 +333,12 @@
               bound_issuer = "https://git.cmu.dev/api/actions";
             };
 
+            # alias per repository for governance's per-repo CI policies
             resource.vault_jwt_auth_backend_role.ci = {
               backend = "\${vault_jwt_auth_backend.forgejo.path}";
               role_name = "ci";
               role_type = "jwt";
-              user_claim = "sub";
+              user_claim = "repository";
               bound_audiences = [ "openbao" ];
               bound_claims = {
                 repository_owner = "ScottyLabs";
@@ -351,9 +352,6 @@
               name = "ci";
               policy = ''
                 path "secret/data/shared/*" {
-                  capabilities = ["read"]
-                }
-                path "secret/data/secretspec/+/ci/*" {
                   capabilities = ["read"]
                 }
               '';
