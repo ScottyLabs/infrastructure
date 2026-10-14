@@ -60,6 +60,23 @@ in
                   capabilities = ["create", "read", "update", "delete", "list"]
                 }
 
+                # Manage CI identity entities and aliases
+                path "identity/entity" {
+                  capabilities = ["create", "update"]
+                }
+
+                path "identity/entity/*" {
+                  capabilities = ["create", "read", "update", "delete", "list"]
+                }
+
+                path "identity/entity-alias" {
+                  capabilities = ["create", "update"]
+                }
+
+                path "identity/entity-alias/*" {
+                  capabilities = ["create", "read", "update", "delete", "list"]
+                }
+
                 # Read auth backend config (for mount accessor lookup)
                 path "sys/auth" {
                   capabilities = ["read"]
