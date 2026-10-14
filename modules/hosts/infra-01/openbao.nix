@@ -410,6 +410,11 @@
                   capabilities = ["read", "list"]
                 }
 
+                # Manage identity entities, groups, and aliases
+                path "identity/*" {
+                  capabilities = ["create", "read", "update", "delete", "list"]
+                }
+
                 # View auth methods
                 path "sys/auth" {
                   capabilities = ["read"]
