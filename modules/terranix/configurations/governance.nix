@@ -77,6 +77,10 @@ in
                   capabilities = ["create", "read", "update", "delete", "list"]
                 }
 
+                path "identity/lookup/entity" {
+                  capabilities = ["update"]
+                }
+
                 # Read auth backend config (for mount accessor lookup)
                 path "sys/auth" {
                   capabilities = ["read"]
