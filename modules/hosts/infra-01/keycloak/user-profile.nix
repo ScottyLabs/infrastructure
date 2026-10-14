@@ -291,6 +291,8 @@ in
             (metaAttr "google_id" "Google ID")
             (metaAttr "google_email" "Google Email")
             (metaAttr "google_name" "Google Name")
+            (metaAttr "apple_id" "Apple User ID")
+            (metaAttr "apple_email" "Apple Account Email")
           ];
           group = [
             {
