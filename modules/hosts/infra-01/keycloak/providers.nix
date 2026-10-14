@@ -15,6 +15,14 @@ let
     };
   };
 
+  # stock oidc mapper isn't compatible with the apple provider
+  appleMapper =
+    attr: claim:
+    oidcMapper "\${keycloak_oidc_identity_provider.apple.alias}" attr claim
+    // {
+      identity_provider_mapper = "apple-user-attribute-mapper";
+    };
+
   oidcIdp =
     args:
     {
@@ -79,6 +87,31 @@ in
           default_scopes = "openid profile email";
           client_id = "193590704321-04lnrs4bkqn7jmpva58g4utnqao7bgio.apps.googleusercontent.com";
           client_secret = "\${data.vault_kv_secret_v2.keycloak_idp.data[\"GOOGLE_CLIENT_SECRET\"]}";
+        };
+
+        resource.keycloak_oidc_identity_provider.apple = {
+          realm = "\${data.keycloak_realm.scottylabs.id}";
+          provider_id = "apple";
+          alias = "apple";
+          display_name = "Apple";
+          gui_order = "5";
+          link_only = true;
+          hide_on_login_page = true;
+          store_token = false;
+          sync_mode = "IMPORT";
+          authorization_url = "https://appleid.apple.com/auth/authorize?response_mode=form_post";
+          token_url = "https://appleid.apple.com/auth/token";
+          jwks_url = "https://appleid.apple.com/auth/keys";
+          issuer = "https://appleid.apple.com";
+          validate_signature = true;
+          # plugin's default, Keycloak prepends `openid`
+          default_scopes = "name%20email";
+          client_id = "\${data.vault_kv_secret_v2.keycloak_idp.data[\"APPLE_SERVICES_ID\"]}";
+          client_secret = "\${data.vault_kv_secret_v2.keycloak_idp.data[\"APPLE_PRIVATE_KEY\"]}";
+          extra_config = {
+            teamId = "\${data.vault_kv_secret_v2.keycloak_idp.data[\"APPLE_TEAM_ID\"]}";
+            keyId = "\${data.vault_kv_secret_v2.keycloak_idp.data[\"APPLE_KEY_ID\"]}";
+          };
         };
 
         resource.keycloak_oidc_identity_provider.cmu_git = forgejoIdp {
@@ -172,6 +205,8 @@ in
           google_name =
             oidcMapper "\${keycloak_oidc_google_identity_provider.google.alias}" "google_name"
               "name";
+          apple_id = appleMapper "apple_id" "sub";
+          apple_email = appleMapper "apple_email" "email";
           cmudev_id = {
             realm = "\${data.keycloak_realm.scottylabs.id}";
             name = "cmudev_id";
