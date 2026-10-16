@@ -49,6 +49,15 @@
             evaluation_interval = "30s";
           };
         };
+
+        # Keep out of btrbk snapshots
+        disko.devices.disk.main.content.partitions.root.content.subvolumes."@prometheus" = {
+          mountpoint = "/var/lib/${config.services.prometheus.stateDir}";
+          mountOptions = [
+            "compress=zstd"
+            "noatime"
+          ];
+        };
       };
     };
 }
