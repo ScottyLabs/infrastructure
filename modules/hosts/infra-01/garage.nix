@@ -29,6 +29,15 @@
         mode = "0400";
       };
 
+      # Keep out of btrbk snapshots
+      disko.devices.disk.main.content.partitions.root.content.subvolumes."@garage" = {
+        mountpoint = "/var/lib/private/garage";
+        mountOptions = [
+          "compress=zstd"
+          "noatime"
+        ];
+      };
+
       # Public read-only vhost for the scottylabs-assets bucket, Host rewritten to its globalAlias
       services.caddy.virtualHosts."assets.scottylabs.org".extraConfig = ''
         reverse_proxy localhost:${toString config.scottylabs.garage.webPort} {
