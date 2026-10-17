@@ -45,6 +45,7 @@
           pkgs.cargo
           pkgs.rustc
           pkgs.gcc
+          pkgs.sccache
         ];
         extraArgs = [
           "--gitea-base-url=https://git.cmu.dev"
@@ -86,6 +87,8 @@
         TF_PLUGIN_CACHE_DIR = "/var/lib/atlantis/plugin-cache";
         TF_PLUGIN_CACHE_MAY_BREAK_DEPENDENCY_LOCK_FILE = "1";
         FORGEJO_TFRC = "${forgejoTfrc}";
+        RUSTC_WRAPPER = "${pkgs.sccache}/bin/sccache";
+        SCCACHE_DIR = "/var/lib/atlantis/sccache";
       };
 
       systemd.services.atlantis.vault.environmentTemplate = ''

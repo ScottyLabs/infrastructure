@@ -32,7 +32,10 @@
       console.keyMap = "us";
 
       # Nix
-      nix.package = pkgs.lixPackageSets.stable.lix;
+      # TODO: https://github.com/NixOS/nixpkgs/pull/573942
+      nix.package = pkgs.lixPackageSets.stable.lix.overrideAttrs (old: {
+        mesonFlags = lib.filter (f: !lib.hasPrefix "-Dmimalloc" f) old.mesonFlags;
+      });
 
       nix.gc = {
         automatic = true;
