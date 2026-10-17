@@ -35,7 +35,7 @@
 
   # Base layer composed onto every darwin host
   flake.modules.darwin.global =
-    { pkgs, ... }:
+    { lib, pkgs, ... }:
     {
       imports = [
         config.flake.modules.darwin.ip-address
@@ -45,7 +45,10 @@
       ];
 
       # Nix
-      nix.package = pkgs.lixPackageSets.stable.lix;
+      # TODO: https://github.com/NixOS/nixpkgs/pull/573942
+      nix.package = pkgs.lixPackageSets.stable.lix.overrideAttrs (old: {
+        mesonFlags = lib.filter (f: !lib.hasPrefix "-Dmimalloc" f) old.mesonFlags;
+      });
       nix.settings.experimental-features = "nix-command flakes";
 
       # Set Git commit hash for darwin-version
