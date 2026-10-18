@@ -45,6 +45,7 @@
         enable = true;
         package = inputs.kennel.packages.x86_64-linux.kennel;
         devenvPackage = inputs.kennel.packages.x86_64-linux.devenv;
+        nixPackage = config.nix.package;
         webhookSecretFile = config.age.secrets.kennel-webhook-secret.path;
         environmentFile = config.age.secrets.kennel.path;
         api.port = 3001;
