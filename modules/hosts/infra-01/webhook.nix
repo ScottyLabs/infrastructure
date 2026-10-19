@@ -127,6 +127,35 @@
               tunnel = "infra-01";
               comment = "Renovate trigger webhook receiver";
             };
+
+            terraform.required_providers.forgejo = {
+              source = "svalabs/forgejo";
+              version = "~> 1.0";
+            };
+            provider.forgejo = {
+              host = "\${var.forgejo_url}";
+              api_token = "\${var.forgejo_token}";
+            };
+            variable.forgejo_url = {
+              type = "string";
+              default = "https://git.cmu.dev";
+            };
+            variable.forgejo_token.sensitive = true;
+
+            data.forgejo_repository.kennel = {
+              owner = "ScottyLabs";
+              name = "kennel";
+            };
+
+            # Starts a Renovate run on every kennel push
+            resource.forgejo_repository_webhook.kennel_renovate = {
+              repository_id = "\${data.forgejo_repository.kennel.id}";
+              type = "forgejo";
+              url = "https://webhooks.scottylabs.org/hooks/renovate-update";
+              content_type = "json";
+              active = true;
+              events = [ "push" ];
+            };
           }
         ];
       };
