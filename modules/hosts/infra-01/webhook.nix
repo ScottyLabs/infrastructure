@@ -48,7 +48,7 @@
 
       triggerRenovateScript = pkgs.writeShellScript "trigger-renovate" ''
         set -euo pipefail
-        ${pkgs.sudo}/bin/sudo ${pkgs.systemd}/bin/systemctl start renovate.service
+        ${config.security.wrapperDir}/sudo ${pkgs.systemd}/bin/systemctl start renovate.service
       '';
 
       mainBranchTriggerRule = {
