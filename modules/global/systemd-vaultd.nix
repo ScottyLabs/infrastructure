@@ -7,12 +7,6 @@
       ...
     }:
 
-    let
-      # TODO: https://github.com/numtide/systemd-vaultd/pull/65
-      baoShimOverlay = _final: prev: {
-        vault = prev.writeShellScriptBin "vault" ''exec ${prev.openbao}/bin/bao "$@"'';
-      };
-    in
     {
       imports = [
         inputs.systemd-vaultd.nixosModules.vaultAgent
@@ -51,8 +45,6 @@
       };
 
       config = {
-        nixpkgs.overlays = [ baoShimOverlay ];
-
         age.secrets.bao-role-id = {
           file = ../../secrets/${config.networking.hostName}/bao-role-id.age;
           mode = "0400";
