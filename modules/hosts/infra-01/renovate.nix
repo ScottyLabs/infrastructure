@@ -8,20 +8,19 @@
     }:
     let
       kennelUrl = "https://git.cmu.dev/ScottyLabs/kennel";
-      updateDevenvLock = toString (
-        pkgs.writeShellScript "update-devenv-lock" ''
-          [ -f devenv.yaml ] || exit 0
-          # Renovate has no OpenBao token
-          printf 'secretspec:\n  enable: false\n' > devenv.local.yaml
-          ${lib.getExe pkgs.devenv} update "$@"
+      updateLockfiles = toString (
+        pkgs.writeShellScript "update-lockfiles" ''
+          set -euo pipefail
+          if [ -f devenv.yaml ]; then
+            # Renovate has no OpenBao token
+            printf 'secretspec:\n  enable: false\n' > devenv.local.yaml
+            ${lib.getExe pkgs.devenv} update
+          fi
+          if [ -f flake.nix ]; then
+            nix flake update
+          fi
         ''
       );
-      # packageRules entries don't merge postUpgradeTasks
-      postUpgradeTasks = command: {
-        commands = [ command ];
-        fileFilters = [ "devenv.lock" ];
-        executionMode = "branch";
-      };
     in
     {
       age.secrets.renovate-token = {
@@ -52,6 +51,12 @@
           # Drops the emoji config summary, header and footer
           prBodyTemplate = "{{{table}}}{{{warnings}}}{{{notes}}}{{{changelogs}}}{{{controls}}}";
           automerge = true;
+          automergeStrategy = "fast-forward";
+          # Renovate merges in the same run instead of Forgejo waiting on CI
+          platformAutomerge = false;
+          ignoreTests = true;
+          # a merged PR with the same title otherwise disables automerge
+          recreateWhen = "always";
 
           enabledManagers = [
             "custom.regex"
@@ -87,7 +92,6 @@
               commitMessageAction = "update";
               commitMessageTopic = "lockfiles";
               commitMessageExtra = "";
-              postUpgradeTasks = postUpgradeTasks updateDevenvLock;
             }
 
             # Runs on kennel pushes via webhook.nix
@@ -99,11 +103,18 @@
                 commitMessageTopic = "lockfiles";
               };
               schedule = [ "at any time" ];
-              postUpgradeTasks = postUpgradeTasks "${updateDevenvLock} scottylabs";
             }
           ];
 
-          allowedCommands = [ "^${lib.escapeRegex updateDevenvLock}( scottylabs)?$" ];
+          allowedCommands = [ "^${lib.escapeRegex updateLockfiles}$" ];
+          postUpgradeTasks = {
+            commands = [ updateLockfiles ];
+            fileFilters = [
+              "devenv.lock"
+              "flake.lock"
+            ];
+            executionMode = "branch";
+          };
         };
       };
     };
