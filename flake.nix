@@ -31,6 +31,10 @@
       url = "github:feel-co/ncro";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    iets = {
+      url = "github:numtide/iets";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     srvos.url = "github:nix-community/srvos";
     systemd-vaultd = {
       url = "github:numtide/systemd-vaultd";
@@ -80,7 +84,7 @@
     # Flake infrastructure
     flake-parts.url = "github:hercules-ci/flake-parts";
     import-tree.url = "github:vic/import-tree";
-    # nix-community/colmena#319 (nix-darwin support) until it merges upstream
+    # TODO: https://github.com/nix-community/colmena/pull/319
     colmena = {
       url = "github:zw3rk/colmena/a6bdf1e2228b";
       inputs.nixpkgs.follows = "nixpkgs";

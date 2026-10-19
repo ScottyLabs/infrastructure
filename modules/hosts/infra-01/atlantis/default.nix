@@ -38,7 +38,7 @@
         environmentFile = config.age.secrets.atlantis.path;
         extraPackages = [
           pkgs.opentofu
-          pkgs.nix
+          config.nix.package
           pkgs.go
           pkgs.unzip
           pkgs.curl

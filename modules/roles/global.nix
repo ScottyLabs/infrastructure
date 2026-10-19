@@ -11,6 +11,7 @@
         caddy
         cadvisor
         cloudflared
+        iets
         ip-address
         ncro
         node-exporter
@@ -34,24 +35,19 @@
   };
 
   # Base layer composed onto every darwin host
-  flake.modules.darwin.global =
-    { lib, pkgs, ... }:
-    {
-      imports = [
-        config.flake.modules.darwin.ip-address
-        config.flake.modules.darwin.shell
-        inputs.home-manager.darwinModules.home-manager
-        inputs.nix-homebrew.darwinModules.nix-homebrew
-      ];
+  flake.modules.darwin.global = {
+    imports = [
+      config.flake.modules.darwin.iets
+      config.flake.modules.darwin.ip-address
+      config.flake.modules.darwin.shell
+      inputs.home-manager.darwinModules.home-manager
+      inputs.nix-homebrew.darwinModules.nix-homebrew
+    ];
 
-      # Nix
-      # TODO: https://github.com/NixOS/nixpkgs/pull/573942
-      nix.package = pkgs.lixPackageSets.stable.lix.overrideAttrs (old: {
-        mesonFlags = lib.filter (f: !lib.hasPrefix "-Dmimalloc" f) old.mesonFlags;
-      });
-      nix.settings.experimental-features = "nix-command flakes";
+    # Nix
+    nix.settings.experimental-features = "nix-command flakes";
 
-      # Set Git commit hash for darwin-version
-      system.configurationRevision = inputs.self.rev or inputs.self.dirtyRev or null;
-    };
+    # Set Git commit hash for darwin-version
+    system.configurationRevision = inputs.self.rev or inputs.self.dirtyRev or null;
+  };
 }
