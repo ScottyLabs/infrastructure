@@ -7,11 +7,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1790734419,
-        "narHash": "sha256-n7wew722m1OTBT9DOIMxNX/NF4zfsSUABAO5eW3wikE=",
+        "lastModified": 1792369191,
+        "narHash": "sha256-Ptf4Drj8JYQDpNGEo9o+Tc7+hyjYxe+zrYO3J4jrYT4=",
         "owner": "ryantm",
         "repo": "agenix",
-        "rev": "3daa710894355fa2fad8243380af373a2b4046ef",
+        "rev": "847720f0e73a77ce6503b63fba6c357c742c28a7",
         "type": "github"
       },
       "original": {
@@ -40,13 +40,17 @@
     "build-env": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-d6xi4mKdjkX2JFicDIv5niSzpyI0m/Hnm8GGAIU04kY=",
-        "type": "file",
-        "url": "file:///dev/null"
+        "lastModified": 1792396616,
+        "narHash": "sha256-lkA2XZM//95FO8Sg03IPm45ib+pY97gQtefYumaAVtk=",
+        "ref": "refs/heads/main",
+        "rev": "b5dd180ba5f5380c7f01a77e07bc9c0e95c998bf",
+        "revCount": 1,
+        "type": "git",
+        "url": "https://git.cmu.dev/ScottyLabs/kennel-build-env"
       },
       "original": {
-        "type": "file",
-        "url": "file:///dev/null"
+        "type": "git",
+        "url": "https://git.cmu.dev/ScottyLabs/kennel-build-env"
       }
     },
     "cachix": {
@@ -134,11 +138,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1791795517,
-        "narHash": "sha256-hmF0FVrUW6UKQ74qyGJSepMYadnIqzVe2h7TQtZdbmo=",
+        "lastModified": 1792238796,
+        "narHash": "sha256-mRsa8oJ8R7fkvR5K+uQYfuxX9Np0ai/KvzTE8FYVx7E=",
         "owner": "catppuccin",
         "repo": "nix",
-        "rev": "2e605f61db52a45a7ff1db414df395ef566565a3",
+        "rev": "30c87b95a628e81ec82a4fa0ed4db85d7c7d46d6",
         "type": "github"
       },
       "original": {
@@ -615,11 +619,11 @@
     "governance": {
       "flake": false,
       "locked": {
-        "lastModified": 1792024592,
-        "narHash": "sha256-kqumXC99NiIiC9I2kqOJUAjVWRds3atjrt60Ja3GNg0=",
+        "lastModified": 1792396403,
+        "narHash": "sha256-LOg/AUiKNDWt+ok4QIyY2NTNwIKW0S2pFwuLR6JEYV4=",
         "ref": "refs/heads/main",
-        "rev": "f50ff5c74f05c45b1c5e3d5db5c494df33af8d57",
-        "revCount": 411,
+        "rev": "dc9b2bc55c83bbb4545e470ca720b343443d6a31",
+        "revCount": 420,
         "type": "git",
         "url": "https://git.cmu.dev/ScottyLabs/governance"
       },
@@ -692,11 +696,11 @@
         "uv2nix": "uv2nix"
       },
       "locked": {
-        "lastModified": 1792284790,
-        "narHash": "sha256-wV9HvKqsobMqxOtkalcbAyfiHKQz5TgMLBNbUHkNYCA=",
+        "lastModified": 1792397175,
+        "narHash": "sha256-xBMibCQO+L0JeP4Ad5WceSl++qEr+nU3gE31qBqqM80=",
         "ref": "refs/heads/main",
-        "rev": "28cea3bbc615e35777ea402011daa58d5581a80f",
-        "revCount": 395,
+        "rev": "e38932b3aebaf2901f60605d1a93db680a385628",
+        "revCount": 396,
         "type": "git",
         "url": "https://git.cmu.dev/ScottyLabs/kennel"
       },
@@ -749,11 +753,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1792183455,
-        "narHash": "sha256-wdmRnrB60UVo6MERmPijnVoyo/ialR1b62I/NrXGLw8=",
+        "lastModified": 1792394949,
+        "narHash": "sha256-DqRqnGyEmmkB5sbvg5/n4Cyraaz84wwl86ZbpT2m+oA=",
         "owner": "feel-co",
         "repo": "ncro",
-        "rev": "e125f8a9b2b7c9414f780604cae02182e8772597",
+        "rev": "7dcf3063ae37c3f012a9c7f4de8561af4bd2a289",
         "type": "github"
       },
       "original": {
@@ -821,11 +825,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1786845137,
-        "narHash": "sha256-oQFip+v0luP8NIxJzmiW4Wu8bILsbFWom5l0zonl8hQ=",
+        "lastModified": 1792366139,
+        "narHash": "sha256-jto4pdsl0bgErQ5vaMc3gOyj//PILLRJuqX3I7fUk6s=",
         "owner": "nix-darwin",
         "repo": "nix-darwin",
-        "rev": "4cff07de74b50e64bdd68cd4e722ab5b6b35ee48",
+        "rev": "f0ec2b3fae4df92ea7788359aef9e07bb88d720f",
         "type": "github"
       },
       "original": {
@@ -1068,11 +1072,11 @@
     },
     "nixpkgs_2": {
       "locked": {
-        "lastModified": 1791956154,
-        "narHash": "sha256-jBYGPi4udQ9uo4KQp9m2J0546nJVQitG15gvZSaVVAs=",
+        "lastModified": 1792094642,
+        "narHash": "sha256-zp8ToDMnqZcu4o4IH9pdwXFXGp7yLm/M0dEnNWnyd7I=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "55bfb4d7437bd4e09ab7cba58a43bd68eb310044",
+        "rev": "fe13242281a67641c0102cdb1087f0ebe586c7df",
         "type": "github"
       },
       "original": {
@@ -1103,11 +1107,11 @@
     },
     "nixpkgs_4": {
       "locked": {
-        "lastModified": 1791943594,
-        "narHash": "sha256-tSfyQRHv3tnjRNLcaz9hYbmWRW/HivOUjWPmlDG2Oxc=",
+        "lastModified": 1792350434,
+        "narHash": "sha256-qsaDcAoHOVmZLsGkNWOcPcsg2+yFXUkcV4ZmluiPDos=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "218414d9075dc7d1bdf7f840e11869319b50e0df",
+        "rev": "fa60a5b07193de65811d4f041b5c7c8ea9593afc",
         "type": "github"
       },
       "original": {
@@ -1307,11 +1311,11 @@
         "nixpkgs": "nixpkgs_4"
       },
       "locked": {
-        "lastModified": 1792031322,
-        "narHash": "sha256-xgJCTlLNN+OOw3qP0SpsXvSAxLkLYYCW907Qdbpy6qE=",
+        "lastModified": 1792376985,
+        "narHash": "sha256-vztPjFw/YFlhKEOnCoMVbbN+XlmSdbTe4oXVvNxxClI=",
         "owner": "nix-community",
         "repo": "srvos",
-        "rev": "62d6e2b25c94a26f5fd7ef5a632e6a92d4b632cb",
+        "rev": "727975f5960b827f54065ec416fbf6d69bd283ab",
         "type": "github"
       },
       "original": {
@@ -1397,11 +1401,11 @@
         "systems": "systems_2"
       },
       "locked": {
-        "lastModified": 1790023441,
-        "narHash": "sha256-9vmOUIearXFJbafvJjEd8yaQQV/dKN2J5t3rC92Hi+Y=",
+        "lastModified": 1792320669,
+        "narHash": "sha256-ejdemeNa8TK1dcep3oMHmTvfEp+D7D6bnnE2tS59baM=",
         "owner": "terranix",
         "repo": "terranix",
-        "rev": "cb9dd00fe24f3f1323baaa19b5ee5fb514d37d77",
+        "rev": "b6c05a45b2435cb3471d6f135ddb0b3c2934cc45",
         "type": "github"
       },
       "original": {
