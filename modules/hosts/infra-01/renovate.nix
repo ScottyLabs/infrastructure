@@ -16,6 +16,12 @@
           ${lib.getExe pkgs.devenv} update "$@"
         ''
       );
+      # packageRules entries don't merge postUpgradeTasks
+      postUpgradeTasks = command: {
+        commands = [ command ];
+        fileFilters = [ "devenv.lock" ];
+        executionMode = "branch";
+      };
     in
     {
       age.secrets.renovate-token = {
@@ -81,7 +87,7 @@
               commitMessageAction = "update";
               commitMessageTopic = "lockfiles";
               commitMessageExtra = "";
-              postUpgradeTasks.commands = [ updateDevenvLock ];
+              postUpgradeTasks = postUpgradeTasks updateDevenvLock;
             }
 
             # Runs on kennel pushes via webhook.nix
@@ -93,15 +99,11 @@
                 commitMessageTopic = "lockfiles";
               };
               schedule = [ "at any time" ];
-              postUpgradeTasks.commands = [ "${updateDevenvLock} scottylabs" ];
+              postUpgradeTasks = postUpgradeTasks "${updateDevenvLock} scottylabs";
             }
           ];
 
           allowedCommands = [ "^${lib.escapeRegex updateDevenvLock}( scottylabs)?$" ];
-          postUpgradeTasks = {
-            fileFilters = [ "devenv.lock" ];
-            executionMode = "branch";
-          };
         };
       };
     };
