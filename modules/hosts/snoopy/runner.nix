@@ -65,5 +65,14 @@
         HOME = lib.mkForce "/var/lib/private/forgejo-runner/scottylabs";
         SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
       };
+
+      # Keep out of btrbk snapshots
+      disko.devices.disk.main.content.partitions.root.content.subvolumes."@forgejo-runner" = {
+        mountpoint = "/var/lib/private/forgejo-runner";
+        mountOptions = [
+          "compress=zstd"
+          "noatime"
+        ];
+      };
     };
 }
