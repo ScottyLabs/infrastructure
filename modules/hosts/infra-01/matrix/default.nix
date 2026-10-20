@@ -44,6 +44,7 @@
         bridges.discord = {
           enable = true;
           environmentFile = config.age.secrets.double-puppet-env.path;
+          relayLoginId = "@reconciler:doggylabs.org";
           adminUsers = [
             "@ap-1:matrix.org"
             "@reconciler:doggylabs.org"
