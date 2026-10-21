@@ -16,6 +16,7 @@
     infra-01-bridge-media-proxy
     infra-01-cmu-vpn
     infra-01-configuration
+    infra-01-darwin-builder
     infra-01-forgejo
     infra-01-garage
     infra-01-grafana
@@ -29,6 +30,8 @@
     infra-01-matrix-options
     infra-01-mautrix-discord
     infra-01-mautrix-slack
+    infra-01-nixbot
+    infra-01-nixbuild
     infra-01-nixos-mautrix-slack
     infra-01-observability
     infra-01-openbao

@@ -5,6 +5,7 @@
     mac-mini
 
     # Services
+    infra-02-builder
     infra-02-configuration
     infra-02-homebrew
   ];

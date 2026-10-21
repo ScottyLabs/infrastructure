@@ -54,11 +54,9 @@ in
       users.knownUsers = [ "deploy" ];
       users.users.deploy = {
         uid = 550;
-        gid = 20;
         home = "/Users/deploy";
         createHome = true;
         shell = "/bin/zsh";
-        ignoreShellProgramCheck = true;
         openssh.authorizedKeys.keys = builtins.attrValues users;
       };
 
