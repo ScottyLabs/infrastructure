@@ -545,9 +545,11 @@
               infrastructure = {
                 repository_id = "\${data.forgejo_repository.infrastructure.id}";
                 type = "forgejo";
-                url = "https://atlantis.scottylabs.org/events";
-                content_type = "json";
-                secret = "\${random_password.atlantis_webhook_secret.result}";
+                config = {
+                  url = "https://atlantis.scottylabs.org/events";
+                  content_type = "json";
+                  secret = "\${random_password.atlantis_webhook_secret.result}";
+                };
                 active = true;
                 events = [
                   "pull_request"
@@ -565,9 +567,11 @@
               governance = {
                 repository_id = "\${data.forgejo_repository.governance.id}";
                 type = "forgejo";
-                url = "https://atlantis.scottylabs.org/events";
-                content_type = "json";
-                secret = "\${random_password.atlantis_webhook_secret.result}";
+                config = {
+                  url = "https://atlantis.scottylabs.org/events";
+                  content_type = "json";
+                  secret = "\${random_password.atlantis_webhook_secret.result}";
+                };
                 active = true;
                 events = [
                   "pull_request"

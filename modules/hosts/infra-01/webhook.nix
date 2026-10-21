@@ -151,8 +151,10 @@
             resource.forgejo_repository_webhook.kennel_renovate = {
               repository_id = "\${data.forgejo_repository.kennel.id}";
               type = "forgejo";
-              url = "https://webhooks.scottylabs.org/hooks/renovate-update";
-              content_type = "json";
+              config = {
+                url = "https://webhooks.scottylabs.org/hooks/renovate-update";
+                content_type = "json";
+              };
               active = true;
               events = [ "push" ];
             };
