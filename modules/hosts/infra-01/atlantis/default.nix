@@ -5,10 +5,10 @@
     let
       forgejoProvider = pkgs.stdenvNoCC.mkDerivation {
         pname = "terraform-provider-forgejo";
-        version = "1.4.2-team-repository.2";
+        version = "1.7.0-team-repository-and-topics";
         src = pkgs.fetchurl {
-          url = "https://github.com/ap-1/terraform-provider-forgejo/releases/download/v1.4.2-team-repository.2/terraform-provider-forgejo_1.4.2-team-repository.2_linux_amd64.zip";
-          hash = "sha256-GMMlBaarmhOxpgNwDjl+2L65qh1nIT6RFj+JAsGZT5E=";
+          url = "https://github.com/ap-1/terraform-provider-forgejo/releases/download/v1.7.0-team-repository-and-topics/terraform-provider-forgejo_1.7.0-team-repository-and-topics_linux_amd64.zip";
+          hash = "sha256-2cSyXkfnfWA7QiGR0vqGyjfDAeGJ4ulqnUKbA4oKpn4=";
         };
         nativeBuildInputs = [ pkgs.unzip ];
         sourceRoot = ".";
