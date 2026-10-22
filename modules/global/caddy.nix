@@ -10,7 +10,7 @@
             "github.com/caddy-dns/cloudflare@v0.2.4"
             "github.com/greenpau/caddy-security@v1.1.62"
           ];
-          hash = "sha256-R2zJNnCtjZuiMqN2NzmsuUK7bgPpkySS/d5pDkcAEAw=";
+          hash = "sha256-/2Ma4OOAJ3UZ4oj/gqF42wHDOIgQ/j/fBH4JvQa8J98=";
         };
         environmentFile = config.age.secrets.cloudflare-api-token.path;
         globalConfig = ''
