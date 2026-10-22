@@ -22,6 +22,7 @@
               "ca-derivations"
               "kvm"
               "nixos-test"
+              "uid-range"
             ];
           }
         ];
