@@ -1,3 +1,12 @@
+let
+  features = [
+    "benchmark"
+    "big-parallel"
+    "ca-derivations"
+    "nixos-test"
+    "uid-range"
+  ];
+in
 {
   flake.modules.nixos.infra-01-nixbuild =
     { config, ... }:
@@ -16,14 +25,14 @@
             protocol = "ssh-ng";
             system = "x86_64-linux";
             maxJobs = 100;
-            supportedFeatures = [
-              "benchmark"
-              "big-parallel"
-              "ca-derivations"
-              "kvm"
-              "nixos-test"
-              "uid-range"
-            ];
+            supportedFeatures = features ++ [ "kvm" ];
+          }
+          {
+            hostName = "eu.nixbuild.net";
+            protocol = "ssh-ng";
+            system = "aarch64-linux";
+            maxJobs = 100;
+            supportedFeatures = features;
           }
         ];
 
