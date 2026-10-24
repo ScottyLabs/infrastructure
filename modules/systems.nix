@@ -9,12 +9,13 @@ let
   darwin = config.flake.modules.darwin;
   users = import ../users.nix;
 
-  hosts = [
-    "infra-01"
-    "deploy-01"
-    "signage-01"
-    "snoopy"
-  ];
+  hosts = {
+    infra-01 = "x86_64-linux";
+    infra-03 = "aarch64-linux";
+    deploy-01 = "x86_64-linux";
+    signage-01 = "x86_64-linux";
+    snoopy = "x86_64-linux";
+  };
 
   darwinHosts = [
     "infra-02"
@@ -33,14 +34,14 @@ let
   ];
 in
 {
-  flake.nixosConfigurations = lib.genAttrs hosts (
-    hostname:
+  flake.nixosConfigurations = lib.mapAttrs (
+    hostname: system:
     inputs.nixpkgs.lib.nixosSystem {
-      system = "x86_64-linux";
+      inherit system;
       inherit specialArgs;
       modules = modulesFor hostname;
     }
-  );
+  ) hosts;
 
   flake.darwinConfigurations = lib.genAttrs darwinHosts (
     hostname:
@@ -55,11 +56,15 @@ in
       meta = {
         nixpkgs = import inputs.nixpkgs { system = "x86_64-linux"; };
         inherit (inputs) nix-darwin;
-        nodeNixpkgs = lib.genAttrs darwinHosts (_: import inputs.nixpkgs { system = "aarch64-darwin"; });
+        nodeNixpkgs =
+          lib.genAttrs darwinHosts (_: import inputs.nixpkgs { system = "aarch64-darwin"; })
+          // lib.mapAttrs (_: system: import inputs.nixpkgs { inherit system; }) (
+            lib.filterAttrs (_: system: system != "x86_64-linux") hosts
+          );
         inherit specialArgs;
       };
     }
-    // lib.genAttrs hosts (
+    // lib.genAttrs (lib.attrNames hosts) (
       hostname:
       let
         bastion = config.flake.nixosConfigurations.${hostname}.config.scottylabs.bastion;

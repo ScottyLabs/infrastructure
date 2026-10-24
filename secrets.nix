@@ -9,9 +9,11 @@ let
   deploy-01 = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOm8p8uaXbhMbJGhkYJZWBzqYB25D9AVCUc5ACcMwU3c root@deploy-01";
   signage-01 = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHY/TsQztMS7l5ozBhLu05O+ze/DasZ3+grn5tvapoGX root@signage-01";
   snoopy = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJJxoj1W19busC7uwr4iNXlJHP3uMS7Wg3M+Kv6j0TPa root@snoopy";
+  infra-03 = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOaQliYDA6EKA9xrJiWqk+unJ4Tm80dbu674zXpFVIxL root@infra-03";
 
   hosts = [
     infra-01
+    infra-03
     deploy-01
     signage-01
     snoopy
@@ -60,6 +62,10 @@ in
   "secrets/snoopy/bao-role-id.age".publicKeys = admins ++ [ snoopy ];
   "secrets/snoopy/bao-secret-id.age".publicKeys = admins ++ [ snoopy ];
   "secrets/snoopy/forgejo-runner-token.age".publicKeys = admins ++ [ snoopy ];
+
+  # infra-03
+  "secrets/infra-03/bao-role-id.age".publicKeys = admins ++ [ infra-03 ];
+  "secrets/infra-03/bao-secret-id.age".publicKeys = admins ++ [ infra-03 ];
 
   # all
   "secrets/cloudflare-api-token.age".publicKeys = admins ++ hosts;
