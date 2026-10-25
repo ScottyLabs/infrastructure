@@ -21,6 +21,10 @@
         extra-trusted-public-keys = [
           "scottylabs.cachix.org-1:hajjEX5SLi/Y7yYloiXTt2IOr3towcTGRhMh1vu6Tjg="
         ];
+
+        # leave RAM for 16 concurrent ci jobs
+        max-jobs = 8;
+        cores = 8;
       };
 
       services.forgejo-runner.instances.scottylabs = {
@@ -44,7 +48,7 @@
 
         settings = {
           runner = {
-            capacity = 1;
+            capacity = 16;
             labels = [ "native:host" ];
           };
           cache = {
