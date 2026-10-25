@@ -6,5 +6,6 @@
 
     # Services
     infra-03-configuration
+    infra-03-runner
   ];
 }

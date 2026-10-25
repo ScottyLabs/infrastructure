@@ -1,5 +1,5 @@
 {
-  flake.modules.nixos.snoopy-runner =
+  flake.modules.nixos.infra-03-runner =
     {
       config,
       inputs,
@@ -10,7 +10,7 @@
 
     {
       age.secrets.forgejo-runner-token = {
-        file = ../../../secrets/snoopy/forgejo-runner-token.age;
+        file = ../../../secrets/infra-03/forgejo-runner-token.age;
         mode = "0400";
         owner = "root";
       };
@@ -39,7 +39,7 @@
           ])
           ++ [
             config.nix.package
-            inputs.kennel.packages.x86_64-linux.devenv
+            inputs.kennel.packages.${pkgs.stdenv.hostPlatform.system}.devenv
           ];
 
         settings = {

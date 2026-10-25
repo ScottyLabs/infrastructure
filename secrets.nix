@@ -61,11 +61,11 @@ in
   # snoopy
   "secrets/snoopy/bao-role-id.age".publicKeys = admins ++ [ snoopy ];
   "secrets/snoopy/bao-secret-id.age".publicKeys = admins ++ [ snoopy ];
-  "secrets/snoopy/forgejo-runner-token.age".publicKeys = admins ++ [ snoopy ];
 
   # infra-03
   "secrets/infra-03/bao-role-id.age".publicKeys = admins ++ [ infra-03 ];
   "secrets/infra-03/bao-secret-id.age".publicKeys = admins ++ [ infra-03 ];
+  "secrets/infra-03/forgejo-runner-token.age".publicKeys = admins ++ [ infra-03 ];
 
   # all
   "secrets/cloudflare-api-token.age".publicKeys = admins ++ hosts;

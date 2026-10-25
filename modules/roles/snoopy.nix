@@ -6,6 +6,5 @@
 
     # Services
     snoopy-configuration
-    snoopy-runner
   ];
 }
