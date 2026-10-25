@@ -62,7 +62,7 @@ in
           };
           keycloak = {
             source = "keycloak/keycloak";
-            version = "~> 5.0";
+            version = "~> 5.10";
           };
           vault = {
             source = "hashicorp/vault";

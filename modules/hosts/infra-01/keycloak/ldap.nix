@@ -26,7 +26,7 @@ in
   perSystem = _: {
     terranix.terranixConfigurations.keycloak.modules = [
       {
-        data.vault_kv_secret_v2.keycloak_ldap = {
+        ephemeral.vault_kv_secret_v2.keycloak_ldap = {
           mount = "secret";
           name = "infra/keycloak-ldap";
         };
@@ -40,7 +40,8 @@ in
           use_truststore_spi = "ALWAYS";
           connection_pooling = true;
           bind_dn = "uid=scottylabs-svc,ou=andrewperson,dc=andrew,dc=cmu,dc=edu";
-          bind_credential = "\${data.vault_kv_secret_v2.keycloak_ldap.data[\"BIND_CREDENTIAL\"]}";
+          bind_credential_wo = "\${ephemeral.vault_kv_secret_v2.keycloak_ldap.data[\"BIND_CREDENTIAL\"]}";
+          bind_credential_wo_version = 1;
           users_dn = "ou=andrewperson,dc=andrew,dc=cmu,dc=edu";
           user_object_classes = [
             "cmuAccountPerson"

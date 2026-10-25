@@ -59,7 +59,7 @@ in
           name = "infra/keycloak-idp";
         };
 
-        data.vault_kv_secret_v2.forgejo_idp = {
+        ephemeral.vault_kv_secret_v2.forgejo_idp = {
           mount = "secret";
           name = "infra/forgejo-idp";
         };
@@ -119,8 +119,9 @@ in
           display_name = "cmu.dev";
           gui_order = "1";
           base = "https://git.cmu.dev";
-          client_id = "\${data.vault_kv_secret_v2.forgejo_idp.data[\"CLIENT_ID\"]}";
-          client_secret = "\${data.vault_kv_secret_v2.forgejo_idp.data[\"CLIENT_SECRET\"]}";
+          client_id = "f6889b2d-f221-463b-806e-401d21de6457";
+          client_secret_wo = "\${ephemeral.vault_kv_secret_v2.forgejo_idp.data[\"CLIENT_SECRET\"]}";
+          client_secret_wo_version = 1;
           default_scopes = "openid profile email";
         };
 
