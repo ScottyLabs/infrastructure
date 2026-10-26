@@ -21,6 +21,9 @@ let
     "CDN_ACCESS_KEY_ID"
     "CDN_SECRET_ACCESS_KEY"
     "CDN_PUBLIC_URL"
+    "EMAIL_FROM"
+    "EMAIL_API_TOKEN"
+    "EMAIL_ACCOUNT_ID"
   ];
 in
 {
@@ -107,6 +110,11 @@ in
               + ''
                 # LiteLLM master key for governance to call the management API
                 path "secret/data/infra/litellm-master-key" {
+                  capabilities = ["read"]
+                }
+
+                # Cloudflare token for governance's email feature
+                path "secret/data/infra/cloudflare-governance-email" {
                   capabilities = ["read"]
                 }
 
