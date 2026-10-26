@@ -1,7 +1,13 @@
 { config, grafana, ... }:
 {
   flake.modules.nixos.deploy-01-kennel =
-    { config, inputs, ... }:
+    {
+      config,
+      inputs,
+      lib,
+      pkgs,
+      ...
+    }:
 
     {
       imports = [
@@ -90,9 +96,22 @@
         forgejo.apiTokenFile = config.age.secrets.kennel-forgejo-token.path;
       };
 
-      systemd.services.kennel.vault.environmentTemplate = ''
-        {{ with secret "secret/data/infra/cloudflare-kennel" }}CLOUDFLARE_API_TOKEN={{ .Data.data.TOKEN }}{{ end }}
-      '';
+      # A vault environmentTemplate adds kennel-envfile.service, which kennel stops as an orphaned deployment
+      systemd.services.kennel = {
+        vault.infraSecrets.cloudflare-token = {
+          path = "cloudflare-kennel";
+          key = "TOKEN";
+        };
+
+        # kennel reads the token from its environment
+        serviceConfig.ExecStart = lib.mkForce (
+          pkgs.writeShellScript "kennel-start" ''
+            CLOUDFLARE_API_TOKEN=$(< "$CREDENTIALS_DIRECTORY/cloudflare-token")
+            export CLOUDFLARE_API_TOKEN
+            exec ${config.services.kennel.package}/bin/kennel
+          ''
+        );
+      };
 
       scottylabs.postgresql.databases = [ "kennel" ];
       scottylabs.valkey.servers = [ "kennel" ];
