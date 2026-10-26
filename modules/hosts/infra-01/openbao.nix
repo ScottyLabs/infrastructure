@@ -451,6 +451,51 @@
               canonical_id = "\${vault_identity_group.all_members.id}";
             };
 
+            # Identity tokens that Google Cloud trusts for workload identity federation
+            resource.vault_identity_oidc.server.issuer = "https://secrets.scottylabs.org";
+
+            resource.vault_identity_oidc_key.terranix = {
+              name = "terranix";
+              algorithm = "RS256";
+              allowed_client_ids = [ "terranix-search-console" ];
+            };
+
+            resource.vault_identity_oidc_role.terranix_search_console = {
+              name = "terranix-search-console";
+              key = "\${vault_identity_oidc_key.terranix.name}";
+              client_id = "terranix-search-console";
+              ttl = 60;
+            };
+
+            resource.vault_policy.terranix_search_console = {
+              name = "terranix-search-console";
+              policy = ''
+                path "identity/oidc/token/terranix-search-console" {
+                  capabilities = ["read"]
+                }
+              '';
+            };
+
+            # Atlantis mints short-lived tokens for this entity to request identity tokens
+            resource.vault_identity_entity.atlantis = {
+              name = "atlantis";
+              policies = [ "\${vault_policy.terranix_search_console.name}" ];
+            };
+
+            data.vault_auth_backend.token.path = "token";
+
+            resource.vault_identity_entity_alias.atlantis = {
+              name = "atlantis";
+              mount_accessor = "\${data.vault_auth_backend.token.accessor}";
+              canonical_id = "\${vault_identity_entity.atlantis.id}";
+            };
+
+            resource.vault_token_auth_backend_role.atlantis = {
+              role_name = "atlantis";
+              allowed_entity_aliases = [ "atlantis" ];
+              token_explicit_max_ttl = 60;
+            };
+
             resource.keycloak_openid_client.openbao = {
               realm_id = "\${data.keycloak_realm.scottylabs.id}";
               client_id = "openbao";
@@ -476,6 +521,7 @@
             };
 
             output.approle_role_ids.value = "\${{ for k, v in vault_approle_auth_backend_role.host : k => v.role_id }}";
+            output.atlantis_entity_id.value = "\${vault_identity_entity.atlantis.id}";
           }
         ];
       };
