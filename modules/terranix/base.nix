@@ -10,6 +10,8 @@ let
   tunnelIdFor =
     record: host:
     tunnelIds.${host} or (throw "dns.${record}: host ${host} has no scottylabs.cloudflared.tunnelId");
+
+  zones = import ../../zones.nix;
 in
 {
   flake.modules.terranix.base =
@@ -110,12 +112,7 @@ in
         };
 
         data = {
-          cloudflare_zones.all = { };
           keycloak_realm.scottylabs.realm = "scottylabs";
-        };
-
-        locals = lib.mkIf (config.dns != { }) {
-          zone_ids = "\${{ for z in data.cloudflare_zones.all.result : z.name => z.id }}";
         };
 
         resource.cloudflare_dns_record.this = lib.mkIf (config.dns != { }) {
@@ -130,12 +127,12 @@ in
             ) "dns.${name}: exactly one of host, target, or tunnel must be set";
             {
               inherit (e)
-                zone
                 name
                 type
                 comment
                 priority
                 ;
+              zone_id = zones.${e.zone} or (throw "dns.${name}: zone ${e.zone} is not in zones.nix");
               # Tunnel CNAMEs only resolve through the Cloudflare proxy
               proxied = e.proxied || e.tunnel != null;
               content =
@@ -147,7 +144,7 @@ in
                   e.target;
             }
           ) config.dns;
-          zone_id = "\${local.zone_ids[each.value.zone]}";
+          zone_id = "\${each.value.zone_id}";
           name = "\${each.value.name}";
           content = "\${each.value.content}";
           type = "\${each.value.type}";

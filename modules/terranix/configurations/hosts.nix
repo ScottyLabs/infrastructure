@@ -30,7 +30,7 @@
               }) inputs.self.darwinConfigurations);
 
             resource.cloudflare_zone_setting.always_use_https = {
-              for_each = "\${{ for z in data.cloudflare_zones.all.result : z.id => z.id }}";
+              for_each = lib.mapAttrs' (_: id: lib.nameValuePair id id) (import ../../../zones.nix);
               zone_id = "\${each.value}";
               setting_id = "always_use_https";
               value = "on";
