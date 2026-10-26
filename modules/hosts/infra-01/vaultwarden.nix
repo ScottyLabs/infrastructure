@@ -25,19 +25,26 @@
           ROCKET_PORT = 8222;
 
           # SMTP
-          SMTP_HOST = "smtp.mailgun.org";
-          SMTP_FROM = "vaultwarden@mail.scottylabs.org";
+          SMTP_HOST = "smtp.mx.cloudflare.net";
+          SMTP_FROM = "noreply@scottylabs.org";
           SMTP_FROM_NAME = "ScottyLabs Vaultwarden";
-          SMTP_SECURITY = "starttls";
-          SMTP_PORT = 587;
+          SMTP_SECURITY = "force_tls";
+          SMTP_PORT = 465;
+          SMTP_USERNAME = "api_token";
+          SMTP_PASSWORD_FILE = "/run/credentials/vaultwarden.service/smtp";
           SMTP_TIMEOUT = 15;
 
           # Database via Unix socket
           DATABASE_URL = "postgresql:///vaultwarden?host=/run/postgresql";
         };
 
-        # SMTP_USERNAME, SMTP_PASSWORD, ADMIN_TOKEN
+        # ADMIN_TOKEN
         environmentFile = config.age.secrets.vaultwarden.path;
+      };
+
+      systemd.services.vaultwarden.vault.infraSecrets.smtp = {
+        path = "cloudflare-smtp";
+        key = "TOKEN";
       };
 
       services.caddy.virtualHosts."vault.scottylabs.org".extraConfig = ''

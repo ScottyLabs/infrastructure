@@ -19,10 +19,18 @@
         mode = "0400";
       };
 
-      systemd.services.keycloak.serviceConfig = {
-        EnvironmentFile = config.age.secrets.keycloak.path;
-        Restart = "on-failure";
-        RestartSec = 5;
+      systemd.services.keycloak = {
+        serviceConfig = {
+          EnvironmentFile = config.age.secrets.keycloak.path;
+          Restart = "on-failure";
+          RestartSec = 5;
+        };
+
+        # Read by the file vault as ${vault.smtp} in the realm's SMTP password
+        vault.infraSecrets.scottylabs_smtp = {
+          path = "cloudflare-smtp";
+          key = "TOKEN";
+        };
       };
 
       services.keycloak = {
@@ -50,6 +58,8 @@
           metrics-enabled = true;
           health-enabled = true;
           http-management-port = 9092;
+          vault = "file";
+          vault-dir = "/run/credentials/keycloak.service";
         };
 
         themes = {

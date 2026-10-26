@@ -70,10 +70,11 @@
 
           mailer = {
             ENABLED = true;
-            PROTOCOL = "smtp+starttls";
-            SMTP_ADDR = "smtp.mailgun.org";
-            SMTP_PORT = 587;
-            FROM = "cmu.dev <forgejo@mail.scottylabs.org>";
+            PROTOCOL = "smtps";
+            SMTP_ADDR = "smtp.mx.cloudflare.net";
+            SMTP_PORT = 465;
+            USER = "api_token";
+            FROM = "cmu.dev <noreply@cmu.dev>";
           };
 
           service = {
@@ -141,13 +142,6 @@
         ]
       );
 
-      # Mailgun SMTP username and password
-      age.secrets.forgejo-mailer = {
-        file = ../../../../secrets/infra-01/forgejo-mailer.age;
-        mode = "0400";
-        owner = "forgejo";
-      };
-
       # Instance signing key private half
       age.secrets.forgejo-signing-key = {
         file = ../../../../secrets/infra-01/forgejo-signing-key.age;
@@ -203,17 +197,21 @@
             path = "forgejo-storage";
             key = "MINIO_SECRET_ACCESS_KEY";
           };
+          smtp = {
+            path = "cloudflare-smtp";
+            key = "TOKEN";
+          };
         };
 
         # ssh-keygen for SSH commit signing
         path = [ pkgs.openssh ];
-        serviceConfig.EnvironmentFile = config.age.secrets.forgejo-mailer.path;
 
-        # Garage S3 creds from OpenBao
+        # Garage S3 creds and Cloudflare SMTP token from OpenBao
         environment = {
           "FORGEJO__storage__MINIO_ACCESS_KEY_ID__FILE" = "/run/credentials/forgejo.service/storage_access";
           "FORGEJO__storage__MINIO_SECRET_ACCESS_KEY__FILE" =
             "/run/credentials/forgejo.service/storage_secret";
+          "FORGEJO__mailer__PASSWD__FILE" = "/run/credentials/forgejo.service/smtp";
         };
 
         wants = [

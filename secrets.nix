@@ -21,7 +21,6 @@ let
 in
 {
   # infra-01
-  "secrets/infra-01/forgejo-mailer.age".publicKeys = admins ++ [ infra-01 ];
   "secrets/infra-01/forgejo-signing-key.age".publicKeys = admins ++ [ infra-01 ];
   "secrets/infra-01/renovate-token.age".publicKeys = admins ++ [ infra-01 ];
   "secrets/infra-01/keycloak.age".publicKeys = admins ++ [ infra-01 ];

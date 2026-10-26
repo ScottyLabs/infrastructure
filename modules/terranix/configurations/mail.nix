@@ -1,4 +1,7 @@
 { config, ... }:
+let
+  zones = import ../../../zones.nix;
+in
 {
   perSystem =
     { pkgs, ... }:
@@ -11,6 +14,17 @@
           {
             terraform.backend.s3.key = "services/mail.tfstate";
             cloudflare.token = "terranix-mail";
+
+            resource.cloudflare_email_sending_subdomain = {
+              cmu-dev = {
+                zone_id = zones."cmu.dev";
+                name = "cmu.dev";
+              };
+              scottylabs-org = {
+                zone_id = zones."scottylabs.org";
+                name = "scottylabs.org";
+              };
+            };
 
             dns = {
               scottylabs-org-mx = {
