@@ -14,8 +14,14 @@ let
   zones = import ../../zones.nix;
   cloudflareAccount = "f8b0a968c44462e7f9128ad43151d2c4";
 
-  # Tokens should only work from hosts that run Atlantis
-  atlantisAddresses = lib.mapAttrsToList (_: host: "${host.config.scottylabs.ipAddress}/32") (
+  hostAddress =
+    token: host:
+    "${
+      inputs.self.nixosConfigurations.${host}.config.scottylabs.ipAddress
+        or (throw "cloudflare.tokens.${token}: host ${host} has no scottylabs.ipAddress")
+    }/32";
+
+  atlantisHosts = lib.attrNames (
     lib.filterAttrs (
       _: host: host.config.scottylabs.atlantis.enable or false
     ) inputs.self.nixosConfigurations
@@ -91,6 +97,11 @@ in
                 type = lib.types.nullOr (lib.types.listOf lib.types.str);
                 default = null;
                 description = "Zones the zone permissions apply to, or null for every zone in the account.";
+              };
+              hosts = lib.mkOption {
+                type = lib.types.listOf lib.types.str;
+                default = atlantisHosts;
+                description = "Hosts whose IP addresses can use the token, defaulting to the hosts that run Atlantis.";
               };
             };
           }
@@ -240,7 +251,7 @@ in
                   permission_groups = permissionGroups token.zonePermissions;
                   resources = builtins.toJSON zoneResources;
                 };
-              condition.request_ip."in" = atlantisAddresses;
+              condition.request_ip."in" = map (hostAddress name) token.hosts;
             }
           ) config.cloudflare.tokens
         );

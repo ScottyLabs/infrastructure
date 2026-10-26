@@ -90,6 +90,10 @@
         forgejo.apiTokenFile = config.age.secrets.kennel-forgejo-token.path;
       };
 
+      systemd.services.kennel.vault.environmentTemplate = ''
+        {{ with secret "secret/data/infra/cloudflare-kennel" }}CLOUDFLARE_API_TOKEN={{ .Data.data.TOKEN }}{{ end }}
+      '';
+
       scottylabs.postgresql.databases = [ "kennel" ];
       scottylabs.valkey.servers = [ "kennel" ];
 

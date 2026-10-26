@@ -45,6 +45,14 @@
               };
 
               smtp.accountPermissions = [ "Email Sending Write" ];
+
+              kennel = {
+                zonePermissions = [
+                  "Zone Read"
+                  "DNS Write"
+                ];
+                hosts = [ "deploy-01" ];
+              };
             };
           }
         ];
