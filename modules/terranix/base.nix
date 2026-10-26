@@ -99,6 +99,12 @@ in
         description = "Cloudflare API tokens to provision and store in OpenBao (name -> permissions).";
       };
 
+      options.cloudflare.token = lib.mkOption {
+        type = lib.types.nullOr lib.types.str;
+        default = "terranix-dns";
+        description = "Provisioned Cloudflare token this configuration uses, such as terranix-hosts.";
+      };
+
       config = {
         terraform.required_providers = {
           cloudflare = {
@@ -124,14 +130,20 @@ in
         };
 
         variable = {
-          cloudflare_api_token.sensitive = true;
           keycloak_admin_user.sensitive = true;
           keycloak_admin_password.sensitive = true;
           garage_admin_token.sensitive = true;
         };
 
+        ephemeral.vault_kv_secret_v2.cloudflare_token = lib.mkIf (config.cloudflare.token != null) {
+          mount = "secret";
+          name = "infra/cloudflare-${config.cloudflare.token}";
+        };
+
         provider = {
-          cloudflare.api_token = "\${var.cloudflare_api_token}";
+          cloudflare = lib.mkIf (config.cloudflare.token != null) {
+            api_token = "\${ephemeral.vault_kv_secret_v2.cloudflare_token.data[\"TOKEN\"]}";
+          };
           keycloak = {
             client_id = "admin-cli";
             username = "\${var.keycloak_admin_user}";

@@ -15,6 +15,7 @@
           config.flake.modules.terranix.s3-state
           {
             terraform.backend.s3.key = "services/hosts.tfstate";
+            cloudflare.token = "terranix-hosts";
             dns =
               (lib.mapAttrs (name: host: {
                 inherit name;

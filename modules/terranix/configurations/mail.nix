@@ -10,6 +10,7 @@
           config.flake.modules.terranix.s3-state
           {
             terraform.backend.s3.key = "services/mail.tfstate";
+            cloudflare.token = "terranix-mail";
 
             dns = {
               scottylabs-org-mx = {

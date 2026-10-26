@@ -1,4 +1,4 @@
-{ config, lib, ... }:
+{ config, ... }:
 {
   perSystem =
     { pkgs, ... }:
@@ -12,8 +12,9 @@
             terraform.backend.s3.key = "services/cloudflare-tokens.tfstate";
 
             # Manual token with only User API Tokens Edit
+            cloudflare.token = null;
             variable.cloudflare_tokens_api_token.sensitive = true;
-            provider.cloudflare.api_token = lib.mkForce "\${var.cloudflare_tokens_api_token}";
+            provider.cloudflare.api_token = "\${var.cloudflare_tokens_api_token}";
 
             cloudflare.tokens = {
               terranix-dns.zonePermissions = [
