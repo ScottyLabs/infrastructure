@@ -493,6 +493,8 @@
             resource.vault_token_auth_backend_role.atlantis = {
               role_name = "atlantis";
               allowed_entity_aliases = [ "atlantis" ];
+              allowed_policies = [ "\${vault_policy.terranix_search_console.name}" ];
+              token_no_default_policy = true;
               token_explicit_max_ttl = 60;
             };
 

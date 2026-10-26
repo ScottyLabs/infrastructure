@@ -89,6 +89,8 @@
         FORGEJO_TFRC = "${forgejoTfrc}";
         RUSTC_WRAPPER = "${pkgs.sccache}/bin/sccache";
         SCCACHE_DIR = "/var/lib/atlantis/sccache";
+        # Lets the search-console Google provider run its OpenBao token script
+        GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES = "1";
       };
 
       systemd.services.atlantis.vault.environmentTemplate = ''
