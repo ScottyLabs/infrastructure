@@ -12,6 +12,14 @@ let
     tunnelIds.${host} or (throw "dns.${record}: host ${host} has no scottylabs.cloudflared.tunnelId");
 
   zones = import ../../zones.nix;
+  cloudflareAccount = "f8b0a968c44462e7f9128ad43151d2c4";
+
+  # Tokens should only work from hosts that run Atlantis
+  atlantisAddresses = lib.mapAttrsToList (_: host: "${host.config.scottylabs.ipAddress}/32") (
+    lib.filterAttrs (
+      _: host: host.config.scottylabs.atlantis.enable or false
+    ) inputs.self.nixosConfigurations
+  );
 in
 {
   flake.modules.terranix.base =
@@ -65,6 +73,32 @@ in
         description = "DNS records to provision (identifier -> entry).";
       };
 
+      options.cloudflare.tokens = lib.mkOption {
+        type = lib.types.attrsOf (
+          lib.types.submodule {
+            options = {
+              accountPermissions = lib.mkOption {
+                type = lib.types.listOf lib.types.str;
+                default = [ ];
+                description = "Account-scoped permission group names, such as Email Sending Write.";
+              };
+              zonePermissions = lib.mkOption {
+                type = lib.types.listOf lib.types.str;
+                default = [ ];
+                description = "Zone-scoped permission group names, such as DNS Write.";
+              };
+              zones = lib.mkOption {
+                type = lib.types.nullOr (lib.types.listOf lib.types.str);
+                default = null;
+                description = "Zones the zone permissions apply to, or null for every zone in the account.";
+              };
+            };
+          }
+        );
+        default = { };
+        description = "Cloudflare API tokens to provision and store in OpenBao (name -> permissions).";
+      };
+
       config = {
         terraform.required_providers = {
           cloudflare = {
@@ -113,6 +147,9 @@ in
 
         data = {
           keycloak_realm.scottylabs.realm = "scottylabs";
+          cloudflare_api_token_permission_groups_list = lib.mkIf (config.cloudflare.tokens != { }) {
+            all = { };
+          };
         };
 
         resource.cloudflare_dns_record.this = lib.mkIf (config.dns != { }) {
@@ -154,6 +191,57 @@ in
           proxied = "\${each.value.proxied}";
           comment = "\${each.value.comment} - managed by terranix";
         };
+
+        locals = lib.mkIf (config.cloudflare.tokens != { }) {
+          cloudflare_permission_groups = "\${{ for g in data.cloudflare_api_token_permission_groups_list.all.result : g.name => g.id... }}";
+        };
+
+        resource.cloudflare_api_token = lib.mkIf (config.cloudflare.tokens != { }) (
+          lib.mapAttrs (
+            name: token:
+            let
+              permissionGroups = map (group: {
+                id = "\${one(local.cloudflare_permission_groups[\"${group}\"])}";
+              });
+              zoneResources =
+                if token.zones == null then
+                  { "com.cloudflare.api.account.${cloudflareAccount}"."com.cloudflare.api.account.zone.*" = "*"; }
+                else
+                  lib.listToAttrs (
+                    map (
+                      zone:
+                      lib.nameValuePair "com.cloudflare.api.account.zone.${zones.${zone} or (throw "cloudflare.tokens.${name}: zone ${zone} is not in zones.nix")}" "*"
+                    ) token.zones
+                  );
+            in
+            {
+              inherit name;
+              policies =
+                lib.optional (token.accountPermissions != [ ]) {
+                  effect = "allow";
+                  permission_groups = permissionGroups token.accountPermissions;
+                  resources = builtins.toJSON { "com.cloudflare.api.account.${cloudflareAccount}" = "*"; };
+                }
+                ++ lib.optional (token.zonePermissions != [ ]) {
+                  effect = "allow";
+                  permission_groups = permissionGroups token.zonePermissions;
+                  resources = builtins.toJSON zoneResources;
+                };
+              condition.request_ip."in" = atlantisAddresses;
+            }
+          ) config.cloudflare.tokens
+        );
+
+        resource.vault_kv_secret_v2 = lib.mkIf (config.cloudflare.tokens != { }) (
+          lib.mapAttrs' (
+            name: _:
+            lib.nameValuePair "cloudflare_${name}" {
+              mount = "secret";
+              name = "infra/cloudflare-${name}";
+              data_json = "\${jsonencode({ TOKEN = cloudflare_api_token.${name}.value })}";
+            }
+          ) config.cloudflare.tokens
+        );
       };
     };
 
