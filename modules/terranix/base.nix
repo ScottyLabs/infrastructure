@@ -23,6 +23,10 @@ in
                 type = lib.types.str;
                 default = "scottylabs.org";
               };
+              name = lib.mkOption {
+                type = lib.types.str;
+                description = "Record name relative to the zone, such as @ for the apex.";
+              };
               host = lib.mkOption {
                 type = lib.types.nullOr lib.types.str;
                 default = null;
@@ -31,16 +35,21 @@ in
               tunnel = lib.mkOption {
                 type = lib.types.nullOr lib.types.str;
                 default = null;
-                description = "Host whose Cloudflare Tunnel serves this record";
+                description = "Host whose Cloudflare Tunnel serves this record.";
               };
               target = lib.mkOption {
                 type = lib.types.nullOr lib.types.str;
                 default = null;
-                description = "Verbatim record content (A address or external CNAME target).";
+                description = "Record content, such as an A address or TXT value.";
               };
               type = lib.mkOption {
                 type = lib.types.str;
                 default = "CNAME";
+              };
+              priority = lib.mkOption {
+                type = lib.types.nullOr lib.types.int;
+                default = null;
+                description = "MX priority.";
               };
               proxied = lib.mkOption {
                 type = lib.types.bool;
@@ -51,7 +60,7 @@ in
           }
         );
         default = { };
-        description = "DNS records to provision (record name -> entry).";
+        description = "DNS records to provision (identifier -> entry).";
       };
 
       config = {
@@ -120,7 +129,13 @@ in
               ] == 1
             ) "dns.${name}: exactly one of host, target, or tunnel must be set";
             {
-              inherit (e) zone type comment;
+              inherit (e)
+                zone
+                name
+                type
+                comment
+                priority
+                ;
               # Tunnel CNAMEs only resolve through the Cloudflare proxy
               proxied = e.proxied || e.tunnel != null;
               content =
@@ -133,9 +148,11 @@ in
             }
           ) config.dns;
           zone_id = "\${local.zone_ids[each.value.zone]}";
-          name = "\${each.key}";
+          name = "\${each.value.name}";
           content = "\${each.value.content}";
           type = "\${each.value.type}";
+          # Terranix omits null priorities
+          priority = "\${try(each.value.priority, null)}";
           ttl = 1;
           proxied = "\${each.value.proxied}";
           comment = "\${each.value.comment} - managed by terranix";

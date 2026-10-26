@@ -447,14 +447,17 @@
             terraform.backend.s3.key = "services/kennel.tfstate";
             dns = {
               kennel = {
+                name = "kennel";
                 tunnel = "deploy-01";
                 comment = "Kennel deployment platform";
               };
               "s3.kennel" = {
+                name = "s3.kennel";
                 tunnel = "deploy-01";
                 comment = "Kennel per-deployment garage S3 API";
               };
               "*" = {
+                name = "*";
                 zone = "scottylabs.net";
                 tunnel = "deploy-01";
                 comment = "Kennel deployment platform wildcard";

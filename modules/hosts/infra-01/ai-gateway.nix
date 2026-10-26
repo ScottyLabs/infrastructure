@@ -79,7 +79,7 @@
             "claude-fable-5-1"
             "claude-opus-5-5"
             "claude-sonnet-5-5"
-            "claude-haiku-4-5-20251001"
+            "claude-haiku-5-5"
           ]
           ++ map openai [
             "gpt-6-astra"
@@ -102,6 +102,7 @@
           {
             terraform.backend.s3.key = "services/litellm.tfstate";
             dns.litellm = {
+              name = "litellm";
               tunnel = "infra-01";
               comment = "LiteLLM AI gateway fronting cli-proxy-api";
             };

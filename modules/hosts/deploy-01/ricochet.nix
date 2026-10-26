@@ -33,6 +33,7 @@
           {
             terraform.backend.s3.key = "services/ricochet.tfstate";
             dns.oauth = {
+              name = "oauth";
               tunnel = "deploy-01";
               comment = "Ricochet OAuth callback relay";
             };

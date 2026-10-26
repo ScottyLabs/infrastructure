@@ -254,18 +254,22 @@
           {
             dns = {
               s3 = {
+                name = "s3";
                 tunnel = "infra-01";
                 comment = "Garage S3-compatible object storage";
               };
               assets = {
+                name = "assets";
                 tunnel = "infra-01";
                 comment = "Garage public-read website endpoint for the scottylabs-assets bucket";
               };
               cdn = {
+                name = "cdn";
                 tunnel = "infra-01";
                 comment = "Garage public-read CDN";
               };
               docs = {
+                name = "docs";
                 tunnel = "infra-01";
                 comment = "ScottyLabs documentation hub (Garage scottylabs-docs bucket)";
               };

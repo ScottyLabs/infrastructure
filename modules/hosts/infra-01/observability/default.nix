@@ -312,10 +312,12 @@
             terraform.backend.s3.key = "services/observability.tfstate";
             dns = {
               grafana = {
+                name = "grafana";
                 tunnel = "infra-01";
                 comment = "Grafana observability frontend";
               };
               uptime = {
+                name = "uptime";
                 tunnel = "infra-01";
                 comment = "Uptime Kuma public status page";
               };

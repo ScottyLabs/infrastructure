@@ -124,6 +124,7 @@
           {
             terraform.backend.s3.key = "services/webhook.tfstate";
             dns.webhooks = {
+              name = "webhooks";
               tunnel = "infra-01";
               comment = "Renovate trigger webhook receiver";
             };

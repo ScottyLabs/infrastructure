@@ -266,6 +266,7 @@
           {
             terraform.backend.s3.key = "services/openbao.tfstate";
             dns.secrets = {
+              name = "secrets";
               tunnel = "infra-01";
               comment = "OpenBao";
             };

@@ -49,11 +49,13 @@
             terraform.backend.s3.key = "services/matrix.tfstate";
             dns = {
               "@" = {
+                name = "@";
                 zone = "doggylabs.org";
                 tunnel = "infra-01";
                 comment = "Matrix homeserver (Synapse)";
               };
               matrix = {
+                name = "matrix";
                 zone = "doggylabs.org";
                 tunnel = "infra-01";
                 comment = "Matrix homeserver (Synapse)";

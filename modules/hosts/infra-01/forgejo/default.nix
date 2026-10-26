@@ -443,6 +443,7 @@
             terraform.backend.s3.key = "services/forgejo.tfstate";
 
             dns.git = {
+              name = "git";
               zone = "cmu.dev";
               host = "infra-01";
               comment = "Forgejo";

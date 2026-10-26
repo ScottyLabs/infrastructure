@@ -120,6 +120,7 @@
             terraform.backend.s3.key = "services/nixbot.tfstate";
 
             dns.nixbot = {
+              name = "nixbot";
               tunnel = "infra-01";
               comment = "Nix CI";
             };

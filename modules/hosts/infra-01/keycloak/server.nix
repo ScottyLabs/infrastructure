@@ -260,6 +260,7 @@
           {
             terraform.backend.s3.key = "services/keycloak.tfstate";
             dns.idp = {
+              name = "idp";
               tunnel = "infra-01";
               comment = "Keycloak";
             };

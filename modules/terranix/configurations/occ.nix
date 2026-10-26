@@ -12,6 +12,7 @@
             terraform.backend.s3.key = "services/occ.tfstate";
 
             dns.incus = {
+              name = "incus";
               zone = "occ.build";
               target = "128.2.96.10";
               type = "A";

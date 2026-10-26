@@ -55,6 +55,7 @@
 
             # Direct because cloudflared can't carry the knot eventstream
             dns.knot = {
+              name = "knot";
               zone = "cmu.dev";
               host = "infra-01";
               comment = "snot knot";

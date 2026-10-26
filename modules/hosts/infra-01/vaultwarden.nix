@@ -58,6 +58,7 @@
           {
             terraform.backend.s3.key = "services/vaultwarden.tfstate";
             dns.vault = {
+              name = "vault";
               tunnel = "infra-01";
               comment = "Vaultwarden";
             };

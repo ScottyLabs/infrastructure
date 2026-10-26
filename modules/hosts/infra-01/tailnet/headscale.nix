@@ -288,11 +288,13 @@
             terraform.backend.s3.key = "services/headscale.tfstate";
             dns = {
               headscale = {
+                name = "headscale";
                 # Direct because cloudflared does not support its HTTP upgrade headers
                 host = "infra-01";
                 comment = "Headscale VPN coordination server";
               };
               headplane = {
+                name = "headplane";
                 tunnel = "infra-01";
                 comment = "Headplane web UI for Headscale";
               };

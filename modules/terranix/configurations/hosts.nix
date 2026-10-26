@@ -17,11 +17,13 @@
             terraform.backend.s3.key = "services/hosts.tfstate";
             dns =
               (lib.mapAttrs (name: host: {
+                inherit name;
                 target = host.config.scottylabs.ipAddress;
                 type = "A";
                 comment = "NixOS host ${name}";
               }) inputs.self.nixosConfigurations)
               // (lib.mapAttrs (name: host: {
+                inherit name;
                 target = host.config.scottylabs.ipAddress;
                 type = "A";
                 comment = "darwin host ${name}";

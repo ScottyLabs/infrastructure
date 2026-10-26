@@ -32,6 +32,7 @@
               resource.posthog_proxy_record.v.domain = "v.${config.dns.v.zone}";
 
               dns.v = {
+                name = "v";
                 type = "CNAME";
                 target = "\${posthog_proxy_record.v.target_cname}";
                 comment = "PostHog managed reverse proxy";
