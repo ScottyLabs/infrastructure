@@ -4,7 +4,6 @@
     {
       config,
       pkgs,
-      inputs,
       ...
     }:
 
@@ -55,7 +54,7 @@
 
         themes = {
           terrier = pkgs.runCommand "keycloak-terrier-theme" { } ''
-            cp -r ${inputs.keycloak-theme}/themes/scottylabs $out
+            cp -r ${./theme} $out
           '';
         };
 

@@ -42,10 +42,6 @@
     };
 
     # infra-01
-    keycloak-theme = {
-      url = "git+https://git.cmu.dev/ScottyLabs/keycloak-theme";
-      flake = false;
-    };
     llm-pkgs = {
       url = "git+https://codeberg.org/anish/llm-pkgs";
       inputs.nixpkgs.follows = "nixpkgs";
