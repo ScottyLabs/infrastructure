@@ -22,8 +22,10 @@ let
     "CDN_SECRET_ACCESS_KEY"
     "CDN_PUBLIC_URL"
     "EMAIL_FROM"
-    "EMAIL_API_TOKEN"
-    "EMAIL_ACCOUNT_ID"
+    "SMTP_HOST"
+    "SMTP_PORT"
+    "SMTP_USERNAME"
+    "SMTP_PASSWORD"
   ];
 in
 {
