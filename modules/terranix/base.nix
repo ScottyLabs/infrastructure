@@ -129,15 +129,17 @@ in
           };
         };
 
-        variable = {
-          keycloak_admin_user.sensitive = true;
-          keycloak_admin_password.sensitive = true;
-          garage_admin_token.sensitive = true;
-        };
+        variable.garage_admin_token.sensitive = true;
 
-        ephemeral.vault_kv_secret_v2.cloudflare_token = lib.mkIf (config.cloudflare.token != null) {
-          mount = "secret";
-          name = "infra/cloudflare-${config.cloudflare.token}";
+        ephemeral.vault_kv_secret_v2 = {
+          cloudflare_token = lib.mkIf (config.cloudflare.token != null) {
+            mount = "secret";
+            name = "infra/cloudflare-${config.cloudflare.token}";
+          };
+          keycloak = {
+            mount = "secret";
+            name = "infra/keycloak-terranix";
+          };
         };
 
         provider = {
@@ -145,9 +147,8 @@ in
             api_token = "\${ephemeral.vault_kv_secret_v2.cloudflare_token.data[\"TOKEN\"]}";
           };
           keycloak = {
-            client_id = "admin-cli";
-            username = "\${var.keycloak_admin_user}";
-            password = "\${var.keycloak_admin_password}";
+            client_id = "\${ephemeral.vault_kv_secret_v2.keycloak.data[\"CLIENT_ID\"]}";
+            client_secret = "\${ephemeral.vault_kv_secret_v2.keycloak.data[\"CLIENT_SECRET\"]}";
             url = "https://idp.scottylabs.org";
           };
           vault.address = "http://127.0.0.1:8200";
