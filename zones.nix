@@ -24,6 +24,7 @@
   "rent-pgh.com" = "03d47c74036171bb4a0ad2679adf7ca5";
   "roomies.live" = "706d92947e0941effeffd392637f97a2";
   "scotty.lol" = "d8546107eab7e3bf8d413759c28b66c2";
+  "scottygo.com" = "0dc43b309b5bcfe88dff25b3bc14e0d9";
   "scottylabs.dev" = "5c2e7faf46bf72319da6cdffadca7f43";
   "scottylabs.net" = "55c7eec3f2a44b6b943962682d1d1953";
   "scottylabs.org" = "ab365d7cec88f972e0b26bf59afd174f";
