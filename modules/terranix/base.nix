@@ -46,7 +46,7 @@ in
               host = lib.mkOption {
                 type = lib.types.nullOr lib.types.str;
                 default = null;
-                description = "Serving host; renders a CNAME to <host>.scottylabs.org.";
+                description = "Serving host, such as scottylabs-infra-01; renders a CNAME to its FQDN.";
               };
               tunnel = lib.mkOption {
                 type = lib.types.nullOr lib.types.str;
@@ -198,7 +198,10 @@ in
               proxied = e.proxied || e.tunnel != null;
               content =
                 if e.host != null then
-                  "${e.host}.scottylabs.org"
+                  let
+                    inherit (inputs.self.nixosConfigurations.${e.host}.config) networking scottylabs;
+                  in
+                  "${networking.hostName}.${scottylabs.domain}"
                 else if e.tunnel != null then
                   "${tunnelIdFor name e.tunnel}.cfargotunnel.com"
                 else
@@ -298,9 +301,9 @@ in
       );
     };
 
-  flake.modules.nixos.infra-01-tofu-providers = {
+  flake.modules.nixos.scottylabs-infra-01-tofu-providers = {
     age.secrets.tofu-providers = {
-      file = ../../secrets/infra-01/tofu-providers.age;
+      file = ../../secrets/scottylabs/infra-01/tofu-providers.age;
       mode = "0400";
     };
   };

@@ -12,6 +12,16 @@ let
         default = null;
         description = "Jump host FQDN for LAN-only nodes unreachable directly from a deployer";
       };
+
+      options.scottylabs.organization = lib.mkOption {
+        type = lib.types.str;
+        description = "Organization this host belongs to, such as scottylabs";
+      };
+
+      options.scottylabs.domain = lib.mkOption {
+        type = lib.types.str;
+        description = "DNS domain under which this host's A record lives";
+      };
     };
 in
 {

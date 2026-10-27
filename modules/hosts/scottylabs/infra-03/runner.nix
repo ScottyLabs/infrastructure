@@ -1,0 +1,82 @@
+{
+  flake.modules.nixos.scottylabs-infra-03-runner =
+    {
+      config,
+      inputs,
+      lib,
+      pkgs,
+      ...
+    }:
+
+    {
+      age.secrets.forgejo-runner-token = {
+        file = ../../../../secrets/scottylabs/infra-03/forgejo-runner-token.age;
+        mode = "0400";
+        owner = "root";
+      };
+
+      nix.settings = {
+        extra-substituters = [ "https://scottylabs.cachix.org" ];
+        extra-trusted-substituters = [ "https://scottylabs.cachix.org" ];
+        extra-trusted-public-keys = [
+          "scottylabs.cachix.org-1:hajjEX5SLi/Y7yYloiXTt2IOr3towcTGRhMh1vu6Tjg="
+        ];
+
+        # leave RAM for 16 concurrent ci jobs
+        max-jobs = 8;
+        cores = 8;
+      };
+
+      services.forgejo-runner.instances.scottylabs = {
+        enable = true;
+        hostPackages =
+          (with pkgs; [
+            bash
+            coreutils
+            curl
+            gitFull
+            gnutar
+            gzip
+            jq
+            nodejs
+            openssh
+          ])
+          ++ [
+            config.nix.package
+            inputs.kennel.packages.${pkgs.stdenv.hostPlatform.system}.devenv
+          ];
+
+        settings = {
+          runner = {
+            capacity = 16;
+            labels = [ "native:host" ];
+          };
+          cache = {
+            enabled = true;
+            port = 8088;
+          };
+          server.connections.default = {
+            url = "https://git.cmu.dev/";
+            uuid = "dc946ee1-89f4-423f-a713-5c50a91fa9ad";
+          };
+        };
+
+        secrets.server.connections.default.token_url = config.age.secrets.forgejo-runner-token.path;
+      };
+
+      # GITHUB_WORKSPACE derives from HOME, and the cache actions tar resolved paths relative to it
+      systemd.services.forgejo-runner-scottylabs.environment = {
+        HOME = lib.mkForce "/var/lib/private/forgejo-runner/scottylabs";
+        SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
+      };
+
+      # Keep out of btrbk snapshots
+      disko.devices.disk.main.content.partitions.root.content.subvolumes."@forgejo-runner" = {
+        mountpoint = "/var/lib/private/forgejo-runner";
+        mountOptions = [
+          "compress=zstd"
+          "noatime"
+        ];
+      };
+    };
+}

@@ -21,7 +21,8 @@
       config = lib.mkIf (cfg.tunnelId != null) {
         # Handed to cloudflared via systemd LoadCredential
         age.secrets.cloudflared-tunnel.file =
-          ../../secrets + "/${config.networking.hostName}/cloudflared-tunnel.age";
+          ../../secrets
+          + "/${config.scottylabs.organization}/${config.networking.hostName}/cloudflared-tunnel.age";
 
         services.cloudflared = {
           enable = true;

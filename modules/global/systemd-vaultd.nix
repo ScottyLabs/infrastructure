@@ -46,11 +46,11 @@
 
       config = {
         age.secrets.bao-role-id = {
-          file = ../../secrets/${config.networking.hostName}/bao-role-id.age;
+          file = ../../secrets/${config.scottylabs.organization}/${config.networking.hostName}/bao-role-id.age;
           mode = "0400";
         };
         age.secrets.bao-secret-id = {
-          file = ../../secrets/${config.networking.hostName}/bao-secret-id.age;
+          file = ../../secrets/${config.scottylabs.organization}/${config.networking.hostName}/bao-secret-id.age;
           mode = "0400";
         };
 

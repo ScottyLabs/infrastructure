@@ -51,7 +51,7 @@
                   "Zone Read"
                   "DNS Write"
                 ];
-                hosts = [ "deploy-01" ];
+                hosts = [ "scottylabs-deploy-01" ];
               };
             };
           }

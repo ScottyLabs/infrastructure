@@ -17,18 +17,20 @@
             terraform.backend.s3.key = "services/hosts.tfstate";
             cloudflare.token = "terranix-hosts";
             dns =
-              (lib.mapAttrs (name: host: {
-                inherit name;
-                target = host.config.scottylabs.ipAddress;
-                type = "A";
-                comment = "NixOS host ${name}";
-              }) inputs.self.nixosConfigurations)
-              // (lib.mapAttrs (name: host: {
-                inherit name;
-                target = host.config.scottylabs.ipAddress;
-                type = "A";
-                comment = "darwin host ${name}";
-              }) inputs.self.darwinConfigurations);
+              let
+                zones = import ../../../zones.nix;
+                record = kind: id: host: {
+                  name = host.config.networking.hostName;
+                  zone = host.config.scottylabs.domain;
+                  target = host.config.scottylabs.ipAddress;
+                  type = "A";
+                  comment = "${kind} host ${id}";
+                };
+              in
+              lib.filterAttrs (_: e: zones ? ${e.zone}) (
+                lib.mapAttrs (record "NixOS") inputs.self.nixosConfigurations
+                // lib.mapAttrs (record "darwin") inputs.self.darwinConfigurations
+              );
 
             resource.cloudflare_zone_setting.always_use_https = {
               for_each = lib.mapAttrs' (_: id: lib.nameValuePair id id) (import ../../../zones.nix);

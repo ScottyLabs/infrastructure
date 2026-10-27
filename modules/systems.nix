@@ -10,96 +10,135 @@ let
   users = import ../users.nix;
 
   hosts = {
-    infra-01 = "x86_64-linux";
-    infra-03 = "aarch64-linux";
-    deploy-01 = "x86_64-linux";
-    signage-01 = "x86_64-linux";
-    snoopy = "x86_64-linux";
+    scottylabs = {
+      infra-01 = {
+        domain = "scottylabs.org";
+        system = "x86_64-linux";
+      };
+      infra-02 = {
+        domain = "scottylabs.org";
+        system = "aarch64-darwin";
+      };
+      infra-03 = {
+        domain = "scottylabs.org";
+        system = "aarch64-linux";
+      };
+      deploy-01 = {
+        domain = "scottylabs.org";
+        system = "x86_64-linux";
+      };
+      signage-01 = {
+        domain = "scottylabs.org";
+        system = "x86_64-linux";
+      };
+      snoopy = {
+        domain = "scottylabs.org";
+        system = "x86_64-linux";
+      };
+    };
+    stugov = {
+      elect-01 = {
+        domain = "andrew.cmu.edu";
+        system = "x86_64-linux";
+      };
+    };
+    thetartan = {
+      www-04 = {
+        domain = "thetartan.org";
+        system = "x86_64-linux";
+      };
+    };
   };
 
-  darwinHosts = [
-    "infra-02"
-  ];
+  allHosts = lib.concatMapAttrs (
+    org:
+    lib.mapAttrs' (
+      name: host:
+      lib.nameValuePair "${org}-${name}" (
+        host
+        // {
+          inherit org name;
+          fqdn = "${name}.${host.domain}";
+        }
+      )
+    )
+  ) hosts;
+
+  isDarwin = host: lib.hasSuffix "-darwin" host.system;
+  nixosHosts = lib.filterAttrs (_: host: !isDarwin host) allHosts;
+  darwinHosts = lib.filterAttrs (_: isDarwin) allHosts;
 
   specialArgs = { inherit inputs users; };
 
-  modulesFor = hostname: [
-    nixos.${hostname}
+  identity = host: {
+    networking.hostName = host.name;
+    scottylabs.organization = host.org;
+    scottylabs.domain = host.domain;
+  };
+
+  modulesFor = id: host: [
+    nixos.${id}
     nixos.global
+    (identity host)
   ];
 
-  darwinModulesFor = hostname: [
-    darwin.${hostname}
+  darwinModulesFor = id: host: [
+    darwin.${id}
     darwin.global
+    (identity host)
   ];
+
+  deploymentFor = host: bastion: {
+    targetHost = host.fqdn;
+    targetUser = "deploy";
+    sshOptions = lib.optionals (bastion != null) [
+      "-J"
+      "deploy@${bastion}"
+    ];
+  };
 in
 {
   flake.nixosConfigurations = lib.mapAttrs (
-    hostname: system:
+    id: host:
     inputs.nixpkgs.lib.nixosSystem {
-      inherit system;
+      inherit (host) system;
       inherit specialArgs;
-      modules = modulesFor hostname;
+      modules = modulesFor id host;
     }
-  ) hosts;
+  ) nixosHosts;
 
-  flake.darwinConfigurations = lib.genAttrs darwinHosts (
-    hostname:
+  flake.darwinConfigurations = lib.mapAttrs (
+    id: host:
     inputs.nix-darwin.lib.darwinSystem {
       inherit specialArgs;
-      modules = darwinModulesFor hostname;
+      modules = darwinModulesFor id host;
     }
-  );
+  ) darwinHosts;
 
   flake.colmenaHive = inputs.colmena.lib.makeHive (
     {
       meta = {
         nixpkgs = import inputs.nixpkgs { system = "x86_64-linux"; };
         inherit (inputs) nix-darwin;
-        nodeNixpkgs =
-          lib.genAttrs darwinHosts (_: import inputs.nixpkgs { system = "aarch64-darwin"; })
-          // lib.mapAttrs (_: system: import inputs.nixpkgs { inherit system; }) (
-            lib.filterAttrs (_: system: system != "x86_64-linux") hosts
-          );
+        nodeNixpkgs = lib.mapAttrs (_: host: import inputs.nixpkgs { inherit (host) system; }) (
+          lib.filterAttrs (_: host: host.system != "x86_64-linux") allHosts
+        );
         inherit specialArgs;
       };
     }
-    // lib.genAttrs (lib.attrNames hosts) (
-      hostname:
-      let
-        bastion = config.flake.nixosConfigurations.${hostname}.config.scottylabs.bastion;
-      in
-      {
-        deployment = {
-          targetHost = "${hostname}.scottylabs.org";
-          targetUser = "deploy";
-          sshOptions = lib.optionals (bastion != null) [
-            "-J"
-            "deploy@${bastion}"
-          ];
-        };
-        imports = modulesFor hostname;
-      }
-    )
-    // lib.genAttrs darwinHosts (
-      hostname:
-      let
-        bastion = config.flake.darwinConfigurations.${hostname}.config.scottylabs.bastion;
-      in
-      {
-        deployment = {
+    // lib.mapAttrs (id: host: {
+      deployment = deploymentFor host config.flake.nixosConfigurations.${id}.config.scottylabs.bastion;
+      imports = modulesFor id host;
+    }) nixosHosts
+    // lib.mapAttrs (id: host: {
+      deployment =
+        deploymentFor host config.flake.darwinConfigurations.${id}.config.scottylabs.bastion
+        // {
           systemType = "darwin";
           # x86_64 deployers cannot cross-build darwin, and the mini can build itself
           buildOnTarget = true;
-          targetHost = "${hostname}.scottylabs.org";
-          targetUser = "deploy";
-          sshOptions = lib.optionals (bastion != null) [
-            "-J"
-            "deploy@${bastion}"
-          ];
         };
-        imports = darwinModulesFor hostname;
-      }
-    )
+      imports = darwinModulesFor id host;
+    }) darwinHosts
   );
 }
