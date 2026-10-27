@@ -16,6 +16,9 @@
       ];
 
       # Enable VMware guest tools
-      virtualisation.vmware.guest.enable = true;
+      virtualisation.vmware.guest = {
+        enable = true;
+        headless = true;
+      };
     };
 }
