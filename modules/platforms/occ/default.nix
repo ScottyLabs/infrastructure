@@ -5,6 +5,7 @@
     {
       imports = [
         config.flake.modules.nixos.occ-disk
+        config.flake.modules.nixos.zram-swap
         inputs.srvos.nixosModules.mixins-systemd-boot
       ];
 
