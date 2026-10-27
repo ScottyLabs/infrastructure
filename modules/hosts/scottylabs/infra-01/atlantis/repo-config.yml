@@ -1,5 +1,6 @@
 repos:
   - id: git.cmu.dev/ScottyLabs/governance
+    repo_config_file: generated/atlantis.yaml
     apply_requirements: [mergeable, undiverged]
     import_requirements: [mergeable, undiverged]
     allowed_overrides: [apply_requirements]
@@ -25,10 +26,10 @@ workflows:
   governance:
     plan:
       steps:
-        - run: cargo build --release --manifest-path=../../Cargo.toml -p governance
+        - run: cargo build --release --manifest-path=../../../Cargo.toml -p governance
         - env:
             name: PATH
-            command: 'echo "$DIR/../../target/release:$PATH"'
+            command: 'echo "$DIR/../../../target/release:$PATH"'
         - env:
             name: TF_CLI_CONFIG_FILE
             command: 'echo "$HOME/.terraform.d/dev_overrides.tfrc"'
@@ -36,20 +37,20 @@ workflows:
         - plan
     apply:
       steps:
-        - run: cargo build --release --manifest-path=../../Cargo.toml -p governance
+        - run: cargo build --release --manifest-path=../../../Cargo.toml -p governance
         - env:
             name: PATH
-            command: 'echo "$DIR/../../target/release:$PATH"'
+            command: 'echo "$DIR/../../../target/release:$PATH"'
         - env:
             name: TF_CLI_CONFIG_FILE
             command: 'echo "$HOME/.terraform.d/dev_overrides.tfrc"'
         - apply
     import:
       steps:
-        - run: cargo build --release --manifest-path=../../Cargo.toml -p governance
+        - run: cargo build --release --manifest-path=../../../Cargo.toml -p governance
         - env:
             name: PATH
-            command: 'echo "$DIR/../../target/release:$PATH"'
+            command: 'echo "$DIR/../../../target/release:$PATH"'
         - env:
             name: TF_CLI_CONFIG_FILE
             command: 'echo "$HOME/.terraform.d/dev_overrides.tfrc"'
