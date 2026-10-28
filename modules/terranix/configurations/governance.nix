@@ -120,6 +120,11 @@ in
                   capabilities = ["read"]
                 }
 
+                # Grouper password for governance's grouper axis
+                path "secret/data/infra/grouper" {
+                  capabilities = ["read"]
+                }
+
                 # Read shared CI cache credentials (cachix, sccache)
                 path "secret/data/shared/*" {
                   capabilities = ["read"]
