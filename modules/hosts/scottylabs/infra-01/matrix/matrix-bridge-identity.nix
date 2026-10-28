@@ -11,10 +11,10 @@
       cfg = config.scottylabs.matrix;
       identityCfg = cfg.bridgeIdentity;
 
-      org = fromTOML (builtins.readFile "${inputs.governance}/data/org.toml");
-      keycloakUrl = org.org.keycloak.url;
-      keycloakRealm = org.org.keycloak.realm;
-      matrixDomain = org.org.communication.matrix_domain or cfg.domain;
+      inherit (builtins.fromJSON (builtins.readFile "${inputs.governance}/generated/data.json")) tech;
+      keycloakUrl = tech.keycloak.url;
+      keycloakRealm = tech.keycloak.realm;
+      matrixDomain = tech.communication.matrix_domain or cfg.domain;
     in
     {
       options.scottylabs.matrix.bridgeIdentity = {
@@ -42,8 +42,8 @@
             message = "scottylabs.matrix.bridgeIdentity.environmentFile must be set when bridge identity is enabled.";
           }
           {
-            assertion = org.org.keycloak ? url && org.org.keycloak ? realm;
-            message = "governance org.toml must define org.keycloak.url and org.keycloak.realm.";
+            assertion = tech ? keycloak && tech.keycloak ? url && tech.keycloak ? realm;
+            message = "governance's generated/data.json must define tech.keycloak.url and tech.keycloak.realm.";
           }
         ];
 
