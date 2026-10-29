@@ -86,6 +86,10 @@ in
     scottylabs-infra-03
   ];
 
+  # stugov-elect-01
+  "secrets/stugov/elect-01/bao-role-id.age".publicKeys = admins;
+  "secrets/stugov/elect-01/bao-secret-id.age".publicKeys = admins;
+
   # all
   "secrets/cloudflare-api-token.age".publicKeys = admins ++ hosts;
   "secrets/pgadmin.age".publicKeys = admins ++ hosts;
