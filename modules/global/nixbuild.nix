@@ -6,14 +6,13 @@ let
     "nixos-test"
     "uid-range"
   ];
-in
-{
-  flake.modules.nixos.scottylabs-infra-01-nixbuild =
+
+  nixbuild =
     { config, ... }:
 
     {
       age.secrets.nixbuild-ssh-key = {
-        file = ../../../../secrets/scottylabs/infra-01/nixbuild-ssh-key.age;
+        file = ../../secrets/nixbuild-ssh-key.age;
         mode = "0400";
       };
 
@@ -52,4 +51,8 @@ in
         '';
       };
     };
+in
+{
+  flake.modules.nixos.nixbuild = nixbuild;
+  flake.modules.darwin.nixbuild = nixbuild;
 }

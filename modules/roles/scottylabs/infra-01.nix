@@ -31,7 +31,6 @@
     scottylabs-infra-01-mautrix-discord
     scottylabs-infra-01-mautrix-slack
     scottylabs-infra-01-nixbot
-    scottylabs-infra-01-nixbuild
     scottylabs-infra-01-nixos-mautrix-slack
     scottylabs-infra-01-observability
     scottylabs-infra-01-openbao

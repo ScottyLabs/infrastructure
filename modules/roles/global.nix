@@ -14,6 +14,7 @@
         iets
         ip-address
         ncro
+        nixbuild
         node-exporter
         observability-agents
         otel-collector
@@ -39,8 +40,10 @@
     imports = [
       config.flake.modules.darwin.iets
       config.flake.modules.darwin.ip-address
+      config.flake.modules.darwin.nixbuild
       config.flake.modules.darwin.shell
       inputs.home-manager.darwinModules.home-manager
+      inputs.agenix.darwinModules.default
       inputs.nix-homebrew.darwinModules.nix-homebrew
     ];
 
