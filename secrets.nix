@@ -10,6 +10,7 @@ let
   scottylabs-signage-01 = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHY/TsQztMS7l5ozBhLu05O+ze/DasZ3+grn5tvapoGX root@signage-01";
   scottylabs-snoopy = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJJxoj1W19busC7uwr4iNXlJHP3uMS7Wg3M+Kv6j0TPa root@snoopy";
   scottylabs-infra-03 = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOaQliYDA6EKA9xrJiWqk+unJ4Tm80dbu674zXpFVIxL root@infra-03";
+  stugov-elect-01 = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJgXDXDmf8KBfvmSLafIfoKvt/Wz1yBnw1X1OozeBKQB root@elect-01";
 
   hosts = [
     scottylabs-infra-01
@@ -17,6 +18,7 @@ let
     scottylabs-deploy-01
     scottylabs-signage-01
     scottylabs-snoopy
+    stugov-elect-01
   ];
 in
 {
@@ -87,8 +89,8 @@ in
   ];
 
   # stugov-elect-01
-  "secrets/stugov/elect-01/bao-role-id.age".publicKeys = admins;
-  "secrets/stugov/elect-01/bao-secret-id.age".publicKeys = admins;
+  "secrets/stugov/elect-01/bao-role-id.age".publicKeys = admins ++ [ stugov-elect-01 ];
+  "secrets/stugov/elect-01/bao-secret-id.age".publicKeys = admins ++ [ stugov-elect-01 ];
 
   # all
   "secrets/cloudflare-api-token.age".publicKeys = admins ++ hosts;
