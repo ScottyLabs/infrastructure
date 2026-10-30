@@ -92,9 +92,9 @@ in
   "secrets/stugov/elect-01/bao-role-id.age".publicKeys = admins ++ [ stugov-elect-01 ];
   "secrets/stugov/elect-01/bao-secret-id.age".publicKeys = admins ++ [ stugov-elect-01 ];
 
-  # thetartan-www-04
-  "secrets/thetartan/www-04/bao-role-id.age".publicKeys = admins;
-  "secrets/thetartan/www-04/bao-secret-id.age".publicKeys = admins;
+  # thetartan-tartan-01
+  "secrets/thetartan/tartan-01/bao-role-id.age".publicKeys = admins;
+  "secrets/thetartan/tartan-01/bao-secret-id.age".publicKeys = admins;
 
   # all
   "secrets/cloudflare-api-token.age".publicKeys = admins ++ hosts;
