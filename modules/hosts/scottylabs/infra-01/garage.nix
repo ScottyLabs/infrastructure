@@ -6,7 +6,7 @@
     {
       scottylabs.garage = {
         enable = true;
-        environmentFile = config.age.secrets.garage.path;
+        environmentFile = config.sops.secrets.garage.path;
         webadmin = {
           enable = true;
           domain = "garage.scottylabs.org";
@@ -28,7 +28,7 @@
         file = ../../../../secrets/scottylabs/infra-01/garage.age;
         mode = "0400";
       };
-      sops.secrets.garage = { };
+      sops.secrets.garage.restartUnits = [ "garage.service" ];
 
       # Keep out of btrbk snapshots
       disko.devices.disk.main.content.partitions.root.content.subvolumes."@garage" = {

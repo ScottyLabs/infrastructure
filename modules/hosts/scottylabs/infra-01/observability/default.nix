@@ -1,7 +1,7 @@
 { config, ... }:
 {
   flake.modules.nixos.scottylabs-infra-01-observability =
-    { inputs, ... }:
+    { config, inputs, ... }:
 
     let
       hostnames = map (host: host.config.networking.hostName) (
@@ -52,8 +52,8 @@
           {
             type = "approle";
             config = {
-              role_id_file_path = "/run/agenix/bao-role-id";
-              secret_id_file_path = "/run/agenix/bao-secret-id";
+              role_id_file_path = config.sops.secrets.bao-role-id.path;
+              secret_id_file_path = config.sops.secrets.bao-secret-id.path;
               remove_secret_id_file_after_reading = false;
             };
           }

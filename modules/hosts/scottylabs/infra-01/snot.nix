@@ -13,7 +13,7 @@
 
       services.snot = {
         enable = true;
-        environmentFiles = [ config.age.secrets.snot-webhook-secret.path ];
+        environmentFiles = [ config.sops.secrets.snot-webhook-secret.path ];
         settings = {
           hostname = "knot.cmu.dev";
           listen_addr = "127.0.0.1:5555";
@@ -25,7 +25,7 @@
       };
 
       age.secrets.snot-webhook-secret.file = ../../../../secrets/scottylabs/infra-01/snot-webhook-secret.age;
-      sops.secrets.snot-webhook-secret = { };
+      sops.secrets.snot-webhook-secret.restartUnits = [ "snot.service" ];
 
       # Read-only DB access, snot connects as its DynamicUser over the socket
       services.postgresql.ensureUsers = [ { name = "snot"; } ];

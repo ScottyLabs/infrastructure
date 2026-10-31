@@ -9,7 +9,10 @@
         mode = "0400";
         owner = "vaultwarden";
       };
-      sops.secrets.vaultwarden.owner = "vaultwarden";
+      sops.secrets.vaultwarden = {
+        owner = "vaultwarden";
+        restartUnits = [ "vaultwarden.service" ];
+      };
 
       services.vaultwarden = {
         enable = true;
@@ -40,7 +43,7 @@
         };
 
         # ADMIN_TOKEN
-        environmentFile = config.age.secrets.vaultwarden.path;
+        environmentFile = config.sops.secrets.vaultwarden.path;
       };
 
       systemd.services.vaultwarden.vault.infraSecrets.smtp = {

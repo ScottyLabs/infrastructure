@@ -12,7 +12,7 @@
           ];
           hash = "sha256-/2Ma4OOAJ3UZ4oj/gqF42wHDOIgQ/j/fBH4JvQa8J98=";
         };
-        environmentFile = config.age.secrets.cloudflare-api-token.path;
+        environmentFile = config.sops.secrets.cloudflare-api-token.path;
         globalConfig = ''
           metrics
 

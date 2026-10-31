@@ -53,8 +53,15 @@
           file = ../../secrets/${config.scottylabs.organization}/${config.networking.hostName}/bao-secret-id.age;
           mode = "0400";
         };
-        sops.secrets.bao-role-id = { };
-        sops.secrets.bao-secret-id = { };
+        sops.secrets =
+          let
+            # Every agent logs in with these, and only reads them at startup
+            agents = map (name: "vault-agent-${name}.service") (lib.attrNames config.services.vault.agents);
+          in
+          {
+            bao-role-id.restartUnits = agents;
+            bao-secret-id.restartUnits = agents;
+          };
 
         services.vault.agents.default.settings = {
           vault.address =
@@ -66,8 +73,8 @@
             {
               type = "approle";
               config = {
-                role_id_file_path = "/run/agenix/bao-role-id";
-                secret_id_file_path = "/run/agenix/bao-secret-id";
+                role_id_file_path = config.sops.secrets.bao-role-id.path;
+                secret_id_file_path = config.sops.secrets.bao-secret-id.path;
                 remove_secret_id_file_after_reading = false;
               };
             }

@@ -26,14 +26,14 @@
       age.secrets.renovate-token = {
         file = ../../../../secrets/scottylabs/infra-01/renovate-token.age;
       };
-      sops.secrets.renovate-token = { };
+      sops.secrets.renovate-token.noRestartReason = "the timer-started renovate.service loads it on each run";
 
       services.renovate = {
         enable = true;
         schedule = "weekly";
 
         credentials = {
-          RENOVATE_TOKEN = config.age.secrets.renovate-token.path;
+          RENOVATE_TOKEN = config.sops.secrets.renovate-token.path;
         };
 
         runtimePackages = [ config.nix.package ];

@@ -34,7 +34,7 @@ in
         file = ../../../../secrets/scottylabs/infra-01/infra-02-builder-ssh-key.age;
         mode = "0400";
       };
-      sops.secrets.infra-02-builder-ssh-key = { };
+      sops.secrets.infra-02-builder-ssh-key.noRestartReason = "ssh reads it on each connection to infra-02";
 
       nix.buildMachines = [
         {
@@ -59,7 +59,7 @@ in
           Host infra-02.scottylabs.org
             # Don't hold a build slot waiting on infra-02
             ConnectTimeout 5
-            IdentityFile ${config.age.secrets.infra-02-builder-ssh-key.path}
+            IdentityFile ${config.sops.secrets.infra-02-builder-ssh-key.path}
         '';
       };
     };

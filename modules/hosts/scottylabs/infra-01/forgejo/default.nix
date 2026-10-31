@@ -145,15 +145,15 @@
       # Instance signing key private half
       age.secrets.forgejo-signing-key = {
         file = ../../../../../secrets/scottylabs/infra-01/forgejo-signing-key.age;
-        path = signingKeyPriv;
         owner = "forgejo";
         group = "forgejo";
         mode = "0400";
-        symlink = false;
       };
       sops.secrets.forgejo-signing-key = {
+        path = signingKeyPriv;
         owner = "forgejo";
         group = "forgejo";
+        restartUnits = [ "forgejo.service" ];
       };
 
       systemd.tmpfiles.rules = [

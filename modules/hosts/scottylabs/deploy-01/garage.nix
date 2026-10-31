@@ -7,13 +7,13 @@
       scottylabs.garage = {
         enable = true;
         domain = "s3.kennel.scottylabs.org";
-        environmentFile = config.age.secrets.garage.path;
+        environmentFile = config.sops.secrets.garage.path;
       };
 
       age.secrets.garage = {
         file = ../../../../secrets/scottylabs/deploy-01/garage.age;
         mode = "0400";
       };
-      sops.secrets.garage = { };
+      sops.secrets.garage.restartUnits = [ "garage.service" ];
     };
 }

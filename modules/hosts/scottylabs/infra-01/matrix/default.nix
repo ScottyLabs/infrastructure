@@ -33,14 +33,30 @@
       };
 
       sops.secrets = {
-        matrix-registration.owner = "matrix-synapse";
-        double-puppet.owner = "matrix-synapse";
-        double-puppet-env.owner = "mautrix-discord";
+        matrix-registration = {
+          owner = "matrix-synapse";
+          restartUnits = [ "matrix-synapse.service" ];
+        };
+        double-puppet = {
+          owner = "matrix-synapse";
+          restartUnits = [ "matrix-synapse.service" ];
+        };
+        double-puppet-env = {
+          owner = "mautrix-discord";
+          restartUnits = [ "mautrix-discord.service" ];
+        };
         double-puppet-env-slack = {
           key = "double-puppet-env";
           owner = "mautrix-slack";
+          restartUnits = [ "mautrix-slack.service" ];
         };
-        bridge-identity.key = "bridge-identity-sync";
+        bridge-identity = {
+          key = "bridge-identity-sync";
+          restartUnits = [
+            "mautrix-discord.service"
+            "mautrix-slack.service"
+          ];
+        };
       };
 
       scottylabs.matrix = {
@@ -48,13 +64,13 @@
         domain = "doggylabs.org";
 
         synapse = {
-          registrationSecretFile = config.age.secrets.matrix-registration.path;
-          extraConfigFile = config.age.secrets.double-puppet.path;
+          registrationSecretFile = config.sops.secrets.matrix-registration.path;
+          extraConfigFile = config.sops.secrets.double-puppet.path;
         };
 
         bridges.discord = {
           enable = true;
-          environmentFile = config.age.secrets.double-puppet-env.path;
+          environmentFile = config.sops.secrets.double-puppet-env.path;
           relayLoginId = "@reconciler:doggylabs.org";
           adminUsers = [
             "@ap-1:matrix.org"
@@ -65,13 +81,13 @@
 
         bridgeIdentity = {
           enable = true;
-          environmentFile = config.age.secrets.bridge-identity.path;
+          environmentFile = config.sops.secrets.bridge-identity.path;
         };
 
         bridges.slack = {
           enable = true;
-          environmentFile = config.age.secrets.double-puppet-env-slack.path;
-          # Relay login ID in double-puppet-env.age as SLACK_RELAY_LOGIN_ID
+          environmentFile = config.sops.secrets.double-puppet-env-slack.path;
+          # Relay login ID in the double-puppet-env secret as SLACK_RELAY_LOGIN_ID
           relay.enable = true;
           adminUsers = [
             "@ap-1:matrix.org"

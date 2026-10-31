@@ -55,7 +55,7 @@
           description = ''
             Path to env file containing DOUBLE_PUPPET_SECRET, ENCRYPTION_PICKLE_KEY,
             PUBLIC_MEDIA_SIGNING_KEY, and SLACK_RELAY_LOGIN_ID (see
-            secrets/scottylabs/infra-01/double-puppet-env.example).
+            the double-puppet-env key in secrets/scottylabs/infra-01.yaml).
           '';
         };
 

@@ -14,7 +14,7 @@
         mode = "0400";
         owner = "root";
       };
-      sops.secrets.forgejo-runner-token = { };
+      sops.secrets.forgejo-runner-token.restartUnits = [ "forgejo-runner-scottylabs.service" ];
 
       nix.settings = {
         extra-substituters = [ "https://scottylabs.cachix.org" ];
@@ -62,7 +62,7 @@
           };
         };
 
-        secrets.server.connections.default.token_url = config.age.secrets.forgejo-runner-token.path;
+        secrets.server.connections.default.token_url = config.sops.secrets.forgejo-runner-token.path;
       };
 
       # GITHUB_WORKSPACE derives from HOME, and the cache actions tar resolved paths relative to it

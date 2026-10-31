@@ -36,7 +36,7 @@
           file = ../../../../secrets/scottylabs/infra-01/nixbot-cachix-token.age;
           mode = "0400";
         };
-        sops.secrets.nixbot-cachix-token = { };
+        sops.secrets.nixbot-cachix-token.restartUnits = [ "nixbot.service" ];
 
         services.nixbot = {
           enable = true;
@@ -76,7 +76,7 @@
           cachix = {
             enable = true;
             name = "scottylabs";
-            auth.authToken.file = config.age.secrets.nixbot-cachix-token.path;
+            auth.authToken.file = config.sops.secrets.nixbot-cachix-token.path;
           };
 
           # main and PRs are always built

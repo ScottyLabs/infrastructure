@@ -306,6 +306,6 @@ in
       file = ../../secrets/scottylabs/infra-01/tofu-providers.age;
       mode = "0400";
     };
-    sops.secrets.tofu-providers = { };
+    sops.secrets.tofu-providers.restartUnits = [ "atlantis.service" ];
   };
 }

@@ -35,7 +35,7 @@
       scottylabs.atlantis = {
         enable = true;
         domain = "atlantis.scottylabs.org";
-        environmentFile = config.age.secrets.atlantis.path;
+        environmentFile = config.sops.secrets.atlantis.path;
         extraPackages = [
           pkgs.opentofu
           config.nix.package
@@ -68,7 +68,10 @@
         owner = "atlantis";
         mode = "0400";
       };
-      sops.secrets.atlantis.owner = "atlantis";
+      sops.secrets.atlantis = {
+        owner = "atlantis";
+        restartUnits = [ "atlantis.service" ];
+      };
 
       # atlantis exits at startup if the gitea API is down
       systemd.services.atlantis = {
@@ -81,7 +84,7 @@
       };
 
       systemd.services.atlantis.serviceConfig.EnvironmentFile = [
-        config.age.secrets.tofu-providers.path
+        config.sops.secrets.tofu-providers.path
       ];
 
       systemd.services.atlantis.environment = {

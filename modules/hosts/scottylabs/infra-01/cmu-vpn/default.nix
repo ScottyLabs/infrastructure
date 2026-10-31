@@ -21,8 +21,8 @@
         cmu-vpn-passkey.file = ../../../../../secrets/scottylabs/infra-01/cmu-vpn-passkey.age;
       };
       sops.secrets = {
-        cmu-vpn-password = { };
-        cmu-vpn-passkey = { };
+        cmu-vpn-password.restartUnits = [ "umvpn.service" ];
+        cmu-vpn-passkey.restartUnits = [ "umvpn.service" ];
       };
 
       services.umvpn = {
@@ -30,8 +30,8 @@
         package = pkgs.callPackage (umvpnSrc + "/nix/package.nix") { };
         group = "Campus VPN";
         username = "scottylabs-svc";
-        passwordFile = config.age.secrets.cmu-vpn-password.path;
-        privateKeyFile = config.age.secrets.cmu-vpn-passkey.path;
+        passwordFile = config.sops.secrets.cmu-vpn-password.path;
+        privateKeyFile = config.sops.secrets.cmu-vpn-passkey.path;
         gateway.enable = true;
       };
     };

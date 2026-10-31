@@ -44,6 +44,7 @@
       config.flake.modules.darwin.ip-address
       config.flake.modules.darwin.nixbuild
       config.flake.modules.darwin.shell
+      config.flake.modules.darwin.sops
       inputs.home-manager.darwinModules.home-manager
       inputs.agenix.darwinModules.default
       inputs.sops-nix.darwinModules.sops

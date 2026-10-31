@@ -64,7 +64,7 @@
         services.pgadmin = {
           enable = true;
           initialEmail = "admin@scottylabs.org";
-          initialPasswordFile = config.age.secrets.pgadmin.path;
+          initialPasswordFile = config.sops.secrets.pgadmin.path;
         };
 
         age.secrets.pgadmin = {
@@ -75,6 +75,7 @@
         sops.secrets.pgadmin = {
           sopsFile = ../../secrets/common.yaml;
           owner = "pgadmin";
+          noRestartReason = "pgadmin only reads it to create the first user";
         };
 
         networking.firewall.interfaces."tailscale0".allowedTCPPorts = [ 5050 ]; # pgadmin

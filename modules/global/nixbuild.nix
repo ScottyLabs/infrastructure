@@ -15,7 +15,10 @@ let
         file = ../../secrets/nixbuild-ssh-key.age;
         mode = "0400";
       };
-      sops.secrets.nixbuild-ssh-key.sopsFile = ../../secrets/nixbuild.yaml;
+      sops.secrets.nixbuild-ssh-key = {
+        sopsFile = ../../secrets/nixbuild.yaml;
+        noRestartReason = "ssh reads it on each connection to nixbuild.net";
+      };
 
       nix = {
         distributedBuilds = true;
@@ -48,7 +51,7 @@ let
         extraConfig = ''
           Host eu.nixbuild.net
             ServerAliveInterval 60
-            IdentityFile ${config.age.secrets.nixbuild-ssh-key.path}
+            IdentityFile ${config.sops.secrets.nixbuild-ssh-key.path}
         '';
       };
     };

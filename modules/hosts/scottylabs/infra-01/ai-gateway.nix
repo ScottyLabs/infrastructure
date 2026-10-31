@@ -5,7 +5,7 @@
 
     {
       age.secrets.cli-proxy-api.file = ../../../../secrets/scottylabs/infra-01/cli-proxy-api.age;
-      sops.secrets.cli-proxy-api = { };
+      sops.secrets.cli-proxy-api.restartUnits = [ "cliproxyapi.service" ];
 
       services.cliproxyapi = {
         enable = true;
@@ -16,7 +16,7 @@
           remote-management = {
             allow-remote = false;
             disable-control-panel = true;
-            secret-key._secret = config.age.secrets.cli-proxy-api.path;
+            secret-key._secret = config.sops.secrets.cli-proxy-api.path;
           };
         };
       };
@@ -54,9 +54,9 @@
       };
 
       age.secrets.typesafe-api-key.file = ../../../../secrets/scottylabs/infra-01/typesafe-api-key.age;
-      sops.secrets.typesafe-api-key = { };
+      sops.secrets.typesafe-api-key.restartUnits = [ "litellm.service" ];
       systemd.services.litellm.serviceConfig.LoadCredential = [
-        "typesafe:${config.age.secrets.typesafe-api-key.path}"
+        "typesafe:${config.sops.secrets.typesafe-api-key.path}"
       ];
 
       scottylabs.ai-gateway.litellm = {

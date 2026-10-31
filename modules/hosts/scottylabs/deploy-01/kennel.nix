@@ -52,14 +52,17 @@
           owner = "kennel";
           group = "kennel";
           mode = "0440";
+          restartUnits = [ "kennel.service" ];
         };
         kennel-webhook-secret = {
           owner = "kennel";
           group = "kennel";
+          restartUnits = [ "kennel.service" ];
         };
         kennel-forgejo-token = {
           owner = "kennel";
           group = "kennel";
+          restartUnits = [ "kennel.service" ];
         };
       };
 
@@ -68,8 +71,8 @@
         package = inputs.kennel.packages.x86_64-linux.kennel;
         devenvPackage = inputs.kennel.packages.x86_64-linux.devenv;
         nixPackage = config.nix.package;
-        webhookSecretFile = config.age.secrets.kennel-webhook-secret.path;
-        environmentFile = config.age.secrets.kennel.path;
+        webhookSecretFile = config.sops.secrets.kennel-webhook-secret.path;
+        environmentFile = config.sops.secrets.kennel.path;
         api.port = 3001;
 
         # Published for ricochet's return_to allowlist (services.ricochet.allowedHostsFile)
@@ -109,7 +112,7 @@
           vaultEndpoint = "openbao://secrets.scottylabs.org/secret?auth=approle";
         };
 
-        forgejo.apiTokenFile = config.age.secrets.kennel-forgejo-token.path;
+        forgejo.apiTokenFile = config.sops.secrets.kennel-forgejo-token.path;
       };
 
       # A vault environmentTemplate adds kennel-envfile.service, which kennel stops as an orphaned deployment

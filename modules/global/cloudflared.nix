@@ -23,12 +23,12 @@
         age.secrets.cloudflared-tunnel.file =
           ../../secrets
           + "/${config.scottylabs.organization}/${config.networking.hostName}/cloudflared-tunnel.age";
-        sops.secrets.cloudflared-tunnel = { };
+        sops.secrets.cloudflared-tunnel.restartUnits = [ "cloudflared-tunnel-${cfg.tunnelId}.service" ];
 
         services.cloudflared = {
           enable = true;
           tunnels.${cfg.tunnelId} = {
-            credentialsFile = config.age.secrets.cloudflared-tunnel.path;
+            credentialsFile = config.sops.secrets.cloudflared-tunnel.path;
             # Catch-all to the local Caddy which owns per-vhost routing
             default = "https://127.0.0.1:443";
             originRequest.originServerName = cfg.originServerName;

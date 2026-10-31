@@ -21,7 +21,7 @@
 
         unitWhitelist = lib.mkOption {
           type = lib.types.str;
-          default = "(kennel.*|caddy|postgresql|valkey|garage|loki|tempo|grafana|prometheus|opentelemetry-collector|promtail)\\.(service|slice)";
+          default = "(kennel.*|caddy|postgresql|valkey|garage|loki|tempo|grafana|prometheus|opentelemetry-collector|promtail|sops-install-secrets)\\.(service|slice)";
           description = "Regex matched against unit names to limit cardinality.";
         };
       };
@@ -194,6 +194,22 @@
           summary = "{{ $labels.name }} on {{ $labels.instance }} has restarted {{ $values.A.Value }} times in the last hour";
           duration = "5m";
           from = 3600;
+        };
+      }
+      {
+        name = "secrets-install-failed";
+        source = grafana.thresholdAlert {
+          name = "secrets";
+          uid = "infra-secrets-install-failed";
+          title = "Secrets failed to install";
+          expr = "max by (instance) (systemd_unit_state{name=\"sops-install-secrets.service\",state=\"failed\"})";
+          threshold = 0;
+          op = "gt";
+          severity = "critical";
+          summary = "sops-install-secrets.service failed on {{ $labels.instance }}, so services there may be running with missing or stale secrets";
+          duration = "1m";
+          # Hosts report the unit once sops-nix runs there
+          noData = "OK";
         };
       }
     ];

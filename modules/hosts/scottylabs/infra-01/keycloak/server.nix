@@ -18,11 +18,11 @@
         file = ../../../../../secrets/scottylabs/infra-01/keycloak.age;
         mode = "0400";
       };
-      sops.secrets.keycloak = { };
+      sops.secrets.keycloak.restartUnits = [ "keycloak.service" ];
 
       systemd.services.keycloak = {
         serviceConfig = {
-          EnvironmentFile = config.age.secrets.keycloak.path;
+          EnvironmentFile = config.sops.secrets.keycloak.path;
           Restart = "on-failure";
           RestartSec = 5;
         };
