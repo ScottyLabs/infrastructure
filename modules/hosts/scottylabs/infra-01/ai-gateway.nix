@@ -11,7 +11,7 @@
         settings = {
           host = "127.0.0.1";
           port = 8317;
-          api-keys = [ { _secret = "/run/secrets/cli-proxy-api-key"; } ];
+          api-keys = [ { _secret = "/run/vault-agent/cli-proxy-api-key"; } ];
           remote-management = {
             allow-remote = false;
             disable-control-panel = true;
@@ -23,7 +23,7 @@
       services.vault.agents.files.settings.template = [
         {
           contents = ''{{ with secret "secret/data/infra/cli-proxy-api-key" }}{{ .Data.data.API_KEY }}{{ end }}'';
-          destination = "/run/secrets/cli-proxy-api-key";
+          destination = "/run/vault-agent/cli-proxy-api-key";
           perms = "0400";
         }
       ];

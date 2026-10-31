@@ -42,7 +42,10 @@
         };
       };
 
-      # The observability flake reads these via $__file{/run/secrets/<name>}
+      # Rendered outside /run/secrets, which is reserved for sops-nix
+      systemd.tmpfiles.rules = [ "d /run/vault-agent 0755 root root -" ];
+
+      # Grafana contact points read these via $__file{/run/vault-agent/<name>}
       services.vault.agents.files.settings = {
         vault.address = "https://secrets.scottylabs.org";
         auto_auth.method = [
@@ -58,13 +61,13 @@
         template = [
           {
             contents = ''{{ with secret "secret/data/infra/discord-webhook-alerts" }}{{ .Data.data.URL }}{{ end }}'';
-            destination = "/run/secrets/discord-webhook-alerts";
+            destination = "/run/vault-agent/discord-webhook-alerts";
             perms = "0400";
             user = "grafana";
           }
           {
             contents = ''{{ with secret "secret/data/infra/slack-webhook-alerts" }}{{ .Data.data.URL }}{{ end }}'';
-            destination = "/run/secrets/slack-webhook-alerts";
+            destination = "/run/vault-agent/slack-webhook-alerts";
             perms = "0400";
             user = "grafana";
           }
@@ -214,7 +217,7 @@
                   uid = "discord-default";
                   type = "discord";
                   settings = {
-                    url = "$__file{/run/secrets/discord-webhook-alerts}";
+                    url = "$__file{/run/vault-agent/discord-webhook-alerts}";
                     use_discord_username = true;
                   };
                 }
@@ -236,7 +239,7 @@
                   uid = "slack-default";
                   type = "slack";
                   settings = {
-                    url = "$__file{/run/secrets/slack-webhook-alerts}";
+                    url = "$__file{/run/vault-agent/slack-webhook-alerts}";
                     username = "Grafana";
                   };
                 }
@@ -258,7 +261,7 @@
                   uid = "slack-critical";
                   type = "slack";
                   settings = {
-                    url = "$__file{/run/secrets/slack-webhook-alerts}";
+                    url = "$__file{/run/vault-agent/slack-webhook-alerts}";
                     username = "Grafana";
                     mention_channel = "channel";
                   };
