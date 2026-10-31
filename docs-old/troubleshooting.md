@@ -1,5 +1,7 @@
 # Troubleshooting
 
+For secrets that fail to decrypt, services that kept an old secret, and sops errors, see [Secrets troubleshooting](../docs/src/troubleshooting/secrets.md).
+
 ## ACME first-deploy race when adding a new subdomain
 
 When a new DNS record is added to a service's terranix configuration and a corresponding nginx vhost with `enableACME = true; forceSSL = true;` is deployed around the same time, the first ACME issuance attempt typically fails. Let's Encrypt's resolvers query authoritative DNS faster than the new Cloudflare record propagates, so HTTP-01 validation hits NXDOMAIN.

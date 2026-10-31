@@ -1,24 +1,25 @@
 # Using Secrets
 
-In configuration files for services managed by NixOS, first define the secret:
+In configuration files for services managed by NixOS, first declare the secret, along with the units to restart when it changes:
 
 ```nix
-age.secrets.secret1 = {
-  file = ../../secrets/prod-02/secret1.age;
-  mode = "0400";
+sops.secrets.secret1 = {
   owner = "secret1";
+  restartUnits = [ "secret1.service" ];
 };
 ```
 
-`file` should be the path to the encrypted secret file created earlier. `mode`, the file permissions, should always be set to `"0400"`. `owner` should be set to the username of the service that needs access to the secret, which may vary based on service.
+sops-nix reads the key `secret1` from the host's own file, `secrets/<org>/<host>.yaml`. Set `sopsFile` to read from a shared file such as `secrets/common.yaml`, and `key` to read a key under a different name.
 
-Then, you can supply this file anywhere the service expects a file path, like in an `environmentFile` property:
+The mode defaults to `"0400"`. `owner` should be set to the username of the service that needs access to the secret, which may vary based on service. A secret read on each use, which no unit needs restarting for, sets `noRestartReason` instead of `restartUnits`.
+
+Then, you can supply its path anywhere the service expects a file path, like in an `environmentFile` property:
 
 ```nix
 services.secret1 = {
   enable = true;
-  environmentFile = config.age.secrets.secret1.path;
+  environmentFile = config.sops.secrets.secret1.path;
 };
 ```
 
-Note that this requires the secret file to have first been committed to git.
+Note that this requires the secret to have first been committed to git.

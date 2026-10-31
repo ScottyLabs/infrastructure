@@ -1,23 +1,25 @@
 # Creating Secrets
 
-`agenix` relies on your SSH public key, so you must have a completed user entry in [users.nix](../../users.nix).
+Secrets are encrypted with `sops` to your SSH key, so you must have a completed user entry in [users.nix](../../users.nix), and another admin must have re-encrypted the files to it with `sops updatekeys`.
 
-Once that is done, define the secret in [secrets.nix](../../secrets.nix). For example, to add a secret named `secret1` on `prod-02`, add this line:
+Each host's secrets live in one file, `secrets/<org>/<host>.yaml`, with one key per secret. Secrets every NixOS host reads live in `secrets/common.yaml`, and the nixbuild SSH key in `secrets/nixbuild.yaml`.
 
-```nix
-"secrets/prod-02/secret1.age".publicKeys = admins ++ [ prod-02 ];
-```
-
-If the host directory does not exist, create it before continuing:
+From the root of the repository, enter the devenv shell, which sets the encryption rules for these files:
 
 ```bash
-mkdir -p secrets/prod-02
+devenv shell
 ```
 
-Then, from the root of the repository (`/etc/nixos`), create the secret file:
+To add a secret named `secret1` on `prod-02`, open the host's file and add the key:
 
 ```bash
-agenix -e secrets/prod-02/secret1.age
+sops secrets/scottylabs/prod-02.yaml
 ```
 
-This command will prompt you to enter the secret value. After entering the value, it will be encrypted and saved to the specified file, which should immediately be committed to source control.
+To set it without opening an editor, pass the value JSON-encoded on stdin:
+
+```bash
+printf '%s' "$value" | jq -Rs . | sops set --value-stdin secrets/scottylabs/prod-02.yaml '["secret1"]'
+```
+
+Either way the file is encrypted again when sops exits, and should immediately be committed to source control. `sops` decrypts with `~/.ssh/id_ed25519`; set `SOPS_AGE_SSH_PRIVATE_KEY_FILE` if your key lives elsewhere.

@@ -41,7 +41,7 @@ Every name is unique across the tree. To find the entry a file provides, read it
 
 A host is built from a list of module names living in `modules/roles/`.
 
-`modules/roles/global.nix` defines the baseline shared by every host: the base system, networking, secrets, and the observability agents, together with external inputs such as home-manager, agenix, and disko.
+`modules/roles/global.nix` defines the baseline shared by every host: the base system, networking, secrets, and the observability agents, together with external inputs such as home-manager, sops-nix, and disko.
 
 Each host has its own role. Its imports are grouped into a platform, the common modules it shares with other hosts, and the host's own services, with each group in a labelled section and sorted within the section:
 
@@ -65,7 +65,7 @@ Each host role includes a platform. Platforms live in `modules/platforms/` and h
 
 ## Systems and deployment
 
-`modules/systems.nix` produces the `nixosConfigurations` and `darwinConfigurations` used for local builds, and the `colmenaHive` used to deploy every host. Each configuration comes from a per-host module list that combines the host role with the matching global role:
+`modules/systems.nix` produces the `nixosConfigurations` and `darwinConfigurations` used for local builds, and the `colmenaHive` used to deploy every host, from the hosts listed by organization in `hosts.nix` with their domain and system. Each configuration comes from a per-host module list that combines the host role with the matching global role:
 
 ```nix
 modulesFor = hostname: [ nixos.${hostname} nixos.global ];

@@ -1,13 +1,13 @@
 # OpenBao Secrets
 
-OpenBao stores secrets centrally and delivers them at runtime, complementing agenix (which encrypts secrets in git).
+OpenBao stores secrets centrally and delivers them at runtime, complementing sops-nix (which encrypts secrets in git).
 
 ## When to Use What
 
 | Use Case | Tool |
 |--------------------------------------------|---------|
-| Bootstrap credentials (AppRole, etc.) | agenix |
-| Infrastructure secrets (ACME, Tofu tokens) | agenix |
+| Bootstrap credentials (AppRole, etc.) | sops-nix |
+| Infrastructure secrets (ACME, Tofu tokens) | sops-nix |
 | Runtime-provisioned secrets (OIDC clients, etc.) | OpenBao |
 
 ## Architecture
@@ -24,7 +24,7 @@ After adding a host to the `hosts` list in the openbao terranix configuration (`
 1. Get the role ID (on infra-01):
 
 ```bash
-set -a; . /run/agenix/tofu-providers; set +a
+set -a; . /run/secrets/tofu-providers; set +a
 nix run .#openbao.init
 nix run .#openbao.terraform -- output approle_role_ids
 ```
@@ -37,16 +37,11 @@ bao login -method=oidc
 bao write -f auth/approle/role/<hostname>/secret-id # requires devops group membership
 ```
 
-3. Add to `secrets.nix`:
-
-```nix
-"secrets/<hostname>/bao-role-id.age".publicKeys = admins ++ [ <hostname> ];
-"secrets/<hostname>/bao-secret-id.age".publicKeys = admins ++ [ <hostname> ];
-```
-
-4. Create the agenix secrets:
+3. Add both to the host's sops file, inside `devenv shell` (the host's key must already be in `keys/hosts/`, see [Post-Installation Setup](../setup/04-post-installation-setup.md)):
 
 ```bash
-agenix -e secrets/<hostname>/bao-role-id.age
-agenix -e secrets/<hostname>/bao-secret-id.age
+printf '%s' "$role_id" | jq -Rs . | sops set --value-stdin secrets/<org>/<hostname>.yaml '["bao-role-id"]'
+printf '%s' "$secret_id" | jq -Rs . | sops set --value-stdin secrets/<org>/<hostname>.yaml '["bao-secret-id"]'
 ```
+
+`modules/global/systemd-vaultd.nix` already declares both on every host, and restarts the host's Vault agents when either changes.

@@ -12,10 +12,24 @@ The `-A` flag is necessary for forwarding your local SSH keys to the remote serv
 scp ~/.ssh/id_ed25519 andrewid@hostname:~/.ssh/
 ```
 
-Once the host key is in `secrets.nix` (below) and the host is in `modules/systems.nix`, deploy it from your workstation:
+The host can't decrypt its secrets until its SSH host key is a recipient, so add it before the first deploy. From your workstation, inside `devenv shell`, save the host key and its age conversion:
 
 ```bash
-colmena apply --on hostname
+mkdir -p keys/hosts/<org>/hostname
+ssh andrewid@hostname.scottylabs.org cat /etc/ssh/ssh_host_ed25519_key.pub | tee keys/hosts/<org>/hostname/ssh.pub | ssh-to-age > keys/hosts/<org>/hostname/age.pub
+```
+
+Add the host to [`hosts.nix`](../../hosts.nix) under its organization, then re-enter `devenv shell` so `sops` picks up the new recipient, and re-encrypt the shared files to it:
+
+```bash
+sops updatekeys secrets/common.yaml
+sops updatekeys secrets/nixbuild.yaml
+```
+
+Every host reads its OpenBao credentials from its own file, `secrets/<org>/hostname.yaml`. Create it by following the [Setting Up a New Host](../secrets/03-openbao.md#setting-up-a-new-host) instructions, then commit everything and deploy:
+
+```bash
+colmena apply --on <org>-hostname
 ```
 
 If an activation goes wrong, roll back on the host to the previous generation:
@@ -25,24 +39,6 @@ sudo nix-env --rollback -p /nix/var/nix/profiles/system
 sudo /nix/var/nix/profiles/system/bin/switch-to-configuration switch
 ```
 
-Finally, add the VM's SSH host key to [`secrets.nix`](../../secrets.nix) so that agenix can encrypt secrets for this host:
-
-```bash
-cat /etc/ssh/ssh_host_ed25519_key.pub
-```
-
-Copy the output and add it to [`secrets.nix`](../../secrets.nix) at the repo root:
-
-```nix
-let
-  # ...
-  hostname = "ssh-ed25519 AAAAC3...";  # paste here
-in
-{
-  # ...
-}
-```
-
-Commit this change to the repository. Finally, if this host will run services that use OpenBao secrets, follow the [Setting Up a New Host](../secrets/03-openbao.md#setting-up-a-new-host) instructions.
+If services come up without their secrets, see [Secrets troubleshooting](../../docs/src/troubleshooting/secrets.md#a-service-starts-without-its-secret).
 
 If this host runs garage, initialize its cluster layout once by following the [Garage](../services/garage.md) guide.

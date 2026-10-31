@@ -11,11 +11,11 @@ Garage is the S3-compatible object storage used across the fleet (Loki chunks, T
 
 ## Secrets
 
-Each garage host has a `garage.age` env file holding `GARAGE_RPC_SECRET` (required for the node to start) and `GARAGE_ADMIN_TOKEN` (the bearer token for the admin API). On deploy-01 the same `GARAGE_ADMIN_TOKEN` also lives in `kennel.age` so kennel can authenticate to the admin API and provision buckets.
+Each garage host has a `garage` env file in its sops file (`secrets/scottylabs/<host>.yaml`) holding `GARAGE_RPC_SECRET` (required for the node to start) and `GARAGE_ADMIN_TOKEN` (the bearer token for the admin API). On deploy-01 the same `GARAGE_ADMIN_TOKEN` also lives in the `kennel` secret so kennel can authenticate to the admin API and provision buckets. Changing either restarts the service that reads it.
 
 ## Running the CLI
 
-The `garage` command is a wrapper that sources the RPC secret from `garage.age`, which only root can read, so it needs `sudo`:
+The `garage` command is a wrapper that sources the RPC secret from `/run/secrets/garage`, which only root can read, so it needs `sudo`:
 
 ```bash
 sudo garage status
