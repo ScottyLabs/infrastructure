@@ -9,6 +9,7 @@
         mode = "0400";
         owner = "vaultwarden";
       };
+      sops.secrets.vaultwarden.owner = "vaultwarden";
 
       services.vaultwarden = {
         enable = true;

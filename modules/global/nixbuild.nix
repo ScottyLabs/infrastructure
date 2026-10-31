@@ -15,6 +15,7 @@ let
         file = ../../secrets/nixbuild-ssh-key.age;
         mode = "0400";
       };
+      sops.secrets.nixbuild-ssh-key.sopsFile = ../../secrets/nixbuild.yaml;
 
       nix = {
         distributedBuilds = true;

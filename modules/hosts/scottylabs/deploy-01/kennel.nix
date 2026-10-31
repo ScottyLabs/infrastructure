@@ -47,6 +47,22 @@
         mode = "0400";
       };
 
+      sops.secrets = {
+        kennel = {
+          owner = "kennel";
+          group = "kennel";
+          mode = "0440";
+        };
+        kennel-webhook-secret = {
+          owner = "kennel";
+          group = "kennel";
+        };
+        kennel-forgejo-token = {
+          owner = "kennel";
+          group = "kennel";
+        };
+      };
+
       services.kennel = {
         enable = true;
         package = inputs.kennel.packages.x86_64-linux.kennel;

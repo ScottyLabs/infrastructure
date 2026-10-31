@@ -18,6 +18,7 @@
         file = ../../../../../secrets/scottylabs/infra-01/keycloak.age;
         mode = "0400";
       };
+      sops.secrets.keycloak = { };
 
       systemd.services.keycloak = {
         serviceConfig = {

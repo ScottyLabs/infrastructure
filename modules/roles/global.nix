@@ -19,6 +19,7 @@
         observability-agents
         otel-collector
         shell
+        sops
         systemd-exporter
         systemd-vaultd
         tailnet-client
@@ -26,6 +27,7 @@
       ++ [
         inputs.home-manager.nixosModules.home-manager
         inputs.agenix.nixosModules.default
+        inputs.sops-nix.nixosModules.sops
         inputs.disko.nixosModules.disko
 
         inputs.srvos.nixosModules.server
@@ -44,6 +46,7 @@
       config.flake.modules.darwin.shell
       inputs.home-manager.darwinModules.home-manager
       inputs.agenix.darwinModules.default
+      inputs.sops-nix.darwinModules.sops
       inputs.nix-homebrew.darwinModules.nix-homebrew
     ];
 

@@ -23,6 +23,7 @@
         age.secrets.cloudflared-tunnel.file =
           ../../secrets
           + "/${config.scottylabs.organization}/${config.networking.hostName}/cloudflared-tunnel.age";
+        sops.secrets.cloudflared-tunnel = { };
 
         services.cloudflared = {
           enable = true;

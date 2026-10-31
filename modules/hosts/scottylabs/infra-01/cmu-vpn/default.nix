@@ -20,6 +20,10 @@
         cmu-vpn-password.file = ../../../../../secrets/scottylabs/infra-01/cmu-vpn-password.age;
         cmu-vpn-passkey.file = ../../../../../secrets/scottylabs/infra-01/cmu-vpn-passkey.age;
       };
+      sops.secrets = {
+        cmu-vpn-password = { };
+        cmu-vpn-passkey = { };
+      };
 
       services.umvpn = {
         enable = true;

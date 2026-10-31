@@ -26,6 +26,7 @@
       age.secrets.renovate-token = {
         file = ../../../../secrets/scottylabs/infra-01/renovate-token.age;
       };
+      sops.secrets.renovate-token = { };
 
       services.renovate = {
         enable = true;

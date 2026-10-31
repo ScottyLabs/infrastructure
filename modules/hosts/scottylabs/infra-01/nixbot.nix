@@ -36,6 +36,7 @@
           file = ../../../../secrets/scottylabs/infra-01/nixbot-cachix-token.age;
           mode = "0400";
         };
+        sops.secrets.nixbot-cachix-token = { };
 
         services.nixbot = {
           enable = true;

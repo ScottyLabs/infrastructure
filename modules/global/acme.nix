@@ -7,6 +7,7 @@
         file = ../../secrets/cloudflare-api-token.age;
         mode = "0400";
       };
+      sops.secrets.cloudflare-api-token.sopsFile = ../../secrets/common.yaml;
 
       security.acme = {
         acceptTerms = true;

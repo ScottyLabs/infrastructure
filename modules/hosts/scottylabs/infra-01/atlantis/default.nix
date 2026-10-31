@@ -68,6 +68,7 @@
         owner = "atlantis";
         mode = "0400";
       };
+      sops.secrets.atlantis.owner = "atlantis";
 
       # atlantis exits at startup if the gitea API is down
       systemd.services.atlantis = {

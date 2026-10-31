@@ -14,6 +14,7 @@
         mode = "0400";
         owner = "root";
       };
+      sops.secrets.forgejo-runner-token = { };
 
       nix.settings = {
         extra-substituters = [ "https://scottylabs.cachix.org" ];

@@ -53,6 +53,8 @@
           file = ../../secrets/${config.scottylabs.organization}/${config.networking.hostName}/bao-secret-id.age;
           mode = "0400";
         };
+        sops.secrets.bao-role-id = { };
+        sops.secrets.bao-secret-id = { };
 
         services.vault.agents.default.settings = {
           vault.address =

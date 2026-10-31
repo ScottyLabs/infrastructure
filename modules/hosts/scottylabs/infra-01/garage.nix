@@ -28,6 +28,7 @@
         file = ../../../../secrets/scottylabs/infra-01/garage.age;
         mode = "0400";
       };
+      sops.secrets.garage = { };
 
       # Keep out of btrbk snapshots
       disko.devices.disk.main.content.partitions.root.content.subvolumes."@garage" = {

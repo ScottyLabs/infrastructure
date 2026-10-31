@@ -34,6 +34,7 @@ in
         file = ../../../../secrets/scottylabs/infra-01/infra-02-builder-ssh-key.age;
         mode = "0400";
       };
+      sops.secrets.infra-02-builder-ssh-key = { };
 
       nix.buildMachines = [
         {

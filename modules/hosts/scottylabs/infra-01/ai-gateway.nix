@@ -5,6 +5,7 @@
 
     {
       age.secrets.cli-proxy-api.file = ../../../../secrets/scottylabs/infra-01/cli-proxy-api.age;
+      sops.secrets.cli-proxy-api = { };
 
       services.cliproxyapi = {
         enable = true;
@@ -53,6 +54,7 @@
       };
 
       age.secrets.typesafe-api-key.file = ../../../../secrets/scottylabs/infra-01/typesafe-api-key.age;
+      sops.secrets.typesafe-api-key = { };
       systemd.services.litellm.serviceConfig.LoadCredential = [
         "typesafe:${config.age.secrets.typesafe-api-key.path}"
       ];

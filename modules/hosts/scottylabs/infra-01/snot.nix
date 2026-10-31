@@ -25,6 +25,7 @@
       };
 
       age.secrets.snot-webhook-secret.file = ../../../../secrets/scottylabs/infra-01/snot-webhook-secret.age;
+      sops.secrets.snot-webhook-secret = { };
 
       # Read-only DB access, snot connects as its DynamicUser over the socket
       services.postgresql.ensureUsers = [ { name = "snot"; } ];

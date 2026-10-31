@@ -151,6 +151,10 @@
         mode = "0400";
         symlink = false;
       };
+      sops.secrets.forgejo-signing-key = {
+        owner = "forgejo";
+        group = "forgejo";
+      };
 
       systemd.tmpfiles.rules = [
         "d ${stateDir}/.ssh 0700 forgejo forgejo -"

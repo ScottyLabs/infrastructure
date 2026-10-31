@@ -1278,6 +1278,7 @@
         "nixpkgs": "nixpkgs_2",
         "ricochet": "ricochet_2",
         "snot": "snot",
+        "sops-nix": "sops-nix",
         "srvos": "srvos",
         "systemd-vaultd": "systemd-vaultd",
         "terranix": "terranix"
@@ -1346,6 +1347,26 @@
       "original": {
         "type": "git",
         "url": "https://tangled.org/isabelroses.com/snot"
+      }
+    },
+    "sops-nix": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1793052255,
+        "narHash": "sha256-Y/JIHTnMlOabDfyaSBubWGLDIVGihLEUuoMhFvQKaDo=",
+        "owner": "Mic92",
+        "repo": "sops-nix",
+        "rev": "60182817ee048ac94b4c68ea76d5ef2e8aac730d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Mic92",
+        "repo": "sops-nix",
+        "type": "github"
       }
     },
     "srvos": {

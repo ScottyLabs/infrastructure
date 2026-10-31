@@ -72,6 +72,10 @@
           owner = "pgadmin";
           mode = "0400";
         };
+        sops.secrets.pgadmin = {
+          sopsFile = ../../secrets/common.yaml;
+          owner = "pgadmin";
+        };
 
         networking.firewall.interfaces."tailscale0".allowedTCPPorts = [ 5050 ]; # pgadmin
 

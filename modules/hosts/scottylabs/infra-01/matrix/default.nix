@@ -32,6 +32,17 @@
         mode = "0400";
       };
 
+      sops.secrets = {
+        matrix-registration.owner = "matrix-synapse";
+        double-puppet.owner = "matrix-synapse";
+        double-puppet-env.owner = "mautrix-discord";
+        double-puppet-env-slack = {
+          key = "double-puppet-env";
+          owner = "mautrix-slack";
+        };
+        bridge-identity.key = "bridge-identity-sync";
+      };
+
       scottylabs.matrix = {
         enable = true;
         domain = "doggylabs.org";

@@ -14,5 +14,6 @@
         file = ../../../../secrets/scottylabs/deploy-01/garage.age;
         mode = "0400";
       };
+      sops.secrets.garage = { };
     };
 }
