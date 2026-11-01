@@ -108,6 +108,9 @@
         inputs.terranix.flakeModule
       ];
 
-      systems = [ "x86_64-linux" ];
+      systems = [
+        "aarch64-linux"
+        "x86_64-linux"
+      ];
     };
 }
