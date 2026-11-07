@@ -102,6 +102,9 @@
           };
         };
 
+        # nixbot writes its forge netrc once at startup, keep the 10d /tmp cleanup off it
+        systemd.tmpfiles.rules = [ "x /tmp/systemd-private-%b-nixbot.service-*/tmp/forge-netrc-*" ];
+
         services.caddy.virtualHosts.${domain}.extraConfig = ''
           reverse_proxy 127.0.0.1:${toString port}
         '';
