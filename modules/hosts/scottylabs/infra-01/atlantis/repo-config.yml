@@ -65,6 +65,9 @@ workflows:
         - env:
             name: TF_CLI_CONFIG_FILE
             command: 'echo "$FORGEJO_TFRC"'
+        - env:
+            name: NIX_TERRAFORM_PLUGIN_DIR
+            command: 'echo "$TERRANIX_PLUGIN_DIR"'
         - run: nix build ".#$PROJECT_NAME.config" --out-link config.tf.json
         - run: tofu init -input=false
         - run: tofu plan -input=false -out "$PLANFILE"
@@ -76,12 +79,21 @@ workflows:
         - env:
             name: TF_CLI_CONFIG_FILE
             command: 'echo "$FORGEJO_TFRC"'
+        - env:
+            name: NIX_TERRAFORM_PLUGIN_DIR
+            command: 'echo "$TERRANIX_PLUGIN_DIR"'
         - run: tofu apply -input=false "$PLANFILE"
     import:
       steps:
         - env:
             name: TF_WORKSPACE
             value: default
+        - env:
+            name: TF_CLI_CONFIG_FILE
+            command: 'echo "$FORGEJO_TFRC"'
+        - env:
+            name: NIX_TERRAFORM_PLUGIN_DIR
+            command: 'echo "$TERRANIX_PLUGIN_DIR"'
         - run: nix build ".#$PROJECT_NAME.config" --out-link config.tf.json
         - run: tofu init -input=false
         - run: tofu import -input=false $(printf '%s' $COMMENT_ARGS | sed 's/,/ /' | tr -d '\\')

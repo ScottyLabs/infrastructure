@@ -30,6 +30,58 @@
           direct {}
         }
       '';
+
+      tofuPlugins =
+        let
+          p = pkgs.opentofu.plugins;
+          target = "${pkgs.go.GOOS}_${pkgs.go.GOARCH}";
+          plugin = host: provider: {
+            name = "${host}/${pkgs.lib.removePrefix "registry.terraform.io/" provider.provider-source-address}/${provider.version}/${target}";
+            path = "${provider}/libexec/terraform-providers/${provider.provider-source-address}/${provider.version}/${target}";
+          };
+        in
+        pkgs.linkFarm "terranix-tofu-plugins" (
+          map (plugin "registry.opentofu.org") [
+            (p.cloudflare_cloudflare.override {
+              rev = "v5.28.1";
+              hash = "sha256-u/jcdMNh/+Jm/jJ7YBZronwUvNRLoZUJZdzS1kF/2O0=";
+              vendorHash = "sha256-IakHMXfSiIazr2sPSugOc/+2JQ7wh2rUcY0hYJYf6Eg=";
+              mkProviderGoModule = pkgs.buildGoLatestModule;
+            })
+            p.keycloak_keycloak
+            (p.hashicorp_vault.override {
+              rev = "v5.13.0";
+              hash = "sha256-kfIulbpyQrUCpCYvUTupqfxRVFl6n+wAJyyq5U4NhFg=";
+              vendorHash = "sha256-1S21quLvX103K1mq4i0FhKH+cC4vwdJ/oI+embmQHSs=";
+              mkProviderGoModule = pkgs.buildGoLatestModule;
+            })
+            p.hashicorp_random
+            (p.hashicorp_google.override {
+              rev = "v7.46.2";
+              hash = "sha256-5wEsjWzIe+vFBSv4La3aVPhxlMv3oDSylzXMNbq3ivQ=";
+              vendorHash = "sha256-Q4vjlWbm0BSZdlLJbLadGfjqjhimhjC0nJYd57VNEOU=";
+              proxyVendor = true;
+              mkProviderGoModule = pkgs.buildGoLatestModule;
+            })
+            (p.mkProvider {
+              owner = "PostHog";
+              repo = "terraform-provider-posthog";
+              rev = "v1.0.28";
+              spdx = "MPL-2.0";
+              hash = "sha256-PCKehRIAfxJbfnSlJLfXUkTMrcoNOIATBlaPGmo8AaI=";
+              vendorHash = null;
+              mkProviderGoModule = pkgs.buildGoLatestModule;
+              homepage = "https://registry.terraform.io/providers/posthog/posthog";
+            })
+          ]
+          ++ [
+            (plugin "registry.terraform.io" p.jkossis_garage)
+            {
+              name = "registry.opentofu.org/svalabs/forgejo/1.7.0/${target}";
+              path = forgejoProvider;
+            }
+          ]
+        );
     in
     {
       scottylabs.atlantis = {
@@ -87,6 +139,7 @@
         TF_PLUGIN_CACHE_DIR = "/var/lib/atlantis/plugin-cache";
         TF_PLUGIN_CACHE_MAY_BREAK_DEPENDENCY_LOCK_FILE = "1";
         FORGEJO_TFRC = "${forgejoTfrc}";
+        TERRANIX_PLUGIN_DIR = "${tofuPlugins}";
         RUSTC_WRAPPER = "${pkgs.sccache}/bin/sccache";
         SCCACHE_DIR = "/var/lib/atlantis/sccache";
         # Lets the search-console Google provider run its OpenBao token script
