@@ -50,9 +50,9 @@
       services.kennel = {
         enable = true;
         package = inputs.kennel.packages.x86_64-linux.kennel;
-        devenvPackage = inputs.kennel.packages.x86_64-linux.devenv;
         nixPackage = config.nix.package;
         webhookSecretFile = config.age.secrets.kennel-webhook-secret.path;
+        nixbotTokenFile = "/run/credentials/kennel.service/nixbot-token";
         environmentFile = config.age.secrets.kennel.path;
         api.port = 3001;
 
@@ -65,11 +65,6 @@
             tunnelId = "1ce95b80-2f68-4136-b3ac-b7e2eab6b4ef";
             zones = import ../../../../zones.nix;
           };
-        };
-
-        builder.cachix = {
-          enable = true;
-          cacheName = "scottylabs";
         };
 
         resources.postgres = {
@@ -98,9 +93,16 @@
 
       # A vault environmentTemplate adds kennel-envfile.service, which kennel stops as an orphaned deployment
       systemd.services.kennel = {
-        vault.infraSecrets.cloudflare-token = {
-          path = "cloudflare-kennel";
-          key = "TOKEN";
+        vault.infraSecrets = {
+          cloudflare-token = {
+            path = "cloudflare-kennel";
+            key = "TOKEN";
+          };
+          # nixbot sends this token to /nixbot, see infra-01/nixbot.nix
+          nixbot-token = {
+            path = "kennel-nixbot";
+            key = "TOKEN";
+          };
         };
 
         # kennel reads the token from its environment
@@ -217,7 +219,7 @@
               };
             })
             (grafana.timeseries {
-              title = "Build state over time";
+              title = "Deploy requests over time";
               id = 4;
               pos = {
                 h = 8;
@@ -227,7 +229,7 @@
               };
               targets = [
                 (grafana.target {
-                  expr = "kennel_builds";
+                  expr = "kennel_deploy_requests";
                   legend = "{{status}}";
                 })
               ];
@@ -237,7 +239,7 @@
               };
             })
             (grafana.timeseries {
-              title = "Queue depth + in-flight";
+              title = "Waiting for artifacts and failed by stage";
               id = 5;
               pos = {
                 h = 8;
@@ -247,12 +249,12 @@
               };
               targets = [
                 (grafana.target {
-                  expr = "kennel_builds{status=\"queued\"}";
-                  legend = "queued";
+                  expr = "kennel_deploy_requests{status=\"pending\"}";
+                  legend = "pending";
                 })
                 (grafana.target {
-                  expr = "kennel_builds{status=\"building\"}";
-                  legend = "building";
+                  expr = "kennel_deploy_failures";
+                  legend = "failed: {{stage}}";
                 })
               ];
               defaults = {

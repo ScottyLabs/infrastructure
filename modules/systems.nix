@@ -100,7 +100,7 @@ in
 {
   flake.nixosConfigurations = lib.mapAttrs (
     id: host:
-    inputs.nixpkgs.lib.nixosSystem {
+    inputs.nixpkgs-hosts.lib.nixosSystem {
       inherit (host) system;
       inherit specialArgs;
       modules = modulesFor id host;
@@ -118,9 +118,9 @@ in
   flake.colmenaHive = inputs.colmena.lib.makeHive (
     {
       meta = {
-        nixpkgs = import inputs.nixpkgs { system = "x86_64-linux"; };
+        nixpkgs = import inputs.nixpkgs-hosts { system = "x86_64-linux"; };
         inherit (inputs) nix-darwin;
-        nodeNixpkgs = lib.mapAttrs (_: host: import inputs.nixpkgs { inherit (host) system; }) (
+        nodeNixpkgs = lib.mapAttrs (_: host: import inputs.nixpkgs-hosts { inherit (host) system; }) (
           lib.filterAttrs (_: host: host.system != "x86_64-linux") allHosts
         );
         inherit specialArgs;

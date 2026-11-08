@@ -125,7 +125,7 @@ in
                   capabilities = ["read"]
                 }
 
-                # Read shared CI cache credentials (cachix, sccache)
+                # Read shared CI cache credentials (sccache)
                 path "secret/data/shared/*" {
                   capabilities = ["read"]
                 }

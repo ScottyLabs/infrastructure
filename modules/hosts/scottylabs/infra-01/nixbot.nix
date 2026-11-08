@@ -89,6 +89,37 @@
               registerGCRoots = false;
             };
           };
+
+          # kennel deploys a branch once its manifest is in the binary cache
+          postBuildSteps = [
+            {
+              name = "kennel";
+              environment = { };
+              # a kennel outage or a repo kennel doesn't deploy shouldn't fail the build
+              warnOnly = true;
+              command = [
+                (lib.getExe pkgs.curl)
+                "--fail-with-body"
+                "--silent"
+                "--show-error"
+                "--header"
+                (inputs.nixbot.lib.interpolate "Authorization: Bearer %(secret:kennel-nixbot-token)s")
+                "--data-urlencode"
+                (inputs.nixbot.lib.interpolate "project=%(prop:project)s")
+                "--data-urlencode"
+                (inputs.nixbot.lib.interpolate "attr=%(prop:attr)s")
+                "--data-urlencode"
+                (inputs.nixbot.lib.interpolate "branch=%(prop:branch)s")
+                "--data-urlencode"
+                (inputs.nixbot.lib.interpolate "revision=%(prop:revision)s")
+                "--data-urlencode"
+                (inputs.nixbot.lib.interpolate "pr_number=%(prop:pr_number)s")
+                "--data-urlencode"
+                (inputs.nixbot.lib.interpolate "out_path=%(prop:out_path)s")
+                "https://kennel.scottylabs.org/nixbot"
+              ];
+            }
+          ];
         };
 
         systemd.services.nixbot.vault.infraSecrets = {
@@ -99,6 +130,10 @@
           oidc-client-secret = {
             path = "nixbot-oidc";
             key = "CLIENT_SECRET";
+          };
+          kennel-nixbot-token = {
+            path = "kennel-nixbot";
+            key = "TOKEN";
           };
         };
 
@@ -223,6 +258,18 @@
               mount = "secret";
               name = "infra/nixbot-oidc";
               data_json = "\${jsonencode({ CLIENT_SECRET = keycloak_openid_client.nixbot.client_secret })}";
+            };
+
+            # Shared with kennel on deploy-01, which checks it on /nixbot
+            resource.random_password.kennel_nixbot = {
+              length = 64;
+              special = false;
+            };
+
+            resource.vault_kv_secret_v2.kennel_nixbot = {
+              mount = "secret";
+              name = "infra/kennel-nixbot";
+              data_json = "\${jsonencode({ TOKEN = random_password.kennel_nixbot.result })}";
             };
           }
         ];

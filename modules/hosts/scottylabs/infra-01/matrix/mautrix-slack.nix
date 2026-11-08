@@ -89,7 +89,7 @@
         assertions = [
           {
             assertion = lib.versionAtLeast slackPackage.version "26.04";
-            message = "mautrix-slack >= 26.04 is required for !slack bridge (plumbing into Discord portals). Update nixpkgs (nix flake update nixpkgs).";
+            message = "mautrix-slack >= 26.04 is required for !slack bridge (plumbing into Discord portals). Update nixpkgs (nix flake update nixpkgs-hosts).";
           }
         ];
 

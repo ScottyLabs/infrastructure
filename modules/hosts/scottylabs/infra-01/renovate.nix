@@ -11,11 +11,6 @@
       updateLockfiles = toString (
         pkgs.writeShellScript "update-lockfiles" ''
           set -euo pipefail
-          if [ -f devenv.yaml ]; then
-            # Renovate has no OpenBao token
-            printf 'secretspec:\n  enable: false\n' > devenv.local.yaml
-            ${lib.getExe pkgs.devenv} update
-          fi
           if [ -f flake.nix ]; then
             nix flake update
           fi
@@ -69,7 +64,7 @@
           customManagers = [
             {
               customType = "regex";
-              managerFilePatterns = [ ''/devenv\.lock$/'' ];
+              managerFilePatterns = [ ''/flake\.lock$/'' ];
               matchStrings = [
                 ''"rev":\s*"(?<currentDigest>[a-f0-9]{40})",\s*"revCount":\s*\d+,\s*"type":\s*"git",\s*"url":\s*"https://git\.cmu\.dev/ScottyLabs/kennel"''
               ];
@@ -109,10 +104,7 @@
           allowedCommands = [ "^${lib.escapeRegex updateLockfiles}$" ];
           postUpgradeTasks = {
             commands = [ updateLockfiles ];
-            fileFilters = [
-              "devenv.lock"
-              "flake.lock"
-            ];
+            fileFilters = [ "flake.lock" ];
             executionMode = "branch";
           };
         };

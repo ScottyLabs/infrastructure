@@ -283,14 +283,6 @@
               description = "KV v2 secrets engine";
             };
 
-            variable.cachix_auth_token.sensitive = true;
-
-            resource.vault_kv_secret_v2.cachix = {
-              mount = "\${vault_mount.kv.path}";
-              name = "shared/cachix";
-              data_json = "\${jsonencode({ CACHIX_AUTH_TOKEN = var.cachix_auth_token })}";
-            };
-
             resource.vault_jwt_auth_backend.oidc = {
               path = "oidc";
               type = "oidc";

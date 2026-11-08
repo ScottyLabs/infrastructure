@@ -2,7 +2,6 @@
   flake.modules.nixos.scottylabs-infra-03-runner =
     {
       config,
-      inputs,
       lib,
       pkgs,
       ...
@@ -41,10 +40,7 @@
             nodejs
             openssh
           ])
-          ++ [
-            config.nix.package
-            inputs.kennel.packages.${pkgs.stdenv.hostPlatform.system}.devenv
-          ];
+          ++ [ config.nix.package ];
 
         settings = {
           runner = {
