@@ -3,8 +3,8 @@ let
   # Per-project secrets written by the tfgen outputs
   projectSecrets = [
     "SENTRY_DSN"
-    "POSTHOG_KEY"
-    "POSTHOG_HOST"
+    "PUBLIC_POSTHOG_KEY"
+    "PUBLIC_POSTHOG_HOST"
     "OIDC_CLIENT_ID"
     "OIDC_CLIENT_SECRET"
     "KEYCLOAK_URL"
