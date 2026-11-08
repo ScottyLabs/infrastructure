@@ -1,29 +1,11 @@
 { config, grafana, ... }:
 {
   flake.modules.nixos.scottylabs-deploy-01-kennel =
-    {
-      config,
-      inputs,
-      lib,
-      pkgs,
-      ...
-    }:
+    { config, inputs, ... }:
 
     {
       imports = [
         inputs.kennel.nixosModules.default
-      ];
-
-      # Skip kennel.slice units in switch-to-configuration's failed-unit sweep
-      nixpkgs.overlays = [
-        (_: prev: {
-          switch-to-configuration-ng = prev.switch-to-configuration-ng.overrideAttrs (old: {
-            postPatch = (old.postPatch or "") + ''
-              substituteInPlace src/main.rs \
-                --replace-fail 'for (unit, unit_state) in new_active_units {' 'for (unit, unit_state) in new_active_units { if unit.ends_with(".service") { let slice: Result<String, _> = unit_state.proxy.get("org.freedesktop.systemd1.Service", "Slice"); if matches!(slice, Ok(s) if s == "kennel.slice") { continue; } }'
-            '';
-          });
-        })
       ];
 
       age.secrets.kennel = {
@@ -91,28 +73,16 @@
         forgejo.apiTokenFile = config.age.secrets.kennel-forgejo-token.path;
       };
 
-      # A vault environmentTemplate adds kennel-envfile.service, which kennel stops as an orphaned deployment
-      systemd.services.kennel = {
-        vault.infraSecrets = {
-          cloudflare-token = {
-            path = "cloudflare-kennel";
-            key = "TOKEN";
-          };
-          # nixbot sends this token to /nixbot, see infra-01/nixbot.nix
-          nixbot-token = {
-            path = "kennel-nixbot";
-            key = "TOKEN";
-          };
+      systemd.services.kennel.vault = {
+        # nixbot sends this token to /nixbot, see infra-01/nixbot.nix
+        infraSecrets.nixbot-token = {
+          path = "kennel-nixbot";
+          key = "TOKEN";
         };
 
-        # kennel reads the token from its environment
-        serviceConfig.ExecStart = lib.mkForce (
-          pkgs.writeShellScript "kennel-start" ''
-            CLOUDFLARE_API_TOKEN=$(< "$CREDENTIALS_DIRECTORY/cloudflare-token")
-            export CLOUDFLARE_API_TOKEN
-            exec ${config.services.kennel.package}/bin/kennel
-          ''
-        );
+        environmentTemplate = ''
+          {{ with secret "secret/data/infra/cloudflare-kennel" }}CLOUDFLARE_API_TOKEN={{ .Data.data.TOKEN }}{{ end }}
+        '';
       };
 
       scottylabs.postgresql.databases = [ "kennel" ];
