@@ -17,16 +17,6 @@
     let
       domain = "nixbot.scottylabs.org";
       inherit (config.services.nixbot) port;
-
-      # nixbot runs flake prefetch-inputs through the passthru Nix, which Lix lacks
-      ietsEvalJobs =
-        pkgs.runCommand "nix-eval-jobs-iets" { passthru.nix = pkgs.nixVersions.nixComponents_2_35.nix-cli; }
-          ''
-            mkdir -p $out/bin
-            ln -s ${
-              lib.getExe' inputs.iets.packages.${pkgs.stdenv.hostPlatform.system}.default "iets"
-            } $out/bin/nix-eval-jobs
-          '';
     in
     {
       imports = [ inputs.nixbot.nixosModules.nixbot ];
@@ -52,7 +42,16 @@
             "aarch64-darwin"
           ];
 
-          packages.nix-eval-jobs = ietsEvalJobs;
+          evalCommand = [
+            (lib.getExe' inputs.iets.packages.${pkgs.stdenv.hostPlatform.system}.default "iets")
+            "eval-jobs"
+            "--cache-dir"
+            "/var/lib/nixbot/eval-cache"
+          ];
+          evalWritablePaths = [ "/var/lib/nixbot/eval-cache" ];
+          evalConcurrency = 16;
+          # nixbuild's maxJobs
+          buildConcurrency = 100;
 
           gitea = {
             enable = true;
