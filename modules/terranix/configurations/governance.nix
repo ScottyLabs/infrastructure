@@ -173,6 +173,22 @@ in
               role = "\${each.value}";
             };
 
+            # Grant admin API access
+            resource.keycloak_openid_client_default_scopes.governance_cli = {
+              realm_id = "\${data.keycloak_realm.scottylabs.id}";
+              client_id = "\${keycloak_openid_client.governance_cli.id}";
+              default_scopes = [
+                "acr"
+                "basic"
+                "email"
+                "kc-admin-api"
+                "profile"
+                "roles"
+                "service_account"
+                "web-origins"
+              ];
+            };
+
             variable.forgejo_token.sensitive = true;
 
             # CI secrets with tofu owners

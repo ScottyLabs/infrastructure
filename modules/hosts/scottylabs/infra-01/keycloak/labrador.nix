@@ -31,6 +31,22 @@ in
           role = "\${each.value}";
         };
 
+        # Grant admin API access
+        resource.keycloak_openid_client_default_scopes.labrador_identity_links = {
+          realm_id = labrador;
+          client_id = "\${keycloak_openid_client.labrador_identity_links.id}";
+          default_scopes = [
+            "acr"
+            "basic"
+            "email"
+            "kc-admin-api"
+            "profile"
+            "roles"
+            "service_account"
+            "web-origins"
+          ];
+        };
+
         output.labrador_identity_links_client_secret = {
           value = "\${keycloak_openid_client.labrador_identity_links.client_secret}";
           sensitive = true;

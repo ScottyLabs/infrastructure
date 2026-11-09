@@ -29,6 +29,22 @@ in
           role = "\${data.keycloak_role.master_admin.name}";
         };
 
+        # Grant admin API access
+        resource.keycloak_openid_client_default_scopes.terranix = {
+          realm_id = master;
+          client_id = "\${keycloak_openid_client.terranix.id}";
+          default_scopes = [
+            "acr"
+            "basic"
+            "email"
+            "kc-admin-api"
+            "profile"
+            "roles"
+            "service_account"
+            "web-origins"
+          ];
+        };
+
         resource.vault_kv_secret_v2.keycloak_terranix = {
           mount = "secret";
           name = "infra/keycloak-terranix";
