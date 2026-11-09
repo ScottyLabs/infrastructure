@@ -44,7 +44,6 @@
     scottylabs-infra-01-uptime
     scottylabs-infra-01-uptime-kuma
     scottylabs-infra-01-vaultwarden
-    scottylabs-infra-01-webhook
     scottylabs-infra-01-well-known
   ];
 }

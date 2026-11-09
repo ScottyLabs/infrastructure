@@ -7,7 +7,6 @@
       ...
     }:
     let
-      kennelUrl = "https://git.cmu.dev/ScottyLabs/kennel";
       updateLockfiles = toString (
         pkgs.writeShellScript "update-lockfiles" ''
           set -euo pipefail
@@ -53,51 +52,19 @@
           # a merged PR with the same title otherwise disables automerge
           recreateWhen = "always";
 
-          enabledManagers = [
-            "custom.regex"
-            "nix"
-          ];
+          enabledManagers = [ "nix" ];
           nix.enabled = true;
           lockFileMaintenance.enabled = true;
 
-          # TODO: https://github.com/renovatebot/renovate/pull/40060
-          customManagers = [
-            {
-              customType = "regex";
-              managerFilePatterns = [ ''/flake\.lock$/'' ];
-              matchStrings = [
-                ''"rev":\s*"(?<currentDigest>[a-f0-9]{40})",\s*"revCount":\s*\d+,\s*"type":\s*"git",\s*"url":\s*"https://git\.cmu\.dev/ScottyLabs/kennel"''
-              ];
-              currentValueTemplate = "main";
-              depNameTemplate = "kennel";
-              packageNameTemplate = kennelUrl;
-              datasourceTemplate = "git-refs";
-            }
-          ];
-
           packageRules = [
             {
-              matchManagers = [
-                "nix"
-                "custom.regex"
-              ];
+              matchManagers = [ "nix" ];
               groupName = "lockfiles";
               group.branchTopic = "lockfiles";
               schedule = [ "before 5am on Monday" ];
               commitMessageAction = "update";
               commitMessageTopic = "lockfiles";
               commitMessageExtra = "";
-            }
-
-            # Runs on kennel pushes via webhook.nix
-            {
-              matchPackageNames = [ kennelUrl ];
-              groupName = "kennel";
-              group = {
-                branchTopic = "kennel";
-                commitMessageTopic = "lockfiles";
-              };
-              schedule = [ "at any time" ];
             }
           ];
 
