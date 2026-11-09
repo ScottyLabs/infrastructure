@@ -57,6 +57,38 @@
         "type": "github"
       }
     },
+    "collar": {
+      "inputs": {
+        "flake-parts": [
+          "kennel",
+          "collar",
+          "scottylabs",
+          "flake-parts"
+        ],
+        "nixpkgs": [
+          "kennel",
+          "collar",
+          "scottylabs",
+          "nixpkgs"
+        ],
+        "scottylabs": [
+          "kennel"
+        ]
+      },
+      "locked": {
+        "lastModified": 1794199406,
+        "narHash": "sha256-op3uNSKCbLgQZ2GM7rRkgnRZK9S8IoECYAb8aURMoOg=",
+        "ref": "refs/heads/main",
+        "rev": "056ac533f69235c0046cf65a6b1d5198c978c2dc",
+        "revCount": 53,
+        "type": "git",
+        "url": "https://git.cmu.dev/ScottyLabs/collar"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://git.cmu.dev/ScottyLabs/collar"
+      }
+    },
     "colmena": {
       "inputs": {
         "flake-compat": "flake-compat",
@@ -297,11 +329,11 @@
     "governance": {
       "flake": false,
       "locked": {
-        "lastModified": 1794182199,
-        "narHash": "sha256-vQFp5m3eqckzF0hEFL4AY9oLKaB0Fkv6uyFwNnyLyM4=",
+        "lastModified": 1794197647,
+        "narHash": "sha256-qNsEd6VAoiqndIwWkoUb7KE7Rmr9L6seLzJvUJT+mpI=",
         "ref": "refs/heads/main",
-        "rev": "6c5dc19677a43843c7061faaf31d953d694186ea",
-        "revCount": 466,
+        "rev": "c8f3781004f1299f3bd9cc6255e462f2156f4ca3",
+        "revCount": 467,
         "type": "git",
         "url": "https://git.cmu.dev/ScottyLabs/governance"
       },
@@ -383,6 +415,7 @@
     },
     "kennel": {
       "inputs": {
+        "collar": "collar",
         "crane": "crane_2",
         "flake-parts": "flake-parts_2",
         "git-hooks": "git-hooks",
@@ -395,11 +428,11 @@
         "uv2nix": "uv2nix"
       },
       "locked": {
-        "lastModified": 1794183928,
-        "narHash": "sha256-yhrGg8+yUJRkLT6RjCM3X18chzgy/SLKvOlp9Zw4INU=",
+        "lastModified": 1794200805,
+        "narHash": "sha256-+FRXNZWvt8lJkx9PwlStOsatg+lSG93gY4hRYSRvcfw=",
         "ref": "refs/heads/main",
-        "rev": "45c11f50f0aa12261f586ce930de9a285474e800",
-        "revCount": 431,
+        "rev": "28d606f615702a5121032bbe5567cb5ed45bd569",
+        "revCount": 434,
         "type": "git",
         "url": "https://git.cmu.dev/ScottyLabs/kennel"
       },
@@ -600,11 +633,11 @@
     },
     "nixpkgs_2": {
       "locked": {
-        "lastModified": 1793811156,
-        "narHash": "sha256-XOUPWb/dGixZZNGpWPRXx7XWzdSJx+gBCIoywJtRfNU=",
+        "lastModified": 1794157196,
+        "narHash": "sha256-Ad+p0TzAFYZBdYL6W6335tl3Qq3iLRdMdu3Fx95N8N8=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "4b566d4013546271cc1301fe20e62de6651e9834",
+        "rev": "4d6a01a11146f4691c0991682885ad9e4686e3ee",
         "type": "github"
       },
       "original": {
@@ -783,11 +816,11 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1793923894,
-        "narHash": "sha256-Sh6giZ9sJtMpcrsqJz4xbkREfwtduSVQ8ZkHUSj7yyk=",
+        "lastModified": 1794192167,
+        "narHash": "sha256-JKGtBDlM5DkOPnturQ14To+qeQhcjS3rA2hcakmWI0k=",
         "owner": "nix-community",
         "repo": "srvos",
-        "rev": "774a7250e3c25d6876bb8af388f9b7f510de2180",
+        "rev": "11e24334759f21e15f16895fc4c9645d97ec5acc",
         "type": "github"
       },
       "original": {
