@@ -291,11 +291,7 @@ in
             inherit name;
             dir = ".";
             workspace = name;
-            autoplan.when_modified = [
-              "modules/**"
-              "flake.nix"
-              "flake.lock"
-            ];
+            autoplan.when_modified = [ "modules/**" ];
           }) (lib.removeAttrs config.terranix.terranixConfigurations [ "garage" ]);
         }
       );
