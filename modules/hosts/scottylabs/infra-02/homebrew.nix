@@ -8,8 +8,6 @@
     homebrew = {
       enable = true;
       onActivation.cleanup = "zap";
-
-      # BlueBubbles bridges iMessage into Matrix
       casks = [ "bluebubbles" ];
     };
   };
