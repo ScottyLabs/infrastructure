@@ -98,10 +98,12 @@ in
       (github {
         owner = "Lucky3028";
         repo = "terraform-provider-discord";
-        rev = "v2.7.0";
+        # TODO: v2.7.0 doesn't build with go 1.27
+        rev = "3710abd02c98b70f1e5cd991261e7a145aa051a6";
+        version = "2.7.0";
         spdx = "GPL-3.0-only";
-        hash = "sha256-e+LqaGjj8dqVZG8xOqcvz6ZS8XM3xoybJBusCA7xe1M=";
-        vendorHash = "sha256-lb2FVsNak7USqUmzV++zQ0htNHPEYnCUZgTdw3sm7ag=";
+        hash = "sha256-OzakkZVmMNJJTa00V5NWQ2F6FYnfFCQuXk0C+9jnci4=";
+        vendorHash = "sha256-CeAREcDIkB58fD+otSgpjhkHCVU1TuPNldmVdO9hRSY=";
       })
       (github {
         owner = "Mastercard";

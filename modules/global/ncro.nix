@@ -1,13 +1,17 @@
 { inputs, ... }:
 {
   flake.modules.nixos.ncro =
-    { lib, ... }:
+    { lib, pkgs, ... }:
 
     {
       imports = [ inputs.ncro.nixosModules.ncro ];
 
       services.ncro = {
         enable = true;
+        # TODO: ncro's package.nix doesn't list sqlite
+        package = inputs.ncro.packages.${pkgs.stdenv.hostPlatform.system}.ncro.overrideAttrs (old: {
+          buildInputs = old.buildInputs ++ [ pkgs.sqlite ];
+        });
         settings = {
           server.listen = "127.0.0.1:5000";
 
