@@ -49,6 +49,16 @@ in
       scottylabs.atlantis = {
         enable = true;
         domain = "atlantis.scottylabs.org";
+        # TODO: https://github.com/runatlantis/atlantis/pull/6715
+        package = pkgs.atlantis.overrideAttrs (old: {
+          patches = (old.patches or [ ]) ++ [
+            (pkgs.fetchpatch {
+              url = "https://github.com/runatlantis/atlantis/compare/b9bac0359050771a18f5320100ed6383f741f4f7...651e11e56d905e70329c0bf056c7d5558015a982.diff";
+              excludes = [ "runatlantis.io/*" ];
+              hash = "sha256-SbuvErTLcwkSVqDZZc4rdOk8+/YKwxSPwW5BkwXXZYY=";
+            })
+          ];
+        });
         environmentFile = config.age.secrets.atlantis.path;
         extraPackages = [
           pkgs.opentofu
