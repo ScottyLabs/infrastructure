@@ -65,7 +65,6 @@ in
           "--default-tf-distribution=opentofu"
           "--write-git-creds"
           "--allow-commands=all"
-          "--silence-vcs-status-no-plans"
           "--hide-prev-plan-comments"
           "--enable-diff-markdown-format"
           "--fail-on-pre-workflow-hook-error"
