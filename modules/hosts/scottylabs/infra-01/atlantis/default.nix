@@ -1,4 +1,16 @@
-{ config, grafana, ... }:
+{
+  config,
+  grafana,
+  lib,
+  ...
+}:
+let
+  # ScottyLabs repos atlantis plans and applies
+  repos = [
+    "infrastructure"
+    "governance"
+  ];
+in
 {
   flake.modules.nixos.scottylabs-infra-01-atlantis =
     { config, pkgs, ... }:
@@ -48,7 +60,7 @@
         extraArgs = [
           "--gitea-base-url=https://git.cmu.dev"
           "--gitea-user=scottylabs-bot"
-          "--repo-allowlist=git.cmu.dev/ScottyLabs/governance,git.cmu.dev/ScottyLabs/infrastructure"
+          "--repo-allowlist=${lib.concatMapStringsSep "," (repo: "git.cmu.dev/ScottyLabs/${repo}") repos}"
           "--allow-fork-prs"
           "--default-tf-distribution=opentofu"
           "--write-git-creds"
@@ -93,6 +105,8 @@
         FORGEJO_TFRC = "${forgejoTfrc}";
         TERRANIX_PLUGIN_DIR = "${plugins.terranix}";
         GOVERNANCE_PLUGIN_DIR = "${plugins.governance}";
+        # governance requires atlantis/plan on these repos' default branch
+        TF_VAR_atlantis_repos = builtins.toJSON repos;
         # Lets the search-console Google provider run its OpenBao token script
         GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES = "1";
       };
@@ -575,63 +589,33 @@
               data_json = "\${jsonencode({ SECRET = random_password.atlantis_jwt.result })}";
             };
 
-            data.forgejo_repository = {
-              infrastructure = {
-                owner = "ScottyLabs";
-                name = "infrastructure";
-              };
-              governance = {
-                owner = "ScottyLabs";
-                name = "governance";
-              };
-            };
+            data.forgejo_repository = lib.genAttrs repos (name: {
+              owner = "ScottyLabs";
+              inherit name;
+            });
 
-            resource.forgejo_repository_webhook = {
-              infrastructure = {
-                repository_id = "\${data.forgejo_repository.infrastructure.id}";
-                type = "forgejo";
-                config = {
-                  url = "https://atlantis.scottylabs.org/events";
-                  content_type = "json";
-                  secret = "\${random_password.atlantis_webhook_secret.result}";
-                };
-                active = true;
-                events = [
-                  "pull_request"
-                  "pull_request_assign"
-                  "pull_request_label"
-                  "pull_request_milestone"
-                  "pull_request_comment"
-                  "pull_request_review_approved"
-                  "pull_request_review_rejected"
-                  "pull_request_review_comment"
-                  "pull_request_sync"
-                  "pull_request_review_request"
-                ];
+            resource.forgejo_repository_webhook = lib.genAttrs repos (repo: {
+              repository_id = "\${data.forgejo_repository.${repo}.id}";
+              type = "forgejo";
+              config = {
+                url = "https://atlantis.scottylabs.org/events";
+                content_type = "json";
+                secret = "\${random_password.atlantis_webhook_secret.result}";
               };
-              governance = {
-                repository_id = "\${data.forgejo_repository.governance.id}";
-                type = "forgejo";
-                config = {
-                  url = "https://atlantis.scottylabs.org/events";
-                  content_type = "json";
-                  secret = "\${random_password.atlantis_webhook_secret.result}";
-                };
-                active = true;
-                events = [
-                  "pull_request"
-                  "pull_request_assign"
-                  "pull_request_label"
-                  "pull_request_milestone"
-                  "pull_request_comment"
-                  "pull_request_review_approved"
-                  "pull_request_review_rejected"
-                  "pull_request_review_comment"
-                  "pull_request_sync"
-                  "pull_request_review_request"
-                ];
-              };
-            };
+              active = true;
+              events = [
+                "pull_request"
+                "pull_request_assign"
+                "pull_request_label"
+                "pull_request_milestone"
+                "pull_request_comment"
+                "pull_request_review_approved"
+                "pull_request_review_rejected"
+                "pull_request_review_comment"
+                "pull_request_sync"
+                "pull_request_review_request"
+              ];
+            });
           }
         ];
       };
