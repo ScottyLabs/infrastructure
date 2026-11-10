@@ -58,7 +58,6 @@
     };
     nixbot = {
       # TODO: https://github.com/Mic92/nixbot/pull/255
-      # TODO: https://github.com/Mic92/nixbot/pull/286
       url = "github:ap-1/nixbot/scottylabs";
       inputs.nixpkgs.follows = "nixpkgs-hosts";
     };
