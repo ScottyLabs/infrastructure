@@ -420,6 +420,9 @@
         "flake-parts": "flake-parts_2",
         "git-hooks": "git-hooks",
         "nixpkgs": "nixpkgs",
+        "nixpkgs-garage": "nixpkgs-garage",
+        "nixpkgs-pitchfork": "nixpkgs-pitchfork",
+        "nixpkgs-semgrep": "nixpkgs-semgrep",
         "pyproject-build-systems": "pyproject-build-systems",
         "pyproject-nix": "pyproject-nix",
         "ricochet": "ricochet",
@@ -428,11 +431,11 @@
         "uv2nix": "uv2nix"
       },
       "locked": {
-        "lastModified": 1794215974,
-        "narHash": "sha256-yOLkOE8kxIYUR3Z4xIW5MtcTmT4wgEMQhdpvbsLYacc=",
+        "lastModified": 1794274480,
+        "narHash": "sha256-HjSwKlbUUs9vVn5oMFhZHxf9FFvEZOAdCxIFgDkpDFw=",
         "ref": "refs/heads/main",
-        "rev": "83d06a708ca1fec9b793771c4e10c37ec3928db1",
-        "revCount": 437,
+        "rev": "70601a4640b46cd79d5cbd141c00a6984c476382",
+        "revCount": 443,
         "type": "git",
         "url": "https://git.cmu.dev/ScottyLabs/kennel"
       },
@@ -600,6 +603,22 @@
         "type": "github"
       }
     },
+    "nixpkgs-garage": {
+      "locked": {
+        "lastModified": 1794219129,
+        "narHash": "sha256-g92k252bVL1UDzpud2tzOLmOKANmCf6FkMG2nmvGO7I=",
+        "owner": "ap-1",
+        "repo": "nixpkgs",
+        "rev": "da94e00dee59f9c562068a55fb5b03efc75bff05",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ap-1",
+        "ref": "garage-darwin",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "nixpkgs-hosts": {
       "locked": {
         "lastModified": 1794042290,
@@ -628,6 +647,38 @@
       "original": {
         "owner": "nix-community",
         "repo": "nixpkgs.lib",
+        "type": "github"
+      }
+    },
+    "nixpkgs-pitchfork": {
+      "locked": {
+        "lastModified": 1794174645,
+        "narHash": "sha256-JxwKVhDG+EEUhpkSULBAv+f0APglnWOArg227J1EWUo=",
+        "owner": "ap-1",
+        "repo": "nixpkgs",
+        "rev": "009e3966fd020815a3b251c3f45e1bc74019d7b3",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ap-1",
+        "ref": "pitchfork",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs-semgrep": {
+      "locked": {
+        "lastModified": 1794177463,
+        "narHash": "sha256-2k9vPqWGbNsR1hcYDkH3kJ8MR9kOGPYYrDorxQ0ECFw=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "91c7535628c543445974573b6a394f7b65263788",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "91c7535628c543445974573b6a394f7b65263788",
         "type": "github"
       }
     },
