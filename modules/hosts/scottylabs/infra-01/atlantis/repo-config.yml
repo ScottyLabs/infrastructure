@@ -6,6 +6,9 @@ repos:
     allowed_overrides: [apply_requirements]
     allow_custom_workflows: false
     workflow: governance
+    pre_workflow_hooks:
+      - run: nix run .#atlantis-hook -- "git+https://git.cmu.dev/$BASE_REPO_OWNER/$BASE_REPO_NAME?ref=$BASE_BRANCH_NAME"
+        description: Generate tofu and autoplan the axes that differ from the base branch
 
   - id: git.cmu.dev/ScottyLabs/infrastructure
     plan_requirements: [mergeable]
