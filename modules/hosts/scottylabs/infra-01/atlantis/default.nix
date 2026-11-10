@@ -44,10 +44,6 @@
           pkgs.go
           pkgs.unzip
           pkgs.curl
-          pkgs.cargo
-          pkgs.rustc
-          pkgs.gcc
-          pkgs.sccache
         ];
         extraArgs = [
           "--gitea-base-url=https://git.cmu.dev"
@@ -91,8 +87,6 @@
         FORGEJO_TFRC = "${forgejoTfrc}";
         TERRANIX_PLUGIN_DIR = "${plugins.terranix}";
         GOVERNANCE_PLUGIN_DIR = "${plugins.governance}";
-        RUSTC_WRAPPER = "${pkgs.sccache}/bin/sccache";
-        SCCACHE_DIR = "/var/lib/atlantis/sccache";
         # Lets the search-console Google provider run its OpenBao token script
         GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES = "1";
       };

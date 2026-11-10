@@ -26,10 +26,9 @@ workflows:
   governance:
     plan:
       steps:
-        - run: cargo build --release --manifest-path=../../../Cargo.toml -p governance
         - env:
             name: PATH
-            command: 'echo "$DIR/../../../target/release:$PATH"'
+            command: 'echo "$DIR/../../governance/bin:$PATH"'
         - env:
             name: TF_CLI_CONFIG_FILE
             command: 'echo "$FORGEJO_TFRC"'
@@ -40,10 +39,9 @@ workflows:
         - plan
     apply:
       steps:
-        - run: cargo build --release --manifest-path=../../../Cargo.toml -p governance
         - env:
             name: PATH
-            command: 'echo "$DIR/../../../target/release:$PATH"'
+            command: 'echo "$DIR/../../governance/bin:$PATH"'
         - env:
             name: TF_CLI_CONFIG_FILE
             command: 'echo "$FORGEJO_TFRC"'
@@ -53,10 +51,9 @@ workflows:
         - apply
     import:
       steps:
-        - run: cargo build --release --manifest-path=../../../Cargo.toml -p governance
         - env:
             name: PATH
-            command: 'echo "$DIR/../../../target/release:$PATH"'
+            command: 'echo "$DIR/../../governance/bin:$PATH"'
         - env:
             name: TF_CLI_CONFIG_FILE
             command: 'echo "$FORGEJO_TFRC"'
