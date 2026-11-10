@@ -76,7 +76,7 @@
             };
           in
           map anthropic [
-            "claude-fable-5-1"
+            "claude-fable-5-2"
             "claude-opus-5-5"
             "claude-sonnet-5-5"
             "claude-haiku-5-5"
@@ -84,7 +84,7 @@
           ++ map openai [
             "gpt-6-astra"
             "gpt-6.1-sol"
-            "gpt-5.6-terra"
+            "gpt-6.1-terra"
             "gpt-6-luna"
             "codex-auto-review"
           ];
