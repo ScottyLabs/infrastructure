@@ -43,8 +43,8 @@ let
       };
     };
     thetartan = {
-      tartan-01 = {
-        domain = "andrew.cmu.edu";
+      www-04 = {
+        domain = "thetartan.org";
         system = "x86_64-linux";
       };
     };
