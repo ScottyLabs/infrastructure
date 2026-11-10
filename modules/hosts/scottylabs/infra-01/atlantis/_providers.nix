@@ -73,7 +73,6 @@ in
       p.keycloak_keycloak
       vault
       p.hashicorp_random
-      p.hashicorp_external
       p.hashicorp_null
       p.integrations_github
       posthog
