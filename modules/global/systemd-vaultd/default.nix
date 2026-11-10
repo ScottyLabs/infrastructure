@@ -4,6 +4,7 @@
     {
       config,
       lib,
+      options,
       ...
     }:
 
@@ -45,12 +46,19 @@
       };
 
       config = {
+        # TODO: replace systemd-vaultd
+        services.systemd-vaultd.package =
+          options.services.systemd-vaultd.package.default.overrideAttrs
+            (old: {
+              patches = (old.patches or [ ]) ++ [ ./wait-for-missing-keys.patch ];
+            });
+
         age.secrets.bao-role-id = {
-          file = ../../secrets/${config.scottylabs.organization}/${config.networking.hostName}/bao-role-id.age;
+          file = ../../../secrets/${config.scottylabs.organization}/${config.networking.hostName}/bao-role-id.age;
           mode = "0400";
         };
         age.secrets.bao-secret-id = {
-          file = ../../secrets/${config.scottylabs.organization}/${config.networking.hostName}/bao-secret-id.age;
+          file = ../../../secrets/${config.scottylabs.organization}/${config.networking.hostName}/bao-secret-id.age;
           mode = "0400";
         };
 

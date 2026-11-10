@@ -1,0 +1,45 @@
+--- a/main.go
++++ b/main.go
+@@ -173,7 +173,11 @@
+ 			log.Printf("Failed to send secret: %v", err)
+ 		}
+ 	} else {
+-		log.Printf("Secret map at %s has no value for key %s", secretPath, secret)
++		// vault agent may not have rendered a newly added key yet
++		log.Printf("Secret map at %s has no value for key %s, waiting for an update", secretPath, secret)
++		if s.queueInotifyRequest(conn, secretName, secret) == nil {
++			shouldClose = false
++		}
+ 	}
+ }
+ 
+--- a/watcher.go
++++ b/watcher.go
+@@ -160,13 +160,16 @@
+ 				}
+ 			}
+ 
++			var waiting []connection
+ 			for _, conn := range conns {
+ 				delete(fdToPath, conn.fd)
+ 
+ 				if err == nil {
+ 					val, ok := secretMap[conn.key]
+ 					if !ok {
+-						log.Printf("Secret map %s has no value for key %s", fname, conn.key)
++						log.Printf("Secret map %s has no value for key %s, waiting for an update", fname, conn.key)
++						fdToPath[conn.fd] = fname
++						waiting = append(waiting, conn)
+ 						continue
+ 					}
+ 					_, err = conn.connection.Write(internal.SecretBytes(val))
+@@ -185,6 +188,9 @@
+ 					log.Printf("Failed to open secret: %v", err)
+ 				}
+ 			}
++			if len(waiting) > 0 {
++				connsForPath[fname] = waiting
++			}
+ 		case fd, ok := <-s.connectionClosed:
+ 			if !ok {
+ 				return
