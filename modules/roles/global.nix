@@ -9,6 +9,7 @@
         base
         btrfs
         caddy
+        caddy-sso
         cadvisor
         cloudflared
         iets

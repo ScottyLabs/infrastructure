@@ -61,6 +61,12 @@
         ];
       };
 
+      scottylabs.caddy.sso.sites.atlantis = {
+        inherit (config.scottylabs.atlantis) domain;
+        # Forgejo webhooks carry their own secret
+        publicPaths = [ "/events" ];
+      };
+
       age.secrets.atlantis = {
         file = ../../../../../secrets/scottylabs/infra-01/atlantis.age;
         owner = "atlantis";
@@ -529,6 +535,44 @@
               mount = "secret";
               name = "infra/atlantis";
               data_json = "\${jsonencode({ GITEA_WEBHOOK_SECRET = random_password.atlantis_webhook_secret.result })}";
+            };
+
+            resource.keycloak_openid_client.atlantis = {
+              realm_id = "\${data.keycloak_realm.scottylabs.id}";
+              client_id = "atlantis";
+              name = "Atlantis";
+              enabled = true;
+              access_type = "CONFIDENTIAL";
+              standard_flow_enabled = true;
+              direct_access_grants_enabled = false;
+              valid_redirect_uris = [
+                "https://atlantis.scottylabs.org/auth/oauth2/scottylabs/authorization-code-callback"
+              ];
+            };
+
+            resource.keycloak_openid_group_membership_protocol_mapper.atlantis_groups = {
+              realm_id = "\${data.keycloak_realm.scottylabs.id}";
+              client_id = "\${keycloak_openid_client.atlantis.id}";
+              name = "groups";
+              claim_name = "groups";
+              full_path = true;
+            };
+
+            resource.random_password.atlantis_jwt = {
+              length = 64;
+              special = false;
+            };
+
+            resource.vault_kv_secret_v2.atlantis_oidc = {
+              mount = "secret";
+              name = "infra/atlantis-oidc";
+              data_json = "\${jsonencode({ CLIENT_SECRET = keycloak_openid_client.atlantis.client_secret })}";
+            };
+
+            resource.vault_kv_secret_v2.atlantis_jwt = {
+              mount = "secret";
+              name = "infra/atlantis-jwt";
+              data_json = "\${jsonencode({ SECRET = random_password.atlantis_jwt.result })}";
             };
 
             data.forgejo_repository = {

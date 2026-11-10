@@ -33,134 +33,29 @@
     in
     {
       options.scottylabs.garage.webadmin = {
-        enable = lib.mkEnableOption "Garage Web Admin UI fronted by caddy with Keycloak OIDC";
+        enable = lib.mkEnableOption "Garage Web Admin UI behind a Keycloak login";
 
         domain = lib.mkOption {
           type = lib.types.str;
           description = "Public hostname for the Garage Web Admin UI";
         };
-
-        keycloakRealm = lib.mkOption {
-          type = lib.types.str;
-          default = "scottylabs";
-          description = "Keycloak realm hosting the OIDC client";
-        };
-
-        keycloakIssuerBase = lib.mkOption {
-          type = lib.types.str;
-          default = "https://idp.scottylabs.org";
-          description = "Keycloak base URL without the realm path";
-        };
-
-        keycloakMetadataUrl = lib.mkOption {
-          type = lib.types.str;
-          default = "http://127.0.0.1:8080/realms/scottylabs/.well-known/openid-configuration";
-          description = "Direct backchannel URL caddy uses to fetch Keycloak OIDC metadata";
-        };
-
-        oidcSecretFile = lib.mkOption {
-          type = lib.types.path;
-          default = "/run/credentials/caddy.service/oidc";
-          description = "Path to a file containing the raw OIDC client secret value";
-        };
-
-        jwtSecretFile = lib.mkOption {
-          type = lib.types.path;
-          default = "/run/credentials/caddy.service/jwt";
-          description = "Path to a file containing the raw JWT shared key value";
-        };
-
-        runtimeEnvFile = lib.mkOption {
-          type = lib.types.path;
-          default = "/run/caddy/garage-webadmin.env";
-          description = "Composed KEY=VALUE env file consumed by caddy";
-        };
       };
 
       config = lib.mkIf (cfg.enable && cfg.webadmin.enable) {
-        services.caddy = {
-          globalConfig = ''
-            order authenticate before respond
-            order authorize before basicauth
+        scottylabs.caddy.sso.sites.garage-webadmin.domain = cfg.webadmin.domain;
 
-            security {
-              oauth identity provider keycloak {
-                driver generic
-                realm ${cfg.webadmin.keycloakRealm}
-                client_id garage-webadmin
-                client_secret {env.OIDC_CLIENT_SECRET}
-                scopes openid email profile
-                metadata_url ${cfg.webadmin.keycloakMetadataUrl}
-                # Async fetch so caddy reloads while keycloak restarts
-                delay_start 1
-                retry_attempts 60
-                retry_interval 2
-              }
+        services.caddy.virtualHosts.${cfg.webadmin.domain}.extraConfig = ''
+          route /api/* {
+            uri strip_prefix /api
+            reverse_proxy 127.0.0.1:${toString cfg.adminPort}
+          }
 
-              authentication portal garageportal {
-                crypto default token lifetime 3600
-                crypto key sign-verify {env.JWT_SHARED_KEY}
-                enable identity provider keycloak
-                cookie domain ${cfg.webadmin.domain}
-                transform user {
-                  match origin ${cfg.webadmin.keycloakRealm}
-                  action add role authp/user
-                }
-              }
-
-              authorization policy garagepolicy {
-                set auth url https://${cfg.webadmin.domain}/auth/
-                allow roles authp/user
-                crypto key verify {env.JWT_SHARED_KEY}
-              }
-            }
-          '';
-
-          virtualHosts.${cfg.webadmin.domain}.extraConfig = ''
-            redir /auth/login https://${cfg.webadmin.domain}/auth/oauth2/${cfg.webadmin.keycloakRealm}/ 302
-
-            route /auth* {
-              authenticate with garageportal
-            }
-
-            route /api/* {
-              authorize with garagepolicy
-              uri strip_prefix /api
-              reverse_proxy 127.0.0.1:${toString cfg.adminPort}
-            }
-
-            route {
-              authorize with garagepolicy
-              root * ${webadminPackage}
-              try_files {path} /index.html
-              file_server
-            }
-          '';
-        };
-
-        systemd.services.caddy = {
-          serviceConfig = {
-            RuntimeDirectory = "caddy";
-            RuntimeDirectoryMode = "0750";
-            EnvironmentFile = [
-              "-${cfg.webadmin.runtimeEnvFile}"
-            ];
-            ExecStartPre = [
-              (pkgs.writeShellScript "compose-garage-webadmin-env" ''
-                set -eu
-                umask 0077
-                if [ -s ${cfg.webadmin.oidcSecretFile} ] && [ -s ${cfg.webadmin.jwtSecretFile} ]; then
-                  {
-                    printf 'OIDC_CLIENT_SECRET=%s\n' "$(cat ${cfg.webadmin.oidcSecretFile})"
-                    printf 'JWT_SHARED_KEY=%s\n' "$(cat ${cfg.webadmin.jwtSecretFile})"
-                  } > ${cfg.webadmin.runtimeEnvFile}
-                fi
-              '')
-            ];
-          };
-          after = [ "keycloak.service" ];
-          wants = [ "keycloak.service" ];
-        };
+          route {
+            root * ${webadminPackage}
+            try_files {path} /index.html
+            file_server
+          }
+        '';
       };
     };
 

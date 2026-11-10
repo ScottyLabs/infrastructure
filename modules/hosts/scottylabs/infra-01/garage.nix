@@ -13,17 +13,6 @@
         };
       };
 
-      systemd.services.caddy.vault.infraSecrets = {
-        oidc = {
-          path = "garage-webadmin-oidc";
-          key = "CLIENT_SECRET";
-        };
-        jwt = {
-          path = "garage-webadmin-jwt";
-          key = "SECRET";
-        };
-      };
-
       age.secrets.garage = {
         file = ../../../../secrets/scottylabs/infra-01/garage.age;
         mode = "0400";
