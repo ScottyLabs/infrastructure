@@ -11,7 +11,6 @@
       cfg = config.scottylabs.matrix;
       bridge = cfg.bridges.slack;
       # ScottyLabs fork with relay, bridge identity, governance mirroring, reaction summaries on v0.2605.0
-      # mautrix-go patches in thesuperRL/mautrix-go scottylabs-v0.28.0 via go.mod replace
       forkSrc = pkgs.fetchFromGitHub {
         owner = "thesuperRL";
         repo = "mautrix-slack";

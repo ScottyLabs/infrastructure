@@ -5,7 +5,7 @@ Garage is the S3-compatible object storage used across the fleet (Loki chunks, T
 ## Hosts
 
 | Host | Endpoint | Purpose |
-| --- | --- | --- |
+| -- | -- | -- |
 | infra-01 | `s3.scottylabs.org` | Shared buckets (observability, CDN, tofu state) |
 | deploy-01 | `s3.kennel.scottylabs.org` | Kennel per-deployment object storage |
 

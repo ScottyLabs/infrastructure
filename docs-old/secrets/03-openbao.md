@@ -5,7 +5,7 @@ OpenBao stores secrets centrally and delivers them at runtime, complementing age
 ## When to Use What
 
 | Use Case | Tool |
-|--------------------------------------------|---------|
+| -- | -- |
 | Bootstrap credentials (AppRole, etc.) | agenix |
 | Infrastructure secrets (ACME, Tofu tokens) | agenix |
 | Runtime-provisioned secrets (OIDC clients, etc.) | OpenBao |
