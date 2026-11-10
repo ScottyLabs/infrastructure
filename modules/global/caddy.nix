@@ -1,7 +1,12 @@
 { grafana, ... }:
 {
   flake.modules.nixos.caddy =
-    { config, pkgs, ... }:
+    {
+      config,
+      lib,
+      pkgs,
+      ...
+    }:
     {
       services.caddy = {
         # cloudflare for DNS-01 renewal of proxied vhosts, security for the garage webadmin portal
@@ -12,11 +17,16 @@
           ];
           hash = "sha256-PshaL6GkOxtx0Z8sm2+tQiyiFRvQaOWV1dLS/dR7g0M=";
         };
-        environmentFile = config.age.secrets.cloudflare-api-token.path;
         globalConfig = ''
           metrics
 
           acme_dns cloudflare {env.CF_DNS_API_TOKEN}
+        '';
+      };
+
+      systemd.services = lib.mkIf config.services.caddy.enable {
+        caddy.vault.environmentTemplate = ''
+          {{ with secret "secret/data/infra/cloudflare-caddy" }}CF_DNS_API_TOKEN={{ .Data.data.TOKEN }}{{ end }}
         '';
       };
     };

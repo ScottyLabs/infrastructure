@@ -99,7 +99,6 @@ in
   "secrets/thetartan/www-04/bao-secret-id.age".publicKeys = admins ++ [ thetartan-www-04 ];
 
   # all
-  "secrets/cloudflare-api-token.age".publicKeys = admins ++ hosts;
   "secrets/pgadmin.age".publicKeys = admins ++ hosts;
   "secrets/nixbuild-ssh-key.age".publicKeys = admins ++ hosts ++ [ scottylabs-infra-02 ];
 }

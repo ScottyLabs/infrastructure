@@ -1,4 +1,9 @@
-{ config, ... }:
+{
+  config,
+  inputs,
+  lib,
+  ...
+}:
 {
   perSystem =
     { pkgs, ... }:
@@ -17,6 +22,16 @@
             provider.cloudflare.api_token = "\${var.cloudflare_tokens_api_token}";
 
             cloudflare.tokens = {
+              caddy = {
+                zonePermissions = [
+                  "Zone Read"
+                  "DNS Write"
+                ];
+                hosts = lib.attrNames (
+                  lib.filterAttrs (_: host: host.config.services.caddy.enable) inputs.self.nixosConfigurations
+                );
+              };
+
               terranix-dns.zonePermissions = [
                 "Zone Read"
                 "DNS Write"

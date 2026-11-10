@@ -4,7 +4,6 @@
   flake.modules.nixos.global = {
     imports =
       (with config.flake.modules.nixos; [
-        acme
         alloy
         base
         btrfs
