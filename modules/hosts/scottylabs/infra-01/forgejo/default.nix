@@ -108,6 +108,8 @@
           };
 
           actions.ENABLED = true;
+          # Queue bursts in Forgejo instead of exhausting the shared Postgres
+          database.MAX_OPEN_CONNS = 50;
           metrics.ENABLED = true;
         };
       };

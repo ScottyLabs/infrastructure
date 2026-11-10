@@ -15,6 +15,8 @@
       443
     ];
 
+    services.postgresql.settings.max_connections = 300;
+
     system.stateVersion = "25.11";
   };
 }
