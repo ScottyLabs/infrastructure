@@ -3,7 +3,8 @@ repos:
     repo_config_file: generated/atlantis.yaml
     apply_requirements: [mergeable, undiverged]
     import_requirements: [mergeable, undiverged]
-    allowed_overrides: [apply_requirements]
+    allowed_overrides: [apply_requirements, workflow]
+    allowed_workflows: [governance, governance-no-refresh]
     allow_custom_workflows: false
     workflow: governance
     pre_workflow_hooks:
@@ -37,7 +38,7 @@ workflows:
             command: 'echo "$GOVERNANCE_PLUGIN_DIR"'
         - init
         - plan
-    apply:
+    apply: &governance-apply
       steps:
         - env:
             name: PATH
@@ -49,7 +50,7 @@ workflows:
             name: NIX_TERRAFORM_PLUGIN_DIR
             command: 'echo "$GOVERNANCE_PLUGIN_DIR"'
         - apply
-    import:
+    import: &governance-import
       steps:
         - env:
             name: PATH
@@ -61,6 +62,24 @@ workflows:
             name: NIX_TERRAFORM_PLUGIN_DIR
             command: 'echo "$GOVERNANCE_PLUGIN_DIR"'
         - import
+
+  governance-no-refresh:
+    plan:
+      steps:
+        - env:
+            name: PATH
+            command: 'echo "$DIR/../../governance/bin:$PATH"'
+        - env:
+            name: TF_CLI_CONFIG_FILE
+            command: 'echo "$FORGEJO_TFRC"'
+        - env:
+            name: NIX_TERRAFORM_PLUGIN_DIR
+            command: 'echo "$GOVERNANCE_PLUGIN_DIR"'
+        - init
+        - plan:
+            extra_args: ["-refresh=false"]
+    apply: *governance-apply
+    import: *governance-import
 
   terranix:
     plan:
