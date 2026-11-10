@@ -11,6 +11,7 @@
       cfg = config.scottylabs.caddy.sso;
 
       realm = "scottylabs";
+      group = "/projects/devops";
       credentials = "/run/credentials/caddy.service";
       envFile = "/run/caddy/sso.env";
       envVar = name: kind: "SSO_${lib.toUpper (lib.replaceStrings [ "-" ] [ "_" ] name)}_${kind}";
@@ -35,11 +36,22 @@
             crypto key sign-verify {env.${envVar name "JWT"}}
             enable identity provider keycloak-${name}
             cookie domain ${site.domain}
+            trust login redirect uri domain exact ${site.domain} path prefix /
+
+            # keep the session cookie under the browser's 4 KB limit
+            transform user {
+              match role ${group}
+              action overwrite role ${group}
+            }
+            transform user {
+              no match role ${group}
+              action overwrite role authp/guest
+            }
           }
 
           authorization policy ${name}-policy {
             set auth url https://${site.domain}/auth/
-            allow roles /projects/devops
+            allow roles ${group}
             crypto key verify {env.${envVar name "JWT"}}
           }
         '') cfg.sites
