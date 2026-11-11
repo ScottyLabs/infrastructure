@@ -176,14 +176,14 @@ in
         timerConfig.OnCalendar = lib.mkForce "*-*-1/3 04:31:00";
       };
 
-      systemd.services.forgejo-dump.onSuccess = [ "restic-backups-forgejo.service" ];
+      systemd.services.forgejo-dump.onSuccess = [ "restic-backups-git.service" ];
 
       age.secrets.forgejo-restic-password = {
         file = ../../../../../secrets/scottylabs/infra-01/forgejo-restic-password.age;
         mode = "0400";
       };
 
-      services.restic.backups.forgejo = {
+      services.restic.backups.git = {
         repository = "s3:https://${cloudflareAccount}.r2.cloudflarestorage.com/forgejo-backups";
         passwordFile = config.age.secrets.forgejo-restic-password.path;
         paths = [ config.services.forgejo.dump.backupDir ];
@@ -192,7 +192,7 @@ in
         pruneOpts = [ "--keep-within 90d" ];
       };
 
-      systemd.services.restic-backups-forgejo = {
+      systemd.services.restic-backups-git = {
         environment.AWS_DEFAULT_REGION = "auto";
         vault.environmentTemplate = ''
           {{ with secret "secret/data/infra/cloudflare-forgejo-backups" }}

@@ -46,6 +46,17 @@
       };
 
       config = {
+        assertions = lib.mapAttrsToList (name: service: {
+          assertion =
+            service.vault.environmentTemplate == null
+            # systemd requests credentials from abstract socket @<16 random hex>/unit/<unit>/<credential>
+            # Past 107 bytes this fails with "No such device or address"
+            ||
+              lib.stringLength "@0123456789abcdef/unit/${name}-envfile.service/${name}.service.EnvironmentFile"
+              <= 107;
+          message = "systemd.services.${name}: vault.environmentTemplate needs a service name of at most 21 characters";
+        }) config.systemd.services;
+
         # TODO: replace systemd-vaultd
         services.systemd-vaultd.package =
           options.services.systemd-vaultd.package.default.overrideAttrs
