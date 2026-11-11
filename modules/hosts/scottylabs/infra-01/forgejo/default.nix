@@ -27,10 +27,10 @@ in
         lfs.enable = true;
         dump = {
           enable = true;
-          interval = "*-*-1/3 04:31:00";
+          interval = "*-*-* 04,16:31:00";
           # not compressed so restic can deduplicate and compress dumps itself
           type = "tar";
-          age = "3d";
+          age = "12h";
         };
 
         database = {
@@ -171,10 +171,6 @@ in
         "L+ ${config.services.forgejo.customDir}/public/assets/img/logo.svg - - - - ${./logo.svg}"
         "L+ ${config.services.forgejo.customDir}/public/assets/img/favicon.svg - - - - ${./logo.svg}"
       ];
-
-      systemd.timers.forgejo-dump = {
-        timerConfig.OnCalendar = lib.mkForce "*-*-1/3 04:31:00";
-      };
 
       systemd.services.forgejo-dump.onSuccess = [ "restic-backups-git.service" ];
 
