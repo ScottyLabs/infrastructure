@@ -23,7 +23,7 @@
       # Hold the splash on screen until cage launches
       systemd.services.plymouth-quit.serviceConfig.ExecStart = [
         ""
-        "${config.boot.plymouth.package}/bin/plymouth quit --retain-splash"
+        "-${config.boot.plymouth.package}/bin/plymouth quit --retain-splash"
       ];
 
       # Kill splash after cage init
