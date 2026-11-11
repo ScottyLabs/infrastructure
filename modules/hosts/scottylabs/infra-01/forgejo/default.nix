@@ -60,6 +60,8 @@ in
             DEFAULT_PUSH_CREATE_PRIVATE = false;
             ENABLE_PUSH_CREATE_USER = true;
             ENABLE_PUSH_CREATE_ORG = true;
+            # Stop crawlers from filling Garage with archives
+            DISABLE_DOWNLOAD_SOURCE_ARCHIVES = true;
           };
 
           # Instance-signed commits Forgejo generates
