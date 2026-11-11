@@ -194,6 +194,26 @@
         "type": "github"
       }
     },
+    "falcon-sensor": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs-hosts"
+        ]
+      },
+      "locked": {
+        "lastModified": 1794411188,
+        "narHash": "sha256-tNIrA0qQDs6+hc4oJU6T+WD41EKMMKeMn+Tg+NvJ3qE=",
+        "owner": "ap-1",
+        "repo": "falcon-sensor-nix",
+        "rev": "0ec8d954740834cbb766ba544b3a8ef86483b048",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ap-1",
+        "repo": "falcon-sensor-nix",
+        "type": "github"
+      }
+    },
     "flake-compat": {
       "flake": false,
       "locked": {
@@ -411,6 +431,22 @@
         "owner": "vic",
         "repo": "import-tree",
         "type": "github"
+      }
+    },
+    "infrastructure-vendor": {
+      "locked": {
+        "lastModified": 1794410458,
+        "narHash": "sha256-PavKzT3/x7UjWcpfApJWT11hHzNo8IgKQ066ChkeeGw=",
+        "ref": "refs/heads/main",
+        "rev": "82866f5b8d6819b9398d9f1279411864cee0d694",
+        "shallow": true,
+        "type": "git",
+        "url": "ssh://forgejo@git.cmu.dev/ScottyLabs/infrastructure-vendor.git"
+      },
+      "original": {
+        "shallow": true,
+        "type": "git",
+        "url": "ssh://forgejo@git.cmu.dev/ScottyLabs/infrastructure-vendor.git"
       }
     },
     "kennel": {
@@ -797,11 +833,13 @@
         "catppuccin": "catppuccin",
         "colmena": "colmena",
         "disko": "disko",
+        "falcon-sensor": "falcon-sensor",
         "flake-parts": "flake-parts",
         "governance": "governance",
         "home-manager": "home-manager",
         "iets": "iets",
         "import-tree": "import-tree",
+        "infrastructure-vendor": "infrastructure-vendor",
         "kennel": "kennel",
         "llm-pkgs": "llm-pkgs",
         "ncro": "ncro",

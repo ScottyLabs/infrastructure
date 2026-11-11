@@ -12,6 +12,7 @@
         caddy-sso
         cadvisor
         cloudflared
+        falcon-sensor
         iets
         ip-address
         ncro
@@ -39,6 +40,7 @@
   # Base layer composed onto every darwin host
   flake.modules.darwin.global = {
     imports = [
+      config.flake.modules.darwin.falcon-sensor
       config.flake.modules.darwin.iets
       config.flake.modules.darwin.ip-address
       config.flake.modules.darwin.nixbuild

@@ -42,6 +42,11 @@
       url = "github:numtide/systemd-vaultd";
       inputs.nixpkgs.follows = "nixpkgs-hosts";
     };
+    falcon-sensor = {
+      url = "github:ap-1/falcon-sensor-nix";
+      inputs.nixpkgs.follows = "nixpkgs-hosts";
+    };
+    infrastructure-vendor.url = "git+ssh://forgejo@git.cmu.dev/ScottyLabs/infrastructure-vendor.git?shallow=1";
 
     # infra-01
     llm-pkgs = {

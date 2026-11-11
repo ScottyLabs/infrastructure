@@ -110,4 +110,5 @@ in
   # all
   "secrets/pgadmin.age".publicKeys = admins ++ all;
   "secrets/nixbuild-ssh-key.age".publicKeys = admins ++ all;
+  "secrets/falcon-sensor.age".publicKeys = admins ++ all;
 }
