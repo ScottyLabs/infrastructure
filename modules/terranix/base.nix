@@ -12,7 +12,7 @@ let
     tunnelIds.${host} or (throw "dns.${record}: host ${host} has no scottylabs.cloudflared.tunnelId");
 
   zones = import ../../data/zones.nix;
-  cloudflareAccount = "f8b0a968c44462e7f9128ad43151d2c4";
+  cloudflareAccount = import ../../data/cloudflare-account.nix;
 
   hostAddress =
     token: host:
@@ -97,6 +97,16 @@ in
                 type = lib.types.nullOr (lib.types.listOf lib.types.str);
                 default = null;
                 description = "Zones the zone permissions apply to, or null for every zone in the account.";
+              };
+              bucketPermissions = lib.mkOption {
+                type = lib.types.listOf lib.types.str;
+                default = [ ];
+                description = "R2 bucket-scoped permission group names, such as Workers R2 Storage Bucket Item Write.";
+              };
+              buckets = lib.mkOption {
+                type = lib.types.listOf lib.types.str;
+                default = [ ];
+                description = "R2 buckets the bucket permissions apply to.";
               };
               hosts = lib.mkOption {
                 type = lib.types.listOf lib.types.str;
@@ -253,6 +263,15 @@ in
                   effect = "allow";
                   permission_groups = permissionGroups token.zonePermissions;
                   resources = builtins.toJSON zoneResources;
+                }
+                ++ lib.optional (token.bucketPermissions != [ ]) {
+                  effect = "allow";
+                  permission_groups = permissionGroups token.bucketPermissions;
+                  resources = builtins.toJSON (
+                    lib.genAttrs (map (
+                      bucket: "com.cloudflare.edge.r2.bucket.${cloudflareAccount}_default_${bucket}"
+                    ) token.buckets) (_: "*")
+                  );
                 };
               condition.request_ip."in" = map (hostAddress name) token.hosts;
             }
@@ -261,11 +280,16 @@ in
 
         resource.vault_kv_secret_v2 = lib.mkIf (config.cloudflare.tokens != { }) (
           lib.mapAttrs' (
-            name: _:
+            name: token:
             lib.nameValuePair "cloudflare_${name}" {
               mount = "secret";
               name = "infra/cloudflare-${name}";
-              data_json = "\${jsonencode({ TOKEN = cloudflare_api_token.${name}.value })}";
+              # R2's S3 credentials are the token ID and the SHA-256 of its value
+              data_json =
+                if token.bucketPermissions != [ ] then
+                  "\${jsonencode({ TOKEN = cloudflare_api_token.${name}.value, ACCESS_KEY_ID = cloudflare_api_token.${name}.id, SECRET_ACCESS_KEY = sha256(cloudflare_api_token.${name}.value) })}"
+                else
+                  "\${jsonencode({ TOKEN = cloudflare_api_token.${name}.value })}";
             }
           ) config.cloudflare.tokens
         );

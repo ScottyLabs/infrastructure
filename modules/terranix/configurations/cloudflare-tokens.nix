@@ -68,6 +68,21 @@
                 ];
                 hosts = [ "scottylabs-deploy-01" ];
               };
+
+              terranix-forgejo = {
+                accountPermissions = [ "Workers R2 Storage Write" ];
+                zonePermissions = [
+                  "Zone Read"
+                  "DNS Write"
+                ];
+                zones = [ "cmu.dev" ];
+              };
+
+              forgejo-backups = {
+                bucketPermissions = [ "Workers R2 Storage Bucket Item Write" ];
+                buckets = [ "forgejo-backups" ];
+                hosts = [ "scottylabs-infra-01" ];
+              };
             };
           }
         ];

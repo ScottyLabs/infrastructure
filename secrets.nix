@@ -32,6 +32,9 @@ in
   "secrets/scottylabs/infra-01/forgejo-signing-key.age".publicKeys = admins ++ [
     scottylabs-infra-01
   ];
+  "secrets/scottylabs/infra-01/forgejo-restic-password.age".publicKeys = admins ++ [
+    scottylabs-infra-01
+  ];
   "secrets/scottylabs/infra-01/renovate-token.age".publicKeys = admins ++ [ scottylabs-infra-01 ];
   "secrets/scottylabs/infra-01/keycloak.age".publicKeys = admins ++ [ scottylabs-infra-01 ];
   "secrets/scottylabs/infra-01/vaultwarden.age".publicKeys = admins ++ [ scottylabs-infra-01 ];

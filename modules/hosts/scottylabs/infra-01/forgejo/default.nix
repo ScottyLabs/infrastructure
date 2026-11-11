@@ -1,4 +1,7 @@
 { config, grafana, ... }:
+let
+  cloudflareAccount = import ../../../../../data/cloudflare-account.nix;
+in
 {
   flake.modules.nixos.scottylabs-infra-01-forgejo =
     {
@@ -25,6 +28,9 @@
         dump = {
           enable = true;
           interval = "*-*-1/3 04:31:00";
+          # not compressed so restic can deduplicate and compress dumps itself
+          type = "tar";
+          age = "3d";
         };
 
         database = {
@@ -166,26 +172,34 @@
         "L+ ${config.services.forgejo.customDir}/public/assets/img/favicon.svg - - - - ${./logo.svg}"
       ];
 
-      # Delete Forgejo dumps older than 30 days
-      systemd.services.forgejo-dump-cleanup = {
-        description = "Clean up Forgejo dumps older than 30 days";
-        serviceConfig = {
-          Type = "oneshot";
-          User = "forgejo";
-          ExecStart = "${pkgs.findutils}/bin/find ${stateDir}/dump -name '*.zip' -mtime +30 -delete";
-        };
-      };
-
       systemd.timers.forgejo-dump = {
         timerConfig.OnCalendar = lib.mkForce "*-*-1/3 04:31:00";
       };
 
-      systemd.timers.forgejo-dump-cleanup = {
-        wantedBy = [ "timers.target" ];
-        timerConfig = {
-          OnCalendar = "daily";
-          Persistent = true;
-        };
+      systemd.services.forgejo-dump.onSuccess = [ "restic-backups-forgejo.service" ];
+
+      age.secrets.forgejo-restic-password = {
+        file = ../../../../../secrets/scottylabs/infra-01/forgejo-restic-password.age;
+        mode = "0400";
+      };
+
+      services.restic.backups.forgejo = {
+        repository = "s3:https://${cloudflareAccount}.r2.cloudflarestorage.com/forgejo-backups";
+        passwordFile = config.age.secrets.forgejo-restic-password.path;
+        paths = [ config.services.forgejo.dump.backupDir ];
+        initialize = true;
+        timerConfig = null;
+        pruneOpts = [ "--keep-within 90d" ];
+      };
+
+      systemd.services.restic-backups-forgejo = {
+        environment.AWS_DEFAULT_REGION = "auto";
+        vault.environmentTemplate = ''
+          {{ with secret "secret/data/infra/cloudflare-forgejo-backups" }}
+          AWS_ACCESS_KEY_ID={{ .Data.data.ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY={{ .Data.data.SECRET_ACCESS_KEY }}
+          {{ end }}
+        '';
       };
 
       # Keycloak OIDC client_secret from OpenBao
@@ -445,6 +459,7 @@
           config.flake.modules.terranix.s3-state
           {
             terraform.backend.s3.key = "services/forgejo.tfstate";
+            cloudflare.token = "terranix-forgejo";
 
             dns.git = {
               name = "git";
@@ -494,6 +509,11 @@
               mount = "secret";
               name = "infra/forgejo-storage";
               data_json = "\${jsonencode({ MINIO_ACCESS_KEY_ID = garage_key.forgejo.id, MINIO_SECRET_ACCESS_KEY = garage_key.forgejo.secret_access_key })}";
+            };
+
+            resource.cloudflare_r2_bucket.forgejo_backups = {
+              account_id = cloudflareAccount;
+              name = "forgejo-backups";
             };
           }
         ];
