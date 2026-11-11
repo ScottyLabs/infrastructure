@@ -172,6 +172,15 @@ in
         "L+ ${config.services.forgejo.customDir}/public/assets/img/favicon.svg - - - - ${./logo.svg}"
       ];
 
+      # Keep out of btrbk snapshots
+      disko.devices.disk.main.content.partitions.root.content.subvolumes."@forgejo-dump" = {
+        mountpoint = config.services.forgejo.dump.backupDir;
+        mountOptions = [
+          "compress=zstd"
+          "noatime"
+        ];
+      };
+
       systemd.services.forgejo-dump.onSuccess = [ "restic-backups-git.service" ];
 
       age.secrets.forgejo-restic-password = {

@@ -88,6 +88,15 @@
           };
         };
 
+        # Keep out of btrbk snapshots
+        disko.devices.disk.main.content.partitions.root.content.subvolumes."@garage" = {
+          mountpoint = "/var/lib/private/garage";
+          mountOptions = [
+            "compress=zstd"
+            "noatime"
+          ];
+        };
+
         services.caddy = {
           enable = true;
           virtualHosts.${cfg.domain}.extraConfig = ''

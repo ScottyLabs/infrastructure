@@ -22,6 +22,15 @@
         ];
       };
 
+      # Keep out of btrbk snapshots
+      disko.devices.disk.main.content.partitions.root.content.subvolumes."@nix" = {
+        mountpoint = "/nix";
+        mountOptions = [
+          "compress=zstd"
+          "noatime"
+        ];
+      };
+
       systemd.tmpfiles.rules = [
         # Btrbk does not create snapshot directories automatically
         "d /mnt/btrfs-root/.snapshots 0755 root root"
