@@ -17,6 +17,11 @@
     let
       domain = "nixbot.scottylabs.org";
       inherit (config.services.nixbot) port;
+      systems = [
+        "x86_64-linux"
+        "aarch64-linux"
+        "aarch64-darwin" # goes to infra-02
+      ];
     in
     {
       imports = [ inputs.nixbot.nixosModules.nixbot ];
@@ -36,11 +41,8 @@
           # nixbot names OIDC users oidc:<issuer without https://>:<username>
           admins = map (name: "oidc:idp.scottylabs.org/realms/scottylabs:${name}") (builtins.attrNames users);
 
-          evalSystems = [
-            "x86_64-linux"
-            "aarch64-linux"
-            "aarch64-darwin"
-          ];
+          evalSystems = systems;
+          buildSystems = systems;
 
           evalCommand = [
             (lib.getExe' inputs.iets.packages.${pkgs.stdenv.hostPlatform.system}.default "iets")
