@@ -52,7 +52,7 @@ in
       programs.ssh = {
         knownHosts.infra-02 = {
           hostNames = [ "infra-02.scottylabs.org" ];
-          publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEXn1GdJYesQxj4Bq+vz+ZITAuWIeOZZkMHsjMbY1IeW";
+          publicKey = (import ../../../../data/hosts.nix).scottylabs-infra-02;
         };
         extraConfig = ''
           Host infra-02.scottylabs.org

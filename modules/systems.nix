@@ -7,7 +7,7 @@
 let
   nixos = config.flake.modules.nixos;
   darwin = config.flake.modules.darwin;
-  users = import ../users.nix;
+  users = import ../data/users.nix;
 
   hosts = {
     scottylabs = {

@@ -1,6 +1,6 @@
 { config, lib, ... }:
 let
-  zones = import ../../../zones.nix;
+  zones = import ../../../data/zones.nix;
   owners = [
     "admin@scottylabs.org"
     "ops@scottylabs.org"

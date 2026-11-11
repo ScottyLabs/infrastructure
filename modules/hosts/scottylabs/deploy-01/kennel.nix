@@ -45,7 +45,7 @@
           ephemeral = "scottylabs.net";
           cloudflare = {
             tunnelId = "1ce95b80-2f68-4136-b3ac-b7e2eab6b4ef";
-            zones = import ../../../../zones.nix;
+            zones = import ../../../../data/zones.nix;
           };
         };
 

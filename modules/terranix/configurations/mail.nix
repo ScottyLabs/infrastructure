@@ -1,6 +1,6 @@
 { config, ... }:
 let
-  zones = import ../../../zones.nix;
+  zones = import ../../../data/zones.nix;
 in
 {
   perSystem =

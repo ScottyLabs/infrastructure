@@ -54,6 +54,7 @@ in
       p.keycloak_keycloak
       vault
       p.hashicorp_random
+      p.hashicorp_tls
       (p.hashicorp_google.override {
         rev = "v7.46.2";
         hash = "sha256-5wEsjWzIe+vFBSv4La3aVPhxlMv3oDSylzXMNbq3ivQ=";

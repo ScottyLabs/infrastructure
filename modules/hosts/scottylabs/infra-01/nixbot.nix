@@ -57,6 +57,7 @@
             enable = true;
             instanceUrl = "https://git.cmu.dev";
             tokenFile = "/run/systemd-vaultd/sock";
+            sshPrivateKeyFile = "/run/systemd-vaultd/sock";
             userAllowlist = [ "ScottyLabs" ];
             topic = "nixbot";
           };
@@ -134,6 +135,10 @@
             path = "kennel-nixbot";
             key = "TOKEN";
           };
+          gitea-ssh-key = {
+            path = "nixbot-vendor-ssh";
+            key = "PRIVATE_KEY";
+          };
         };
 
         # nixbot writes its forge netrc once at startup, keep the 10d /tmp cleanup off it
@@ -166,6 +171,7 @@
               source = "svalabs/forgejo";
               version = "~> 1.0";
             };
+            terraform.required_providers.tls.source = "hashicorp/tls";
             provider.forgejo = [
               {
                 host = "\${var.forgejo_url}";
@@ -240,6 +246,27 @@
               mount = "secret";
               name = "infra/nixbot-forgejo";
               data_json = "\${jsonencode({ TOKEN = forgejo_personal_access_token.nixbot.token })}";
+            };
+
+            # private flake inputs are fetched over SSH
+            resource.tls_private_key.nixbot_vendor.algorithm = "ED25519";
+
+            data.forgejo_repository.vendor = {
+              owner = "ScottyLabs";
+              name = "infrastructure-vendor";
+            };
+
+            resource.forgejo_deploy_key.nixbot_vendor = {
+              repository_id = "\${data.forgejo_repository.vendor.id}";
+              title = "nixbot";
+              key = "\${trimspace(tls_private_key.nixbot_vendor.public_key_openssh)}";
+              read_only = true;
+            };
+
+            resource.vault_kv_secret_v2.nixbot_vendor_ssh = {
+              mount = "secret";
+              name = "infra/nixbot-vendor-ssh";
+              data_json = "\${jsonencode({ PRIVATE_KEY = tls_private_key.nixbot_vendor.private_key_openssh })}";
             };
 
             resource.keycloak_openid_client.nixbot = {

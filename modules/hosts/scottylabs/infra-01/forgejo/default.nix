@@ -114,6 +114,10 @@
         };
       };
 
+      # verify git.cmu.dev for nixbot and atlantis over ssh
+      programs.ssh.knownHosts."git.cmu.dev".publicKey =
+        (import ../../../../../data/hosts.nix).scottylabs-infra-01;
+
       catppuccin = {
         enable = true;
         autoEnable = false;

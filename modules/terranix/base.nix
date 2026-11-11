@@ -11,7 +11,7 @@ let
     record: host:
     tunnelIds.${host} or (throw "dns.${record}: host ${host} has no scottylabs.cloudflared.tunnelId");
 
-  zones = import ../../zones.nix;
+  zones = import ../../data/zones.nix;
   cloudflareAccount = "f8b0a968c44462e7f9128ad43151d2c4";
 
   hostAddress =

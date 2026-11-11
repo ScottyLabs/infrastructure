@@ -47,6 +47,7 @@
           enable = true;
           package = pkgs.postgresql_18;
           extensions = ps: lib.mapAttrsToList (attr: sqlName: trusted sqlName ps.${attr}) extensions;
+          settings.max_connections = 300;
 
           initdbArgs = [
             "--locale-provider=builtin"
@@ -54,7 +55,6 @@
           ];
 
           ensureDatabases = cfg.databases;
-
           ensureUsers = map (name: {
             inherit name;
             ensureDBOwnership = true;

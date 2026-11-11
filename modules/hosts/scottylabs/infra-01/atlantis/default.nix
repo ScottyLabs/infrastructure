@@ -116,6 +116,8 @@ in
         GOVERNANCE_PLUGIN_DIR = "${plugins.governance}";
         # governance requires atlantis/plan on these repos' default branch
         TF_VAR_atlantis_repos = builtins.toJSON repos;
+        # private flake inputs are fetched over SSH
+        GIT_SSH_COMMAND = "ssh -i /run/credentials/atlantis.service/vendor-ssh-key";
         # Lets the search-console Google provider run its OpenBao token script
         GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES = "1";
       };
@@ -123,6 +125,11 @@ in
       systemd.services.atlantis.vault.environmentTemplate = ''
         {{ with secret "secret/data/infra/atlantis" }}ATLANTIS_GITEA_WEBHOOK_SECRET={{ .Data.data.GITEA_WEBHOOK_SECRET }}{{ end }}
       '';
+
+      systemd.services.atlantis.vault.infraSecrets.vendor-ssh-key = {
+        path = "atlantis-vendor-ssh";
+        key = "PRIVATE_KEY";
+      };
 
       systemd.tmpfiles.rules = [ "d /var/lib/atlantis/plugin-cache 0755 atlantis atlantis -" ];
     };
@@ -539,6 +546,7 @@ in
               source = "svalabs/forgejo";
               version = "~> 1.0";
             };
+            terraform.required_providers.tls.source = "hashicorp/tls";
             provider.forgejo = {
               host = "\${var.forgejo_url}";
               api_token = "\${var.forgejo_token}";
@@ -598,10 +606,32 @@ in
               data_json = "\${jsonencode({ SECRET = random_password.atlantis_jwt.result })}";
             };
 
-            data.forgejo_repository = lib.genAttrs repos (name: {
-              owner = "ScottyLabs";
-              inherit name;
-            });
+            data.forgejo_repository =
+              lib.genAttrs repos (name: {
+                owner = "ScottyLabs";
+                inherit name;
+              })
+              // {
+                vendor = {
+                  owner = "ScottyLabs";
+                  name = "infrastructure-vendor";
+                };
+              };
+
+            resource.tls_private_key.atlantis_vendor.algorithm = "ED25519";
+
+            resource.forgejo_deploy_key.atlantis_vendor = {
+              repository_id = "\${data.forgejo_repository.vendor.id}";
+              title = "atlantis";
+              key = "\${trimspace(tls_private_key.atlantis_vendor.public_key_openssh)}";
+              read_only = true;
+            };
+
+            resource.vault_kv_secret_v2.atlantis_vendor_ssh = {
+              mount = "secret";
+              name = "infra/atlantis-vendor-ssh";
+              data_json = "\${jsonencode({ PRIVATE_KEY = tls_private_key.atlantis_vendor.private_key_openssh })}";
+            };
 
             resource.forgejo_repository_webhook = lib.genAttrs repos (repo: {
               repository_id = "\${data.forgejo_repository.${repo}.id}";
