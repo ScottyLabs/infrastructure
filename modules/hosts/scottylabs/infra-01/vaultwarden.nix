@@ -42,6 +42,11 @@
         environmentFile = config.age.secrets.vaultwarden.path;
       };
 
+      scottylabs.backup.paths.vaultwarden.paths = [
+        "/var/lib/vaultwarden/attachments"
+        "/var/lib/vaultwarden/rsa_key.pem"
+      ];
+
       systemd.services.vaultwarden.vault.infraSecrets.smtp = {
         path = "cloudflare-smtp";
         key = "TOKEN";

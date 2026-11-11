@@ -36,6 +36,8 @@
       };
 
       config = lib.mkIf cfg.enable {
+        scottylabs.backup.garage.${cfg.bucket}.enable = false;
+
         services.loki = {
           enable = true;
           configuration = {

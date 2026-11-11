@@ -67,6 +67,8 @@
           initialPasswordFile = config.age.secrets.pgadmin.path;
         };
 
+        scottylabs.backup.sqlite.pgadmin = "/var/lib/pgadmin/pgadmin4.db";
+
         age.secrets.pgadmin = {
           file = ../../secrets/pgadmin.age;
           owner = "pgadmin";

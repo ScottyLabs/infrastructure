@@ -32,9 +32,9 @@ in
   "secrets/scottylabs/infra-01/forgejo-signing-key.age".publicKeys = admins ++ [
     scottylabs-infra-01
   ];
-  "secrets/scottylabs/infra-01/forgejo-restic-password.age".publicKeys = admins ++ [
-    scottylabs-infra-01
-  ];
+  "secrets/scottylabs/infra-01/restic.age".publicKeys = admins ++ [ scottylabs-infra-01 ];
+  "secrets/scottylabs/infra-01/pgbackrest.age".publicKeys = admins ++ [ scottylabs-infra-01 ];
+  "secrets/scottylabs/infra-01/garage-backup.age".publicKeys = admins ++ [ scottylabs-infra-01 ];
   "secrets/scottylabs/infra-01/renovate-token.age".publicKeys = admins ++ [ scottylabs-infra-01 ];
   "secrets/scottylabs/infra-01/keycloak.age".publicKeys = admins ++ [ scottylabs-infra-01 ];
   "secrets/scottylabs/infra-01/vaultwarden.age".publicKeys = admins ++ [ scottylabs-infra-01 ];
@@ -80,6 +80,9 @@ in
   "secrets/scottylabs/deploy-01/cloudflared-tunnel.age".publicKeys = admins ++ [
     scottylabs-deploy-01
   ];
+  "secrets/scottylabs/deploy-01/restic.age".publicKeys = admins ++ [ scottylabs-deploy-01 ];
+  "secrets/scottylabs/deploy-01/pgbackrest.age".publicKeys = admins ++ [ scottylabs-deploy-01 ];
+  "secrets/scottylabs/deploy-01/garage-backup.age".publicKeys = admins ++ [ scottylabs-deploy-01 ];
 
   # scottylabs-signage-01
   "secrets/scottylabs/signage-01/bao-role-id.age".publicKeys = admins ++ [ scottylabs-signage-01 ];

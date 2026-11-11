@@ -29,6 +29,8 @@
         mode = "0400";
       };
 
+      scottylabs.backup.sqlite.kennel = "/var/lib/kennel/kennel.db";
+
       services.kennel = {
         enable = true;
         package = inputs.kennel.packages.x86_64-linux.kennel;

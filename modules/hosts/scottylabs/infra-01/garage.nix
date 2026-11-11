@@ -18,6 +18,11 @@
         mode = "0400";
       };
 
+      scottylabs.backup.garage = {
+        scottylabs-docs.enable = false;
+        sccache.enable = false;
+      };
+
       # Public read-only vhost for the scottylabs-assets bucket, Host rewritten to its globalAlias
       services.caddy.virtualHosts."assets.scottylabs.org".extraConfig = ''
         reverse_proxy localhost:${toString config.scottylabs.garage.webPort} {

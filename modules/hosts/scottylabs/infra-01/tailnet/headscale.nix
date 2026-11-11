@@ -105,6 +105,10 @@
       };
 
       config = lib.mkIf cfg.enable {
+        scottylabs.backup.paths.headscale.paths = [
+          config.services.headscale.settings.noise.private_key_path
+        ];
+
         environment.etc."headscale/acl.json" = {
           text = aclPolicy;
           user = "headscale";

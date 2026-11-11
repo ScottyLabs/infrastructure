@@ -36,6 +36,8 @@
           };
         };
 
+        scottylabs.backup.sqlite.uptime-kuma = "${config.services.uptime-kuma.settings.DATA_DIR}kuma.db";
+
         services.caddy.virtualHosts.${cfg.domain}.extraConfig = ''
           reverse_proxy 127.0.0.1:${toString cfg.port}
         '';

@@ -24,6 +24,8 @@
         };
       };
 
+      scottylabs.backup.sqlite.snot = "/var/lib/snot/snot.db";
+
       age.secrets.snot-webhook-secret.file = ../../../../secrets/scottylabs/infra-01/snot-webhook-secret.age;
 
       # Read-only DB access, snot connects as its DynamicUser over the socket

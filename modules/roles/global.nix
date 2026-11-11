@@ -5,6 +5,7 @@
     imports =
       (with config.flake.modules.nixos; [
         alloy
+        backup
         base
         btrfs
         caddy

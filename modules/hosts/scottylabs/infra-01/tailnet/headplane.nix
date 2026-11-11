@@ -54,6 +54,8 @@
       };
 
       config = lib.mkIf cfg.enable {
+        scottylabs.backup.sqlite.headplane = "${config.services.headplane.settings.server.data_path}/hp_persist.db";
+
         services.headplane = {
           enable = true;
           settings = {

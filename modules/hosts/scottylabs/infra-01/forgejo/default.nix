@@ -185,28 +185,15 @@ in
 
       systemd.services.forgejo-dump.onSuccess = [ "restic-backups-git.service" ];
 
-      age.secrets.forgejo-restic-password = {
-        file = ../../../../../secrets/scottylabs/infra-01/forgejo-restic-password.age;
-        mode = "0400";
-      };
-
-      services.restic.backups.git = {
-        repository = "s3:https://${cloudflareAccount}.r2.cloudflarestorage.com/forgejo-backups";
-        passwordFile = config.age.secrets.forgejo-restic-password.path;
-        paths = [ config.services.forgejo.dump.backupDir ];
-        initialize = true;
-        timerConfig = null;
-        pruneOpts = [ "--keep-within 90d" ];
-      };
-
-      systemd.services.restic-backups-git = {
-        environment.AWS_DEFAULT_REGION = "auto";
-        vault.environmentTemplate = ''
-          {{ with secret "secret/data/infra/cloudflare-forgejo-backups" }}
-          AWS_ACCESS_KEY_ID={{ .Data.data.ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY={{ .Data.data.SECRET_ACCESS_KEY }}
-          {{ end }}
-        '';
+      scottylabs.backup = {
+        paths.git = {
+          paths = [ config.services.forgejo.dump.backupDir ];
+          timerConfig = null;
+        };
+        garage.forgejo.exclude = [
+          "repo-archive/**"
+          "actions_log/**"
+        ];
       };
 
       # Keycloak OIDC client_secret from OpenBao

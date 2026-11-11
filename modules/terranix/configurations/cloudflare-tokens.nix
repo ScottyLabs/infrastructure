@@ -83,7 +83,17 @@
                 buckets = [ "forgejo-backups" ];
                 hosts = [ "scottylabs-infra-01" ];
               };
-            };
+
+              terranix-backups.accountPermissions = [ "Workers R2 Storage Write" ];
+            }
+            // lib.mapAttrs' (
+              id: host:
+              lib.nameValuePair "backups-${id}" {
+                bucketPermissions = [ "Workers R2 Storage Bucket Item Write" ];
+                buckets = [ host.config.scottylabs.backup.bucket ];
+                hosts = [ id ];
+              }
+            ) (lib.filterAttrs (_: host: host.config.scottylabs.backup.enable) inputs.self.nixosConfigurations);
           }
         ];
       };

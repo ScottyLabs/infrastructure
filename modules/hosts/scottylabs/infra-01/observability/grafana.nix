@@ -80,6 +80,8 @@ in
       };
 
       config = lib.mkIf cfg.enable {
+        scottylabs.backup.sqlite.grafana = config.services.grafana.settings.database.path;
+
         services.grafana = {
           enable = true;
 

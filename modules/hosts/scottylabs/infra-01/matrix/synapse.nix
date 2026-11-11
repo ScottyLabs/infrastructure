@@ -42,6 +42,10 @@
       };
 
       config = lib.mkIf cfg.enable {
+        scottylabs.backup.paths.synapse.paths = [
+          config.services.matrix-synapse.settings.signing_key_path
+        ];
+
         nixpkgs.config.permittedInsecurePackages = [
           "olm-3.2.16"
         ];

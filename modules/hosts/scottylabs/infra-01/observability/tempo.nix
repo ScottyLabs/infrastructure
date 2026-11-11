@@ -46,6 +46,8 @@
       };
 
       config = lib.mkIf cfg.enable {
+        scottylabs.backup.garage.${cfg.bucket}.enable = false;
+
         services.tempo = {
           enable = true;
           settings = {
