@@ -97,8 +97,9 @@
             {
               name = "kennel";
               environment = { };
-              # a kennel outage or a repo kennel doesn't deploy shouldn't fail the build
+              # don't fail builds when kennel is down or doesn't deploy the repo
               warnOnly = true;
+              onReuse = true;
               command = [
                 (lib.getExe pkgs.curl)
                 "--fail-with-body"

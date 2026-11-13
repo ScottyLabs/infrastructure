@@ -467,11 +467,11 @@
         "uv2nix": "uv2nix"
       },
       "locked": {
-        "lastModified": 1794550437,
-        "narHash": "sha256-iPZ3aSnR0Cix/uDSmukYW94txCUuR3whhB89oja34cA=",
+        "lastModified": 1794567210,
+        "narHash": "sha256-xsPlKQHW44mp2ShgoZBkNx/xeAes1oFRcw7R+bVHhHU=",
         "ref": "refs/heads/main",
-        "rev": "d040820d784016c16c44d3a757e945c4065c726f",
-        "revCount": 453,
+        "rev": "39fcc8a1f6627e4f29d9cb8e10eddbb02985a2c3",
+        "revCount": 454,
         "type": "git",
         "url": "https://git.cmu.dev/ScottyLabs/kennel"
       },
@@ -589,11 +589,11 @@
         "treefmt-nix": "treefmt-nix_3"
       },
       "locked": {
-        "lastModified": 1794330157,
-        "narHash": "sha256-Cv9lUck4e32GTzxhnXESoswidUIg5tB3BigxRr6xeYA=",
+        "lastModified": 1794565906,
+        "narHash": "sha256-nEmspbPK3ME0Y0r9oCPyfjzrsfK+kJkdsTPMPzcGXiY=",
         "owner": "ap-1",
         "repo": "nixbot",
-        "rev": "9f3b9a5a09b9ee0d6eb69923427ebd2d7dc846e4",
+        "rev": "d7892308a2d152f7dc236eaf2465814084ca5d72",
         "type": "github"
       },
       "original": {
