@@ -43,6 +43,8 @@
         # Published for ricochet's return_to allowlist (services.ricochet.allowedHostsFile)
         customDomainsFile = "/run/kennel/custom-domains";
 
+        cachixCache = "scottylabs";
+
         domains = {
           ephemeral = "scottylabs.net";
           cloudflare = {
