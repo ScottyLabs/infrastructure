@@ -316,6 +316,7 @@ in
             dir = ".";
             workspace = name;
             autoplan.when_modified = [ "modules/**" ];
+            execution_order_group = if name == "cloudflare-tokens" then 0 else 1;
           }) (lib.removeAttrs config.terranix.terranixConfigurations [ "garage" ]);
         }
       );
