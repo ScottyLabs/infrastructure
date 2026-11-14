@@ -2,7 +2,7 @@
 {
   flake.modules.darwin.scottylabs-infra-04.imports = with config.flake.modules.darwin; [
     # Platform
-    occ-vmapple
+    darwin
 
     # Common
     darwin-builder

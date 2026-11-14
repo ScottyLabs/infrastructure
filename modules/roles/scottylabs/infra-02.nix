@@ -2,7 +2,7 @@
 {
   flake.modules.darwin.scottylabs-infra-02.imports = with config.flake.modules.darwin; [
     # Platform
-    mac-mini
+    darwin
 
     # Common
     darwin-builder

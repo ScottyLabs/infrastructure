@@ -61,7 +61,7 @@ flake.modules.nixos.infra-01.imports = with config.flake.modules.nixos; [
 
 ## Platforms
 
-Each host role includes a platform. Platforms live in `modules/platforms/` and hold the machine-dependent parts of a configuration, such as the boot loader, kernel modules, and disk layout via disko, or on darwin the host architecture and power behaviour. `campus-cloud` covers the CMU Campus Cloud VMware guests used by `infra-01` and `deploy-01`, `mele-cyber-x1` covers the signage hardware, `computer-club` covers `snoopy`, `occ` covers the OCC Incus VM `infra-03`, `mac-mini` covers `infra-02`, and `occ-vmapple` covers `infra-04`, a macOS guest that OCC runs on QEMU's `vmapple` machine outside Incus's own VM support.
+Each host role includes a platform. Platforms live in `modules/platforms/` and hold the machine-dependent parts of a configuration, such as the boot loader, kernel modules, and disk layout via disko, or on darwin the host architecture and power behaviour. `campus-cloud` covers the CMU Campus Cloud VMware guests used by `infra-01` and `deploy-01`, `mele-cyber-x1` covers the signage hardware, `computer-club` covers `snoopy`, `occ` covers the OCC Incus VM `infra-03`, and `darwin` covers the Mac mini `infra-02` and `infra-04`, a macOS guest that OCC runs on QEMU's `vmapple` machine outside Incus's own VM support.
 
 ## Systems and deployment
 

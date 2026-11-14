@@ -5,5 +5,8 @@
 
     system.primaryUser = "scottylabs";
     system.stateVersion = 6;
+
+    # not supported on virtual Macs
+    power.restartAfterPowerFailure = true;
   };
 }
