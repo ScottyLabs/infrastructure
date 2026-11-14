@@ -1,6 +1,9 @@
 { config, ... }:
 let
   hm = config.flake.modules.homeManager.shell;
+
+  # lets nixbot log in as deploy
+  nixbotKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIQSC5/Cj8v6zalayJLxWKl+PFN+82uPfW4YHbxzl4Kc nixbot deploy";
 in
 {
   flake.modules.nixos.shell =
@@ -23,7 +26,7 @@ in
         // {
           deploy = {
             isNormalUser = true;
-            openssh.authorizedKeys.keys = builtins.attrValues users;
+            openssh.authorizedKeys.keys = builtins.attrValues users ++ [ nixbotKey ];
           };
         };
 
@@ -50,14 +53,14 @@ in
   flake.modules.darwin.shell =
     { config, users, ... }:
     {
-      # deploy account colmena connects as
+      # deploy account colmena and nixbot connect as
       users.knownUsers = [ "deploy" ];
       users.users.deploy = {
         uid = 550;
         home = "/Users/deploy";
         createHome = true;
         shell = "/bin/zsh";
-        openssh.authorizedKeys.keys = builtins.attrValues users;
+        openssh.authorizedKeys.keys = builtins.attrValues users ++ [ nixbotKey ];
       };
 
       security.sudo.extraConfig = "deploy ALL=(ALL) NOPASSWD: ALL";

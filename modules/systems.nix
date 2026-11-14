@@ -100,6 +100,61 @@ let
       "deploy@${bastion}"
     ];
   };
+
+  configurationFor =
+    id: host:
+    if isDarwin host then
+      config.flake.darwinConfigurations.${id}
+    else
+      config.flake.nixosConfigurations.${id};
+
+  # nixbot deploys from infra-01, an x86_64-linux host
+  effectPkgs = inputs.nixpkgs-hosts.legacyPackages.x86_64-linux;
+  effects = inputs.nixbot.lib.effects { pkgs = effectPkgs; };
+  hostKeys = import ../data/hosts.nix;
+  knownHosts = effectPkgs.writeText "known_hosts" (
+    lib.concatLines (lib.mapAttrsToList (id: host: "${host.fqdn} ${hostKeys.${id}}") allHosts)
+  );
+
+  # copies a host's system to it and switches to it
+  deployEffect =
+    id: host:
+    let
+      inherit (configurationFor id host) config;
+      inherit (config.system.build) toplevel;
+      deployment = deploymentFor host config.scottylabs.bastion;
+      ssh = {
+        destination = "${deployment.targetUser}@${deployment.targetHost}";
+        sshOptions = lib.concatStringsSep " " deployment.sshOptions;
+      };
+      common = {
+        name = "deploy-${id}";
+        lock = "deploy-${id}";
+        when.changed.toplevel = "${toplevel}";
+        secretsMap.ssh = "deploy-ssh";
+        userSetupScript = ''
+          writeSSHKey ssh ~/.ssh/id_ed25519
+          cp ${knownHosts} ~/.ssh/known_hosts
+        '';
+      };
+    in
+    if isDarwin host then
+      effects.runNixDarwin (common // { inherit config ssh; })
+    else
+      effects.mkEffect (
+        common
+        // {
+          inputs = [ effectPkgs.openssh ];
+          # keeps switching if the SSH session drops or nixbot restarts
+          effectScript = effects.ssh ssh ''
+            set -euo pipefail
+            sudo nix-env -p /nix/var/nix/profiles/system --set ${toplevel}
+            sudo systemd-run --collect --no-ask-password --pipe --quiet --service-type=exec \
+              --unit=nixbot-switch-to-configuration --wait \
+              ${toplevel}/bin/switch-to-configuration switch
+          '';
+        }
+      );
 in
 {
   flake.nixosConfigurations = lib.mapAttrs (
@@ -145,4 +200,9 @@ in
       imports = darwinModulesFor id host;
     }) darwinHosts
   );
+
+  # nixbot runs these after a green build of main
+  flake.herculesCI = _: {
+    onPush.default.outputs.effects = lib.mapAttrs deployEffect allHosts;
+  };
 }

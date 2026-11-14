@@ -67,6 +67,7 @@ in
   "secrets/scottylabs/infra-01/darwin-builder-ssh-key.age".publicKeys = admins ++ [
     scottylabs-infra-01
   ];
+  "secrets/scottylabs/infra-01/nixbot-effects.age".publicKeys = admins ++ [ scottylabs-infra-01 ];
 
   # scottylabs-deploy-01
   "secrets/scottylabs/deploy-01/bao-role-id.age".publicKeys = admins ++ [ scottylabs-deploy-01 ];

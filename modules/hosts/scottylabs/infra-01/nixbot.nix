@@ -32,6 +32,12 @@
           mode = "0400";
         };
 
+        # nixbot's SSH key for deploying hosts
+        age.secrets.nixbot-effects = {
+          file = ../../../../secrets/scottylabs/infra-01/nixbot-effects.age;
+          mode = "0400";
+        };
+
         services.nixbot = {
           enable = true;
           inherit domain;
@@ -79,6 +85,9 @@
             name = "scottylabs";
             auth.authToken.file = config.age.secrets.nixbot-cachix-token.path;
           };
+
+          effects.perRepoSecretFiles."gitea:ScottyLabs/infrastructure" =
+            config.age.secrets.nixbot-effects.path;
 
           # main and PRs are always built
           branches = {
