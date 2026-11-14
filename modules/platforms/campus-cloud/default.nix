@@ -20,5 +20,9 @@
         enable = true;
         headless = true;
       };
+
+      # CampusCloud VMs have no serial port
+      srvos.boot.consoles = [ "tty0" ];
+      systemd.services."serial-getty@ttyS0".enable = false;
     };
 }
