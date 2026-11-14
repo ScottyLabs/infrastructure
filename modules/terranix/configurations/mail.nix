@@ -83,6 +83,14 @@ in
                 target = ''"v=DMARC1; p=reject;"'';
                 comment = "DMARC";
               };
+
+              cmustudy-com-resend-dkim = {
+                zone = "cmustudy.com";
+                name = "resend._domainkey.updates";
+                type = "TXT";
+                target = ''"p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCuuTrpqTvLhJ9waEB2b+i18R0a0UWPnP0H2iNRHO/7mApFmuZxPhN0kAQqM0fscrH1+8Ox+QX0wBWaw1jGyLfIVv3GvFPFyQYjxpZek2j3JHzUMhZ6zUSvc2ipv8a/Aphneu8KdN5blCLKGxB6m4CFoL1KNpiaaB/m3uqh4RGV8QIDAQAB"'';
+                comment = "Resend DKIM";
+              };
             };
           }
         ];

@@ -54,6 +54,7 @@
                 ];
                 zones = [
                   "cmu.dev"
+                  "cmustudy.com"
                   "scottylabs.org"
                   "scottylabs.dev"
                 ];
