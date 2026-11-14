@@ -33,7 +33,6 @@
         inputs.srvos.nixosModules.server
         inputs.srvos.nixosModules.mixins-terminfo
         inputs.srvos.nixosModules.mixins-trusted-nix-caches
-        { srvos.flake = inputs.self; }
       ];
   };
 
@@ -52,8 +51,5 @@
 
     # Nix
     nix.settings.experimental-features = "nix-command flakes";
-
-    # Set Git commit hash for darwin-version
-    system.configurationRevision = inputs.self.rev or inputs.self.dirtyRev or null;
   };
 }
