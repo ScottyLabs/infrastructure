@@ -117,7 +117,7 @@ in
         # governance requires atlantis/plan on these repos' default branch
         TF_VAR_atlantis_repos = builtins.toJSON repos;
         # private flake inputs are fetched over SSH
-        GIT_SSH_COMMAND = "ssh -i /run/credentials/atlantis.service/vendor-ssh-key";
+        GIT_SSH_COMMAND = "${lib.getExe pkgs.openssh} -i /run/credentials/atlantis.service/vendor-ssh-key";
         # Lets the search-console Google provider run its OpenBao token script
         GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES = "1";
       };
