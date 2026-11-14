@@ -205,4 +205,11 @@ in
   flake.herculesCI = _: {
     onPush.default.outputs.effects = lib.mapAttrs deployEffect allHosts;
   };
+
+  # puts every host's system in the checks required for merge
+  flake.checks = lib.zipAttrsWith (_: lib.mergeAttrsList) (
+    lib.mapAttrsToList (id: host: {
+      ${host.system}.${id} = (configurationFor id host).config.system.build.toplevel;
+    }) allHosts
+  );
 }
