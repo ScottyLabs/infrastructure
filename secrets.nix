@@ -9,6 +9,7 @@ let
     scottylabs-infra-01
     scottylabs-infra-02
     scottylabs-infra-03
+    scottylabs-infra-04
     scottylabs-deploy-01
     scottylabs-signage-01
     scottylabs-snoopy
@@ -20,6 +21,7 @@ let
     scottylabs-infra-01
     scottylabs-infra-02
     scottylabs-infra-03
+    scottylabs-infra-04
     scottylabs-deploy-01
     scottylabs-signage-01
     scottylabs-snoopy
@@ -62,7 +64,7 @@ in
   "secrets/scottylabs/infra-01/nixbot-cachix-token.age".publicKeys = admins ++ [
     scottylabs-infra-01
   ];
-  "secrets/scottylabs/infra-01/infra-02-builder-ssh-key.age".publicKeys = admins ++ [
+  "secrets/scottylabs/infra-01/darwin-builder-ssh-key.age".publicKeys = admins ++ [
     scottylabs-infra-01
   ];
 

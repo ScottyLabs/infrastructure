@@ -20,7 +20,7 @@
       systems = [
         "x86_64-linux"
         "aarch64-linux"
-        "aarch64-darwin" # goes to infra-02
+        "aarch64-darwin" # goes to infra-02 and infra-04
       ];
     in
     {

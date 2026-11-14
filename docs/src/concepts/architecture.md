@@ -1,6 +1,6 @@
 # Architecture
 
-This repository holds the Nix configuration for every ScottyLabs machine. `infra-01` runs the shared services (identity, git, secrets, monitoring), `deploy-01` runs the Kennel deployment platform, `signage-01` is a display kiosk, and `snoopy` is a Computer Club virtual machine, all running NixOS. `infra-02` is a Mac mini running nix-darwin. Each host's full system is built from a set of small modules that live under `modules/`.
+This repository holds the Nix configuration for every ScottyLabs machine. `infra-01` runs the shared services (identity, git, secrets, monitoring), `deploy-01` runs the Kennel deployment platform, `signage-01` is a display kiosk, `snoopy` is a Computer Club virtual machine, and `infra-03` is a CI runner virtual machine on OCC, all running NixOS. `infra-02` is a Mac mini and `infra-04` a macOS virtual machine on OCC, both running nix-darwin. Each host's full system is built from a set of small modules that live under `modules/`.
 
 A service is defined in one file and then listed by name on the hosts that should run it.
 
@@ -61,7 +61,7 @@ flake.modules.nixos.infra-01.imports = with config.flake.modules.nixos; [
 
 ## Platforms
 
-Each host role includes a platform. Platforms live in `modules/platforms/` and hold the machine-dependent parts of a configuration, such as the boot loader, kernel modules, and disk layout via disko, or on darwin the host architecture and power behaviour. `campus-cloud` covers the CMU Campus Cloud VMware guests used by `infra-01` and `deploy-01`, `mele-cyber-x1` covers the signage hardware, `computer-club` covers `snoopy`, and `mac-mini` covers `infra-02`.
+Each host role includes a platform. Platforms live in `modules/platforms/` and hold the machine-dependent parts of a configuration, such as the boot loader, kernel modules, and disk layout via disko, or on darwin the host architecture and power behaviour. `campus-cloud` covers the CMU Campus Cloud VMware guests used by `infra-01` and `deploy-01`, `mele-cyber-x1` covers the signage hardware, `computer-club` covers `snoopy`, `occ` covers the OCC Incus VM `infra-03`, `mac-mini` covers `infra-02`, and `occ-vmapple` covers `infra-04`, a macOS guest that OCC runs on QEMU's `vmapple` machine outside Incus's own VM support.
 
 ## Systems and deployment
 

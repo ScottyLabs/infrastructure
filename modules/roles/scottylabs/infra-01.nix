@@ -5,6 +5,7 @@
     campus-cloud
 
     # Common
+    darwin-builder
     postgresql
     server
     webadmin
@@ -16,7 +17,6 @@
     scottylabs-infra-01-bridge-media-proxy
     scottylabs-infra-01-cmu-vpn
     scottylabs-infra-01-configuration
-    scottylabs-infra-01-darwin-builder
     scottylabs-infra-01-forgejo
     scottylabs-infra-01-garage
     scottylabs-infra-01-grafana

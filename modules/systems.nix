@@ -23,6 +23,10 @@ let
         domain = "scottylabs.org";
         system = "aarch64-linux";
       };
+      infra-04 = {
+        domain = "scottylabs.org";
+        system = "aarch64-darwin";
+      };
       deploy-01 = {
         domain = "scottylabs.org";
         system = "x86_64-linux";
