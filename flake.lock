@@ -467,11 +467,11 @@
         "uv2nix": "uv2nix"
       },
       "locked": {
-        "lastModified": 1794567210,
-        "narHash": "sha256-xsPlKQHW44mp2ShgoZBkNx/xeAes1oFRcw7R+bVHhHU=",
+        "lastModified": 1794644375,
+        "narHash": "sha256-P95W3rgiZ3vKA2MHvcKX9nKeg2fQHjqhUvDMrI+rfFE=",
         "ref": "refs/heads/main",
-        "rev": "39fcc8a1f6627e4f29d9cb8e10eddbb02985a2c3",
-        "revCount": 454,
+        "rev": "329cc8526ad07c4e31a279c5102e655728011703",
+        "revCount": 457,
         "type": "git",
         "url": "https://git.cmu.dev/ScottyLabs/kennel"
       },
@@ -867,11 +867,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1794127728,
-        "narHash": "sha256-QhZ104DwHvvMxWxmI13zdppISE27UmdqhRI2VwBg/yU=",
+        "lastModified": 1794561628,
+        "narHash": "sha256-oWtItM1eQqkp9OJXq2/Zo10Y9Vu9PDE6O8JRjj4+EkE=",
         "owner": "oxalica",
         "repo": "rust-overlay",
-        "rev": "51c6dc40d18552701f7c5c62e3f7a5fc899f7132",
+        "rev": "84edd48f141b0c8910dffdd0296ddd577e829132",
         "type": "github"
       },
       "original": {
