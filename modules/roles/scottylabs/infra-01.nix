@@ -16,6 +16,7 @@
     scottylabs-infra-01-atlantis-service
     scottylabs-infra-01-bridge-media-proxy
     scottylabs-infra-01-cmu-vpn
+    scottylabs-infra-01-collar-broker
     scottylabs-infra-01-configuration
     scottylabs-infra-01-forgejo
     scottylabs-infra-01-garage

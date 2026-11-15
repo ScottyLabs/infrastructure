@@ -54,7 +54,7 @@
           http-host = "127.0.0.1";
           http-port = 8080;
           log-level = "org.keycloak.broker:debug,org.keycloak.events:debug,org.keycloak.saml:debug,org.keycloak.federation.ldap:debug";
-          features = "scripts";
+          features = "scripts,identity-brokering-api:v2";
           metrics-enabled = true;
           health-enabled = true;
           http-management-port = 9092;

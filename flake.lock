@@ -60,6 +60,36 @@
     "collar": {
       "inputs": {
         "flake-parts": [
+          "collar",
+          "scottylabs",
+          "flake-parts"
+        ],
+        "nixpkgs": [
+          "collar",
+          "scottylabs",
+          "nixpkgs"
+        ],
+        "scottylabs": [
+          "kennel"
+        ]
+      },
+      "locked": {
+        "lastModified": 1794771350,
+        "narHash": "sha256-ONfiY1tWjONrbrK+ERWn+bzJnOMTxewagfNjmU4bLps=",
+        "ref": "refs/heads/main",
+        "rev": "2f5fe8d39b8a2f6b103d67bc693ac55da62b8643",
+        "revCount": 64,
+        "type": "git",
+        "url": "https://git.cmu.dev/ScottyLabs/collar"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://git.cmu.dev/ScottyLabs/collar"
+      }
+    },
+    "collar_2": {
+      "inputs": {
+        "flake-parts": [
           "kennel",
           "collar",
           "scottylabs",
@@ -451,7 +481,7 @@
     },
     "kennel": {
       "inputs": {
-        "collar": "collar",
+        "collar": "collar_2",
         "crane": "crane_2",
         "flake-parts": "flake-parts_2",
         "git-hooks": "git-hooks",
@@ -831,6 +861,7 @@
       "inputs": {
         "agenix": "agenix",
         "catppuccin": "catppuccin",
+        "collar": "collar",
         "colmena": "colmena",
         "disko": "disko",
         "falcon-sensor": "falcon-sensor",

@@ -48,6 +48,11 @@
     };
     infrastructure-vendor.url = "git+ssh://forgejo@git.cmu.dev/ScottyLabs/infrastructure-vendor.git?shallow=1";
 
+    collar = {
+      url = "git+https://git.cmu.dev/ScottyLabs/collar";
+      inputs.scottylabs.follows = "kennel";
+    };
+
     # infra-01
     llm-pkgs = {
       url = "git+https://codeberg.org/anish/llm-pkgs";

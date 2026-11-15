@@ -112,6 +112,24 @@ in
 
             "auth.basic".enabled = false;
 
+            "auth.jwt" = {
+              enabled = true;
+              header_name = "X-JWT-Assertion";
+              jwk_set_url = "https://idp.scottylabs.org/realms/scottylabs/protocol/openid-connect/certs";
+              expect_claims = builtins.toJSON {
+                iss = "https://idp.scottylabs.org/realms/scottylabs";
+                aud = "grafana";
+                azp = "collar";
+              };
+              username_claim = "email";
+              email_claim = "email";
+              auto_sign_up = true;
+              role_attribute_path = "contains(groups[*], '/projects/devops/admins') && 'GrafanaAdmin' || 'Viewer'";
+              role_attribute_strict = true;
+              allow_assign_grafana_admin = true;
+              url_login = false;
+            };
+
             "auth.generic_oauth" = {
               enabled = true;
               name = "Keycloak";
@@ -123,6 +141,7 @@ in
               api_url = "https://idp.scottylabs.org/realms/scottylabs/protocol/openid-connect/userinfo";
               use_pkce = true;
               tls_skip_verify_insecure = false;
+              login_attribute_path = "email";
               allow_assign_grafana_admin = true;
               role_attribute_path = "contains(groups[*], '/projects/devops/admins') && 'GrafanaAdmin' || 'Viewer'";
               role_attribute_strict = true;
