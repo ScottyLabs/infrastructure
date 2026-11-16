@@ -44,11 +44,12 @@ in
       '';
 
       plugins = import ./_providers.nix { inherit pkgs forgejoProvider; };
+
+      domain = "atlantis.scottylabs.org";
     in
     {
-      scottylabs.atlantis = {
+      services.atlantis = {
         enable = true;
-        domain = "atlantis.scottylabs.org";
         # TODO: https://github.com/runatlantis/atlantis/pull/6715
         package = pkgs.atlantis.overrideAttrs (old: {
           patches = (old.patches or [ ]) ++ [
@@ -67,23 +68,46 @@ in
           pkgs.unzip
           pkgs.curl
         ];
-        extraArgs = [
-          "--gitea-base-url=https://git.cmu.dev"
-          "--gitea-user=scottylabs-bot"
-          "--repo-allowlist=${lib.concatMapStringsSep "," (repo: "git.cmu.dev/ScottyLabs/${repo}") repos}"
-          "--allow-fork-prs"
-          "--default-tf-distribution=opentofu"
-          "--write-git-creds"
-          "--allow-commands=all"
-          "--hide-prev-plan-comments"
-          "--enable-diff-markdown-format"
-          "--fail-on-pre-workflow-hook-error"
-          "--repo-config=${./repo-config.yml}"
-        ];
+        settings = {
+          atlantis-url = "https://${domain}";
+          # atlantis defaults to ~/.atlantis
+          data-dir = config.services.atlantis.dataDir;
+          gitea-base-url = "https://git.cmu.dev";
+          gitea-user = "scottylabs-bot";
+          repo-allowlist = lib.concatMapStringsSep "," (repo: "git.cmu.dev/ScottyLabs/${repo}") repos;
+          allow-fork-prs = true;
+          default-tf-distribution = "opentofu";
+          write-git-creds = true;
+          allow-commands = "all";
+          hide-prev-plan-comments = true;
+          enable-diff-markdown-format = true;
+          fail-on-pre-workflow-hook-error = true;
+          repo-config = "${./repo-config.yml}";
+        };
+        environment = {
+          TF_PLUGIN_CACHE_DIR = "/var/lib/atlantis/plugin-cache";
+          TF_PLUGIN_CACHE_MAY_BREAK_DEPENDENCY_LOCK_FILE = "1";
+          FORGEJO_TFRC = "${forgejoTfrc}";
+          TERRANIX_PLUGIN_DIR = "${plugins.terranix}";
+          GOVERNANCE_PLUGIN_DIR = "${plugins.governance}";
+          # governance requires atlantis/plan on these repos' default branch
+          TF_VAR_atlantis_repos = builtins.toJSON repos;
+          # private flake inputs are fetched over SSH
+          GIT_SSH_COMMAND = "${lib.getExe pkgs.openssh} -i /run/credentials/atlantis.service/vendor-ssh-key";
+          # Lets the search-console Google provider run its OpenBao token script
+          GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES = "1";
+        };
+      };
+
+      services.caddy = {
+        enable = true;
+        virtualHosts.${domain}.extraConfig = ''
+          reverse_proxy localhost:${toString config.services.atlantis.settings.port}
+        '';
       };
 
       scottylabs.caddy.sso.sites.atlantis = {
-        inherit (config.scottylabs.atlantis) domain;
+        inherit domain;
         # Forgejo webhooks carry their own secret
         publicPaths = [ "/events" ];
       };
@@ -97,30 +121,20 @@ in
       # atlantis exits at startup if the gitea API is down
       systemd.services.atlantis = {
         after = [
+          "network-online.target"
           "forgejo.service"
           "caddy.service"
         ];
-        wants = [ "caddy.service" ];
+        wants = [
+          "network-online.target"
+          "caddy.service"
+        ];
         serviceConfig.ExecStartPre = "${pkgs.curl}/bin/curl --fail --silent --output /dev/null --retry 60 --retry-delay 1 --retry-all-errors https://git.cmu.dev/api/v1/version";
       };
 
       systemd.services.atlantis.serviceConfig.EnvironmentFile = [
         config.age.secrets.tofu-providers.path
       ];
-
-      systemd.services.atlantis.environment = {
-        TF_PLUGIN_CACHE_DIR = "/var/lib/atlantis/plugin-cache";
-        TF_PLUGIN_CACHE_MAY_BREAK_DEPENDENCY_LOCK_FILE = "1";
-        FORGEJO_TFRC = "${forgejoTfrc}";
-        TERRANIX_PLUGIN_DIR = "${plugins.terranix}";
-        GOVERNANCE_PLUGIN_DIR = "${plugins.governance}";
-        # governance requires atlantis/plan on these repos' default branch
-        TF_VAR_atlantis_repos = builtins.toJSON repos;
-        # private flake inputs are fetched over SSH
-        GIT_SSH_COMMAND = "${lib.getExe pkgs.openssh} -i /run/credentials/atlantis.service/vendor-ssh-key";
-        # Lets the search-console Google provider run its OpenBao token script
-        GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES = "1";
-      };
 
       systemd.services.atlantis.vault.environmentTemplate = ''
         {{ with secret "secret/data/infra/atlantis" }}ATLANTIS_GITEA_WEBHOOK_SECRET={{ .Data.data.GITEA_WEBHOOK_SECRET }}{{ end }}

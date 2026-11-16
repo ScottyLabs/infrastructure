@@ -13,7 +13,6 @@
     # Services
     scottylabs-infra-01-ai-gateway
     scottylabs-infra-01-atlantis
-    scottylabs-infra-01-atlantis-service
     scottylabs-infra-01-bridge-media-proxy
     scottylabs-infra-01-cmu-vpn
     scottylabs-infra-01-collar-broker

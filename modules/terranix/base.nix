@@ -23,7 +23,7 @@ let
 
   atlantisHosts = lib.attrNames (
     lib.filterAttrs (
-      _: host: host.config.scottylabs.atlantis.enable or false
+      _: host: host.config.services.atlantis.enable or false
     ) inputs.self.nixosConfigurations
   );
 in
