@@ -12,6 +12,54 @@
         url = "https://github.com/groundsgg/keycloak-minecraft-idp/releases/download/v1.1.3/keycloak-minecraft-idp-1.1.3.jar";
         hash = "sha256-tL+snexMXmrNTv6uFvZZbpfDQ+MQsOICAVkvDGHiR7U=";
       };
+
+      # TODO: https://github.com/keycloak/keycloak/pull/53256
+      keycloakFixVersion = "26.8.2";
+      keycloakFixSrc = pkgs.applyPatches {
+        name = "keycloak-pr-53256-src";
+        src = pkgs.fetchFromGitHub {
+          owner = "keycloak";
+          repo = "keycloak";
+          tag = keycloakFixVersion;
+          sparseCheckout = [
+            "services/src/main/java/org/keycloak/broker/oidc"
+            "services/src/main/java/org/keycloak/services/resources"
+            "services/src/main/java/org/keycloak/social/gitlab"
+          ];
+          hash = "sha256-cr/vQ2fotrfM3JQ/JtZLDJyQ5XHwfZXSEF1PpHStjRw=";
+        };
+        patches = [
+          (pkgs.fetchpatch {
+            url = "https://github.com/keycloak/keycloak/commit/57e34463eea22148cd92285ecb5de31e3f22e9f9.patch";
+            includes = [ "services/src/main/*" ];
+            hash = "sha256-CS9viYzTYcRmt7je4QFOtZTeLnPJKzaClmdeGIF0AV0=";
+          })
+        ];
+        # fail loudly if the fix is missing from the patched sources
+        postPatch = ''
+          grep -q onTokenRefreshed services/src/main/java/org/keycloak/broker/oidc/AbstractOAuth2IdentityProvider.java
+        '';
+      };
+      keycloak =
+        pkgs.lib.throwIf (pkgs.keycloak.version != keycloakFixVersion)
+          "keycloak ${pkgs.keycloak.version} != ${keycloakFixVersion}, drop or rebase the PR 53256 patch"
+          (
+            pkgs.keycloak.overrideAttrs (old: {
+              nativeBuildInputs = old.nativeBuildInputs ++ [ pkgs.jdk_headless ];
+              # recompile patched classes against the shipped jars, before kc.sh build indexes them
+              preBuild = (old.preBuild or "") + ''
+                java_src=${keycloakFixSrc}/services/src/main/java/org/keycloak
+                javac --release 17 -proc:none -nowarn -encoding UTF-8 \
+                  -cp 'lib/lib/main/*:lib/lib/boot/*' -d patched-classes \
+                  $java_src/broker/oidc/AbstractOAuth2IdentityProvider.java \
+                  $java_src/broker/oidc/OIDCIdentityProvider.java \
+                  $java_src/services/resources/IdentityBrokerService.java \
+                  $java_src/social/gitlab/GitLabIdentityProvider.java
+                jar uf lib/lib/main/org.keycloak.keycloak-services-${old.version}.jar -C patched-classes .
+                rm -r patched-classes
+              '';
+            })
+          );
     in
     {
       age.secrets.keycloak = {
@@ -35,6 +83,7 @@
 
       services.keycloak = {
         enable = true;
+        package = keycloak;
         database = {
           type = "postgresql";
           createLocally = false;
