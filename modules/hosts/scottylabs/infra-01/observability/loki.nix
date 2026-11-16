@@ -49,6 +49,7 @@
             };
 
             common = {
+              instance_addr = "127.0.0.1";
               path_prefix = "/var/lib/loki";
               replication_factor = 1;
               ring.kvstore.store = "inmemory";
