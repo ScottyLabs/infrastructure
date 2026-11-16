@@ -145,11 +145,10 @@ let
         common
         // {
           inputs = [ effectPkgs.openssh ];
-          # keeps switching if the SSH session drops or nixbot restarts
           effectScript = effects.ssh ssh ''
             set -euo pipefail
             sudo nix-env -p /nix/var/nix/profiles/system --set ${toplevel}
-            sudo systemd-run --collect --no-ask-password --pipe --quiet --service-type=exec \
+            sudo systemd-run --collect --no-ask-password --quiet --service-type=exec \
               --unit=nixbot-switch-to-configuration --wait \
               ${toplevel}/bin/switch-to-configuration switch
           '';
