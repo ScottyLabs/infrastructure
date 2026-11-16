@@ -179,6 +179,16 @@
 
         systemd.services.headscale = {
           restartTriggers = [ aclPolicy ];
+          after = [
+            "postgresql.target"
+            "keycloak.service"
+            "caddy.service"
+          ];
+          wants = [
+            "postgresql.target"
+            "keycloak.service"
+            "caddy.service"
+          ];
         };
 
         services.caddy.virtualHosts.${cfg.domain}.extraConfig = ''
