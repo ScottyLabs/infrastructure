@@ -131,6 +131,13 @@ let
         name = "deploy-${id}";
         lock = "deploy-${id}";
         when.changed.toplevel = "${toplevel}";
+        # nixbot restarts when its own host switches
+        after = lib.optionals (config.services.nixbot.enable or false) (
+          map (other: [
+            "default"
+            other
+          ]) (lib.attrNames (removeAttrs allHosts [ id ]))
+        );
         secretsMap.ssh = "deploy-ssh";
         userSetupScript = ''
           writeSSHKey ssh ~/.ssh/id_ed25519
