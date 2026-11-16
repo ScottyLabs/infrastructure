@@ -63,6 +63,22 @@
 
         services.pgadmin = {
           enable = true;
+          package = pkgs.pgadmin4.overrideAttrs (old: {
+            # webpack exceeds node's default heap
+            env = (old.env or { }) // {
+              NODE_OPTIONS = "--max-old-space-size=4096";
+            };
+            # TODO: https://github.com/NixOS/nixpkgs/pull/589098
+            patches = (old.patches or [ ]) ++ [
+              (pkgs.fetchpatch {
+                url = "https://github.com/pgadmin-org/pgadmin4/commit/88c3ac2db15ff8c53fa9b4f8b2d69c8f2b12e611.patch";
+                excludes = [
+                  "web/pgadmin/browser/server_groups/servers/databases/schemas/tables/templates/indexes/sql/default/column_details.sql"
+                ];
+                hash = "sha256-if6GNnACJKiH9PTAPK6f+++96enXgcnujRb0ypH60Uw=";
+              })
+            ];
+          });
           initialEmail = "admin@scottylabs.org";
           initialPasswordFile = config.age.secrets.pgadmin.path;
         };
