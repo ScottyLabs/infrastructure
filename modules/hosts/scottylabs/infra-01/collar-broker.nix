@@ -9,8 +9,17 @@
     {
       systemd.services.collar-broker = {
         description = "Collar Forgejo token broker";
-        after = [ "network-online.target" ];
-        wants = [ "network-online.target" ];
+        # Startup fetches signing keys through Keycloak's HTTPS endpoint.
+        after = [
+          "network-online.target"
+          "keycloak.service"
+          "caddy.service"
+        ];
+        wants = [
+          "network-online.target"
+          "keycloak.service"
+          "caddy.service"
+        ];
         wantedBy = [ "multi-user.target" ];
 
         vault.infraSecrets.client-secret = {
