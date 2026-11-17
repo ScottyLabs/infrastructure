@@ -7,7 +7,8 @@ let
       services.ncro = {
         enable = true;
         settings = {
-          server.listen = "127.0.0.1:5000";
+          # macOS's AirPlay Receiver holds 5000
+          server.listen = "127.0.0.1:5002";
 
           upstreams = [
             {
@@ -45,7 +46,7 @@ let
       };
 
       # Route all substitution on this host through ncro
-      nix.settings.substituters = lib.mkForce [ "http://localhost:5000" ];
+      nix.settings.substituters = lib.mkForce [ "http://127.0.0.1:5002" ];
       # ncro's negative_ttl already covers misses
       nix.settings.narinfo-cache-negative-ttl = 0;
     };

@@ -1,6 +1,6 @@
 { inputs, lib, ... }:
 let
-  # ncro listens on 127.0.0.1:5000
+  # macOS's AirPlay Receiver holds 5000
   port = 5001;
   keys = import ../../data/cache-keys.nix;
 
