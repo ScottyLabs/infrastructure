@@ -44,6 +44,7 @@
       config.flake.modules.darwin.ip-address
       config.flake.modules.darwin.nixbuild
       config.flake.modules.darwin.shell
+      config.flake.modules.darwin.tailnet-client
       inputs.home-manager.darwinModules.home-manager
       inputs.agenix.darwinModules.default
       inputs.nix-homebrew.darwinModules.nix-homebrew

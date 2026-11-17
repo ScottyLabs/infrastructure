@@ -54,8 +54,6 @@ in
   "secrets/scottylabs/infra-01/bridge-identity-sync.age".publicKeys = admins ++ [
     scottylabs-infra-01
   ];
-  "secrets/scottylabs/infra-01/cmu-vpn-password.age".publicKeys = admins ++ [ scottylabs-infra-01 ];
-  "secrets/scottylabs/infra-01/cmu-vpn-passkey.age".publicKeys = admins ++ [ scottylabs-infra-01 ];
   "secrets/scottylabs/infra-01/cloudflared-tunnel.age".publicKeys = admins ++ [ scottylabs-infra-01 ];
   "secrets/scottylabs/infra-01/snot-webhook-secret.age".publicKeys = admins ++ [
     scottylabs-infra-01
@@ -109,6 +107,12 @@ in
   # thetartan-www-04
   "secrets/thetartan/www-04/bao-role-id.age".publicKeys = admins ++ [ thetartan-www-04 ];
   "secrets/thetartan/www-04/bao-secret-id.age".publicKeys = admins ++ [ thetartan-www-04 ];
+
+  # darwin
+  "secrets/headscale-authkey.age".publicKeys = admins ++ [
+    scottylabs-infra-02
+    scottylabs-infra-04
+  ];
 
   # all
   "secrets/pgadmin.age".publicKeys = admins ++ all;

@@ -81,7 +81,8 @@
 
     # infra-02
     nix-darwin = {
-      url = "github:nix-darwin/nix-darwin/master";
+      # TODO: https://github.com/nix-darwin/nix-darwin/pull/1899, https://github.com/nix-darwin/nix-darwin/pull/1900
+      url = "github:ap-1/nix-darwin/scottylabs";
       inputs.nixpkgs.follows = "nixpkgs-hosts";
     };
     nix-homebrew.url = "github:zhaofengli/nix-homebrew";

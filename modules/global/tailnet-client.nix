@@ -7,15 +7,12 @@
     }:
 
     {
-      # Enable Headscale and IP forwarding
       services.tailscale = {
         enable = true;
-        useRoutingFeatures = "server";
+        openFirewall = true;
         authKeyFile = "/run/credentials/tailscaled.service/HEADSCALE_AUTHKEY";
         extraUpFlags = [
           "--login-server=https://headscale.scottylabs.org"
-          "--ssh"
-          "--advertise-exit-node"
           "--hostname=${config.networking.hostName}"
         ];
       };
@@ -25,14 +22,7 @@
         key = "HEADSCALE_AUTHKEY";
       };
 
-      # Open firewall for Tailscale
-      networking.firewall = {
-        trustedInterfaces = [ "tailscale0" ];
-        allowedUDPPorts = [ config.services.tailscale.port ];
-      };
-
-      # Tailscale CLI
-      environment.systemPackages = [ pkgs.tailscale ];
+      networking.firewall.trustedInterfaces = [ "tailscale0" ];
 
       # Enable UDP GRO forwarding on boot
       systemd.services.tailscale-udp-gro = {
@@ -50,6 +40,22 @@
             ${pkgs.ethtool}/bin/ethtool -K $NETDEV rx-udp-gro-forwarding on rx-gro-list off || true
           fi
         '';
+      };
+    };
+
+  flake.modules.darwin.tailnet-client =
+    { config, ... }:
+
+    {
+      age.secrets.headscale-authkey.file = ../../secrets/headscale-authkey.age;
+
+      services.tailscale = {
+        enable = true;
+        authKeyFile = config.age.secrets.headscale-authkey.path;
+        extraUpFlags = [
+          "--login-server=https://headscale.scottylabs.org"
+          "--hostname=${config.networking.hostName}"
+        ];
       };
     };
 }
