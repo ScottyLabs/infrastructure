@@ -12,6 +12,24 @@
         fileSystems = [ "/" ];
       };
 
+      # Reclaim near-empty data and metadata chunks
+      systemd.services.btrfs-balance = {
+        description = "Balance mostly empty btrfs chunks on /";
+        serviceConfig = {
+          Type = "oneshot";
+          ExecStart = "${pkgs.btrfs-progs}/bin/btrfs balance start -dusage=10 -musage=10 /";
+          Nice = 19;
+          IOSchedulingClass = "idle";
+        };
+      };
+      systemd.timers.btrfs-balance = {
+        wantedBy = [ "timers.target" ];
+        timerConfig = {
+          OnCalendar = "Sun *-*-* 04:00:00"; # after nix.gc at 00:00 and btrbk at 03:00
+          Persistent = true;
+        };
+      };
+
       # Mount top-level btrfs for btrbk to access subvolumes
       fileSystems."/mnt/btrfs-root" = {
         device = "/dev/disk/by-partlabel/disk-main-root";
