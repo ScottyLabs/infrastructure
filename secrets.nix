@@ -66,6 +66,9 @@ in
     scottylabs-infra-01
   ];
   "secrets/scottylabs/infra-01/nixbot-effects.age".publicKeys = admins ++ [ scottylabs-infra-01 ];
+  "secrets/scottylabs/infra-01/harmonia-signing-key.age".publicKeys = admins ++ [
+    scottylabs-infra-01
+  ];
 
   # scottylabs-deploy-01
   "secrets/scottylabs/deploy-01/bao-role-id.age".publicKeys = admins ++ [ scottylabs-deploy-01 ];
@@ -84,14 +87,21 @@ in
   "secrets/scottylabs/deploy-01/restic.age".publicKeys = admins ++ [ scottylabs-deploy-01 ];
   "secrets/scottylabs/deploy-01/pgbackrest.age".publicKeys = admins ++ [ scottylabs-deploy-01 ];
   "secrets/scottylabs/deploy-01/garage-backup.age".publicKeys = admins ++ [ scottylabs-deploy-01 ];
+  "secrets/scottylabs/deploy-01/harmonia-signing-key.age".publicKeys = admins ++ [
+    scottylabs-deploy-01
+  ];
 
   # scottylabs-signage-01
   "secrets/scottylabs/signage-01/bao-role-id.age".publicKeys = admins ++ [ scottylabs-signage-01 ];
   "secrets/scottylabs/signage-01/bao-secret-id.age".publicKeys = admins ++ [ scottylabs-signage-01 ];
+  "secrets/scottylabs/signage-01/harmonia-signing-key.age".publicKeys = admins ++ [
+    scottylabs-signage-01
+  ];
 
   # scottylabs-snoopy
   "secrets/scottylabs/snoopy/bao-role-id.age".publicKeys = admins ++ [ scottylabs-snoopy ];
   "secrets/scottylabs/snoopy/bao-secret-id.age".publicKeys = admins ++ [ scottylabs-snoopy ];
+  "secrets/scottylabs/snoopy/harmonia-signing-key.age".publicKeys = admins ++ [ scottylabs-snoopy ];
 
   # scottylabs-infra-03
   "secrets/scottylabs/infra-03/bao-role-id.age".publicKeys = admins ++ [ scottylabs-infra-03 ];
@@ -99,14 +109,29 @@ in
   "secrets/scottylabs/infra-03/forgejo-runner-token.age".publicKeys = admins ++ [
     scottylabs-infra-03
   ];
+  "secrets/scottylabs/infra-03/harmonia-signing-key.age".publicKeys = admins ++ [
+    scottylabs-infra-03
+  ];
+
+  # scottylabs-infra-02
+  "secrets/scottylabs/infra-02/harmonia-signing-key.age".publicKeys = admins ++ [
+    scottylabs-infra-02
+  ];
+
+  # scottylabs-infra-04
+  "secrets/scottylabs/infra-04/harmonia-signing-key.age".publicKeys = admins ++ [
+    scottylabs-infra-04
+  ];
 
   # stugov-elect-01
   "secrets/stugov/elect-01/bao-role-id.age".publicKeys = admins ++ [ stugov-elect-01 ];
   "secrets/stugov/elect-01/bao-secret-id.age".publicKeys = admins ++ [ stugov-elect-01 ];
+  "secrets/stugov/elect-01/harmonia-signing-key.age".publicKeys = admins ++ [ stugov-elect-01 ];
 
   # thetartan-www-04
   "secrets/thetartan/www-04/bao-role-id.age".publicKeys = admins ++ [ thetartan-www-04 ];
   "secrets/thetartan/www-04/bao-secret-id.age".publicKeys = admins ++ [ thetartan-www-04 ];
+  "secrets/thetartan/www-04/harmonia-signing-key.age".publicKeys = admins ++ [ thetartan-www-04 ];
 
   # darwin
   "secrets/headscale-authkey.age".publicKeys = admins ++ [

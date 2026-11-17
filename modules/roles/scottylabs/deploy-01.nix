@@ -10,6 +10,7 @@
     webadmin
 
     # Services
+    scottylabs-deploy-01-cache
     scottylabs-deploy-01-configuration
     scottylabs-deploy-01-garage
     scottylabs-deploy-01-kennel

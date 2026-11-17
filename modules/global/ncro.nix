@@ -1,11 +1,9 @@
 { inputs, ... }:
-{
-  flake.modules.nixos.ncro =
+let
+  ncro =
     { lib, ... }:
 
     {
-      imports = [ inputs.ncro.nixosModules.ncro ];
-
       services.ncro = {
         enable = true;
         settings = {
@@ -48,5 +46,26 @@
 
       # Route all substitution on this host through ncro
       nix.settings.substituters = lib.mkForce [ "http://localhost:5000" ];
+      # ncro's negative_ttl already covers misses
+      nix.settings.narinfo-cache-negative-ttl = 0;
     };
+in
+{
+  flake.modules.nixos.ncro = {
+    imports = [
+      inputs.ncro.nixosModules.ncro
+      ncro
+    ];
+  };
+
+  flake.modules.darwin.ncro = {
+    imports = [
+      inputs.ncro.darwinModules.ncro
+      ncro
+    ];
+
+    # ncro's default 536 belongs to _harmonia in nix-darwin
+    users.users._ncro.uid = 537;
+    users.groups._ncro.gid = 537;
+  };
 }

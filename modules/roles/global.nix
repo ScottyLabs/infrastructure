@@ -13,6 +13,7 @@
         cadvisor
         cloudflared
         falcon-sensor
+        harmonia
         iets
         ip-address
         ncro
@@ -40,8 +41,10 @@
   flake.modules.darwin.global = {
     imports = [
       config.flake.modules.darwin.falcon-sensor
+      config.flake.modules.darwin.harmonia
       config.flake.modules.darwin.iets
       config.flake.modules.darwin.ip-address
+      config.flake.modules.darwin.ncro
       config.flake.modules.darwin.nixbuild
       config.flake.modules.darwin.shell
       config.flake.modules.darwin.tailnet-client
