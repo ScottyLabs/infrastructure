@@ -45,6 +45,27 @@ in
           ];
         };
 
+        data.keycloak_openid_client.labrador_governance = {
+          realm_id = master;
+          client_id = "labrador-governance";
+        };
+
+        # Grant admin API access
+        resource.keycloak_openid_client_default_scopes.labrador_governance = {
+          realm_id = master;
+          client_id = "\${data.keycloak_openid_client.labrador_governance.id}";
+          default_scopes = [
+            "acr"
+            "basic"
+            "email"
+            "kc-admin-api"
+            "profile"
+            "roles"
+            "service_account"
+            "web-origins"
+          ];
+        };
+
         resource.vault_kv_secret_v2.keycloak_terranix = {
           mount = "secret";
           name = "infra/keycloak-terranix";
