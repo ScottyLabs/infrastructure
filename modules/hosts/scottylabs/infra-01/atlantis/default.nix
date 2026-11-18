@@ -88,8 +88,8 @@ in
           TF_PLUGIN_CACHE_DIR = "/var/lib/atlantis/plugin-cache";
           TF_PLUGIN_CACHE_MAY_BREAK_DEPENDENCY_LOCK_FILE = "1";
           FORGEJO_TFRC = "${forgejoTfrc}";
-          TERRANIX_PLUGIN_DIR = "${plugins.terranix}";
-          GOVERNANCE_PLUGIN_DIR = "${plugins.governance}";
+          TERRANIX_PLUGIN_DIR = "/var/lib/atlantis/providers/terranix";
+          GOVERNANCE_PLUGIN_DIR = "/var/lib/atlantis/providers/governance";
           # governance requires atlantis/plan on these repos' default branch
           TF_VAR_atlantis_repos = builtins.toJSON repos;
           # private flake inputs are fetched over SSH
@@ -134,6 +134,12 @@ in
 
       systemd.services.atlantis.serviceConfig.EnvironmentFile = [
         config.age.secrets.tofu-providers.path
+      ];
+
+      # Fixed paths for tofu's plugin cache to link into
+      systemd.services.atlantis.serviceConfig.BindReadOnlyPaths = [
+        "${plugins.terranix}:/var/lib/atlantis/providers/terranix"
+        "${plugins.governance}:/var/lib/atlantis/providers/governance"
       ];
 
       systemd.services.atlantis.vault.environmentTemplate = ''
