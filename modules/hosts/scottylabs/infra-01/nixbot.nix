@@ -22,6 +22,40 @@
         "aarch64-linux"
         "aarch64-darwin" # goes to infra-02 and infra-04
       ];
+
+      # deploy-01's harmonia serves what nixbot builds
+      cache = "nixbot@deploy-01.tail.scottylabs.org";
+      knownHosts = pkgs.writeText "deploy-01-known-hosts" ''
+        deploy-01.tail.scottylabs.org ${(import ../../../../data/hosts.nix).scottylabs-deploy-01}
+      '';
+      sshOpts =
+        key:
+        "-i ${key} -o IdentitiesOnly=yes -o UserKnownHostsFile=${knownHosts} -o StrictHostKeyChecking=yes";
+      nix = "${config.nix.package}/bin/nix";
+
+      # Sends a default-branch build's derivations to deploy-01 and roots them there
+      cacheRoots = pkgs.writeShellApplication {
+        name = "nixbot-cache-roots";
+        runtimeInputs = [
+          pkgs.findutils
+          pkgs.jq
+          pkgs.openssh
+        ];
+        text = ''
+          payload=$(cat)
+          if [ "$(jq -r .pr_number <<<"$payload")" != "" ] \
+            || [ "$(jq -r .branch <<<"$payload")" != "$(jq -r .default_branch <<<"$payload")" ]; then
+            exit 0
+          fi
+
+          jq -r '.attributes[] | select(.drv_path != null) | .drv_path' <<<"$payload" |
+            NIX_SSHOPTS="${sshOpts config.age.secrets.cache-push.path}" \
+              xargs -r ${nix} --extra-experimental-features nix-command copy --derivation --no-check-sigs \
+              --to ssh-ng://${cache}
+
+          ssh ${sshOpts config.age.secrets.cache-roots.path} ${cache} <<<"$payload"
+        '';
+      };
     in
     {
       imports = [ inputs.nixbot.nixosModules.nixbot ];
@@ -29,6 +63,17 @@
       config = {
         age.secrets.nixbot-cachix-token = {
           file = ../../../../secrets/scottylabs/infra-01/nixbot-cachix-token.age;
+          mode = "0400";
+        };
+
+        age.secrets.cache-push = {
+          file = ../../../../secrets/scottylabs/infra-01/cache-push.age;
+          owner = "nixbot";
+          mode = "0400";
+        };
+        age.secrets.cache-roots = {
+          file = ../../../../secrets/scottylabs/infra-01/cache-roots.age;
+          owner = "nixbot";
           mode = "0400";
         };
 
@@ -85,6 +130,29 @@
             name = "scottylabs";
             auth.authToken.file = config.age.secrets.nixbot-cachix-token.path;
           };
+
+          uploaders = [
+            {
+              name = "deploy-01";
+              command = [
+                nix
+                "--extra-experimental-features"
+                "nix-command"
+                "copy"
+                "--no-check-sigs"
+                "--to"
+                "ssh-ng://${cache}"
+              ];
+              environment.NIX_SSHOPTS = sshOpts config.age.secrets.cache-push.path;
+            }
+          ];
+
+          buildFinishedSteps = [
+            {
+              name = "deploy-01 roots";
+              command = [ (lib.getExe cacheRoots) ];
+            }
+          ];
 
           effects.perRepoSecretFiles."gitea:ScottyLabs/infrastructure" =
             config.age.secrets.nixbot-effects.path;

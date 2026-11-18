@@ -69,6 +69,8 @@ in
   "secrets/scottylabs/infra-01/harmonia-signing-key.age".publicKeys = admins ++ [
     scottylabs-infra-01
   ];
+  "secrets/scottylabs/infra-01/cache-push.age".publicKeys = admins ++ [ scottylabs-infra-01 ];
+  "secrets/scottylabs/infra-01/cache-roots.age".publicKeys = admins ++ [ scottylabs-infra-01 ];
 
   # scottylabs-deploy-01
   "secrets/scottylabs/deploy-01/bao-role-id.age".publicKeys = admins ++ [ scottylabs-deploy-01 ];
