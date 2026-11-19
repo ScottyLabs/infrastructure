@@ -112,7 +112,7 @@
             tokenFile = "/run/systemd-vaultd/sock";
             sshPrivateKeyFile = "/run/systemd-vaultd/sock";
             userAllowlist = [ "ScottyLabs" ];
-            topic = "nixbot";
+            topic = null;
           };
 
           oidc = {
