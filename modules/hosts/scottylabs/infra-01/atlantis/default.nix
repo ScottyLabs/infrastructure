@@ -144,6 +144,7 @@ in
 
       systemd.services.atlantis.vault.environmentTemplate = ''
         {{ with secret "secret/data/infra/atlantis" }}ATLANTIS_GITEA_WEBHOOK_SECRET={{ .Data.data.GITEA_WEBHOOK_SECRET }}{{ end }}
+        {{ with secret "secret/data/infra/nixbot-governance" }}NIXBOT_TOKEN={{ .Data.data.TOKEN }}{{ end }}
       '';
 
       systemd.services.atlantis.vault.infraSecrets.vendor-ssh-key = {
