@@ -26,28 +26,6 @@
             dst = [ "*:*" ];
           }
         ];
-
-        ssh = [
-          {
-            action = "accept";
-            src = [ "autogroup:member" ];
-            dst = [ "autogroup:tagged" ];
-            users = [
-              "autogroup:nonroot"
-              "root"
-            ];
-          }
-        ];
-
-        autoApprovers = {
-          exitNode = [ "tag:server" ];
-          routes = builtins.listToAttrs (
-            map (route: {
-              name = route;
-              value = [ "tag:server" ];
-            }) cfg.autoApproveRoutes
-          );
-        };
       };
     in
     {
@@ -95,12 +73,6 @@
           type = lib.types.listOf lib.types.str;
           default = [ "/projects/devops" ];
           description = "Keycloak groups that may register nodes via OIDC.";
-        };
-
-        autoApproveRoutes = lib.mkOption {
-          type = lib.types.listOf lib.types.str;
-          default = [ ];
-          description = "Subnet routes auto-approved for tag:server nodes.";
         };
       };
 
