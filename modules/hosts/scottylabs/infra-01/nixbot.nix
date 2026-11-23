@@ -51,7 +51,7 @@
               xargs -r ${nix} --extra-experimental-features nix-command copy --derivation --no-check-sigs \
               --to ssh-ng://${cache}
 
-          ssh ${sshOpts config.age.secrets.cache-roots.path} ${cache} <<<"$payload"
+          ssh -T ${sshOpts config.age.secrets.cache-roots.path} ${cache} <<<"$payload"
         '';
       };
     in
