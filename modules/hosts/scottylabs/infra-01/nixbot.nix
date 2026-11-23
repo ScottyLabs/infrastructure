@@ -23,7 +23,6 @@
         "aarch64-darwin" # goes to infra-02 and infra-04
       ];
 
-      # deploy-01's harmonia serves what nixbot builds
       cache = "nixbot@deploy-01.tail.scottylabs.org";
       knownHosts = pkgs.writeText "deploy-01-known-hosts" ''
         deploy-01.tail.scottylabs.org ${(import ../../../../data/hosts.nix).scottylabs-deploy-01}
@@ -33,7 +32,6 @@
         "-i ${key} -o IdentitiesOnly=yes -o UserKnownHostsFile=${knownHosts} -o StrictHostKeyChecking=yes";
       nix = "${config.nix.package}/bin/nix";
 
-      # Sends a default-branch build's derivations to deploy-01 and roots them there
       cacheRoots = pkgs.writeShellApplication {
         name = "nixbot-cache-roots";
         runtimeInputs = [
@@ -210,8 +208,12 @@
           };
         };
 
-        # nixbot writes its forge netrc once at startup, keep the 10d /tmp cleanup off it
-        systemd.tmpfiles.rules = [ "x /tmp/systemd-private-%b-nixbot.service-*/tmp/forge-netrc-*" ];
+        systemd.tmpfiles.rules = [
+          # nixbot only writes its forge netrc at startup
+          "x /tmp/systemd-private-%b-nixbot.service-*/tmp/forge-netrc-*"
+          # iOS builds need Xcode in the store
+          "L+ /nix/var/nix/gcroots/xcode-27.1 - - - - /nix/store/4zpbm301yk9iqhf96cxak2qy3ag14zj9-Xcode.app"
+        ];
 
         services.caddy.virtualHosts.${domain}.extraConfig = ''
           reverse_proxy 127.0.0.1:${toString port}
