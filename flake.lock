@@ -577,15 +577,16 @@
         ]
       },
       "locked": {
-        "lastModified": 1795351307,
-        "narHash": "sha256-m93+qwpVxFF+EFQNv3b7bnInbY+B6qkHj+X3OmpJS0U=",
-        "owner": "feel-co",
+        "lastModified": 1795417182,
+        "narHash": "sha256-nm0v/t1AEeUUCEnQy7O6OwrzGEomYR0aHxvO2AmM9WY=",
+        "owner": "ap-1",
         "repo": "ncro",
-        "rev": "b6d6396faa8de1cc0b84ba823a5ee2f369a0595a",
+        "rev": "0a76603f9c256383f2d53657eef5550d5416aa54",
         "type": "github"
       },
       "original": {
-        "owner": "feel-co",
+        "owner": "ap-1",
+        "ref": "mesh-broadcast-test",
         "repo": "ncro",
         "type": "github"
       }
@@ -658,11 +659,11 @@
         "treefmt-nix": "treefmt-nix_3"
       },
       "locked": {
-        "lastModified": 1794967462,
-        "narHash": "sha256-L7ujVARF5L+8Eip3YtG1EKo+aXI6mregZ1MOpCDtG9o=",
+        "lastModified": 1795417253,
+        "narHash": "sha256-VNEGfQnJbxQ7bkKBRjlDKEOOAlBA7PpNdJpmz7B5XhA=",
         "owner": "ap-1",
         "repo": "nixbot",
-        "rev": "b58189ed6907061f83e052eac704bf06ad82de0d",
+        "rev": "348ae52e3a15fa797ea8cc2c524c9f1cbc73c148",
         "type": "github"
       },
       "original": {

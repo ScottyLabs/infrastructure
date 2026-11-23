@@ -30,7 +30,8 @@
       inputs.nixpkgs.follows = "nixpkgs-hosts";
     };
     ncro = {
-      url = "github:feel-co/ncro";
+      # TODO: https://github.com/manic-systems/ncro/pull/151
+      url = "github:ap-1/ncro/mesh-broadcast-test";
       inputs.nixpkgs.follows = "nixpkgs-hosts";
     };
     iets = {

@@ -16,7 +16,6 @@ in
     let
       gcroots = "/nix/var/nix/gcroots/nixbot";
 
-      # Replaces a project's roots with the derivations of its latest default-branch build
       roots = pkgs.writeShellApplication {
         name = "nixbot-cache-roots";
         runtimeInputs = [
@@ -60,7 +59,6 @@ in
 
       systemd.tmpfiles.rules = [ "d ${gcroots} 0755 nixbot nixbot -" ];
 
-      # Unrooted paths stay for a week
       nix.gc.automatic = lib.mkForce false;
       services.harmonia.gc = {
         enable = true;
