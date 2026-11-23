@@ -61,11 +61,6 @@
       imports = [ inputs.nixbot.nixosModules.nixbot ];
 
       config = {
-        age.secrets.nixbot-cachix-token = {
-          file = ../../../../secrets/scottylabs/infra-01/nixbot-cachix-token.age;
-          mode = "0400";
-        };
-
         age.secrets.cache-push = {
           file = ../../../../secrets/scottylabs/infra-01/cache-push.age;
           owner = "nixbot";
@@ -123,12 +118,6 @@
             clientSecretFile = "/run/systemd-vaultd/sock";
             # Match admins by Andrew ID instead of Keycloak's user UUID
             mapping.username = "preferred_username";
-          };
-
-          cachix = {
-            enable = true;
-            name = "scottylabs";
-            auth.authToken.file = config.age.secrets.nixbot-cachix-token.path;
           };
 
           uploaders = [

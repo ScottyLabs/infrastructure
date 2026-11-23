@@ -15,12 +15,6 @@
       };
 
       nix.settings = {
-        extra-substituters = [ "https://scottylabs.cachix.org" ];
-        extra-trusted-substituters = [ "https://scottylabs.cachix.org" ];
-        extra-trusted-public-keys = [
-          "scottylabs.cachix.org-1:hajjEX5SLi/Y7yYloiXTt2IOr3towcTGRhMh1vu6Tjg="
-        ];
-
         # leave RAM for 16 concurrent ci jobs
         max-jobs = 8;
         cores = 8;

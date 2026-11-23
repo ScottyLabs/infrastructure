@@ -59,9 +59,6 @@ in
     scottylabs-infra-01
   ];
   "secrets/scottylabs/infra-01/typesafe-api-key.age".publicKeys = admins ++ [ scottylabs-infra-01 ];
-  "secrets/scottylabs/infra-01/nixbot-cachix-token.age".publicKeys = admins ++ [
-    scottylabs-infra-01
-  ];
   "secrets/scottylabs/infra-01/darwin-builder-ssh-key.age".publicKeys = admins ++ [
     scottylabs-infra-01
   ];
