@@ -2,7 +2,7 @@
 let
   # macOS's AirPlay Receiver holds 5000
   port = 5001;
-  keys = import ../../data/cache-keys.nix;
+  keys = import ../../data/hosts.nix;
 
   harmonia =
     { config, ... }:
@@ -28,11 +28,11 @@ let
 
         services.ncro.settings.upstreams =
           lib.mapAttrsToList
-            (id: host: {
+            (_: host: {
               url = "http://${host.config.networking.hostName}.tail.scottylabs.org:${toString port}";
               # Ahead of the public caches when latencies tie
               priority = 5;
-              public_key = keys.${id};
+              public_key = keys.${host.config.scottylabs.organization}.${host.config.networking.hostName}.cache;
             })
             (
               lib.removeAttrs (inputs.self.nixosConfigurations // inputs.self.darwinConfigurations) [

@@ -1,5 +1,5 @@
 {
-  flake.modules.darwin.scottylabs-infra-02-configuration = {
+  flake.modules.darwin.scottylabs-mac-01-configuration = {
     scottylabs.ipAddress = "172.26.160.112";
     scottylabs.bastion = "infra-01.scottylabs.org";
 

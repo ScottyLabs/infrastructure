@@ -8,51 +8,7 @@ let
   nixos = config.flake.modules.nixos;
   darwin = config.flake.modules.darwin;
   users = import ../data/users.nix;
-
-  hosts = {
-    scottylabs = {
-      infra-01 = {
-        domain = "scottylabs.org";
-        system = "x86_64-linux";
-      };
-      infra-02 = {
-        domain = "scottylabs.org";
-        system = "aarch64-darwin";
-      };
-      infra-03 = {
-        domain = "scottylabs.org";
-        system = "aarch64-linux";
-      };
-      infra-04 = {
-        domain = "scottylabs.org";
-        system = "aarch64-darwin";
-      };
-      deploy-01 = {
-        domain = "scottylabs.org";
-        system = "x86_64-linux";
-      };
-      signage-01 = {
-        domain = "scottylabs.org";
-        system = "x86_64-linux";
-      };
-      snoopy = {
-        domain = "scottylabs.org";
-        system = "x86_64-linux";
-      };
-    };
-    stugov = {
-      elect-01 = {
-        domain = "andrew.cmu.edu";
-        system = "x86_64-linux";
-      };
-    };
-    thetartan = {
-      www-04 = {
-        domain = "thetartan.org";
-        system = "x86_64-linux";
-      };
-    };
-  };
+  hosts = import ../data/hosts.nix;
 
   allHosts = lib.concatMapAttrs (
     org:
@@ -111,9 +67,8 @@ let
   # nixbot deploys from infra-01, an x86_64-linux host
   effectPkgs = inputs.nixpkgs-hosts.legacyPackages.x86_64-linux;
   effects = inputs.nixbot.lib.effects { pkgs = effectPkgs; };
-  hostKeys = import ../data/hosts.nix;
   knownHosts = effectPkgs.writeText "known_hosts" (
-    lib.concatLines (lib.mapAttrsToList (id: host: "${host.fqdn} ${hostKeys.${id}}") allHosts)
+    lib.concatLines (lib.mapAttrsToList (_: host: "${host.fqdn} ${host.ssh}") allHosts)
   );
 
   # copies a host's system to it and switches to it

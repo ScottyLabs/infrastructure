@@ -20,12 +20,12 @@
       systems = [
         "x86_64-linux"
         "aarch64-linux"
-        "aarch64-darwin" # goes to infra-02 and infra-04
+        "aarch64-darwin" # goes to mac-01 and mac-02
       ];
 
       cache = "nixbot@deploy-01.tail.scottylabs.org";
       knownHosts = pkgs.writeText "deploy-01-known-hosts" ''
-        deploy-01.tail.scottylabs.org ${(import ../../../../data/hosts.nix).scottylabs-deploy-01}
+        deploy-01.tail.scottylabs.org ${(import ../../../../data/hosts.nix).scottylabs.deploy-01.ssh}
       '';
       sshOpts =
         key:

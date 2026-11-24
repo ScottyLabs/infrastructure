@@ -80,7 +80,7 @@
       inputs.nixpkgs.follows = "nixpkgs-hosts";
     };
 
-    # infra-02
+    # mac-01 and mac-02
     nix-darwin = {
       # TODO: https://github.com/nix-darwin/nix-darwin/pull/1899, https://github.com/nix-darwin/nix-darwin/pull/1900
       url = "github:ap-1/nix-darwin/scottylabs";

@@ -1,5 +1,5 @@
 {
-  flake.modules.nixos.scottylabs-infra-03-runner =
+  flake.modules.nixos.scottylabs-ci-01-runner =
     {
       config,
       lib,
@@ -9,7 +9,7 @@
 
     {
       age.secrets.forgejo-runner-token = {
-        file = ../../../../secrets/scottylabs/infra-03/forgejo-runner-token.age;
+        file = ../../../../secrets/scottylabs/ci-01/forgejo-runner-token.age;
         mode = "0400";
         owner = "root";
       };

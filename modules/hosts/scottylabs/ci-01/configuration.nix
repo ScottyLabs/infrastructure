@@ -1,5 +1,5 @@
 {
-  flake.modules.nixos.scottylabs-infra-03-configuration = {
+  flake.modules.nixos.scottylabs-ci-01-configuration = {
     scottylabs.ipAddress = "172.24.97.83";
     scottylabs.bastion = "infra-01.scottylabs.org";
 

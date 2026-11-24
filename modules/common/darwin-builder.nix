@@ -58,9 +58,9 @@ in
       }) builders;
 
       programs.ssh = {
-        knownHosts = lib.mapAttrs (id: host: {
+        knownHosts = lib.mapAttrs (_: host: {
           hostNames = [ (fqdn host) ];
-          publicKey = hostKeys.${id};
+          publicKey = hostKeys.${host.config.scottylabs.organization}.${host.config.networking.hostName}.ssh;
         }) builders;
         extraConfig = lib.concatMapStrings (host: ''
           Host ${fqdn host}
