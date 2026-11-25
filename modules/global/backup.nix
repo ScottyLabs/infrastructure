@@ -326,7 +326,6 @@
             ];
 
             systemd.tmpfiles.rules = [
-              "d /run/pgbackrest 0750 root postgres -"
               "d /var/lib/postgresql/pgbackrest-spool 0750 postgres postgres -"
             ];
           })
