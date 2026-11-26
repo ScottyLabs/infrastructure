@@ -8,7 +8,6 @@
     darwin-builder
     postgresql
     server
-    webadmin
 
     # Services
     scottylabs-infra-01-ai-gateway

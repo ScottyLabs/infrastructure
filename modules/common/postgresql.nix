@@ -28,6 +28,14 @@
           cat ${pkg}/share/postgresql/extension/${sqlName}.control > $control
           echo "trusted = true" >> $control
         '';
+
+      withExtensions = ps: lib.mapAttrsToList (attr: sqlName: trusted sqlName ps.${attr}) extensions;
+
+      # Cluster that postgresql-upgrade migrates from
+      previous = pkgs.postgresql_18;
+      previousDataDir = "/var/lib/postgresql/${previous.psqlSchema}";
+
+      pg = config.services.postgresql;
     in
     {
       options.scottylabs.postgresql = {
@@ -45,8 +53,8 @@
       config = lib.mkIf (cfg.databases != [ ]) {
         services.postgresql = {
           enable = true;
-          package = pkgs.postgresql_18;
-          extensions = ps: lib.mapAttrsToList (attr: sqlName: trusted sqlName ps.${attr}) extensions;
+          package = pkgs.postgresql_19;
+          extensions = withExtensions;
           settings.max_connections = 300;
 
           initdbArgs = [
@@ -59,6 +67,42 @@
             inherit name;
             ensureDBOwnership = true;
           }) cfg.databases;
+        };
+
+        systemd.services.postgresql-upgrade = {
+          description = "Upgrade PostgreSQL ${previous.psqlSchema} cluster to ${pg.package.psqlSchema}";
+          requiredBy = [ "postgresql.service" ];
+          before = [ "postgresql.service" ];
+          unitConfig.ConditionPathExists = [
+            "${previousDataDir}/PG_VERSION"
+            "!${pg.dataDir}/PG_VERSION"
+          ];
+          serviceConfig = {
+            Type = "oneshot";
+            RemainAfterExit = true;
+            User = "postgres";
+            Group = "postgres";
+            UMask = "0027";
+            RuntimeDirectory = "postgresql-upgrade";
+            WorkingDirectory = "/var/lib/postgresql";
+            TimeoutStartSec = "infinity";
+          };
+          script = ''
+            staging=${pg.dataDir}.upgrade
+            rm -rf "$staging"
+            ${pg.finalPackage}/bin/initdb -D "$staging" -U ${pg.superUser} ${lib.escapeShellArgs pg.initdbArgs}
+            ${pg.finalPackage}/bin/pg_upgrade \
+              --old-bindir ${previous.withPackages withExtensions}/bin \
+              --new-bindir ${pg.finalPackage}/bin \
+              --old-datadir ${previousDataDir} \
+              --new-datadir "$staging" \
+              --old-options '-c archive_mode=off' \
+              --socketdir "$RUNTIME_DIRECTORY" \
+              --copy-file-range
+            # StateDirectory may have left an empty one behind
+            rmdir ${pg.dataDir} 2>/dev/null || true
+            mv -T "$staging" ${pg.dataDir}
+          '';
         };
 
         services.pgadmin = {

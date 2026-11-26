@@ -148,7 +148,8 @@
           }
           {
             job_name = "kennel";
-            static_configs = [ { targets = [ "deploy-01:3001" ]; } ];
+            scheme = "https";
+            static_configs = [ { targets = [ "kennel.scottylabs.org" ]; } ];
           }
           {
             job_name = "cadvisor";

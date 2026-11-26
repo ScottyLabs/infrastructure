@@ -46,6 +46,17 @@ let
     vendorHash = null;
     mkProviderGoModule = pkgs.buildGoLatestModule;
   };
+  garage = github {
+    # TODO: upstream garage v3 websiteAccess decoding to jkossis/terraform-provider-garage
+    owner = "ap-1";
+    repo = "terraform-provider-garage";
+    rev = "b5a4143ae84dcdbf72dec523cc664da2750f888e";
+    version = "1.0.5";
+    spdx = "MPL-2.0";
+    hash = "sha256-o8DlAHgMsZwk62UFw1/8DtnpVxyaXbXzu+81B4+QnD0=";
+    vendorHash = "sha256-r6WqUIatjVjvC98PlbVPm3w1/XZPhdYriG4KsoqrkgY=";
+    provider-source-address = "registry.terraform.io/jkossis/garage";
+  };
 in
 {
   terranix = pkgs.linkFarm "terranix-tofu-plugins" (
@@ -64,7 +75,7 @@ in
       })
       posthog
     ]
-    ++ terraform [ p.jkossis_garage ]
+    ++ terraform [ garage ]
     ++ [ forgejo ]
   );
 
@@ -126,7 +137,7 @@ in
       })
     ]
     ++ terraform [
-      p.jkossis_garage
+      garage
       (github {
         owner = "AhmedOsman00";
         repo = "terraform-provider-apple";

@@ -1,3 +1,4 @@
+{ inputs, ... }:
 {
   flake.modules.nixos.server =
     {
@@ -62,7 +63,7 @@
       config = lib.mkIf cfg.enable {
         services.garage = {
           enable = true;
-          package = pkgs.garage_2;
+          package = inputs.nixpkgs-garage.legacyPackages.${pkgs.stdenv.hostPlatform.system}.garage_3;
 
           inherit (cfg) environmentFile;
 

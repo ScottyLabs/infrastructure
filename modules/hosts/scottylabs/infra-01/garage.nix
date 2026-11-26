@@ -7,11 +7,12 @@
       scottylabs.garage = {
         enable = true;
         environmentFile = config.age.secrets.garage.path;
-        webadmin = {
-          enable = true;
-          domain = "garage.scottylabs.org";
-        };
       };
+
+      scottylabs.caddy.sso.sites.garage-webadmin.domain = "garage.scottylabs.org";
+      services.caddy.virtualHosts."garage.scottylabs.org".extraConfig = ''
+        reverse_proxy 127.0.0.1:${toString config.scottylabs.garage.adminPort}
+      '';
 
       age.secrets.garage = {
         file = ../../../../secrets/scottylabs/infra-01/garage.age;
@@ -91,7 +92,7 @@
               x = 0;
               y = 0;
             };
-            targets = [ (grafana.target { expr = "cluster_healthy"; }) ];
+            targets = [ (grafana.target { expr = "garage_cluster_healthy"; }) ];
             defaults.mappings = [
               {
                 type = "value";
@@ -116,7 +117,7 @@
               x = 6;
               y = 0;
             };
-            targets = [ (grafana.target { expr = "cluster_connected_nodes"; }) ];
+            targets = [ (grafana.target { expr = "garage_cluster_connected_nodes"; }) ];
             defaults.unit = "short";
           })
           (grafana.timeseries {
@@ -129,7 +130,7 @@
             };
             targets = [
               (grafana.target {
-                expr = "sum by (api_endpoint) (rate(api_s3_request_counter[5m]))";
+                expr = "sum by (api_endpoint) (rate(garage_api_s3_requests_total[5m]))";
                 legend = "{{api_endpoint}}";
               })
             ];
@@ -145,7 +146,7 @@
             };
             targets = [
               (grafana.target {
-                expr = "sum by (api_endpoint) (rate(api_s3_error_counter[5m]))";
+                expr = "sum by (api_endpoint) (rate(garage_api_s3_errors_total[5m]))";
                 legend = "{{api_endpoint}}";
               })
             ];
@@ -161,7 +162,7 @@
             };
             targets = [
               (grafana.target {
-                expr = "histogram_quantile(0.95, sum by (le, api_endpoint) (rate(api_s3_request_duration_bucket[5m])))";
+                expr = "histogram_quantile(0.95, sum by (le, api_endpoint) (rate(garage_api_s3_request_duration_bucket[5m])))";
                 legend = "{{api_endpoint}}";
               })
             ];
@@ -197,11 +198,11 @@
             };
             targets = [
               (grafana.target {
-                expr = "rate(block_bytes_read[5m])";
+                expr = "rate(garage_block_bytes_read_total[5m])";
                 legend = "read";
               })
               (grafana.target {
-                expr = "rate(block_bytes_written[5m])";
+                expr = "rate(garage_block_bytes_written_total[5m])";
                 legend = "write";
               })
             ];
@@ -217,7 +218,7 @@
             };
             targets = [
               (grafana.target {
-                expr = "block_resync_queue_length";
+                expr = "garage_block_resync_queue_length";
                 legend = "queued";
               })
             ];
@@ -378,6 +379,65 @@
                 value = "\${garage_key.sccache_reader.secret_access_key}";
                 sensitive = true;
               };
+            };
+          }
+        ];
+      };
+
+      terranix.terranixConfigurations.garage-webadmin = {
+        terraformWrapper.package = pkgs.opentofu;
+        modules = [
+          config.flake.modules.terranix.base
+          config.flake.modules.terranix.s3-state
+          {
+            terraform.backend.s3.key = "services/garage-webadmin.tfstate";
+            dns.garage = {
+              name = "garage";
+              tunnel = "scottylabs-infra-01";
+              comment = "Garage web admin UI fronted by caddy with Keycloak OIDC";
+            };
+            resource.keycloak_openid_client.garage_webadmin = {
+              realm_id = "\${data.keycloak_realm.scottylabs.id}";
+              client_id = "garage-webadmin";
+              name = "Garage Web Admin";
+              enabled = true;
+              access_type = "CONFIDENTIAL";
+              standard_flow_enabled = true;
+              direct_access_grants_enabled = false;
+              valid_redirect_uris = [
+                "https://garage.scottylabs.org/auth/oauth2/scottylabs/authorization-code-callback"
+              ];
+            };
+
+            resource.keycloak_openid_group_membership_protocol_mapper.garage_webadmin_groups = {
+              realm_id = "\${data.keycloak_realm.scottylabs.id}";
+              client_id = "\${keycloak_openid_client.garage_webadmin.id}";
+              name = "groups";
+              claim_name = "groups";
+              full_path = true;
+            };
+
+            resource.random_password.garage_webadmin_jwt = {
+              length = 64;
+              special = false;
+            };
+
+            resource.vault_kv_secret_v2 = {
+              garage_webadmin_oidc = {
+                mount = "secret";
+                name = "infra/garage-webadmin-oidc";
+                data_json = "\${jsonencode({ CLIENT_SECRET = keycloak_openid_client.garage_webadmin.client_secret })}";
+              };
+              garage_webadmin_jwt = {
+                mount = "secret";
+                name = "infra/garage-webadmin-jwt";
+                data_json = "\${jsonencode({ SECRET = random_password.garage_webadmin_jwt.result })}";
+              };
+            };
+
+            output.garage_webadmin_client_secret = {
+              value = "\${keycloak_openid_client.garage_webadmin.client_secret}";
+              sensitive = true;
             };
           }
         ];

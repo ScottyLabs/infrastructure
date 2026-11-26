@@ -53,6 +53,8 @@
       url = "git+https://git.cmu.dev/ScottyLabs/collar";
       inputs.scottylabs.follows = "kennel";
     };
+    # TODO: https://github.com/NixOS/nixpkgs/pull/593390, https://github.com/NixOS/nixpkgs/pull/593395
+    nixpkgs-garage.url = "github:ap-1/nixpkgs/garage-3-webadmin";
 
     # infra-01
     llm-pkgs = {

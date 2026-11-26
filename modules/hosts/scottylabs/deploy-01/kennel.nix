@@ -51,15 +51,8 @@
           };
         };
 
-        resources.postgres = {
-          enable = true;
-          socketDir = "/run/postgresql";
-        };
-
-        resources.valkey = {
-          enable = true;
-          socketPath = "/run/redis-kennel/redis.sock";
-        };
+        resources.postgres.enable = true;
+        resources.valkey.enable = true;
 
         resources.garage = {
           enable = true;

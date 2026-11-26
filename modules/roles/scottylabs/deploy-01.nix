@@ -7,7 +7,6 @@
     # Common
     postgresql
     server
-    webadmin
 
     # Services
     scottylabs-deploy-01-cache
