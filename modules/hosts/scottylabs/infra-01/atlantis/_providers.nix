@@ -47,13 +47,13 @@ let
     mkProviderGoModule = pkgs.buildGoLatestModule;
   };
   garage = github {
-    # TODO: upstream garage v3 websiteAccess decoding to jkossis/terraform-provider-garage
+    # TODO: https://github.com/jkossis/terraform-provider-garage/pull/17
     owner = "ap-1";
     repo = "terraform-provider-garage";
-    rev = "b5a4143ae84dcdbf72dec523cc664da2750f888e";
+    rev = "71c0efc7d2f0442d84a71377417c084dc08b00df";
     version = "1.0.5";
     spdx = "MPL-2.0";
-    hash = "sha256-o8DlAHgMsZwk62UFw1/8DtnpVxyaXbXzu+81B4+QnD0=";
+    hash = "sha256-Mtr3+FozlsYq+2j19irhcljM/4Y3GoaCVbEBSf1ovOM=";
     vendorHash = "sha256-r6WqUIatjVjvC98PlbVPm3w1/XZPhdYriG4KsoqrkgY=";
     provider-source-address = "registry.terraform.io/jkossis/garage";
   };
