@@ -61,6 +61,15 @@
           }) cfg.databases;
         };
 
+        # Keep out of btrbk snapshots
+        disko.devices.disk.main.content.partitions.root.content.subvolumes."@postgresql" = {
+          mountpoint = "/var/lib/postgresql";
+          mountOptions = [
+            "compress=zstd"
+            "noatime"
+          ];
+        };
+
         services.pgadmin = {
           enable = true;
           initialEmail = "admin@scottylabs.org";
