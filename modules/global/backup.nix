@@ -260,6 +260,28 @@
               mode = "0440";
             };
 
+            # TODO: https://github.com/pgbackrest/pgbackrest/commit/228203e595484966c8c042ceb8e52346fb634e88
+            nixpkgs.overlays = [
+              (_: prev: {
+                pgbackrest = prev.pgbackrest.overrideAttrs (old: {
+                  version = "2.61.0dev-unstable-2026-11-20";
+                  src = prev.fetchFromGitHub {
+                    owner = "pgbackrest";
+                    repo = "pgbackrest";
+                    rev = "228203e595484966c8c042ceb8e52346fb634e88";
+                    hash = "sha256-7/NH3DNAchBLeqk7NDF48nNzOPqc3uWiqnBXSxMBOYE=";
+                  };
+                  nativeBuildInputs = prev.lib.remove prev.python3 old.nativeBuildInputs ++ [
+                    (prev.python3.withPackages (ps: [ ps.pyyaml ]))
+                  ];
+                  # The source tree now has its own build/ directory
+                  mesonBuildDir = "_build";
+                  mesonFlags = (old.mesonFlags or [ ]) ++ [ "-Dlibsystemd=disabled" ];
+                  postPatch = "patchShebangs build";
+                });
+              })
+            ];
+
             services.pgbackrest = {
               enable = true;
               settings = {
